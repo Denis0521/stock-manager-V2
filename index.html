@@ -86,7 +86,7 @@ body.cement {
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif; background:var(--bg); color:var(--t-main); padding:0 0 80px; min-height:100vh; font-size:14px; overflow-x:hidden; transition:background-color 0.3s, color 0.3s}
 input,select,button{font-family:inherit;font-size:inherit;outline:none}
 
-/* 🎯 專業級優化：數據等寬防止跳動，字元微調縮小 */
+/* 🎯 專業級優化：數據等寬防止跳動 */
 .price, .chgp, .chg, .today-pnl, .total, .idx-box-price, .val, .hval {
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.3px;
@@ -97,7 +97,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none}
   background: var(--bg);
   border: none;
   box-shadow: 5px 5px 10px var(--s-dark), -5px -5px 10px var(--s-light);
-  border-radius: 16px; /* 統一加大圓角，更顯現代擬物感 */
+  border-radius: 16px;
 }
 .header { border-radius: 0 0 16px 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; margin-bottom: 10px; }
 .header h1 { font-size: 17px; font-weight: 700; color: var(--t-main); }
@@ -145,50 +145,71 @@ button:active, .tab-btn.active {
 .idx-box-change-row { display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 600; white-space: nowrap; }
 .idx-box-src { font-size: 9px; color: var(--t-muted); text-align: right; margin-top: 2px; opacity: 0.7; }
 
-/* 📊 列表區域 (改進為5欄精簡高專業版面，移除原生滾動條斷層) */
-.table-scroll { margin: 0 14px; overflow: hidden; padding: 4px; }
-.list-wrap { width: 100%; }
-.list-header { 
+/* 📊 列表區域（💡 終極優化：加入 X 軸水平滾動並凍結代號欄，絕不切字） */
+.table-scroll { 
+  margin: 0 14px; 
+  overflow-x: auto; 
+  padding: 4px;
+  -webkit-overflow-scrolling: touch; 
+}
+/* 隱藏原生滑動條讓視覺更乾淨 */
+.table-scroll::-webkit-scrollbar { height: 4px; }
+.table-scroll::-webkit-scrollbar-thumb { background: var(--s-dark); border-radius: 2px; }
+
+.list-wrap { 
+  min-width: 480px; /* 強制設定最小寬度，超出自動啟用優雅滑動查看明細 */
+  width: 100%; 
+}
+
+/* 重新調配 5 欄比例：代號 80px、其餘皆寬裕，保留空間給大額數字 */
+.list-header, .srow { 
   display: grid; 
-  grid-template-columns: 80px 95px 75px 100px 1fr; 
+  grid-template-columns: 80px 105px 85px 105px 1fr; 
+  align-items: center; 
+}
+
+.list-header { 
   padding: 12px 6px; 
   font-size: 13px; 
   color: var(--t-muted); 
   font-weight: 600; 
-  align-items: center; 
   border-bottom: 2px solid var(--s-dark); 
 }
+
 .srow { 
-  display: grid; 
-  grid-template-columns: 80px 95px 75px 100px 1fr; 
   padding: 14px 6px; 
-  font-size: 15px; 
-  align-items: center; 
+  font-size: 14px; 
   border-bottom: 1px solid var(--s-dark); 
   cursor: pointer; 
   transition: background 0.15s ease;
   background: var(--bg);
 }
-.srow:active {
-  background: rgba(0,0,0,0.03);
-}
-body.dark .srow:active {
-  background: rgba(255,255,255,0.02);
-}
+.srow:active { background: rgba(0,0,0,0.03); }
+body.dark .srow:active { background: rgba(255,255,255,0.02); }
 .srow:last-child { border-bottom: none; }
-.list-header > div, .srow > div { text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.list-header > div:nth-child(1), .srow > div:nth-child(1) { text-align: left; background: var(--bg); }
+
+.list-header > div, .srow > div { text-align: right; white-space: nowrap; }
+
+/* ❄️ 凍結第一欄（代號欄）：當向右滑動看明細時，代號仍會固定在最左邊 */
+.list-header > div:nth-child(1), .srow > div:nth-child(1) { 
+  text-align: left; 
+  position: sticky; 
+  left: 0; 
+  z-index: 2; 
+  background: var(--bg); 
+  padding-right: 4px;
+}
 
 .sym-container { display: flex !important; flex-direction: column !important; align-items: flex-start !important; justify-content: center !important; line-height: 1.2 !important; }
-.srow .sym { font-weight: 800; font-size: 16px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
+.srow .sym { font-weight: 800; font-size: 15px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
 .sym-src { font-size: 8px; color: var(--t-muted); font-weight: normal; margin-top: 1px; }
 
-.srow .qty-cell { font-weight: 500; color: var(--t-main); text-align: right; }
+.srow .qty-cell { font-weight: 500; color: var(--t-main); text-align: right; line-height: 1.3; }
 .srow .price { font-weight: 700; }
-.srow .today-col { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; line-height: 1.2; }
-.srow .today-pnl { font-size: 15px; font-weight: 700; }
-.srow .today-chg-details { font-size: 12px; font-weight: 600; }
-.srow .total { font-weight: 700; text-align: right; }
+.srow .today-col { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; line-height: 1.3; }
+.srow .today-pnl { font-size: 14px; font-weight: 700; }
+.srow .today-chg-details { font-size: 11px; font-weight: 600; }
+.srow .total { font-weight: 700; text-align: right; line-height: 1.3; }
 
 /* 4. 統計區與下拉選單 */
 .summary { padding: 16px; margin: 14px; }
@@ -287,10 +308,11 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   </div>
 </div>
 
+<!-- 💡 X 軸優雅滚動包裝層 -->
 <div class="table-scroll" id="tableScroll" style="display:none;">
   <div class="list-wrap" id="listContainer">
     <div class="list-header">
-      <div>代號</div><div>庫存/均價</div><div>現價</div><div>今日損益(核心)</div><div>總未實現</div>
+      <div>代號</div><div>庫存/均價</div><div>現價</div><div>今日損益</div><div>總未實現</div>
     </div>
     <div id="listBody"></div>
   </div>
@@ -349,7 +371,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       </div>
     </div>
 
-    <div class="v-box">核心版本：V4.0.0 (智慧更新專業版)</div>
+    <div class="v-box">核心版本：V4.1.0 (流暢寬版明細)</div>
 
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
@@ -364,7 +386,7 @@ let tabRecords = [[], [], []];
 let tabNames = ['分頁 A', '分頁 B', '分頁 C'];
 
 let fugleKey='',secondFugleKey='',pollTimer=null;
-let activeKeyIndex = 0; // 💡 智慧型 API Key 自動切換機制
+let activeKeyIndex = 0;
 const FK='tw_fugle_key',SFK='tw_second_fugle_key',TK='tw_theme', CUR_TAB_KEY='tw_current_tab', TN_KEY='tw_tab_names';
 const getStockKey = (idx) => `tw_stock_portfolio_tab_${idx}`;
 const getRecordKey = (idx) => `tw_records_tab_${idx}`;
@@ -418,7 +440,7 @@ function saveKeys(){
   fugleKey=document.getElementById('fugleKeyInput').value.trim();
   secondFugleKey=document.getElementById('secondFugleKeyInput').value.trim();
   try{localStorage.setItem(FK,fugleKey);localStorage.setItem(SFK,secondFugleKey);}catch(e){}
-  activeKeyIndex = 0; // 重置首選 Key
+  activeKeyIndex = 0;
   updateKeyStatus();
 }
 function saveRecords(){try{localStorage.setItem(getRecordKey(currentTab),JSON.stringify(tabRecords[currentTab]));}catch(e){}}
@@ -543,12 +565,10 @@ async function fetchGlobalIndicesFromGoogle() {
   }
 }
 
-// 💡 優化：智慧備用 Key 機制，若主要 Key 失敗自動切換至備用 Key
 async function fetchFugle(symbol){
   const keys = [fugleKey, secondFugleKey].filter(k => k);
   if(keys.length === 0) return null;
   
-  // 優先使用當前標註為活耀的 Key 索引
   let targetIndex = activeKeyIndex < keys.length ? activeKeyIndex : 0;
   
   try {
@@ -560,7 +580,6 @@ async function fetchFugle(symbol){
       const d = await resp.json();
       if(d && d.lastPrice != null) return {price: d.lastPrice, change: d.change, changePercent: d.changePercent, source: 'Fugle'};
     } else if (resp.status === 429 && keys.length > 1) {
-      // 觸發流量上限，切換到另一把 Key
       activeKeyIndex = (targetIndex + 1) % keys.length;
       console.warn("Fugle API Key 流量用罄，自動切換至備用 Key 運作。");
     }
@@ -621,7 +640,6 @@ async function fetchWeightedIndex(){
   return null;
 }
 
-// 💡 優化：使用定時器時，全面採用智慧型局部更新 DOM，防止 innerHTML 刷頁閃爍與卡頓
 async function refreshPrices(){
   const idxR = await fetchWeightedIndex();
   const idxEl = document.getElementById('idxPrice');
@@ -641,7 +659,6 @@ async function refreshPrices(){
   
   const currentStocks = tabStocks[currentTab];
   
-  // 改用 Promise.allSettled 避免單一股票 API 超時拖累其他股票更新
   await Promise.allSettled(currentStocks.map(async (s)=>{
     let r = await fetchFugle(s.symbol);
     if(!r) r = await fetchYahoo(s.symbol);
@@ -651,7 +668,7 @@ async function refreshPrices(){
       s.changePercent=r.changePercent;
       s.source=r.source;
       s.updateTime=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
-      renderRow(s); // 🚀 只刷本列 DOM
+      renderRow(s);
     }
   }));
   updateSummary();
@@ -677,7 +694,7 @@ function renderRow(s){
   const qn=el.querySelector('.qty-cell');
   if(qn){
     qn.innerHTML=`<div style="font-weight:700;">${s.displayQty} ${s.displayUnit}</div>
-                  <div style="font-size:12px;color:var(--t-muted);margin-top:1px;">${s.buyPrice ? '均:'+s.buyPrice : '未設均價'}</div>`;
+                  <div style="font-size:11px;color:var(--t-muted);margin-top:1px;">${s.buyPrice ? '均:'+s.buyPrice : '未設均'}</div>`;
   }
   
   const pEl=el.querySelector('.price');
@@ -705,7 +722,7 @@ function renderRow(s){
           const unPnl = Math.round(mktValue - cost);
           const roi = ((mktValue - cost) / cost) * 100;
           totalEl.innerHTML = `<div style="font-weight:700;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
-                               <div style="font-size:12px;opacity:0.85;margin-top:1px;">${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%</div>`;
+                               <div style="font-size:11px;opacity:0.85;margin-top:1px;">${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%</div>`;
           totalEl.className = 'total ' + (unPnl >= 0 ? 'up' : 'down');
       } else {
           totalEl.innerHTML = `<div class="neutral">—</div><div style="font-size:11px;opacity:0.5;font-weight:normal;">點擊設定</div>`;
@@ -730,7 +747,6 @@ function renderAll(){
   
   for(const s of currentStocks){
     const div=document.createElement('div');div.className='srow';div.dataset.id=s.id;
-    // 💡 體驗提升：點擊該行直接觸發操作選單（修改/刪除）
     div.addEventListener('click', () => triggerRowAction(s.id));
     
     const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
@@ -760,7 +776,7 @@ function renderAll(){
             const roi = ((mktValue - cost) / cost) * 100;
             totalClass = unPnl >= 0 ? 'up' : 'down';
             totalHtml = `<div style="font-weight:700;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
-                         <div style="font-size:12px;opacity:0.85;margin-top:1px;">${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%</div>`;
+                         <div style="font-size:11px;opacity:0.85;margin-top:1px;">${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%</div>`;
         } else {
             totalHtml = `<div class="neutral">—</div><div style="font-size:11px;opacity:0.5;font-weight:normal;">點擊設定</div>`;
         }
@@ -770,7 +786,7 @@ function renderAll(){
     
     div.innerHTML=
       '<div class="sym-container"><div class="sym">'+s.symbol+'</div>'+srcStr+'</div>'+
-      '<div class="qty-cell"><div style="font-weight:700;">'+s.displayQty+' '+s.displayUnit+'</div><div style="font-size:12px;color:var(--t-muted);margin-top:1px;">'+(s.buyPrice ? '均:'+s.buyPrice : '未設均價')+'</div></div>'+
+      '<div class="qty-cell"><div style="font-weight:700;">'+s.displayQty+' '+s.displayUnit+'</div><div style="font-size:11px;color:var(--t-muted);margin-top:1px;">'+(s.buyPrice ? '均:'+s.buyPrice : '未設均')+'</div></div>'+
       '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+
       todayHtml +
       '<div class="total '+totalClass+'">'+totalHtml+'</div>';
@@ -779,12 +795,11 @@ function renderAll(){
   updateSummary();
 }
 
-// 💡 專業 UI 優化：點擊欄位後跳出集中管理選單，取代原先老舊突兀的連續 prompt 框
 function triggerRowAction(id) {
   const s = tabStocks[currentTab].find(x => x.id === id);
   if (!s) return;
   
-  const act = prompt(`請輸入操作指令進行「${s.symbol}」管理：\n\n1: 修改代號\n2: 修改數量\n3: 設定/修改買入均價\n4: ✕ 刪除此持股\n留空或按取消取消操作`);
+  const act = prompt(`請輸入操作指令進行「${s.symbol}」管理：\n\n1: 修改代號\n2: 修改數量\n3: 設定/修改買入均價\n4: ✕ 刪除此持股\n留空或按取消`);
   if (!act) return;
   
   const choice = act.trim();
@@ -795,7 +810,7 @@ function triggerRowAction(id) {
     const nq = prompt(`請輸入新持股數量（單位為 ${s.displayUnit}）：`, s.displayQty);
     if (nq && parseInt(nq) > 0) { s.displayQty = parseInt(nq); }
   } else if (choice === '3') {
-    const nbp = prompt('請輸入「買入均價」（留空或輸入0則不計算總未實現損益）：', s.buyPrice || '');
+    const nbp = prompt('請輸入「買入均價」：', s.buyPrice || '');
     const bpNum = parseFloat(nbp);
     s.buyPrice = (isNaN(bpNum) || bpNum <= 0) ? null : bpNum;
   } else if (choice === '4') {
@@ -1025,7 +1040,7 @@ document.getElementById('buyPriceInput').addEventListener('keydown',e=>{
 });
 
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存管理 V4.0.0 已啟動 (智慧型優化版)');
+console.log('股票庫存管理 V4.1.0 已啟動 (流暢寬版明細)');
 </script>
 </body>
 </html>
