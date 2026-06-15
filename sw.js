@@ -1,66 +1,59 @@
-const CACHE_NAME = 'stock-portfolio-v3.5.4';
-const STATIC_ASSETS = [
+const CACHE_NAME = 'stock-portfolio-v4.0.0';
+const urlsToCache = [
   './',
   './index.html',
-  './manifest.json',
-  './icon.svg'
+  './manifest.json'
 ];
 
-// Install: 使用 allSettled 避免單一資源失敗導致安裝中斷
+// 安裝服務器：載入靜態基礎核心
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      console.log('[SW] Caching static assets');
-      return Promise.allSettled(
-        STATIC_ASSETS.map(url => 
-          cache.add(url).catch(err => console.warn(`[SW] Skip caching ${url}:`, err))
-        )
-      );
-    })
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        console.log('Opened dynamic service cache store');
+        return cache.addAll(urlsToCache);
+      })
   );
   self.skipWaiting();
 });
 
-// Activate: 清理舊版快取並立即接管
+// 激活服務器：清除其餘過時的舊版 Cache 碎片
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => {
-          console.log('[SW] Deleting old cache:', key);
-          return caches.delete(key);
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheName !== CACHE_NAME) {
+            console.log('Deleting expired old version cache:', cacheName);
+            return caches.delete(cacheName);
+          }
         })
-      )
-    )
+      );
+    })
   );
   self.clients.claim();
 });
 
-// Fetch: API 請求強制走網路，靜態資源走 Cache-First
+// 💡 關鍵代碼優化：對本地 html、json 資源全面改為 "Network First"
+// 這樣能保證開發者未來一更新代碼，使用者重開 App 就一定看得到最新功能
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
-
-  // 🔑 關鍵優化：Fugle API 永不快取，確保股價即時性
-  if (url.hostname.includes('fugle') || url.pathname.includes('/api/')) {
-    return; // 交由瀏覽器預設 Network-Only 處理
+  
+  if (url.origin === self.location.origin) {
+    // 本地靜態頁面：網絡優先，網絡斷線時才降級用快取
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          if (response && response.status === 200) {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+  } else {
+    // 外部第三方 API（Fugle / Yahoo / Google）：直接走網絡，不要緩存股價
+    event.respondWith(fetch(event.request));
   }
-
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
-        // 僅快取成功且為 GET 的靜態資源
-        if (response && response.status === 200 && event.request.method === 'GET') {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-        }
-        return response;
-      }).catch(() => {
-        // 離線 fallback：僅對 HTML 請求返回快取頁面
-        if (event.request.destination === 'document') {
-          return caches.match('./index.html');
-        }
-      });
-    })
-  );
 });
