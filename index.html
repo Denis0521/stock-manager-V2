@@ -93,37 +93,35 @@
         .del-hist-btn { padding: 6px 12px; font-size: 13px; border-radius: 8px; }
         .hist-empty { color: var(--t-muted); font-size: 14px; text-align: center; padding: 20px; font-weight: 600; }
 
-        /* 🎨 進階介面大改造：完美置中 + 霧玻璃 + 無毛邊 + 立體圓角 */
+        /* 🎨 進階介面：保留原底色 + 完美置中 + 立體圓角 + 無毛邊 */
         .modal-overlay { 
             display: none; 
             position: fixed; 
             top: 0; left: 0; right: 0; bottom: 0; 
-            background: rgba(0,0,0,0.5); /* 遮罩稍微透明讓背景透出 */
+            background: rgba(0,0,0,0.6); /* 遮罩維持半透明黑，不做背景霧化 */
             z-index: 999; 
             align-items: center; /* 垂直置中 */
             justify-content: center; /* 水平置中 */
-            backdrop-filter: blur(8px); /* 背景霧化 */
-            -webkit-backdrop-filter: blur(8px);
         }
         .modal-overlay.show { display: flex; }
         
         .modal { 
             position: relative;
-            border-radius: 20px; /* 加大圓角 */
+            border-radius: 20px; /* 大圓角 */
             padding: 24px 20px 24px; 
             width: calc(100% - 28px); 
             max-width: 400px; 
             max-height: 85vh; 
             overflow-y: auto;
-            /* 霧玻璃與立體光影效果 */
-            background: rgba(255, 255, 255, 0.15); /* 預設透明度，會被 JS 覆蓋 */
-            backdrop-filter: blur(20px) saturate(180%); /* 強力霧化 */
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.2); /* 關鍵：消除邊緣毛邊 */
+            /* 保留原本的 Neumorphism 底色與光影 */
+            background: var(--bg);
+            border: 1px solid rgba(255, 255, 255, 0.05); /* 極細邊框消除邊緣毛邊 */
             box-shadow: 
-                0 20px 50px rgba(0,0,0,0.4), 
-                0 8px 16px rgba(0,0,0,0.3),
-                inset 0 1px 1px rgba(255,255,255,0.3); /* 內側高光增加立體感 */
+                0 25px 50px rgba(0,0,0,0.5),   /* 外部立體陰影 */
+                0 10px 20px rgba(0,0,0,0.3),
+                6px 6px 12px var(--s-dark),     /* 原本的新擬物光影 */
+                -6px -6px 12px var(--s-light),
+                inset 0 1px 1px rgba(255,255,255,0.1); /* 內側高光 */
         }
         
         .modal h2 { font-size: 18px; margin-bottom: 16px; text-align: center; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
@@ -237,7 +235,7 @@
                     <input type="file" id="importFile" style="display:none" onchange="importData(event)">
                 </div>
             </div>
-            <div class="v-box">核心版本：V3.7.1 (霧玻璃介面優化版)</div>
+            <div class="v-box">核心版本：V3.7.2 (介面微調優化版)</div>
             <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
         </div>
     </div>
@@ -256,7 +254,7 @@
         const FUGLE='https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
         
         function loadState(){ try{ const f=localStorage.getItem(FK);if(f)fugleKey=f; const sf=localStorage.getItem(SFK);if(sf)secondFugleKey=sf; const ct=localStorage.getItem(CUR_TAB_KEY);if(ct!=null)currentTab=parseInt(ct); const tn=localStorage.getItem(TN_KEY);if(tn) tabNames=JSON.parse(tn); for(let i=0; i<3; i++){ const s=localStorage.getItem(getStockKey(i)); if(s) tabStocks[i]=JSON.parse(s); const r=localStorage.getItem(getRecordKey(i)); if(r) tabRecords[i]=JSON.parse(r); } const t=localStorage.getItem(TK); applyThemeText(t); const cachedIdx = localStorage.getItem('tw_cached_indices'); if(cachedIdx) { cachedGlobalIndices = JSON.parse(cachedIdx); if(cachedGlobalIndices.length > 0) renderGlobalIndices(cachedGlobalIndices); } }catch(e){console.error(e);} document.getElementById('fugleKeyInput').value=fugleKey; document.getElementById('secondFugleKeyInput').value=secondFugleKey; updateKeyStatus(); updateTabUI(); }
-        function applyThemeText(t){ const body=document.body; const themeBtn=document.getElementById('themeBtn'); const metaTheme = document.getElementById('themeColorMeta'); const modal = document.getElementById('modalPanel'); body.className = ''; let modalBg = 'rgba(255, 255, 255, 0.25)'; let modalBorder = 'rgba(255, 255, 255, 0.4)'; if(t==='dark'){ body.classList.add('dark'); themeBtn.textContent='☀️'; metaTheme.content='#1a1e24'; modalBg='rgba(40, 45, 55, 0.6)'; modalBorder='rgba(255, 255, 255, 0.1)'; } else if(t==='tech'){ body.classList.add('tech'); themeBtn.textContent='🚀'; metaTheme.content='#2b303a'; modalBg='rgba(50, 55, 65, 0.6)'; modalBorder='rgba(255, 255, 255, 0.1)'; } else if(t==='blue-dark'){ body.classList.add('blue-dark'); themeBtn.textContent='🌌'; metaTheme.content='#101929'; modalBg='rgba(25, 40, 60, 0.6)'; modalBorder='rgba(255, 255, 255, 0.1)'; } else if(t==='blue-light'){ body.classList.add('blue-light'); themeBtn.textContent='💎'; metaTheme.content='#d9e2ec'; modalBg='rgba(255, 255, 255, 0.3)'; modalBorder='rgba(255, 255, 255, 0.5)'; } else if(t==='pink'){ body.classList.add('pink'); themeBtn.textContent='🌸'; metaTheme.content='#f3e6e8'; modalBg='rgba(255, 245, 248, 0.4)'; modalBorder='rgba(255, 255, 255, 0.5)'; } else if(t==='cement'){ body.classList.add('cement'); themeBtn.textContent='🏢'; metaTheme.content='#a3a8b0'; modalBg='rgba(200, 205, 215, 0.5)'; modalBorder='rgba(255, 255, 255, 0.3)'; } else { themeBtn.textContent='🌙'; metaTheme.content='#e0e5ec'; modalBg='rgba(255, 255, 255, 0.25)'; modalBorder='rgba(255, 255, 255, 0.4)'; } if(modal) { modal.style.backgroundColor = modalBg; modal.style.borderColor = modalBorder; } }
+        function applyThemeText(t){ const body=document.body; const themeBtn=document.getElementById('themeBtn'); const metaTheme = document.getElementById('themeColorMeta'); body.className = ''; if(t==='dark'){ body.classList.add('dark'); themeBtn.textContent='☀️'; metaTheme.content='#1a1e24'; } else if(t==='tech'){ body.classList.add('tech'); themeBtn.textContent='🚀'; metaTheme.content='#2b303a'; } else if(t==='blue-dark'){ body.classList.add('blue-dark'); themeBtn.textContent='🌌'; metaTheme.content='#101929'; } else if(t==='blue-light'){ body.classList.add('blue-light'); themeBtn.textContent='💎'; metaTheme.content='#d9e2ec'; } else if(t==='pink'){ body.classList.add('pink'); themeBtn.textContent='🌸'; metaTheme.content='#f3e6e8'; } else if(t==='cement'){ body.classList.add('cement'); themeBtn.textContent='🏢'; metaTheme.content='#a3a8b0'; } else { themeBtn.textContent='🌙'; metaTheme.content='#e0e5ec'; } }
         function saveHoldings(){try{localStorage.setItem(getStockKey(currentTab),JSON.stringify(tabStocks[currentTab]));}catch(e){}}
         function saveKeys(){ fugleKey=document.getElementById('fugleKeyInput').value.trim(); secondFugleKey=document.getElementById('secondFugleKeyInput').value.trim(); try{localStorage.setItem(FK,fugleKey);localStorage.setItem(SFK,secondFugleKey);}catch(e){} updateKeyStatus(); }
         function saveRecords(){try{localStorage.setItem(getRecordKey(currentTab),JSON.stringify(tabRecords[currentTab]));}catch(e){}}
@@ -289,7 +287,7 @@
         function exportData() { const dataToExport = { tabStocks: [localStorage.getItem(getStockKey(0)), localStorage.getItem(getStockKey(1)), localStorage.getItem(getStockKey(2))], tabRecords: [localStorage.getItem(getRecordKey(0)), localStorage.getItem(getRecordKey(1)), localStorage.getItem(getRecordKey(2))], tabNames: localStorage.getItem(TN_KEY), fugleKey: localStorage.getItem(FK), secondFugleKey: localStorage.getItem(SFK), theme: localStorage.getItem(TK) }; const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "application/json" }); const url = URL.createObjectURL(blob); const downloadAnchorElement = document.createElement('a'); const d = new Date(); const dateString = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0'); downloadAnchorElement.setAttribute("href", url); downloadAnchorElement.setAttribute("download", "stock_backup_" + dateString + ".json"); document.body.appendChild(downloadAnchorElement); downloadAnchorElement.click(); document.body.removeChild(downloadAnchorElement); URL.revokeObjectURL(url); showToast('✅ 備份檔案已成功下載'); }
         function triggerImport() { document.getElementById('importFile').click(); }
         function importData(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); if(confirm('⚠️ 警告：這將會覆蓋您目前的所有資料！\n確定要還原備份嗎？')) { if (data.tabStocks) { data.tabStocks.forEach((val, i) => { if(val) localStorage.setItem(getStockKey(i), val); }); } if (data.tabRecords) { data.tabRecords.forEach((val, i) => { if(val) localStorage.setItem(getRecordKey(i), val); }); } if (data.tabNames) localStorage.setItem(TN_KEY, data.tabNames); if (data.fugleKey) localStorage.setItem(FK, data.fugleKey); if (data.secondFugleKey) localStorage.setItem(SFK, data.secondFugleKey); if (data.theme) localStorage.setItem(TK, data.theme); alert('🎉 備份還原成功！系統將為您重新載入頁面。'); location.reload(); } } catch (err) { alert('❌ 檔案格式錯誤，無法還原資料。請確認上傳的是正確的 json 備份檔。'); } document.getElementById('importFile').value = ''; }; reader.readAsText(file); }
-        async function refresh(){await refreshPrices()} loadState();renderAll();renderHistory(); setTimeout(refresh,300); pollTimer=setInterval(refresh,30000); document.getElementById('symInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); } }); document.getElementById('qtyInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('buyPriceInput').focus(); } }); document.getElementById('buyPriceInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); addStock(); } }); document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')}); console.log('股票庫存管理 V3.7.1 已啟動 (霧玻璃介面優化版)');
+        async function refresh(){await refreshPrices()} loadState();renderAll();renderHistory(); setTimeout(refresh,300); pollTimer=setInterval(refresh,30000); document.getElementById('symInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); } }); document.getElementById('qtyInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('buyPriceInput').focus(); } }); document.getElementById('buyPriceInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); addStock(); } }); document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')}); console.log('股票庫存管理 V3.7.2 已啟動 (介面微調優化版)');
     </script>
 </body>
 </html>
