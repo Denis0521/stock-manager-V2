@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stock-portfolio-v3.6.0';
+const CACHE_NAME = 'stock-portfolio-v3.6.0'; // ⚠️ 修改這裡的版本號是強制更新的關鍵
 const urlsToCache = [
   './',
   './index.html',
@@ -14,7 +14,7 @@ self.addEventListener('install', event => {
         return cache.addAll(urlsToCache);
       })
   );
-  self.skipWaiting();
+  self.skipWaiting(); // 強制立即啟用新版的 Service Worker
 });
 
 self.addEventListener('activate', event => {
@@ -24,7 +24,7 @@ self.addEventListener('activate', event => {
         cacheNames.map(cacheName => {
           if (cacheName !== CACHE_NAME) {
             console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
+            return caches.delete(cacheName); // 刪除舊版快取
           }
         })
       );
@@ -34,11 +34,22 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // 優化：不攔截 API 動態請求，避免股價被快取導致延遲
-  if (event.request.url.includes('api.fugle.tw') || event.request.url.includes('finance.yahoo.com') || event.request.url.includes('allorigins.win') || event.request.url.includes('docs.google.com')) {
-    return fetch(event.request);
+  const requestUrl = new URL(event.request.url);
+  
+  // 🚀 重要優化：絕對不快取 API 動態請求，確保股價即時更新！
+  const isApiRequest = 
+    requestUrl.hostname.includes('api.fugle.tw') || 
+    requestUrl.hostname.includes('finance.yahoo.com') || 
+    requestUrl.hostname.includes('allorigins.win') ||
+    requestUrl.hostname.includes('docs.google.com');
+
+  if (isApiRequest) {
+    // 如果是 API 請求，永遠直接向伺服器要資料，不讀快取
+    event.respondWith(fetch(event.request));
+    return;
   }
 
+  // 對於靜態檔案 (HTML, CSS, JS)，使用 Cache First 策略增加離線可用性
   event.respondWith(
     caches.match(event.request)
       .then(response => {
@@ -49,3 +60,4 @@ self.addEventListener('fetch', event => {
       })
   );
 });
+
