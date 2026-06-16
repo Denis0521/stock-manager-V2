@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stock-portfolio-v3.6.0'; // ⚠️ 修改這裡的版本號是強制更新的關鍵
+const CACHE_NAME = 'stock-portfolio-v3.6.1'; // ⚠️ 修改這裡的版本號是強制更新的關鍵
 const urlsToCache = [
   './',
   './index.html',
