@@ -1,8 +1,9 @@
-const CACHE_NAME = 'stock-portfolio-v3.5.8';
+const CACHE_NAME = 'stock-portfolio-v3.6.0';
 const urlsToCache = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './icon-512.png'
 ];
 
 self.addEventListener('install', event => {
@@ -33,6 +34,11 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+  // 優化：不攔截 API 動態請求，避免股價被快取導致延遲
+  if (event.request.url.includes('api.fugle.tw') || event.request.url.includes('finance.yahoo.com') || event.request.url.includes('allorigins.win') || event.request.url.includes('docs.google.com')) {
+    return fetch(event.request);
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(response => {

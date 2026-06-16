@@ -1,1033 +1,644 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>股票庫存管理</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>股票庫存管理</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="股票庫存管理">
+    <meta name="theme-color" id="themeColorMeta" content="#e0e5ec">
+    <link rel="apple-touch-icon" href="icon-512.png">
+    <link rel="icon" href="icon-512.png" type="image/png">
+    <style>
+        /* ========================================================= 🚀 核心變數引擎 (掌控全主題的 3D 光影與顏色) ========================================================= */
+        :root { --bg: #e0e5ec; --s-light: #ffffff; --s-dark: #a3b1c6; --t-main: #2d3436; --t-muted: #6b7280; --up: #d93025; --down: #188038; --engrave-l: rgba(255,255,255,0.8); --engrave-d: rgba(0,0,0,0.15); --protrude-l: rgba(255,255,255,0.8); --protrude-d: rgba(0,0,0,0.2); --accent: #1a73e8; }
+        body.dark { --bg: #1a1e24; --s-light: #242932; --s-dark: #101316; --t-main: #e6edf3; --t-muted: #8b949e; --up: #f85149; --down: #3fb950; --engrave-l: rgba(255,255,255,0.05); --engrave-d: rgba(0,0,0,0.6); --protrude-l: rgba(255,255,255,0.1); --protrude-d: rgba(0,0,0,0.8); --accent: #58a6ff; }
+        body.tech { --bg: #2b303a; --s-light: #363c48; --s-dark: #20242c; --t-main: #e2e8f0; --t-muted: #a0aec0; --up: #ff4d4d; --down: #2ecc71; --engrave-l: rgba(255,255,255,0.05); --engrave-d: rgba(0,0,0,0.5); --protrude-l: rgba(255,255,255,0.1); --protrude-d: rgba(0,0,0,0.6); --accent: #58a6ff; }
+        body.blue-dark { --bg: #101929; --s-light: #162339; --s-dark: #0a0f19; --t-main: #ffffff; --t-muted: #5bc0be; --up: #ff6b6b; --down: #2ecc71; --engrave-l: rgba(255,255,255,0.05); --engrave-d: rgba(0,0,0,0.5); --protrude-l: rgba(255,255,255,0.1); --protrude-d: rgba(0,0,0,0.8); --accent: #00b4d8; }
+        body.blue-light { --bg: #d9e2ec; --s-light: #ffffff; --s-dark: #b8c6d6; --t-main: #1a202c; --t-muted: #4a5568; --up: #e53e3e; --down: #38a169; --engrave-l: rgba(255,255,255,0.8); --engrave-d: rgba(0,0,0,0.15); --protrude-l: rgba(255,255,255,0.8); --protrude-d: rgba(0,0,0,0.2); --accent: #2b6cb0; }
+        body.pink { --bg: #f3e6e8; --s-light: #ffffff; --s-dark: #d5c3c6; --t-main: #4a123a; --t-muted: #9b2c2c; --up: #e53e3e; --down: #38a169; --engrave-l: rgba(255,255,255,0.7); --engrave-d: rgba(0,0,0,0.1); --protrude-l: rgba(255,255,255,0.7); --protrude-d: rgba(0,0,0,0.15); --accent: #d63384; }
+        body.cement { --bg: #a3a8b0; --s-light: #c0c5cd; --s-dark: #868b93; --t-main: #22252a; --t-muted: #4a5059; --up: #c62828; --down: #1b5e20; --engrave-l: rgba(255,255,255,0.6); --engrave-d: rgba(0,0,0,0.3); --protrude-l: rgba(255,255,255,0.5); --protrude-d: rgba(0,0,0,0.4); --accent: #111111; }
 
-<!-- 🍎 Apple iOS 與 PWA 專屬優化標籤 -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="股票庫存管理">
-<!-- 📱 動態狀態列顏色 -->
-<meta name="theme-color" id="themeColorMeta" content="#e0e5ec">
-<link rel="apple-touch-icon" href="icon.svg">
-<link rel="icon" href="icon.svg" type="image/svg+xml">
+        /* ========================================================= 🌐 基礎排版與 3D 結構 ========================================================= */
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif; background:var(--bg); color:var(--t-main); padding:0 0 80px; min-height:100vh; font-size:14px; overflow-x:hidden; transition:background-color 0.3s, color 0.3s}
+        input,select,button{font-family:inherit;font-size:inherit;outline:none;text-align:center}
 
-<style>
-/* =========================================================
-   🚀 核心變數引擎 (掌控全主題的 3D 光影與顏色)
-   ========================================================= */
-:root {
-  --bg: #e0e5ec;
-  --s-light: #ffffff;
-  --s-dark: #a3b1c6;
-  --t-main: #2d3436;
-  --t-muted: #6b7280;
-  --up: #d93025;
-  --down: #188038;
-  --engrave-l: rgba(255,255,255,0.8);
-  --engrave-d: rgba(0,0,0,0.15);
-  --protrude-l: rgba(255,255,255,0.8);
-  --protrude-d: rgba(0,0,0,0.2);
-  --accent: #1a73e8;
-}
-body.dark {
-  --bg: #1a1e24; --s-light: #242932; --s-dark: #101316;
-  --t-main: #e6edf3; --t-muted: #8b949e;
-  --up: #f85149; --down: #3fb950;
-  --engrave-l: rgba(255,255,255,0.05); --engrave-d: rgba(0,0,0,0.6);
-  --protrude-l: rgba(255,255,255,0.1); --protrude-d: rgba(0,0,0,0.8);
-  --accent: #58a6ff;
-}
-body.tech {
-  --bg: #2b303a; --s-light: #363c48; --s-dark: #20242c;
-  --t-main: #e2e8f0; --t-muted: #a0aec0;
-  --up: #ff4d4d; --down: #2ecc71;
-  --engrave-l: rgba(255,255,255,0.05); --engrave-d: rgba(0,0,0,0.5);
-  --protrude-l: rgba(255,255,255,0.1); --protrude-d: rgba(0,0,0,0.6);
-  --accent: #58a6ff;
-}
-body.blue-dark {
-  --bg: #101929; --s-light: #162339; --s-dark: #0a0f19;
-  --t-main: #ffffff; --t-muted: #5bc0be;
-  --up: #ff6b6b; --down: #2ecc71;
-  --engrave-l: rgba(255,255,255,0.05); --engrave-d: rgba(0,0,0,0.5);
-  --protrude-l: rgba(255,255,255,0.1); --protrude-d: rgba(0,0,0,0.8);
-  --accent: #00b4d8;
-}
-body.blue-light {
-  --bg: #d9e2ec; --s-light: #ffffff; --s-dark: #b8c6d6;
-  --t-main: #1a202c; --t-muted: #4a5568;
-  --up: #e53e3e; --down: #38a169;
-  --engrave-l: rgba(255,255,255,0.8); --engrave-d: rgba(0,0,0,0.15);
-  --protrude-l: rgba(255,255,255,0.8); --protrude-d: rgba(0,0,0,0.2);
-  --accent: #2b6cb0;
-}
-body.pink {
-  --bg: #f3e6e8; --s-light: #ffffff; --s-dark: #d5c3c6;
-  --t-main: #4a123a; --t-muted: #9b2c2c;
-  --up: #e53e3e; --down: #38a169;
-  --engrave-l: rgba(255,255,255,0.7); --engrave-d: rgba(0,0,0,0.1);
-  --protrude-l: rgba(255,255,255,0.7); --protrude-d: rgba(0,0,0,0.15);
-  --accent: #d63384;
-}
-body.cement {
-  --bg: #a3a8b0; --s-light: #c0c5cd; --s-dark: #868b93;
-  --t-main: #22252a; --t-muted: #4a5059;
-  --up: #c62828; --down: #1b5e20;
-  --engrave-l: rgba(255,255,255,0.6); --engrave-d: rgba(0,0,0,0.3);
-  --protrude-l: rgba(255,255,255,0.5); --protrude-d: rgba(0,0,0,0.4);
-  --accent: #111111;
-}
+        .header, .tabs-bar, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .modal, .backup-box, .edit-modal-content {
+            background: var(--bg); border: none; box-shadow: 6px 6px 12px var(--s-dark), -6px -6px 12px var(--s-light); border-radius: 12px;
+        }
+        .header { border-radius: 0 0 16px 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; margin-bottom: 0px; }
+        .header h1 { font-size: 17px; font-weight: 700; color: var(--t-main); }
+        .header .hdr-right { display: flex; gap: 8px; }
+        .tabs-bar { padding: 8px 10px; margin: 14px; gap: 8px; display: flex; }
+        .card { padding: 16px; margin: 14px; }
+        .card-title { font-size: 15px; color: var(--t-muted); margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; text-align: left; }
 
-/* =========================================================
-   🌐 基礎排版與 3D 結構
-   ========================================================= */
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif; background:var(--bg); color:var(--t-main); padding:0 0 80px; min-height:100vh; font-size:14px; overflow-x:hidden; transition:background-color 0.3s, color 0.3s}
-input,select,button{font-family:inherit;font-size:inherit;outline:none;text-align:center}
+        .form-row { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+        .form-row:last-child { margin-bottom: 0; }
+        input, select {
+            flex: 1; min-width: 0; padding: 12px; background: var(--bg); border: none; border-radius: 8px;
+            box-shadow: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
+            color: var(--t-main); font-weight: 600; text-align: left;
+            text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d);
+        }
+        input::placeholder { color: var(--t-muted); text-shadow: none; font-weight: normal; }
+        .form-row select { flex: 0 0 68px; padding: 12px 4px; text-align: center; }
+        .form-row .sym-inp { flex: 0 0 90px; }
 
-/* 1. 立體凸出板塊 (Cards) - 統一 14px 外縫隙 */
-.header, .tabs-bar, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .modal, .backup-box {
-  background: var(--bg);
-  border: none;
-  box-shadow: 6px 6px 12px var(--s-dark), -6px -6px 12px var(--s-light);
-  border-radius: 12px;
-}
+        button, .tab-btn {
+            background: var(--bg); border: none; border-radius: 8px; padding: 10px 16px;
+            box-shadow: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
+            color: var(--t-main); font-weight: 600; cursor: pointer; transition: all 0.2s ease;
+            text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d);
+            display: flex; align-items: center; justify-content: center;
+        }
+        button:active, .tab-btn.active { box-shadow: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light); color: var(--accent); }
+        .tab-btn { flex: 1; padding: 12px 8px; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .btn-theme, .btn-adv { padding: 8px 12px; font-size: 13px; }
+        .form-row button { font-size: 15px; letter-spacing: 2px; padding-left: 18px; }
+        .btn-save { width: 100%; padding: 14px; font-size: 16px; margin: 14px; width: calc(100% - 28px); }
 
-.header { border-radius: 0 0 16px 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; margin-bottom: 0px; }
-.header h1 { font-size: 17px; font-weight: 700; color: var(--t-main); }
-.header .hdr-right { display: flex; gap: 8px; }
+        .idx-scroll-container { margin: 14px; overflow-x: auto; display: flex; gap: 0; padding: 6px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+        .idx-scroll-container::-webkit-scrollbar { height: 0; }
+        .idx-card-box { flex: 0 0 auto; min-width: 140px; padding: 6px 16px; scroll-snap-align: start; box-shadow: none; border-right: 1px solid var(--s-dark); border-radius: 0; background: transparent; text-align: left; }
+        .idx-card-box:last-child { border-right: none; }
+        .idx-box-name { font-size: 15px; color: var(--t-muted); font-weight: 600; }
+        .idx-box-price { font-size: 18px; font-weight: 700; margin: 2px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
+        .idx-box-change-row { display: flex; align-items: center; justify-content: flex-start; gap: 6px; font-size: 15px; font-weight: 600; white-space: nowrap; }
+        .idx-box-src { font-size: 9px; color: var(--t-muted); text-align: right; margin-top: 2px; opacity: 0.7; }
 
-/* 統一各區塊上下左右間距為 14px */
-.tabs-bar { padding: 8px 10px; margin: 14px; gap: 8px; display: flex; }
-.card { padding: 16px; margin: 14px; }
-/* 標題字體統一 15px */
-.card-title { font-size: 15px; color: var(--t-muted); margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; text-align: left; }
+        .table-scroll { margin: 14px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; }
+        .list-wrap { min-width: 710px; }
+        .list-header { display: grid; grid-template-columns: 100px 95px 85px 85px 75px 85px 110px 85px; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 15px; color: var(--t-muted); font-weight: 600; }
+        .srow { display: grid; grid-template-columns: 100px 95px 85px 85px 75px 85px 110px 85px; align-items: stretch; border-bottom: 1px solid var(--s-dark); font-size: 17px; }
+        .srow:last-child { border-bottom: none; }
+        .list-header > div, .srow > div { padding: 14px 6px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; white-space: nowrap; }
+        .list-header > div:nth-child(1), .srow > div:nth-child(1) { align-items: flex-start; text-align: left; position: sticky; left: 0; z-index: 2; background: var(--bg); padding-left: 14px; }
+        .list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after { content: ''; position: absolute; top: 0; bottom: 0; right: -6px; width: 6px; background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; }
+        .list-header > div:nth-child(8) { align-items: center; justify-content: center; padding-left: 14px; }
+        .srow > div:nth-child(8) { flex-direction: row; align-items: center; justify-content: center; gap: 6px; padding-left: 14px; }
 
-/* 2. 挖空輸入框 (Recessed) + 凸出文字 (Protruding Text) */
-.form-row { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
-.form-row:last-child { margin-bottom: 0; }
-input, select {
-  flex: 1; min-width: 0; padding: 12px;
-  background: var(--bg); border: none; border-radius: 8px;
-  box-shadow: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
-  color: var(--t-main); font-weight: 600; text-align: left;
-  text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d);
-}
-input::placeholder { color: var(--t-muted); text-shadow: none; font-weight: normal; }
-.form-row select { flex: 0 0 68px; padding: 12px 4px; text-align: center; }
-.form-row .sym-inp { flex: 0 0 90px; }
+        .sym-container { align-items: flex-start !important; line-height: 1.2 !important; }
+        .srow .sym { font-weight: 800; font-size: 17px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; }
+        .sym-src { font-size: 9px; color: var(--t-muted); font-weight: normal; margin-top: 2px; }
+        .srow .qty-cell { font-weight: 600; color: var(--t-main); overflow: hidden; width: 100%; }
+        .srow .price { font-weight: 700; }
+        .srow .chgp { font-size: 17px; font-weight: 700; }
+        .srow .chg, .srow .today-pnl { font-weight: 700; }
+        .srow .total { font-weight: 700; overflow: hidden; width: 100%; }
+        .srow .act button { padding: 6px 10px; font-size: 13px; border-radius: 6px; }
 
-/* 3. 凸出按鈕 (Protruding) + 刻入文字 (Engraved Text) */
-button, .tab-btn {
-  background: var(--bg); border: none; border-radius: 8px; padding: 10px 16px;
-  box-shadow: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
-  color: var(--t-main); font-weight: 600; cursor: pointer; transition: all 0.2s ease;
-  text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); display: flex; align-items: center; justify-content: center;
-}
-button:active, .tab-btn.active {
-  box-shadow: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
-  color: var(--accent);
-}
-.tab-btn { flex: 1; padding: 12px 8px; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.btn-theme, .btn-adv { padding: 8px 12px; font-size: 13px; }
-/* 新增按鈕統一 15px */
-.form-row button { font-size: 15px; letter-spacing: 2px; padding-left: 18px; /* 補齊因間距造成的視覺微偏 */ }
-.btn-save { width: 100%; padding: 14px; font-size: 16px; margin: 14px; width: calc(100% - 28px); }
+        .summary { padding: 16px; margin: 14px; }
+        .sum-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
+        .sum-row .lab { color: var(--t-muted); font-size: 15px; font-weight: 600; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
+        .sum-row .val { font-size: 18px; font-weight: 800; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
+        .sum-divider { height: 2px; background: var(--s-dark); opacity: 0.5; margin: 8px 0; border-radius: 2px; }
+        .sum-toggle-btn { text-align: center; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 8px; padding-top: 4px; background: transparent; box-shadow: none; color: var(--t-muted); text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
 
-/* 🌍 滑動大盤區 (移除 gap 修正邊線不置中錯覺，強制字體靠左對齊) */
-.idx-scroll-container { margin: 14px; overflow-x: auto; display: flex; gap: 0; padding: 6px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
-.idx-scroll-container::-webkit-scrollbar { height: 0; }
-.idx-card-box { flex: 0 0 auto; min-width: 140px; padding: 6px 16px; scroll-snap-align: start; box-shadow: none; border-right: 1px solid var(--s-dark); border-radius: 0; background: transparent; text-align: left; }
-.idx-card-box:last-child { border-right: none; }
-/* 大盤標題字體統一 15px */
-.idx-box-name { font-size: 15px; color: var(--t-muted); font-weight: 600; }
-.idx-box-price { font-size: 18px; font-weight: 700; margin: 2px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
-.idx-box-change-row { display: flex; align-items: center; justify-content: flex-start; gap: 6px; font-size: 15px; font-weight: 600; white-space: nowrap; }
-.idx-box-src { font-size: 9px; color: var(--t-muted); text-align: right; margin-top: 2px; opacity: 0.7; }
+        .history { margin: 14px; }
+        .hist-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; margin-top: 10px; }
+        .hist-item-left { display: flex; align-items: baseline; gap: 12px; }
+        .hist-item .hdate { color: var(--t-muted); font-size: 13px; font-weight: 600; }
+        .hist-item .hval { font-weight: 800; font-size: 15px; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
+        .del-hist-btn { padding: 6px 12px; font-size: 13px; border-radius: 8px; }
+        .hist-empty { color: var(--t-muted); font-size: 14px; text-align: center; padding: 20px; font-weight: 600; }
 
-/* 📊 列表區域 (標題統一為 15px，內容核心數字統一為 17px) */
-.table-scroll { margin: 14px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; }
-.list-wrap { min-width: 710px; } 
-/* 欄位配比: 代號100 數量95 價85 幅度85 漲跌75 今損益85 總損110 動作85 = 720px */
-.list-header { display: grid; grid-template-columns: 100px 95px 85px 85px 75px 85px 110px 85px; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 15px; color: var(--t-muted); font-weight: 600; }
-/* 明細核心數字統一放大至 17px */
-.srow { display: grid; grid-template-columns: 100px 95px 85px 85px 75px 85px 110px 85px; align-items: stretch; border-bottom: 1px solid var(--s-dark); font-size: 17px; }
-.srow:last-child { border-bottom: none; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 999; align-items: flex-end; justify-content: center; backdrop-filter: blur(3px); }
+        .modal-overlay.show { display: flex; }
+        .modal { border-radius: 24px 24px 0 0; padding: 24px 20px 32px; width: 100%; max-width: 480px; max-height: 85vh; overflow-y: auto; }
+        .modal h2 { font-size: 18px; margin-bottom: 16px; text-align: center; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
+        .modal label { display: block; font-size: 13px; color: var(--t-muted); margin: 12px 0 6px; font-weight: 600; }
+        .modal-close { margin-top: 20px; width: 100%; padding: 14px; font-size: 16px; }
+        
+        /* 編輯 Modal 特有樣式 */
+        .edit-modal-content { padding: 20px; }
+        .edit-input { margin-bottom: 12px; width: 100%; }
 
-/* 儲存格滿版設計：確保代號欄的底色能完全擋住字 */
-.list-header > div, .srow > div { padding: 14px 6px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; white-space: nowrap; }
+        .key-status { font-size: 11px; padding: 4px 10px; border-radius: 12px; display: inline-block; margin-top: 6px; font-weight: 600; }
+        .key-status.ok { background: var(--bg); box-shadow: inset 2px 2px 4px var(--s-dark), inset -2px -2px 4px var(--s-light); color: var(--up); }
+        .key-status.none { background: var(--bg); box-shadow: inset 2px 2px 4px var(--s-dark), inset -2px -2px 4px var(--s-light); color: var(--t-muted); }
+        .info-box { padding: 12px 14px; font-size: 13px; line-height: 1.6; margin-bottom: 16px; font-weight: 600; color: var(--accent); background: var(--bg); box-shadow: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light); border-radius: 12px; }
 
-/* 第 1 欄 (代號) 黏貼定位與滿版底色 */
-.list-header > div:nth-child(1), .srow > div:nth-child(1) { 
-  align-items: flex-start; text-align: left; position: sticky; left: 0; z-index: 2; 
-  background: var(--bg); padding-left: 14px; 
-}
-.list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after { 
-  content: ''; position: absolute; top: 0; bottom: 0; right: -6px; width: 6px; 
-  background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; 
-}
+        .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--t-main); color: var(--bg); padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: bold; z-index: 9999; opacity: 0; transition: opacity 0.3s; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .toast.show { opacity: 1; }
+        a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
+        .backup-box { padding: 16px; margin: 14px 0 0; }
+        .backup-title { font-size: 15px; font-weight: 700; color: var(--t-muted); margin-bottom: 12px; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); text-align: left; }
+        .backup-btns { display: flex; gap: 12px; }
+        .btn-backup { flex: 1; padding: 12px; font-size: 14px; }
+        .v-box { text-align: center; font-size: 12px; color: var(--t-muted); margin-top: 24px; font-weight: 600; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
 
-/* 第 8 欄 (動作按鈕) 距離拉開 */
-.list-header > div:nth-child(8) { align-items: center; justify-content: center; padding-left: 14px; }
-.srow > div:nth-child(8) { flex-direction: row; align-items: center; justify-content: center; gap: 6px; padding-left: 14px; }
-
-/* 內部字體與容器對齊 (統一 17px) */
-.sym-container { align-items: flex-start !important; line-height: 1.2 !important; }
-.srow .sym { font-weight: 800; font-size: 17px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; }
-.sym-src { font-size: 9px; color: var(--t-muted); font-weight: normal; margin-top: 2px; }
-
-.srow .qty-cell { font-weight: 600; color: var(--t-main); overflow: hidden; width: 100%; }
-.srow .price { font-weight: 700; }
-.srow .chgp { font-size: 17px; font-weight: 700; }
-.srow .chg, .srow .today-pnl { font-weight: 700; }
-.srow .total { font-weight: 700; overflow: hidden; width: 100%; }
-.srow .act button { padding: 6px 10px; font-size: 13px; border-radius: 6px; }
-
-/* 4. 統計區與下拉選單 (無凸出，文字刻入，標題統一 15px) */
-.summary { padding: 16px; margin: 14px; }
-.sum-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
-.sum-row .lab { color: var(--t-muted); font-size: 15px; font-weight: 600; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
-.sum-row .val { font-size: 18px; font-weight: 800; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
-.sum-divider { height: 2px; background: var(--s-dark); opacity: 0.5; margin: 8px 0; border-radius: 2px; }
-
-.sum-toggle-btn { 
-  text-align: center; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 8px; padding-top: 4px;
-  background: transparent; box-shadow: none;
-  color: var(--t-muted); 
-  text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d);
-}
-
-/* 📜 歷史紀錄區 */
-.history { margin: 14px; }
-.hist-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; margin-top: 10px; }
-.hist-item-left { display: flex; align-items: baseline; gap: 12px; }
-.hist-item .hdate { color: var(--t-muted); font-size: 13px; font-weight: 600; }
-.hist-item .hval { font-weight: 800; font-size: 15px; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
-.del-hist-btn { padding: 6px 12px; font-size: 13px; border-radius: 8px; }
-.hist-empty { color: var(--t-muted); font-size: 14px; text-align: center; padding: 20px; font-weight: 600; }
-
-.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 999; align-items: flex-end; justify-content: center; backdrop-filter: blur(3px); }
-.modal-overlay.show { display: flex; }
-.modal { border-radius: 24px 24px 0 0; padding: 24px 20px 32px; width: 100%; max-width: 480px; max-height: 85vh; overflow-y: auto; }
-.modal h2 { font-size: 18px; margin-bottom: 16px; text-align: center; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
-.modal label { display: block; font-size: 13px; color: var(--t-muted); margin: 12px 0 6px; font-weight: 600; }
-.modal-close { margin-top: 20px; width: 100%; padding: 14px; font-size: 16px; }
-
-.key-status { font-size: 11px; padding: 4px 10px; border-radius: 12px; display: inline-block; margin-top: 6px; font-weight: 600; }
-.key-status.ok { background: var(--bg); box-shadow: inset 2px 2px 4px var(--s-dark), inset -2px -2px 4px var(--s-light); color: var(--up); }
-.key-status.none { background: var(--bg); box-shadow: inset 2px 2px 4px var(--s-dark), inset -2px -2px 4px var(--s-light); color: var(--t-muted); }
-
-.info-box { padding: 12px 14px; font-size: 13px; line-height: 1.6; margin-bottom: 16px; font-weight: 600; color: var(--accent); background: var(--bg); box-shadow: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light); border-radius: 12px; }
-.toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--t-main); color: var(--bg); padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: bold; z-index: 9999; opacity: 0; transition: opacity 0.3s; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-.toast.show { opacity: 1; }
-
-a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
-
-.backup-box { padding: 16px; margin: 14px 0 0; }
-.backup-title { font-size: 15px; font-weight: 700; color: var(--t-muted); margin-bottom: 12px; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); text-align: left; }
-.backup-btns { display: flex; gap: 12px; }
-.btn-backup { flex: 1; padding: 12px; font-size: 14px; }
-
-.v-box { text-align: center; font-size: 12px; color: var(--t-muted); margin-top: 24px; font-weight: 600; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
-
-/* 通用顏色 */
-.up { color: var(--up) !important; text-shadow: none !important; }
-.down { color: var(--down) !important; text-shadow: none !important; }
-.neutral { color: var(--t-main) !important; text-shadow: none !important; }
-
-@media(min-width:480px){body{max-width:480px;margin:0 auto}}
-</style>
-  <link rel="manifest" href="manifest.json">
+        .up { color: var(--up) !important; text-shadow: none !important; }
+        .down { color: var(--down) !important; text-shadow: none !important; }
+        .neutral { color: var(--t-main) !important; text-shadow: none !important; }
+        @media(min-width:480px){body{max-width:480px;margin:0 auto}}
+    </style>
+    <link rel="manifest" href="manifest.json">
 </head>
 <body>
-<div class="header">
-  <h1>股票庫存管理</h1>
-  <div class="hdr-right">
-    <button type="button" class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙</button>
-    <button type="button" class="btn-adv" onclick="openModal()">進階</button>
-  </div>
-</div>
-
-<div class="tabs-bar">
-  <button type="button" class="tab-btn active" onclick="switchTab(0)" ondblclick="renameTab(0)" id="tab0">分頁 A</button>
-  <button type="button" class="tab-btn" onclick="switchTab(1)" ondblclick="renameTab(1)" id="tab1">分頁 B</button>
-  <button type="button" class="tab-btn" onclick="switchTab(2)" ondblclick="renameTab(2)" id="tab2">分頁 C</button>
-</div>
-
-<div class="card">
-  <div class="card-title">新增持股</div>
-  <div class="form-row">
-    <input type="text" class="sym-inp" id="symInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase">
-    <input type="number" id="qtyInput" placeholder="數量" min="1" step="1" inputmode="numeric">
-    <select id="unitSelect"><option value="張">張</option><option value="股">股</option></select>
-  </div>
-  <div class="form-row">
-    <input type="number" id="buyPriceInput" placeholder="買入均價 (選填計算損益)" step="0.01" min="0" inputmode="decimal">
-    <button type="button" onclick="addStock()" style="flex:0 0 80px;">新增</button>
-  </div>
-</div>
-
-<div class="idx-scroll-container" id="idxScrollContainer">
-  <div class="idx-card-box">
-    <div class="idx-box-name">臺灣加權指數</div>
-    <div class="idx-box-price" id="idxPrice">—</div>
-    <div class="idx-box-change-row">
-      <span id="idxChange"></span>
-      <span id="idxPct"></span>
+    <div class="header">
+        <h1>股票庫存管理</h1>
+        <div class="hdr-right">
+            <button type="button" class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙</button>
+            <button type="button" class="btn-adv" onclick="openModal()">進階</button>
+        </div>
     </div>
-    <div class="idx-box-src" id="idxSource">Loading...</div>
-  </div>
-</div>
-
-<div class="table-scroll" id="tableScroll" style="display:none;">
-  <div class="list-wrap" id="listContainer">
-    <div class="list-header">
-      <div>代號</div><div>庫存/均價</div><div>現價</div><div>今日幅度</div><div>今日漲跌</div><div>今日損益</div><div>總損益</div><div>動作</div>
+    <div class="tabs-bar">
+        <button type="button" class="tab-btn active" onclick="switchTab(0)" id="tab0">分頁 A</button>
+        <button type="button" class="tab-btn" onclick="switchTab(1)" id="tab1">分頁 B</button>
+        <button type="button" class="tab-btn" onclick="switchTab(2)" id="tab2">分頁 C</button>
     </div>
-    <div id="listBody"></div>
-  </div>
-</div>
-
-<div id="emptyState" style="display:none;margin:0 14px;padding:32px 14px;text-align:center;color:var(--t-muted);font-weight:600;font-size:16px">尚無持股，請在上方新增</div>
-
-<div class="summary" id="summaryArea" style="display:none;">
-  <div onclick="toggleSummary()" style="cursor:pointer;">
-    <div class="sum-row" style="padding-bottom:0;">
-      <span class="lab">今日損益總計</span>
-      <span class="val" id="totalPnl">+0</span>
+    <div class="card">
+        <div class="card-title">新增持股</div>
+        <div class="form-row">
+            <input type="text" class="sym-inp" id="symInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase">
+            <input type="number" id="qtyInput" placeholder="數量" min="1" step="1" inputmode="numeric">
+            <select id="unitSelect"><option value="張">張</option><option value="股">股</option></select>
+        </div>
+        <div class="form-row">
+            <input type="number" id="buyPriceInput" placeholder="買入均價 (選填計算損益)" step="0.01" min="0" inputmode="decimal">
+            <button type="button" onclick="addStock()" style="flex:0 0 80px;">新增</button>
+        </div>
     </div>
-    <div class="sum-toggle-btn" id="sumToggleBtn">▼ 下拉選單</div>
-  </div>
-  
-  <div id="summaryDetails" style="display:none;">
-    <div class="sum-divider" style="margin-top:10px;"></div>
-    <div class="sum-row"><span class="lab">總未實現損益 (ROI)</span><span class="val" id="totalUnrealized">—</span></div>
-    <div class="sum-divider"></div>
-    <div class="sum-row" style="padding-bottom:0;"><span class="lab">持股資產總計</span><span class="val" id="totalAsset">0</span></div>
-    <div class="sum-toggle-btn" style="margin-top:12px;" onclick="toggleSummary(event)">▲ 收起選單</div>
-  </div>
-</div>
-
-<button type="button" class="btn-save" id="saveArea" style="display:none;" onclick="saveDailyPnl()">存儲今日損益總計</button>
-
-<div class="history">
-  <div class="card-title" style="margin:0 0 6px">歷史記錄</div>
-  <div id="historyBody"><div class="hist-empty">尚無記錄</div></div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal">
-    <h2>進階設定</h2>
-    <div style="text-align:center;margin-bottom:12px">
-      <a class="btn-link" href="https://developer.fugle.tw/docs/key/" target="_blank">🔗 申請 Fugle API Key</a>
+    <div class="idx-scroll-container" id="idxScrollContainer">
+        <div class="idx-card-box">
+            <div class="idx-box-name">臺灣加權指數</div>
+            <div class="idx-box-price" id="idxPrice">—</div>
+            <div class="idx-box-change-row">
+                <span id="idxChange"></span>
+                <span id="idxPct"></span>
+            </div>
+            <div class="idx-box-src" id="idxSource">Loading...</div>
+        </div>
     </div>
-    
-    <label>Fugle API Key（主要）</label>
-    <input type="text" id="fugleKeyInput" placeholder="輸入第一組 Key" autocomplete="off">
-    <div><span class="key-status none" id="fugleKeyStatus">未設定</span></div>
-    
-    <label>Fugle API Key 2（備用）</label>
-    <input type="text" id="secondFugleKeyInput" placeholder="輸入第二組 Key（選填）" autocomplete="off">
-    <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
+    <div class="table-scroll" id="tableScroll" style="display:none;">
+        <div class="list-wrap" id="listContainer">
+            <div class="list-header">
+                <div>代號</div><div>庫存/均價</div><div>現價</div><div>今日幅度</div><div>今日漲跌</div><div>今日損益</div><div>總損益</div><div>動作</div>
+            </div>
+            <div id="listBody"></div>
+        </div>
+    </div>
+    <div id="emptyState" style="display:none;margin:0 14px;padding:32px 14px;text-align:center;color:var(--t-muted);font-weight:600;font-size:16px">尚無持股，請在上方新增</div>
+    <div class="summary" id="summaryArea" style="display:none;">
+        <div onclick="toggleSummary()" style="cursor:pointer;">
+            <div class="sum-row" style="padding-bottom:0;">
+                <span class="lab">今日損益總計</span>
+                <span class="val" id="totalPnl">+0</span>
+            </div>
+            <div class="sum-toggle-btn" id="sumToggleBtn">▼ 下拉選單</div>
+        </div>
+        <div id="summaryDetails" style="display:none;">
+            <div class="sum-divider" style="margin-top:10px;"></div>
+            <div class="sum-row"><span class="lab">總未實現損益 (ROI)</span><span class="val" id="totalUnrealized">—</span></div>
+            <div class="sum-divider"></div>
+            <div class="sum-row" style="padding-bottom:0;"><span class="lab">持股資產總計</span><span class="val" id="totalAsset">0</span></div>
+            <div class="sum-toggle-btn" style="margin-top:12px;" onclick="toggleSummary(event)">▲ 收起選單</div>
+        </div>
+    </div>
+    <button type="button" class="btn-save" id="saveArea" style="display:none;" onclick="saveDailyPnl()">存儲今日損益總計</button>
+    <div class="history">
+        <div class="card-title" style="margin:0 0 6px">歷史記錄</div>
+        <div id="historyBody"><div class="hist-empty">尚無記錄</div></div>
+    </div>
+    <div class="toast" id="toast"></div>
 
-    <div class="backup-box">
-      <div class="backup-title">資料備份與還原</div>
-      <div class="backup-btns">
-        <button type="button" class="btn-backup" onclick="exportData()">📥 匯出備份</button>
-        <button type="button" class="btn-backup" onclick="triggerImport()">📤 匯入還原</button>
-        <input type="file" id="importFile" style="display:none" onchange="importData(event)">
-      </div>
+    <!-- 進階設定 Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h2>進階設定</h2>
+            <div style="text-align:center;margin-bottom:12px">
+                <a class="btn-link" href="https://developer.fugle.tw/docs/key/" target="_blank">🔗 申請 Fugle API Key</a>
+            </div>
+            <label>Fugle API Key（主要）</label>
+            <input type="text" id="fugleKeyInput" placeholder="輸入第一組 Key" autocomplete="off">
+            <div><span class="key-status none" id="fugleKeyStatus">未設定</span></div>
+            <label>Fugle API Key 2（備用）</label>
+            <input type="text" id="secondFugleKeyInput" placeholder="輸入第二組 Key（選填）" autocomplete="off">
+            <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
+            <div class="backup-box">
+                <div class="backup-title">資料備份與還原</div>
+                <div class="backup-btns">
+                    <button type="button" class="btn-backup" onclick="exportData()">📥 匯出備份</button>
+                    <button type="button" class="btn-backup" onclick="triggerImport()">📤 匯入還原</button>
+                    <input type="file" id="importFile" style="display:none" onchange="importData(event)">
+                </div>
+            </div>
+            <div class="v-box">核心版本：V3.6.0 (安全與效能優化版)</div>
+            <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
+        </div>
     </div>
 
-    <div class="v-box">核心版本：V3.5.8 (極簡按鈕優化版)</div>
+    <!-- 編輯股票 Modal -->
+    <div class="modal-overlay" id="editModalOverlay">
+        <div class="modal" style="border-radius: 24px;">
+            <h2>修改持股</h2>
+            <div class="edit-modal-content">
+                <label>股票代號</label>
+                <input type="text" id="editSymInput" class="edit-input" maxlength="10" style="text-transform:uppercase">
+                <label>數量 (單位維持原設定)</label>
+                <input type="number" id="editQtyInput" class="edit-input" min="1" step="1" inputmode="numeric">
+                <label>買入均價 (留空或0代表不計算總損益)</label>
+                <input type="number" id="editBpInput" class="edit-input" step="0.01" min="0" inputmode="decimal">
+            </div>
+            <button type="button" class="modal-close" onclick="saveEditStock()">儲存修改</button>
+            <button type="button" class="modal-close" style="margin-top:8px; box-shadow: none; background: transparent; color: var(--t-muted);" onclick="closeEditModal()">取消</button>
+        </div>
+    </div>
 
-    <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
-  </div>
-</div>
+    <script>
+        const App = {
+            googleCsvUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR65VYw1-a-i-uKJqR-SiC9XQ4O1IokgVoWCP35eH6rHLqNgk_A9ZFDDT8nniO5dzVLfPhS8m_9IfaA/pub?gid=0&single=true&output=csv',
+            currentTab: 0,
+            tabStocks: [[], [], []],
+            tabRecords: [[], [], []],
+            tabNames: ['分頁 A', '分頁 B', '分頁 C'],
+            fugleKey: '', secondFugleKey: '', pollTimer: null, fugleKeyIndex: 0, editingStockId: null,
+            FK: 'tw_fugle_key', SFK: 'tw_second_fugle_key', TK: 'tw_theme', CUR_TAB_KEY: 'tw_current_tab', TN_KEY: 'tw_tab_names',
+            cachedGlobalIndices: [],
+            FUGLE: 'https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/',
+            
+            getStockKey: (idx) => `tw_stock_portfolio_tab_${idx}`,
+            getRecordKey: (idx) => `tw_records_tab_${idx}`,
 
-<script>
-let googleCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR65VYw1-a-i-uKJqR-SiC9XQ4O1IokgVoWCP35eH6rHLqNgk_A9ZFDDT8nniO5dzVLfPhS8m_9IfaA/pub?gid=0&single=true&output=csv';
+            init() {
+                this.loadState();
+                this.renderAll();
+                this.renderHistory();
+                setTimeout(() => this.refresh(), 300);
+                this.pollTimer = setInterval(() => this.refresh(), 30000);
 
-let currentTab = 0;
-let tabStocks = [[], [], []];
-let tabRecords = [[], [], []];
-let tabNames = ['分頁 A', '分頁 B', '分頁 C'];
+                document.getElementById('symInput').addEventListener('keydown', e => { if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); } });
+                document.getElementById('qtyInput').addEventListener('keydown', e => { if(e.key==='Enter') { e.preventDefault(); document.getElementById('buyPriceInput').focus(); } });
+                document.getElementById('buyPriceInput').addEventListener('keydown', e => { if(e.key==='Enter') { e.preventDefault(); this.addStock(); } });
+                document.getElementById('modalOverlay').addEventListener('click', function(e){ if(e.target===this) this.classList.remove('show'); });
+                document.getElementById('editModalOverlay').addEventListener('click', function(e){ if(e.target===this) App.closeEditModal(); });
+                console.log('股票庫存管理 V3.6.0 已啟動 (安全與效能優化版)');
+            },
 
-let fugleKey='',secondFugleKey='',pollTimer=null;
-let fugleKeyIndex = 0;
+            loadState() {
+                try {
+                    const f=localStorage.getItem(this.FK); if(f) this.fugleKey=f;
+                    const sf=localStorage.getItem(this.SFK); if(sf) this.secondFugleKey=sf;
+                    const ct=localStorage.getItem(this.CUR_TAB_KEY); if(ct!=null) this.currentTab=parseInt(ct);
+                    const tn=localStorage.getItem(this.TN_KEY); if(tn) this.tabNames=JSON.parse(tn);
+                    for(let i=0; i<3; i++){
+                        const s=localStorage.getItem(this.getStockKey(i)); if(s) this.tabStocks[i]=JSON.parse(s);
+                        const r=localStorage.getItem(this.getRecordKey(i)); if(r) this.tabRecords[i]=JSON.parse(r);
+                    }
+                    this.applyThemeText(localStorage.getItem(this.TK));
+                    const cachedIdx = localStorage.getItem('tw_cached_indices');
+                    if(cachedIdx) { this.cachedGlobalIndices = JSON.parse(cachedIdx); if(this.cachedGlobalIndices.length > 0) this.renderGlobalIndices(this.cachedGlobalIndices); }
+                } catch(e){ console.error(e); }
+                document.getElementById('fugleKeyInput').value=this.fugleKey;
+                document.getElementById('secondFugleKeyInput').value=this.secondFugleKey;
+                this.updateKeyStatus();
+                this.updateTabUI();
+            },
 
-const FK='tw_fugle_key',SFK='tw_second_fugle_key',TK='tw_theme', CUR_TAB_KEY='tw_current_tab', TN_KEY='tw_tab_names';
-const getStockKey = (idx) => `tw_stock_portfolio_tab_${idx}`;
-const getRecordKey = (idx) => `tw_records_tab_${idx}`;
+            applyThemeText(t) {
+                const body=document.body, themeBtn=document.getElementById('themeBtn'), metaTheme = document.getElementById('themeColorMeta');
+                body.className = '';
+                const themes = { 'dark': ['dark', '☀️', '#1a1e24'], 'tech': ['tech', '🚀', '#2b303a'], 'blue-dark': ['blue-dark', '🌌', '#101929'], 'blue-light': ['blue-light', '💎', '#d9e2ec'], 'pink': ['pink', '🌸', '#f3e6e8'], 'cement': ['cement', '🏢', '#a3a8b0'] };
+                if(themes[t]) { body.classList.add(themes[t][0]); themeBtn.textContent=themes[t][1]; metaTheme.content=themes[t][2]; }
+                else { themeBtn.textContent='🌙'; metaTheme.content='#e0e5ec'; }
+            },
 
-let cachedGlobalIndices = [];
+            toggleTheme() {
+                const order = ['dark', 'tech', 'blue-dark', 'blue-light', 'pink', 'cement', 'light'];
+                const current = document.body.className || 'light';
+                const nextIdx = (order.indexOf(current) + 1) % order.length;
+                const nextTheme = order[nextIdx];
+                this.applyThemeText(nextTheme === 'light' ? null : nextTheme);
+                try{localStorage.setItem(this.TK, nextTheme === 'light' ? '' : nextTheme);}catch(e){}
+            },
 
-const FUGLE='https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
+            switchTab(tabIndex) {
+                if(this.currentTab === tabIndex) return;
+                this.currentTab = tabIndex;
+                try{localStorage.setItem(this.CUR_TAB_KEY, this.currentTab);}catch(e){}
+                this.updateTabUI(); this.renderAll(); this.renderHistory(); this.refresh();
+            },
 
-function loadState(){
-  try{
-    const f=localStorage.getItem(FK);if(f)fugleKey=f;
-    const sf=localStorage.getItem(SFK);if(sf)secondFugleKey=sf;
-    const ct=localStorage.getItem(CUR_TAB_KEY);if(ct!=null)currentTab=parseInt(ct);
-    const tn=localStorage.getItem(TN_KEY);if(tn) tabNames=JSON.parse(tn);
+            updateTabUI() {
+                for(let i=0; i<3; i++){
+                    const btn = document.getElementById(`tab${i}`);
+                    btn.textContent = this.tabNames[i] || `分頁 ${String.fromCharCode(65 + i)}`;
+                    btn.classList.toggle('active', i === this.currentTab);
+                }
+            },
 
-    for(let i=0; i<3; i++){
-      const s=localStorage.getItem(getStockKey(i)); if(s) tabStocks[i]=JSON.parse(s);
-      const r=localStorage.getItem(getRecordKey(i)); if(r) tabRecords[i]=JSON.parse(r);
-    }
-    const t=localStorage.getItem(TK);
-    applyThemeText(t);
-    
-    const cachedIdx = localStorage.getItem('tw_cached_indices');
-    if(cachedIdx) {
-      cachedGlobalIndices = JSON.parse(cachedIdx);
-      if(cachedGlobalIndices.length > 0) renderGlobalIndices(cachedGlobalIndices);
-    }
-  }catch(e){console.error(e);}
-  document.getElementById('fugleKeyInput').value=fugleKey;
-  document.getElementById('secondFugleKeyInput').value=secondFugleKey;
-  updateKeyStatus();
-  updateTabUI();
-}
+            updateKeyStatus() {
+                ['fugleKey','secondFugleKey'].forEach((id,i)=>{
+                    const el=document.getElementById(id+'Status'); if(!el)return;
+                    const val=i===0?this.fugleKey:this.secondFugleKey;
+                    el.textContent = val ? '✓ 已設定' : '未設定';
+                    el.className = 'key-status ' + (val ? 'ok' : 'none');
+                });
+            },
 
-function applyThemeText(t){
-  const body=document.body;
-  const themeBtn=document.getElementById('themeBtn');
-  const metaTheme = document.getElementById('themeColorMeta');
-  body.className = '';
-  
-  if(t==='dark'){ body.classList.add('dark'); themeBtn.textContent='☀️'; metaTheme.content='#1a1e24'; }
-  else if(t==='tech'){ body.classList.add('tech'); themeBtn.textContent='🚀'; metaTheme.content='#2b303a'; }
-  else if(t==='blue-dark'){ body.classList.add('blue-dark'); themeBtn.textContent='🌌'; metaTheme.content='#101929'; }
-  else if(t==='blue-light'){ body.classList.add('blue-light'); themeBtn.textContent='💎'; metaTheme.content='#d9e2ec'; }
-  else if(t==='pink'){ body.classList.add('pink'); themeBtn.textContent='🌸'; metaTheme.content='#f3e6e8'; }
-  else if(t==='cement'){ body.classList.add('cement'); themeBtn.textContent='🏢'; metaTheme.content='#a3a8b0'; }
-  else { themeBtn.textContent='🌙'; metaTheme.content='#e0e5ec'; }
-}
+            // --- API 抓取優化區 ---
+            async fetchFugle(symbol){
+                const keys = [this.fugleKey, this.secondFugleKey].filter(k => k && k.trim() !== '');
+                if(keys.length === 0) return null;
+                const startIndex = this.fugleKeyIndex % keys.length;
+                this.fugleKeyIndex++;
+                for(let i = 0; i < keys.length; i++){
+                    const attemptIndex = (startIndex + i) % keys.length;
+                    try {
+                        const resp = await fetch(this.FUGLE + encodeURIComponent(symbol), { headers: {'X-API-KEY': keys[attemptIndex]}, signal: AbortSignal.timeout(4000) });
+                        if(resp.ok){ const d = await resp.json(); if(d && d.lastPrice != null) return {price: d.lastPrice, change: d.change, changePercent: d.changePercent, source: 'Fugle'}; }
+                        else if (resp.status === 429) { this.showToast('⚠️ API 請求過於頻繁，請稍後再試'); continue; }
+                    } catch(e) { continue; }
+                }
+                return null;
+            },
 
-function saveHoldings(){try{localStorage.setItem(getStockKey(currentTab),JSON.stringify(tabStocks[currentTab]));}catch(e){}}
-function saveKeys(){
-  fugleKey=document.getElementById('fugleKeyInput').value.trim();
-  secondFugleKey=document.getElementById('secondFugleKeyInput').value.trim();
-  try{localStorage.setItem(FK,fugleKey);localStorage.setItem(SFK,secondFugleKey);}catch(e){}
-  updateKeyStatus();
-}
-function saveRecords(){try{localStorage.setItem(getRecordKey(currentTab),JSON.stringify(tabRecords[currentTab]));}catch(e){}}
+            async fetchYahoo(symbol){
+                const tryFetch = async (suffix) => {
+                    try {
+                        const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}${suffix}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
+                        // 使用 allorigins 解決 CORS 跨域問題
+                        const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`;
+                        const resp = await fetch(proxyUrl, { signal: AbortSignal.timeout(5000) });
+                        if(!resp.ok) return null;
+                        const text = await resp.text();
+                        const lines = text.trim().split('\n');
+                        if(lines.length < 2) return null;
+                        const cols = lines[lines.length - 1].split(',');
+                        if(cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
+                        const price = parseFloat(cols[4]); const open = parseFloat(cols[1]);
+                        const chg = +(price - open).toFixed(2); const pct = +((chg / open) * 100).toFixed(2);
+                        return {price, change: chg, changePercent: pct, source: 'Yahoo'};
+                    } catch(e) { return null; }
+                };
+                let res = await tryFetch('.TW'); if(!res) res = await tryFetch('.TWO'); return res;
+            },
 
-function toggleTheme(){
-  const body=document.body;
-  let nextTheme = 'light';
-  if(body.classList.contains('dark')){ nextTheme = 'tech'; }
-  else if(body.classList.contains('tech')){ nextTheme = 'blue-dark'; }
-  else if(body.classList.contains('blue-dark')){ nextTheme = 'blue-light'; }
-  else if(body.classList.contains('blue-light')){ nextTheme = 'pink'; }
-  else if(body.classList.contains('pink')){ nextTheme = 'cement'; }
-  else if(body.classList.contains('cement')){ nextTheme = 'light'; }
-  else { nextTheme = 'dark'; }
-  applyThemeText(nextTheme);
-  try{localStorage.setItem(TK, nextTheme);}catch(e){}
-}
+            async fetchWeightedIndex(){
+                const keys = [this.fugleKey, this.secondFugleKey].filter(k => k && k.trim() !== '');
+                if(keys.length > 0){
+                    const startIndex = this.fugleKeyIndex % keys.length; this.fugleKeyIndex++;
+                    for(let i = 0; i < keys.length; i++){
+                        const attemptIndex = (startIndex + i) % keys.length;
+                        try{
+                            const resp = await fetch(this.FUGLE + 'IX0001', {headers: {'X-API-KEY': keys[attemptIndex]}, signal: AbortSignal.timeout(4000)});
+                            if(resp.ok){ const d = await resp.json(); const p = d.lastPrice ?? d.closePrice ?? d.price; if(p != null) return {price: p, change: d.change, changePercent: d.changePercent, source: 'Fugle'}; }
+                        }catch(e){}
+                    }
+                }
+                try {
+                    const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
+                    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`;
+                    const resp = await fetch(proxyUrl);
+                    if(resp.ok){
+                        const text = await resp.text(); const lines = text.trim().split('\n'); const cols = lines[lines.length - 1].split(',');
+                        const price = parseFloat(cols[4]); const open = parseFloat(cols[1]);
+                        return {price, change: price - open, changePercent: ((price - open)/open)*100, source: 'Yahoo'};
+                    }
+                }catch(e){}
+                return null;
+            },
 
-function switchTab(tabIndex){
-  if(currentTab === tabIndex) return;
-  currentTab = tabIndex;
-  try{localStorage.setItem(CUR_TAB_KEY, currentTab);}catch(e){}
-  updateTabUI();
-  renderAll();
-  renderHistory();
-  refreshPrices();
-}
+            async fetchGlobalIndicesFromGoogle() {
+                if (!this.googleCsvUrl || this.googleCsvUrl.includes('2PACX-xxxxxxxxx')) return;
+                try {
+                    const response = await fetch(this.googleCsvUrl + '&cachebust=' + Date.now(), { signal: AbortSignal.timeout(5000) });
+                    if (!response.ok) return; const text = await response.text();
+                    const rows = text.split('\n').map(row => row.trim()).filter(row => row.length > 0);
+                    const parsedIndices = [];
+                    for(let i = 1; i < rows.length; i++) {
+                        const columns = rows[i].split(','); if (columns.length < 3) continue;
+                        const name = columns[0].replace(/"/g, '').trim(); const price = parseFloat(columns[1]);
+                        let rawPctStr = columns[2].replace(/"/g, '').trim(); let pct = 0;
+                        if (rawPctStr.includes('%')) { pct = parseFloat(rawPctStr.replace('%', '')); } else { pct = parseFloat(rawPctStr) * 100; }
+                        if (isNaN(price) || isNaN(pct)) continue;
+                        const originalClose = price / (1 + (pct / 100)); const changeAmt = price - originalClose;
+                        parsedIndices.push({ name, price, pct, changeAmt });
+                    }
+                    if (parsedIndices.length > 0) { this.cachedGlobalIndices = parsedIndices; try { localStorage.setItem('tw_cached_indices', JSON.stringify(this.cachedGlobalIndices)); } catch(e){} this.renderGlobalIndices(this.cachedGlobalIndices); }
+                } catch (e) { console.error("Google Index Fetch Error:", e); }
+            },
 
-function renameTab(tabIndex) {
-  const oldName = tabNames[tabIndex] || `分頁 ${String.fromCharCode(65 + tabIndex)}`;
-  const newName = prompt('請輸入此分頁的新名稱：', oldName);
-  if (newName !== null) {
-    const finalName = newName.trim() === '' ? `分頁 ${String.fromCharCode(65 + tabIndex)}` : newName.trim();
-    tabNames[tabIndex] = finalName;
-    try { localStorage.setItem(TN_KEY, JSON.stringify(tabNames)); } catch(e){}
-    updateTabUI();
-    showToast(`已更名為「${finalName}」`);
-  }
-}
+            // 批次請求限制：避免 Promise.all 瞬間爆發 429 Error
+            async refreshPrices() {
+                const idxR = await this.fetchWeightedIndex();
+                if(idxR){
+                    document.getElementById('idxPrice').textContent=idxR.price.toLocaleString('en-US',{maximumFractionDigits:0});
+                    document.getElementById('idxChange').textContent=(idxR.change>=0?'+':'')+idxR.change.toFixed(2);
+                    document.getElementById('idxChange').className=(idxR.change>=0?'up':'down');
+                    document.getElementById('idxPct').textContent='('+(idxR.changePercent>=0?'+':'')+idxR.changePercent.toFixed(2)+'%)';
+                    document.getElementById('idxPct').className=(idxR.changePercent>=0?'up':'down');
+                    document.getElementById('idxSource').textContent='via '+idxR.source+' '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+                }
+                this.fetchGlobalIndicesFromGoogle();
 
-function updateTabUI(){
-  for(let i=0; i<3; i++){
-    const btn = document.getElementById(`tab${i}`);
-    btn.textContent = tabNames[i] || `分頁 ${String.fromCharCode(65 + i)}`;
-    if(i === currentTab) btn.classList.add('active');
-    else btn.classList.remove('active');
-  }
-}
+                const currentStocks = this.tabStocks[this.currentTab];
+                const batchSize = 5;
+                for (let i = 0; i < currentStocks.length; i += batchSize) {
+                    const batch = currentStocks.slice(i, i + batchSize);
+                    const results = await Promise.all(batch.map(async (s) => {
+                        let r = await this.fetchFugle(s.symbol); if(!r) r = await this.fetchYahoo(s.symbol); return {s, r};
+                    }));
+                    for (const {s, r} of results) {
+                        if(r){ s.price=r.price; s.change=r.change; s.changePercent=r.changePercent; s.source=r.source; s.updateTime=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}); this.renderRow(s); }
+                    }
+                }
+                this.updateSummary();
+            },
 
-function updateKeyStatus(){
-  ['fugleKey','secondFugleKey'].forEach((id,i)=>{
-    const el=document.getElementById(id+'Status');if(!el)return;
-    const val=i===0?fugleKey:secondFugleKey;
-    if(val){el.textContent='✓ 已設定';el.className='key-status ok';}
-    else{el.textContent='未設定';el.className='key-status none';}
-  });
-}
+            renderGlobalIndices(indices) {
+                const container = document.getElementById('idxScrollContainer');
+                const boxes = container.querySelectorAll('.idx-card-box');
+                for(let i = 1; i < boxes.length; i++) boxes[i].remove();
+                indices.forEach(item => {
+                    const card = document.createElement('div'); card.className = 'idx-card-box';
+                    const sign = item.pct >= 0 ? '+' : ''; const cls = item.pct >= 0 ? 'up' : 'down';
+                    card.innerHTML = `<div class="idx-box-name">${item.name}</div><div class="idx-box-price">${item.price.toLocaleString('en-US', {maximumFractionDigits:2})}</div><div class="idx-box-change-row ${cls}"><span>${sign}${item.changeAmt.toFixed(2)}</span><span>(${sign}${item.pct.toFixed(2)}%)</span></div><div class="idx-box-src">via Google</div>`;
+                    container.appendChild(card);
+                });
+            },
 
-function renderGlobalIndices(indices) {
-  const container = document.getElementById('idxScrollContainer');
-  const boxes = container.querySelectorAll('.idx-card-box');
-  for(let i = 1; i < boxes.length; i++) { boxes[i].remove(); }
+            // --- 畫面渲染優化區 ---
+            renderRow(s) {
+                const el=document.querySelector('.srow[data-id="'+s.id+'"]'); if(!el) return;
+                const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
+                let p = s.price; let chg = s.change ?? 0;
+                
+                const symCont = el.querySelector('.sym-container');
+                if(symCont){ symCont.querySelector('.sym').textContent=s.symbol; let srcEl = symCont.querySelector('.sym-src'); if(!srcEl){ srcEl = document.createElement('div'); srcEl.className = 'sym-src'; symCont.appendChild(srcEl); } srcEl.textContent = (s.source==='Fugle' && s.updateTime) ? 'via Fugle '+s.updateTime : ''; }
+                const qn=el.querySelector('.qty-cell');
+                if(qn){ qn.innerHTML=`<div style="line-height:1.2;font-size:17px;">${s.displayQty} ${s.displayUnit}</div><div style="font-size:14px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}">${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}</div>`; }
+                const pEl=el.querySelector('.price');
+                if(p!=null){ pEl.textContent=this.formatPrice(p); pEl.className='price '+(chg>=0?'up':'down'); }
+                const cp=el.querySelector('.chgp');
+                if(s.changePercent!=null){cp.textContent=(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%';cp.className='chgp '+(s.changePercent>=0?'up':'down');}
+                const cg=el.querySelector('.chg');
+                if(s.change!=null){cg.textContent=(chg>=0?'+':'')+chg.toFixed(2);cg.className='chg '+(chg>=0?'up':'down');}
+                const tp = el.querySelector('.today-pnl');
+                if(s.change!=null){ const todayPnl = Math.round(shares * chg); tp.textContent = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString(); tp.className = 'today-pnl ' + (todayPnl >= 0 ? 'up' : 'down'); }
+                
+                let totalHtml = '—'; let totalValForClass = 0;
+                if (p != null) {
+                    const mktValue = Math.round(shares * p);
+                    if (s.buyPrice != null && s.buyPrice > 0) { const cost = s.buyPrice * shares; const unPnl = Math.round(mktValue - cost); const roi = ((mktValue - cost) / cost) * 100; totalValForClass = unPnl; totalHtml = `<div style="line-height:1.2;font-size:17px;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div><div style="font-size:14px;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`; }
+                    else { totalValForClass = 0; totalHtml = `<div style="line-height:1.2;font-size:17px;" class="neutral">—</div><div style="font-size:14px;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`; }
+                }
+                el.querySelector('.total').innerHTML = totalHtml;
+                el.querySelector('.total').className = 'total ' + (totalValForClass !== 0 ? (totalValForClass >= 0 ? 'up' : 'down') : '');
+            },
 
-  indices.forEach(item => {
-    const card = document.createElement('div');
-    card.className = 'idx-card-box';
-    const sign = item.pct >= 0 ? '+' : '';
-    const cls = item.pct >= 0 ? 'up' : 'down';
-    card.innerHTML = `
-      <div class="idx-box-name">${item.name}</div>
-      <div class="idx-box-price">${item.price.toLocaleString('en-US', {maximumFractionDigits:2})}</div>
-      <div class="idx-box-change-row ${cls}">
-        <span>${sign}${item.changeAmt.toFixed(2)}</span>
-        <span>(${sign}${item.pct.toFixed(2)}%)</span>
-      </div>
-      <div class="idx-box-src">via Google</div>
-    `;
-    container.appendChild(card);
-  });
-}
+            renderAll(){
+                const body=document.getElementById('listBody'); const empty=document.getElementById('emptyState'); const tableScroll=document.getElementById('tableScroll'); const sumArea = document.getElementById('summaryArea'); const saveArea = document.getElementById('saveArea');
+                const currentStocks = this.tabStocks[this.currentTab];
+                
+                // 優化：差異比對，不隨意清空畫面
+                const existingIds = new Set(Array.from(body.children).map(el => el.dataset.id));
+                const currentIds = new Set(currentStocks.map(s => s.id));
 
-async function fetchGlobalIndicesFromGoogle() {
-  if (!googleCsvUrl || googleCsvUrl.includes('2PACX-xxxxxxxxx')) return;
-  try {
-    const response = await fetch(googleCsvUrl + '&cachebust=' + Date.now(), { signal: AbortSignal.timeout(5000) });
-    if (!response.ok) return;
-    const text = await response.text();
-    const rows = text.split('\n').map(row => row.trim()).filter(row => row.length > 0);
-    
-    const parsedIndices = [];
+                // 移除不在清單中的
+                existingIds.forEach(id => { if (!currentIds.has(id)) body.querySelector(`[data-id="${id}"]`).remove(); });
 
-    for(let i = 1; i < rows.length; i++) {
-      const columns = rows[i].split(',');
-      if (columns.length < 3) continue;
+                if(currentStocks.length===0){ empty.style.display='block';tableScroll.style.display='none';sumArea.style.display='none';saveArea.style.display='none';return; }
+                empty.style.display='none';tableScroll.style.display='block';sumArea.style.display='block';saveArea.style.display='block';
 
-      const name = columns[0].replace(/"/g, '').trim();
-      const price = parseFloat(columns[1]);
-      
-      let rawPctStr = columns[2].replace(/"/g, '').trim();
-      let pct = 0;
-      if (rawPctStr.includes('%')) {
-        pct = parseFloat(rawPctStr.replace('%', ''));
-      } else {
-        pct = parseFloat(rawPctStr) * 100;
-      }
+                // 新增或更新
+                currentStocks.forEach(s => {
+                    if (!existingIds.has(s.id)) {
+                        const div=document.createElement('div'); div.className='srow'; div.dataset.id=s.id;
+                        // 防堵 XSS：使用 textContent 而非直接帶入字串
+                        div.innerHTML= `<div class="sym-container"><div class="sym"></div><div class="sym-src"></div></div><div class="qty-cell"></div><div class="price"></div><div class="chgp">—</div><div class="chg">—</div><div class="today-pnl">—</div><div class="total">—</div><div class="act"><button type="button" class="edit-btn">✎</button><button type="button" class="del-btn">✕</button></div>`;
+                        div.querySelector('.edit-btn').onclick = () => this.openEditModal(s.id);
+                        div.querySelector('.del-btn').onclick = () => this.deleteStock(s.id);
+                        body.appendChild(div);
+                    }
+                    this.renderRow(s);
+                });
+                this.updateSummary();
+            },
 
-      if (isNaN(price) || isNaN(pct)) continue;
+            updateSummary(){
+                let pnl=0, asset=0, totalUnPnl=0; let hasUnPnl = false;
+                for(const s of this.tabStocks[this.currentTab]){
+                    const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty; let p=s.price??0, c=s.change??0;
+                    pnl += Math.round(sh * c); asset += Math.round(sh * p);
+                    if (s.buyPrice != null && s.price != null && s.buyPrice > 0) { totalUnPnl += Math.round((s.price - s.buyPrice) * sh); hasUnPnl = true; }
+                }
+                const pe=document.getElementById('totalPnl'); pe.textContent=(pnl>=0?'+':'')+pnl.toLocaleString(); pe.className='val '+(pnl>=0?'up':'down');
+                const ae = document.getElementById('totalAsset'); ae.textContent = (asset>=0?'':'-')+asset.toLocaleString(); ae.className = 'val neutral';
+                const ue = document.getElementById('totalUnrealized');
+                if(hasUnPnl) { ue.textContent = (totalUnPnl >= 0 ? '+' : '') + totalUnPnl.toLocaleString(); ue.className = 'val ' + (totalUnPnl >= 0 ? 'up' : 'down'); }
+                else { ue.textContent = '—'; ue.className = 'val neutral'; }
+            },
 
-      const originalClose = price / (1 + (pct / 100));
-      const changeAmt = price - originalClose;
+            // --- 資料操作區 ---
+            addStock(){
+                let sym=document.getElementById('symInput').value.trim().toUpperCase();
+                sym = sym.replace(/[^A-Z0-9]/g, ''); // 防堵 XSS：只允許英文數字
+                const qty=parseInt(document.getElementById('qtyInput').value); const unit=document.getElementById('unitSelect').value;
+                const bp = parseFloat(document.getElementById('buyPriceInput').value);
+                const buyPrice = isNaN(bp) || bp <= 0 ? null : bp;
+                if(!sym||!qty||qty<1){this.showToast('請輸入代號與數量');return}
+                if(this.tabStocks[this.currentTab].some(s=>s.symbol===sym)){this.showToast('該股票已存在於此分頁');return}
+                const id='s_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+                this.tabStocks[this.currentTab].push({id,symbol:sym,displayQty:qty,displayUnit:unit,buyPrice:buyPrice,shares:unit==='張'?qty*1000:qty,price:null,change:null,changePercent:null});
+                this.saveHoldings(); this.renderAll();
+                document.getElementById('symInput').value=''; document.getElementById('qtyInput').value=''; document.getElementById('buyPriceInput').value='';
+                this.showToast('已新增 '+sym); this.refresh();
+            },
 
-      parsedIndices.push({ name, price, pct, changeAmt });
-    }
+            deleteStock(id){
+                if(!confirm('確定刪除？'))return;
+                this.tabStocks[this.currentTab]=this.tabStocks[this.currentTab].filter(s=>s.id!==id);
+                this.saveHoldings(); this.renderAll(); this.showToast('記錄已刪除');
+            },
 
-    if (parsedIndices.length > 0) {
-      cachedGlobalIndices = parsedIndices;
-      try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
-      renderGlobalIndices(cachedGlobalIndices);
-    }
-  } catch (e) { 
-    console.error("Google Index Fetch Error:", e); 
-  }
-}
+            openEditModal(id) {
+                const s = this.tabStocks[this.currentTab].find(x=>x.id===id); if(!s) return;
+                this.editingStockId = id;
+                document.getElementById('editSymInput').value = s.symbol;
+                document.getElementById('editQtyInput').value = s.displayQty;
+                document.getElementById('editBpInput').value = s.buyPrice || '';
+                document.getElementById('editModalOverlay').classList.add('show');
+            },
 
-async function fetchFugle(symbol){
-  const keys = [fugleKey, secondFugleKey].filter(k => k && k.trim() !== '');
-  if(keys.length === 0) return null;
+            closeEditModal() {
+                document.getElementById('editModalOverlay').classList.remove('show');
+                this.editingStockId = null;
+            },
 
-  const startIndex = fugleKeyIndex % keys.length;
-  fugleKeyIndex++; 
+            saveEditStock() {
+                const s = this.tabStocks[this.currentTab].find(x=>x.id===this.editingStockId); if(!s) return;
+                let sym = document.getElementById('editSymInput').value.trim().toUpperCase();
+                sym = sym.replace(/[^A-Z0-9]/g, ''); // 防堵 XSS
+                const qty = parseInt(document.getElementById('editQtyInput').value);
+                const bp = parseFloat(document.getElementById('editBpInput').value);
 
-  for(let i = 0; i < keys.length; i++){
-    const attemptIndex = (startIndex + i) % keys.length;
-    const currentKey = keys[attemptIndex];
-    try {
-      const resp = await fetch(FUGLE + encodeURIComponent(symbol), {
-        headers: {'X-API-KEY': currentKey}, 
-        signal: AbortSignal.timeout(4000)
-      });
-      if(resp.ok){
-        const d = await resp.json();
-        if(d && d.lastPrice != null) return {price: d.lastPrice, change: d.change, changePercent: d.changePercent, source: 'Fugle'};
-      } else if (resp.status === 429) {
-        continue;
-      }
-    } catch(e) {
-      continue;
-    }
-  }
-  return null;
-}
+                if(sym) { s.symbol = sym; s.price=null; s.change=null; s.changePercent=null; s.source=null; s.updateTime=null; }
+                if(qty > 0) { s.displayQty = qty; s.shares = s.displayUnit==='張'?s.displayQty*1000:s.displayQty; }
+                s.buyPrice = (isNaN(bp) || bp <= 0) ? null : bp;
 
-async function fetchYahoo(symbol){
-  const tryFetch = async (suffix) => {
-    try {
-      const url = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}${suffix}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
-      const resp = await fetch(url);
-      if(!resp.ok) return null;
-      const text = await resp.text();
-      const lines = text.trim().split('\n');
-      if(lines.length < 2) return null;
-      
-      const lastLine = lines[lines.length - 1];
-      const cols = lastLine.split(',');
-      if(cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
-      
-      const price = parseFloat(cols[4]);
-      const open = parseFloat(cols[1]);
-      const chg = +(price - open).toFixed(2);
-      const pct = +((chg / open) * 100).toFixed(2);
-      return {price, change: chg, changePercent: pct, source: 'Yahoo'};
-    } catch(e) { return null; }
-  };
-  let res = await tryFetch('.TW');
-  if(!res) res = await tryFetch('.TWO');
-  return res;
-}
+                this.saveHoldings(); this.renderAll(); this.closeEditModal(); this.showToast('已修改'); this.refresh();
+            },
 
-async function fetchWeightedIndex(){
-  const keys = [fugleKey, secondFugleKey].filter(k => k && k.trim() !== '');
-  if(keys.length > 0){
-    const startIndex = fugleKeyIndex % keys.length;
-    fugleKeyIndex++;
-    for(let i = 0; i < keys.length; i++){
-      const attemptIndex = (startIndex + i) % keys.length;
-      try{
-        const resp = await fetch(FUGLE + 'IX0001', {headers: {'X-API-KEY': keys[attemptIndex]}, signal: AbortSignal.timeout(4000)});
-        if(resp.ok){
-          const d = await resp.json();
-          const p = d.lastPrice ?? d.closePrice ?? d.price;
-          if(p != null) return {price: p, change: d.change, changePercent: d.changePercent, source: 'Fugle'};
-        }
-      }catch(e){}
-    }
-  }
-  try {
-    const url = `https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
-    const resp = await fetch(url);
-    if(resp.ok){
-      const text = await resp.text();
-      const lines = text.trim().split('\n');
-      const cols = lines[lines.length - 1].split(',');
-      const price = parseFloat(cols[4]);
-      const open = parseFloat(cols[1]);
-      return {price, change: price - open, changePercent: ((price - open)/open)*100, source: 'Yahoo'};
-    }
-  }catch(e){}
-  return null;
-}
+            saveDailyPnl(){
+                let pnl=0,asset=0;
+                for(const s of this.tabStocks[this.currentTab]){ const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty; let p=s.price??0, c=s.change??0; pnl += Math.round(sh * c); asset += Math.round(sh * p); }
+                const n=new Date();
+                const ds=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
+                const ts=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+                this.tabRecords[this.currentTab].unshift({date:ds,time:ts,totalPnl:pnl,totalAsset:asset,timestamp:n.getTime()});
+                if(this.tabRecords[this.currentTab].length>50) this.tabRecords[this.currentTab]=this.tabRecords[this.currentTab].slice(0,50);
+                this.saveRecords(); this.renderHistory(); this.showToast('已存儲今日損益：'+(pnl>=0?'+':'')+pnl.toLocaleString());
+            },
 
-async function refreshPrices(){
-  const idxR = await fetchWeightedIndex();
-  const idxEl = document.getElementById('idxPrice');
-  const idxChgEl = document.getElementById('idxChange');
-  const idxPctEl = document.getElementById('idxPct');
-  const idxSrcEl = document.getElementById('idxSource');
-  if(idxR){
-    idxEl.textContent=idxR.price.toLocaleString('en-US',{maximumFractionDigits:0});
-    idxChgEl.textContent=(idxR.change>=0?'+':'')+idxR.change.toFixed(2);
-    idxChgEl.className=(idxR.change>=0?'up':'down');
-    idxPctEl.textContent='('+(idxR.changePercent>=0?'+':'')+idxR.changePercent.toFixed(2)+'%)';
-    idxPctEl.className=(idxR.changePercent>=0?'up':'down');
-    idxSrcEl.textContent='via '+idxR.source+' '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
-  }
+            deleteHistory(timestamp) {
+                if(!confirm('確定刪除此筆記錄？')) return;
+                this.tabRecords[this.currentTab] = this.tabRecords[this.currentTab].filter(r => r.timestamp !== timestamp);
+                this.saveRecords(); this.renderHistory(); this.showToast('記錄已刪除');
+            },
 
-  fetchGlobalIndicesFromGoogle();
-  
-  const currentStocks = tabStocks[currentTab];
-  const results = await Promise.all(currentStocks.map(async (s)=>{
-    let r = await fetchFugle(s.symbol);
-    if(!r) r = await fetchYahoo(s.symbol);
-    return {s,r};
-  }));
-  for(const {s,r} of results){
-    if(r){
-      s.price=r.price;
-      s.change=r.change;
-      s.changePercent=r.changePercent;
-      s.source=r.source;
-      s.updateTime=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
-      renderRow(s);
-    }
-  }
-  updateSummary();
-}
+            renderHistory(){
+                const body=document.getElementById('historyBody'); const currentRecords = this.tabRecords[this.currentTab];
+                if(!currentRecords || currentRecords.length===0){body.innerHTML='<div class="hist-empty">尚無記錄</div>';return;}
+                body.innerHTML='';
+                for(const r of currentRecords){
+                    const d=document.createElement('div'); d.className='hist-item';
+                    d.innerHTML=`<div class="hist-item-left"><span class="hdate">${r.date} ${r.time}</span><span class="hval ${r.totalPnl>=0?'up':'down'}">${r.totalPnl>=0?'+':''}${r.totalPnl.toLocaleString()}</span></div>`;
+                    const btn = document.createElement('button'); btn.className = 'del-hist-btn'; btn.textContent = '✕'; btn.onclick = () => this.deleteHistory(r.timestamp);
+                    d.appendChild(btn); body.appendChild(d);
+                }
+            },
 
-function renderRow(s){
-  const el=document.querySelector('.srow[data-id="'+s.id+'"]');if(!el)return;
-  const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
-  let p = s.price; let chg = s.change ?? 0;
-  
-  const symCont = el.querySelector('.sym-container');
-  if(symCont){
-    symCont.querySelector('.sym').textContent=s.symbol;
-    let srcEl = symCont.querySelector('.sym-src');
-    if(!srcEl){
-      srcEl = document.createElement('div');
-      srcEl.className = 'sym-src';
-      symCont.appendChild(srcEl);
-    }
-    srcEl.textContent = (s.source==='Fugle' && s.updateTime) ? 'via Fugle ' + s.updateTime : '';
-  }
-  
-  const qn=el.querySelector('.qty-cell');
-  if(qn){
-    qn.innerHTML=`<div style="line-height:1.2;font-size:17px;">${s.displayQty} ${s.displayUnit}</div>
-                  <div style="font-size:14px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}">${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}</div>`;
-  }
-  
-  const pEl=el.querySelector('.price');
-  if(p!=null){
-    pEl.textContent=formatPrice(p);
-    pEl.className='price '+(chg>=0?'up':'down');
-  }
-  const cp=el.querySelector('.chgp');
-  if(s.changePercent!=null){cp.textContent=(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%';cp.className='chgp '+(s.changePercent>=0?'up':'down');}
-  const cg=el.querySelector('.chg');
-  if(s.change!=null){cg.textContent=(chg>=0?'+':'')+chg.toFixed(2);cg.className='chg '+(chg>=0?'up':'down');}
-  
-  const tp = el.querySelector('.today-pnl');
-  if(s.change!=null){
-    const todayPnl = Math.round(shares * chg);
-    tp.textContent = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString();
-    tp.className = 'today-pnl ' + (todayPnl >= 0 ? 'up' : 'down');
-  }
-  
-  let totalHtml = '—';
-  let totalValForClass = 0;
-  
-  if (p != null) {
-      const mktValue = Math.round(shares * p);
-      if (s.buyPrice != null && s.buyPrice > 0) {
-          const cost = s.buyPrice * shares;
-          const unPnl = Math.round(mktValue - cost);
-          const roi = ((mktValue - cost) / cost) * 100;
-          totalValForClass = unPnl;
-          totalHtml = `<div style="line-height:1.2;font-size:17px;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
-                       <div style="font-size:14px;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`;
-      } else {
-          totalValForClass = 0;
-          totalHtml = `<div style="line-height:1.2;font-size:17px;" class="neutral">—</div>
-                       <div style="font-size:14px;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
-      }
-  }
+            // --- 系統功能區 ---
+            openModal(){ document.getElementById('fugleKeyInput').value=this.fugleKey; document.getElementById('secondFugleKeyInput').value=this.secondFugleKey; this.updateKeyStatus(); document.getElementById('modalOverlay').classList.add('show'); },
+            saveAndCloseModal(){ this.saveKeys(); document.getElementById('modalOverlay').classList.remove('show'); this.showToast('設定已儲存'); this.refresh(); },
+            saveHoldings(){ try{localStorage.setItem(this.getStockKey(this.currentTab),JSON.stringify(this.tabStocks[this.currentTab]));}catch(e){} },
+            saveKeys(){ this.fugleKey=document.getElementById('fugleKeyInput').value.trim(); this.secondFugleKey=document.getElementById('secondFugleKeyInput').value.trim(); try{localStorage.setItem(this.FK,this.fugleKey);localStorage.setItem(this.SFK,this.secondFugleKey);}catch(e){} this.updateKeyStatus(); },
+            saveRecords(){ try{localStorage.setItem(this.getRecordKey(this.currentTab),JSON.stringify(this.tabRecords[this.currentTab]));}catch(e){} },
+            toggleSummary(e) { if(e) e.stopPropagation(); const details = document.getElementById('summaryDetails'); const toggleBtn = document.getElementById('sumToggleBtn'); const isHidden = details.style.display === 'none'; details.style.display = isHidden ? 'block' : 'none'; toggleBtn.style.display = isHidden ? 'none' : 'block'; },
+            formatPrice(p){ if(p==null)return '—'; if(Math.abs(p)>=1000)return p.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); return p.toFixed(2); },
+            showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(this.toastTimer); this.toastTimer=setTimeout(()=>t.classList.remove('show'),2000); },
 
-  el.querySelector('.total').innerHTML = totalHtml;
-  if(totalValForClass !== 0) {
-      el.querySelector('.total').className = 'total ' + (totalValForClass >= 0 ? 'up' : 'down');
-  } else {
-      el.querySelector('.total').className = 'total';
-  }
-}
+            exportData() {
+                const dataToExport = { tabStocks: [localStorage.getItem(this.getStockKey(0)), localStorage.getItem(this.getStockKey(1)), localStorage.getItem(this.getStockKey(2))], tabRecords: [localStorage.getItem(this.getRecordKey(0)), localStorage.getItem(this.getRecordKey(1)), localStorage.getItem(this.getRecordKey(2))], tabNames: localStorage.getItem(this.TN_KEY), fugleKey: localStorage.getItem(this.FK), secondFugleKey: localStorage.getItem(this.SFK), theme: localStorage.getItem(this.TK) };
+                const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); const d = new Date(); const ds = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+                a.href = url; a.download = "stock_backup_" + ds + ".json"; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); this.showToast('✅ 備份檔案已成功下載');
+            },
+            triggerImport() { document.getElementById('importFile').click(); },
+            importData(event) {
+                const file = event.target.files[0]; if (!file) return; const reader = new FileReader();
+                reader.onload = (e) => {
+                    try { const data = JSON.parse(e.target.result); if(confirm('⚠️ 警告：這將會覆蓋您目前的所有資料！\n確定要還原備份嗎？')) { if (data.tabStocks) data.tabStocks.forEach((val, i) => { if(val) localStorage.setItem(this.getStockKey(i), val); }); if (data.tabRecords) data.tabRecords.forEach((val, i) => { if(val) localStorage.setItem(this.getRecordKey(i), val); }); if (data.tabNames) localStorage.setItem(this.TN_KEY, data.tabNames); if (data.fugleKey) localStorage.setItem(this.FK, data.fugleKey); if (data.secondFugleKey) localStorage.setItem(this.SFK, data.secondFugleKey); if (data.theme) localStorage.setItem(this.TK, data.theme); alert('🎉 備份還原成功！系統將為您重新載入頁面。'); location.reload(); } } catch (err) { alert('❌ 檔案格式錯誤，無法還原資料。請確認上傳的是正確的 json 備份檔。'); }
+                    document.getElementById('importFile').value = '';
+                }; reader.readAsText(file);
+            },
+            toastTimer: null
+        };
 
-function renderAll(){
-  const body=document.getElementById('listBody');
-  const empty=document.getElementById('emptyState');
-  const tableScroll=document.getElementById('tableScroll');
-  const sumArea = document.getElementById('summaryArea');
-  const saveArea = document.getElementById('saveArea');
-  
-  body.innerHTML='';
-  const currentStocks = tabStocks[currentTab];
-  if(currentStocks.length===0){
-    empty.style.display='block';tableScroll.style.display='none';sumArea.style.display='none';saveArea.style.display='none';return;
-  }
-  empty.style.display='none';tableScroll.style.display='block';sumArea.style.display='block';saveArea.style.display='block';
-  
-  for(const s of currentStocks){
-    const div=document.createElement('div');div.className='srow';div.dataset.id=s.id;
-    const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
-    let p = s.price; let chg = s.change ?? 0;
-    
-    let pStr = '—';
-    if(p!=null) pStr = formatPrice(p);
-    const cgp = s.changePercent!=null ? (s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%' : '—';
-    let cgStr = '—';
-    if(s.change!=null) cgStr = (chg>=0?'+':'') + chg.toFixed(2);
-    
-    let tpStr = '—';
-    let tpClass = '';
-    if (s.change != null) {
-      const todayPnl = Math.round(shares * chg);
-      tpStr = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString();
-      tpClass = todayPnl >= 0 ? 'up' : 'down';
-    }
-    
-    let totalHtml = '—';
-    let totalValForClass = 0;
-    
-    if (p != null) {
-        const mktValue = Math.round(shares * p);
-        if (s.buyPrice != null && s.buyPrice > 0) {
-            const cost = s.buyPrice * shares;
-            const unPnl = Math.round(mktValue - cost);
-            const roi = ((mktValue - cost) / cost) * 100;
-            totalValForClass = unPnl;
-            totalHtml = `<div style="line-height:1.2;font-size:17px;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
-                         <div style="font-size:14px;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`;
-        } else {
-            totalValForClass = 0;
-            totalHtml = `<div style="line-height:1.2;font-size:17px;" class="neutral">—</div>
-                         <div style="font-size:14px;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
-        }
-    }
-    
-    let srcStr = (s.source==='Fugle' && s.updateTime) ? '<div class="sym-src">via Fugle '+s.updateTime+'</div>' : '<div class="sym-src"></div>';
-    
-    div.innerHTML=
-      '<div class="sym-container"><div class="sym">'+s.symbol+'</div>'+srcStr+'</div>'+
-      '<div class="qty-cell"><div style="line-height:1.2;font-size:17px;">'+s.displayQty+' '+s.displayUnit+'</div><div style="font-size:14px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'">'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'</div></div>'+
-      '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+
-      '<div class="chgp '+(s.changePercent!=null?(s.changePercent>=0?'up':'down'):'')+'">'+cgp+'</div>'+
-      '<div class="chg '+(s.change!=null?(chg>=0?'up':'down'):'')+'">'+cgStr+'</div>'+
-      '<div class="today-pnl '+tpClass+'">'+tpStr+'</div>'+
-      '<div class="total '+(totalValForClass!==0?(totalValForClass>=0?'up':'down'):'')+'">'+totalHtml+'</div>'+
-      '<div class="act"><button type="button" onclick="editStock(\''+s.id+'\')">✎</button><button type="button" class="del-btn" onclick="deleteStock(\''+s.id+'\')">✕</button></div>';
-    body.appendChild(div);
-  }
-  updateSummary();
-}
-
-function updateSummary(){
-  let pnl=0, asset=0, totalUnPnl=0;
-  let hasUnPnl = false;
-  const currentStocks = tabStocks[currentTab];
-  for(const s of currentStocks){
-    const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
-    let p=s.price??0, c=s.change??0;
-    pnl += Math.round(sh * c);
-    asset += Math.round(sh * p);
-    
-    if (s.buyPrice != null && s.price != null && s.buyPrice > 0) {
-      totalUnPnl += Math.round((s.price - s.buyPrice) * sh);
-      hasUnPnl = true;
-    }
-  }
-  
-  const pe=document.getElementById('totalPnl');pe.textContent=(pnl>=0?'+':'')+pnl.toLocaleString();pe.className='val '+(pnl>=0?'up':'down');
-  const ae = document.getElementById('totalAsset');ae.textContent = (asset>=0?'+':'')+asset.toLocaleString();ae.className = 'val neutral'; 
-  
-  const ue = document.getElementById('totalUnrealized');
-  if(hasUnPnl) {
-    ue.textContent = (totalUnPnl >= 0 ? '+' : '') + totalUnPnl.toLocaleString();
-    ue.className = 'val ' + (totalUnPnl >= 0 ? 'up' : 'down');
-  } else {
-    ue.textContent = '—';
-    ue.className = 'val neutral';
-  }
-}
-
-function toggleSummary(e) {
-  if(e) e.stopPropagation();
-  const details = document.getElementById('summaryDetails');
-  const toggleBtn = document.getElementById('sumToggleBtn');
-  if (details.style.display === 'none') {
-    details.style.display = 'block';
-    toggleBtn.style.display = 'none';
-  } else {
-    details.style.display = 'none';
-    toggleBtn.style.display = 'block';
-  }
-}
-
-function addStock(){
-  const sym=document.getElementById('symInput').value.trim().toUpperCase();
-  const qty=parseInt(document.getElementById('qtyInput').value);
-  const unit=document.getElementById('unitSelect').value;
-  const bpRaw = document.getElementById('buyPriceInput').value;
-  const bp = parseFloat(bpRaw);
-  const buyPrice = isNaN(bp) || bp <= 0 ? null : bp;
-
-  if(!sym||!qty||qty<1){showToast('請輸入代號與數量');return}
-  const currentStocks = tabStocks[currentTab];
-  if(currentStocks.some(s=>s.symbol===sym)){showToast('該股票已存在於此分頁');return}
-  
-  const id='s_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
-  currentStocks.push({id,symbol:sym,displayQty:qty,displayUnit:unit,buyPrice:buyPrice,shares:unit==='張'?qty*1000:qty,price:null,change:null,changePercent:null});
-  saveHoldings();renderAll();
-  
-  document.getElementById('symInput').value='';
-  document.getElementById('qtyInput').value='';
-  document.getElementById('buyPriceInput').value='';
-  showToast('已新增 '+sym);refreshPrices();
-}
-
-function deleteStock(id){
-  if(!confirm('確定刪除？'))return;
-  tabStocks[currentTab]=tabStocks[currentTab].filter(s=>s.id!==id);saveHoldings();renderAll();showToast('記錄已刪除');
-}
-
-function editStock(id){
-  const s=tabStocks[currentTab].find(x=>x.id===id);if(!s)return;
-  
-  const ns=prompt('修改代號：',s.symbol);
-  if(ns!==null && ns.trim()){s.symbol=ns.trim().toUpperCase();s.price=null;s.change=null;s.changePercent=null;s.source=null;s.updateTime=null;}
-  
-  const nq=prompt('修改數量（單位維持 '+s.displayUnit+'）：',s.displayQty);
-  if(nq!==null){
-    const qtyNum = parseInt(nq);
-    if(qtyNum>0){s.displayQty=qtyNum;s.shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;}
-  }
-  
-  const nbp=prompt('設定/修改「買入均價」\n(留空或輸入0代表不計算總損益)：', s.buyPrice || '');
-  if(nbp!==null){
-    const bpNum = parseFloat(nbp);
-    s.buyPrice = (isNaN(bpNum) || bpNum <= 0) ? null : bpNum;
-  }
-  
-  saveHoldings();renderAll();showToast('已修改');refreshPrices();
-}
-
-function saveDailyPnl(){
-  let pnl=0,asset=0;
-  const currentStocks = tabStocks[currentTab];
-  for(const s of currentStocks){
-    const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
-    let p=s.price??0, c=s.change??0;
-    pnl += Math.round(sh * c);
-    asset += Math.round(sh * p);
-  }
-  const n=new Date();
-  const ds=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
-  const ts=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
-  
-  const currentRecords = tabRecords[currentTab];
-  currentRecords.unshift({date:ds,time:ts,totalPnl:pnl,totalAsset:asset,timestamp:n.getTime()});
-  if(currentRecords.length>50) tabRecords[currentTab]=currentRecords.slice(0,50);
-  saveRecords();renderHistory();
-  showToast('已存儲今日損益：'+(pnl>=0?'+':'')+pnl.toLocaleString());
-}
-
-function deleteHistory(timestamp) {
-  if(!confirm('確定刪除此筆記錄？')) return;
-  tabRecords[currentTab] = tabRecords[currentTab].filter(r => r.timestamp !== timestamp);
-  saveRecords();renderHistory();showToast('記錄已刪除');
-}
-
-function renderHistory(){
-  const body=document.getElementById('historyBody');
-  const currentRecords = tabRecords[currentTab];
-  if(!currentRecords || currentRecords.length===0){body.innerHTML='<div class="hist-empty">尚無記錄</div>';return;}
-  body.innerHTML='';
-  for(const r of currentRecords){
-    const d=document.createElement('div');d.className='hist-item';
-    d.innerHTML='<div class="hist-item-left"><span class="hdate">'+r.date+' '+r.time+'</span><span class="hval '+(r.totalPnl>=0?'up':'down')+'">'+(r.totalPnl>=0?'+':'')+r.totalPnl.toLocaleString()+'</span></div><button type="button" class="del-hist-btn" onclick="deleteHistory('+r.timestamp+')">✕</button>';
-    body.appendChild(d);
-  }
-}
-
-function openModal(){
-  document.getElementById('fugleKeyInput').value=fugleKey;
-  document.getElementById('secondFugleKeyInput').value=secondFugleKey;
-  updateKeyStatus();document.getElementById('modalOverlay').classList.add('show');
-}
-
-function saveAndCloseModal(){
-  saveKeys();document.getElementById('modalOverlay').classList.remove('show');
-  showToast('設定已儲存');refreshPrices();
-}
-
-function formatPrice(p){
-  if(p==null)return '—';
-  if(Math.abs(p)>=1000)return p.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-  return p.toFixed(2);
-}
-
-let toastTimer=null;
-function showToast(msg){
-  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
-  clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2000);
-}
-
-function exportData() {
-  const dataToExport = {
-    tabStocks: [localStorage.getItem(getStockKey(0)), localStorage.getItem(getStockKey(1)), localStorage.getItem(getStockKey(2))],
-    tabRecords: [localStorage.getItem(getRecordKey(0)), localStorage.getItem(getRecordKey(1)), localStorage.getItem(getRecordKey(2))],
-    tabNames: localStorage.getItem(TN_KEY),
-    fugleKey: localStorage.getItem(FK),
-    secondFugleKey: localStorage.getItem(SFK),
-    theme: localStorage.getItem(TK)
-  };
-  
-  const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const downloadAnchorElement = document.createElement('a');
-  
-  const d = new Date();
-  const dateString = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
-  
-  downloadAnchorElement.setAttribute("href", url);
-  downloadAnchorElement.setAttribute("download", "stock_backup_" + dateString + ".json");
-  document.body.appendChild(downloadAnchorElement);
-  downloadAnchorElement.click();
-  document.body.removeChild(downloadAnchorElement);
-  URL.revokeObjectURL(url);
-  
-  showToast('✅ 備份檔案已成功下載');
-}
-
-function triggerImport() {
-  document.getElementById('importFile').click();
-}
-
-function importData(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const data = JSON.parse(e.target.result);
-      
-      if(confirm('⚠️ 警告：這將會覆蓋您目前的所有資料！\n確定要還原備份嗎？')) {
-        if (data.tabStocks) {
-          data.tabStocks.forEach((val, i) => { if(val) localStorage.setItem(getStockKey(i), val); });
-        }
-        if (data.tabRecords) {
-          data.tabRecords.forEach((val, i) => { if(val) localStorage.setItem(getRecordKey(i), val); });
-        }
-        if (data.tabNames) localStorage.setItem(TN_KEY, data.tabNames);
-        if (data.fugleKey) localStorage.setItem(FK, data.fugleKey);
-        if (data.secondFugleKey) localStorage.setItem(SFK, data.secondFugleKey);
-        if (data.theme) localStorage.setItem(TK, data.theme);
-        
-        alert('🎉 備份還原成功！系統將為您重新載入頁面。');
-        location.reload();
-      }
-    } catch (err) {
-      alert('❌ 檔案格式錯誤，無法還原資料。請確認上傳的是正確的 json 備份檔。');
-    }
-    document.getElementById('importFile').value = '';
-  };
-  reader.readAsText(file);
-}
-
-async function refresh(){await refreshPrices()}
-
-loadState();renderAll();renderHistory();
-setTimeout(refresh,300);
-pollTimer=setInterval(refresh,30000);
-
-document.getElementById('symInput').addEventListener('keydown',e=>{
-  if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); }
-});
-document.getElementById('qtyInput').addEventListener('keydown',e=>{
-  if(e.key==='Enter') { e.preventDefault(); document.getElementById('buyPriceInput').focus(); }
-});
-document.getElementById('buyPriceInput').addEventListener('keydown',e=>{
-  if(e.key==='Enter') { e.preventDefault(); addStock(); }
-});
-
-document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-console.log('股票庫存管理 V3.5.8 已啟動 (極簡按鈕優化版)');
-</script>
+        App.init();
+    </script>
 </body>
 </html>
