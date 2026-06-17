@@ -13,10 +13,16 @@
     <style>
         /* ========================================================= 🚀 核心變數引擎 ========================================================= */
         :root { --bg: #e0e5ec; --s-light: #ffffff; --s-dark: #a3b1c6; --t-main: #2d3436; --t-muted: #6b7280; --up: #d93025; --down: #188038; --engrave-l: rgba(255,255,255,0.8); --engrave-d: rgba(0,0,0,0.15); --protrude-l: rgba(255,255,255,0.8); --protrude-d: rgba(0,0,0,0.2); --accent: #1a73e8; }
-        body.dark { --bg: #1a1e24; --s-light: #242932; --s-dark: #101316; --t-main: #e6edf3; --t-muted: #8b949e; --up: #ff6b6b; --down: #51cf66; --engrave-l: rgba(255,255,255,0.05); --engrave-d: rgba(0,0,0,0.6); --protrude-l: rgba(255,255,255,0.1); --protrude-d: rgba(0,0,0,0.8); --accent: #58a6ff; }
+        
+        /* (已移除 dark 與 blue-dark) */
         body.tech { --bg: #2b303a; --s-light: #363c48; --s-dark: #20242c; --t-main: #e2e8f0; --t-muted: #a0aec0; --up: #ff6b6b; --down: #51cf66; --engrave-l: rgba(255,255,255,0.05); --engrave-d: rgba(0,0,0,0.5); --protrude-l: rgba(255,255,255,0.1); --protrude-d: rgba(0,0,0,0.6); --accent: #58a6ff; }
-        body.blue-dark { --bg: #101929; --s-light: #162339; --s-dark: #0a0f19; --t-main: #ffffff; --t-muted: #5bc0be; --up: #ff6b6b; --down: #2ecc71; --engrave-l: rgba(255,255,255,0.05); --engrave-d: rgba(0,0,0,0.5); --protrude-l: rgba(255,255,255,0.1); --protrude-d: rgba(0,0,0,0.8); --accent: #00b4d8; }
-        body.blue-light { --bg: #d9e2ec; --s-light: #ffffff; --s-dark: #b8c6d6; --t-main: #1a202c; --t-muted: #4a5568; --up: #e53e3e; --down: #38a169; --engrave-l: rgba(255,255,255,0.8); --engrave-d: rgba(0,0,0,0.15); --protrude-l: rgba(255,255,255,0.8); --protrude-d: rgba(0,0,0,0.2); --accent: #2b6cb0; }
+        
+        /* 🎨 新增主題：淺藍色 (優化對比度) */
+        body.blue-light { --bg: #e3edf7; --s-light: #ffffff; --s-dark: #b8c6d6; --t-main: #102a43; --t-muted: #486581; --up: #e53e3e; --down: #2f855a; --engrave-l: rgba(255,255,255,0.8); --engrave-d: rgba(0,0,0,0.15); --protrude-l: rgba(255,255,255,0.8); --protrude-d: rgba(0,0,0,0.2); --accent: #2b6cb0; }
+        
+        /* 🎨 新增主題：淺紫色 */
+        body.purple-light { --bg: #ece8f3; --s-light: #ffffff; --s-dark: #cfc7df; --t-main: #322659; --t-muted: #6b5b8e; --up: #d53f8c; --down: #2f855a; --engrave-l: rgba(255,255,255,0.8); --engrave-d: rgba(0,0,0,0.15); --protrude-l: rgba(255,255,255,0.8); --protrude-d: rgba(0,0,0,0.2); --accent: #6b46c1; }
+        
         body.pink { --bg: #f3e6e8; --s-light: #ffffff; --s-dark: #d5c3c6; --t-main: #4a123a; --t-muted: #9b2c2c; --up: #e53e3e; --down: #38a169; --engrave-l: rgba(255,255,255,0.7); --engrave-d: rgba(0,0,0,0.1); --protrude-l: rgba(255,255,255,0.7); --protrude-d: rgba(0,0,0,0.15); --accent: #d63384; }
         body.cement { --bg: #a3a8b0; --s-light: #c0c5cd; --s-dark: #868b93; --t-main: #22252a; --t-muted: #4a5059; --up: #c62828; --down: #1b5e20; --engrave-l: rgba(255,255,255,0.6); --engrave-d: rgba(0,0,0,0.3); --protrude-l: rgba(255,255,255,0.5); --protrude-d: rgba(0,0,0,0.4); --accent: #111111; }
 
@@ -98,30 +104,25 @@
             display: none; 
             position: fixed; 
             top: 0; left: 0; right: 0; bottom: 0; 
-            background: rgba(0,0,0,0.6); /* 遮罩維持半透明黑，不做背景霧化 */
+            background: rgba(0,0,0,0.6); 
             z-index: 999; 
-            align-items: center; /* 垂直置中 */
-            justify-content: center; /* 水平置中 */
+            align-items: center; justify-content: center; 
         }
         .modal-overlay.show { display: flex; }
         
         .modal { 
             position: relative;
-            border-radius: 20px; /* 大圓角 */
+            border-radius: 20px; 
             padding: 24px 20px 24px; 
-            width: calc(100% - 28px); 
-            max-width: 400px; 
-            max-height: 85vh; 
-            overflow-y: auto;
-            /* 保留原本的 Neumorphism 底色與光影 */
+            width: calc(100% - 28px); max-width: 400px; max-height: 85vh; overflow-y: auto;
             background: var(--bg);
-            border: 1px solid rgba(255, 255, 255, 0.05); /* 極細邊框消除邊緣毛邊 */
+            border: 1px solid rgba(255, 255, 255, 0.05); 
             box-shadow: 
-                0 25px 50px rgba(0,0,0,0.5),   /* 外部立體陰影 */
+                0 25px 50px rgba(0,0,0,0.5), 
                 0 10px 20px rgba(0,0,0,0.3),
-                6px 6px 12px var(--s-dark),     /* 原本的新擬物光影 */
+                6px 6px 12px var(--s-dark), 
                 -6px -6px 12px var(--s-light),
-                inset 0 1px 1px rgba(255,255,255,0.1); /* 內側高光 */
+                inset 0 1px 1px rgba(255,255,255,0.1); 
         }
         
         .modal h2 { font-size: 18px; margin-bottom: 16px; text-align: center; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
@@ -235,7 +236,7 @@
                     <input type="file" id="importFile" style="display:none" onchange="importData(event)">
                 </div>
             </div>
-            <div class="v-box">核心版本：V3.7.2 (介面微調優化版)</div>
+            <div class="v-box">核心版本：V3.7.3 (主題重構優化版)</div>
             <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
         </div>
     </div>
@@ -254,11 +255,34 @@
         const FUGLE='https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
         
         function loadState(){ try{ const f=localStorage.getItem(FK);if(f)fugleKey=f; const sf=localStorage.getItem(SFK);if(sf)secondFugleKey=sf; const ct=localStorage.getItem(CUR_TAB_KEY);if(ct!=null)currentTab=parseInt(ct); const tn=localStorage.getItem(TN_KEY);if(tn) tabNames=JSON.parse(tn); for(let i=0; i<3; i++){ const s=localStorage.getItem(getStockKey(i)); if(s) tabStocks[i]=JSON.parse(s); const r=localStorage.getItem(getRecordKey(i)); if(r) tabRecords[i]=JSON.parse(r); } const t=localStorage.getItem(TK); applyThemeText(t); const cachedIdx = localStorage.getItem('tw_cached_indices'); if(cachedIdx) { cachedGlobalIndices = JSON.parse(cachedIdx); if(cachedGlobalIndices.length > 0) renderGlobalIndices(cachedGlobalIndices); } }catch(e){console.error(e);} document.getElementById('fugleKeyInput').value=fugleKey; document.getElementById('secondFugleKeyInput').value=secondFugleKey; updateKeyStatus(); updateTabUI(); }
-        function applyThemeText(t){ const body=document.body; const themeBtn=document.getElementById('themeBtn'); const metaTheme = document.getElementById('themeColorMeta'); body.className = ''; if(t==='dark'){ body.classList.add('dark'); themeBtn.textContent='☀️'; metaTheme.content='#1a1e24'; } else if(t==='tech'){ body.classList.add('tech'); themeBtn.textContent='🚀'; metaTheme.content='#2b303a'; } else if(t==='blue-dark'){ body.classList.add('blue-dark'); themeBtn.textContent='🌌'; metaTheme.content='#101929'; } else if(t==='blue-light'){ body.classList.add('blue-light'); themeBtn.textContent='💎'; metaTheme.content='#d9e2ec'; } else if(t==='pink'){ body.classList.add('pink'); themeBtn.textContent='🌸'; metaTheme.content='#f3e6e8'; } else if(t==='cement'){ body.classList.add('cement'); themeBtn.textContent='🏢'; metaTheme.content='#a3a8b0'; } else { themeBtn.textContent='🌙'; metaTheme.content='#e0e5ec'; } }
+        
+        // 🎨 更新主題邏輯：移除深色與深藍，新增淺藍與淺紫
+        function applyThemeText(t){ 
+            const body=document.body; const themeBtn=document.getElementById('themeBtn'); const metaTheme = document.getElementById('themeColorMeta'); 
+            body.className = ''; 
+            if(t==='tech'){ body.classList.add('tech'); themeBtn.textContent='🚀'; metaTheme.content='#2b303a'; } 
+            else if(t==='blue-light'){ body.classList.add('blue-light'); themeBtn.textContent='💎'; metaTheme.content='#e3edf7'; } 
+            else if(t==='purple-light'){ body.classList.add('purple-light'); themeBtn.textContent='🍇'; metaTheme.content='#ece8f3'; } 
+            else if(t==='pink'){ body.classList.add('pink'); themeBtn.textContent='🌸'; metaTheme.content='#f3e6e8'; } 
+            else if(t==='cement'){ body.classList.add('cement'); themeBtn.textContent='🏢'; metaTheme.content='#a3a8b0'; } 
+            else { themeBtn.textContent='🌙'; metaTheme.content='#e0e5ec'; } 
+        }
         function saveHoldings(){try{localStorage.setItem(getStockKey(currentTab),JSON.stringify(tabStocks[currentTab]));}catch(e){}}
         function saveKeys(){ fugleKey=document.getElementById('fugleKeyInput').value.trim(); secondFugleKey=document.getElementById('secondFugleKeyInput').value.trim(); try{localStorage.setItem(FK,fugleKey);localStorage.setItem(SFK,secondFugleKey);}catch(e){} updateKeyStatus(); }
         function saveRecords(){try{localStorage.setItem(getRecordKey(currentTab),JSON.stringify(tabRecords[currentTab]));}catch(e){}}
-        function toggleTheme(){ const body=document.body; let nextTheme = 'light'; if(body.classList.contains('dark')){ nextTheme = 'tech'; } else if(body.classList.contains('tech')){ nextTheme = 'blue-dark'; } else if(body.classList.contains('blue-dark')){ nextTheme = 'blue-light'; } else if(body.classList.contains('blue-light')){ nextTheme = 'pink'; } else if(body.classList.contains('pink')){ nextTheme = 'cement'; } else if(body.classList.contains('cement')){ nextTheme = 'light'; } else { nextTheme = 'dark'; } applyThemeText(nextTheme); try{localStorage.setItem(TK, nextTheme);}catch(e){} }
+        
+        // 🎨 更新主題切換順序
+        function toggleTheme(){ 
+            const body=document.body; 
+            let nextTheme = 'light'; 
+            if(body.classList.contains('tech')){ nextTheme = 'blue-light'; } 
+            else if(body.classList.contains('blue-light')){ nextTheme = 'purple-light'; } 
+            else if(body.classList.contains('purple-light')){ nextTheme = 'pink'; } 
+            else if(body.classList.contains('pink')){ nextTheme = 'cement'; } 
+            else if(body.classList.contains('cement')){ nextTheme = 'light'; } 
+            else { nextTheme = 'tech'; } 
+            applyThemeText(nextTheme); try{localStorage.setItem(TK, nextTheme);}catch(e){} 
+        }
         function switchTab(tabIndex){ if(currentTab === tabIndex) return; currentTab = tabIndex; try{localStorage.setItem(CUR_TAB_KEY, currentTab);}catch(e){} updateTabUI(); renderAll(); renderHistory(); refreshPrices(); }
         function renameTab(tabIndex) { const oldName = tabNames[tabIndex] || `分頁 ${String.fromCharCode(65 + tabIndex)}`; const newName = prompt('請輸入此分頁的新名稱：', oldName); if (newName !== null) { const finalName = newName.trim() === '' ? `分頁 ${String.fromCharCode(65 + tabIndex)}` : newName.trim(); tabNames[tabIndex] = finalName; try { localStorage.setItem(TN_KEY, JSON.stringify(tabNames)); } catch(e){} updateTabUI(); showToast(`已更名為「${finalName}」`); } }
         function updateTabUI(){ for(let i=0; i<3; i++){ const btn = document.getElementById(`tab${i}`); btn.textContent = tabNames[i] || `分頁 ${String.fromCharCode(65 + i)}`; if(i === currentTab) btn.classList.add('active'); else btn.classList.remove('active'); } }
@@ -287,7 +311,7 @@
         function exportData() { const dataToExport = { tabStocks: [localStorage.getItem(getStockKey(0)), localStorage.getItem(getStockKey(1)), localStorage.getItem(getStockKey(2))], tabRecords: [localStorage.getItem(getRecordKey(0)), localStorage.getItem(getRecordKey(1)), localStorage.getItem(getRecordKey(2))], tabNames: localStorage.getItem(TN_KEY), fugleKey: localStorage.getItem(FK), secondFugleKey: localStorage.getItem(SFK), theme: localStorage.getItem(TK) }; const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "application/json" }); const url = URL.createObjectURL(blob); const downloadAnchorElement = document.createElement('a'); const d = new Date(); const dateString = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0'); downloadAnchorElement.setAttribute("href", url); downloadAnchorElement.setAttribute("download", "stock_backup_" + dateString + ".json"); document.body.appendChild(downloadAnchorElement); downloadAnchorElement.click(); document.body.removeChild(downloadAnchorElement); URL.revokeObjectURL(url); showToast('✅ 備份檔案已成功下載'); }
         function triggerImport() { document.getElementById('importFile').click(); }
         function importData(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); if(confirm('⚠️ 警告：這將會覆蓋您目前的所有資料！\n確定要還原備份嗎？')) { if (data.tabStocks) { data.tabStocks.forEach((val, i) => { if(val) localStorage.setItem(getStockKey(i), val); }); } if (data.tabRecords) { data.tabRecords.forEach((val, i) => { if(val) localStorage.setItem(getRecordKey(i), val); }); } if (data.tabNames) localStorage.setItem(TN_KEY, data.tabNames); if (data.fugleKey) localStorage.setItem(FK, data.fugleKey); if (data.secondFugleKey) localStorage.setItem(SFK, data.secondFugleKey); if (data.theme) localStorage.setItem(TK, data.theme); alert('🎉 備份還原成功！系統將為您重新載入頁面。'); location.reload(); } } catch (err) { alert('❌ 檔案格式錯誤，無法還原資料。請確認上傳的是正確的 json 備份檔。'); } document.getElementById('importFile').value = ''; }; reader.readAsText(file); }
-        async function refresh(){await refreshPrices()} loadState();renderAll();renderHistory(); setTimeout(refresh,300); pollTimer=setInterval(refresh,30000); document.getElementById('symInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); } }); document.getElementById('qtyInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('buyPriceInput').focus(); } }); document.getElementById('buyPriceInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); addStock(); } }); document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')}); console.log('股票庫存管理 V3.7.2 已啟動 (介面微調優化版)');
+        async function refresh(){await refreshPrices()} loadState();renderAll();renderHistory(); setTimeout(refresh,300); pollTimer=setInterval(refresh,30000); document.getElementById('symInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); } }); document.getElementById('qtyInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('buyPriceInput').focus(); } }); document.getElementById('buyPriceInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); addStock(); } }); document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')}); console.log('股票庫存管理 V3.7.3 已啟動 (主題重構優化版)');
     </script>
 </body>
 </html>
