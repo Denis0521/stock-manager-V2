@@ -249,4 +249,840 @@
         </div>
     </div>
     <script>
-==========
+        // ========== 全域錯誤處理 ==========
+        window.addEventListener('error', e => {
+            console.error('[Global Error]', e.error);
+            showToast('系統錯誤，請檢查網路或重新整理');
+        });
+        window.addEventListener('unhandledrejection', e => {
+            console.error('[Unhandled]', e.reason);
+            e.preventDefault();
+        });
+
+        // ========== 常數與設定 ==========
+        const FK = 'tw_fugle_key';
+        const SFK = 'tw_second_fugle_key';
+        const TK = 'tw_theme';
+        const CUR_TAB_KEY = 'tw_current_tab';
+        const TN_KEY = 'tw_tab_names';
+        const GOOGLE_CSV_KEY = 'tw_google_csv_url';
+        const getStockKey = idx => `tw_stock_portfolio_tab_${idx}`;
+        const getRecordKey = idx => `tw_records_tab_${idx}`;
+
+        const FUGLE_API = 'https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
+        const PROXY_LIST = [
+            'https://api.allorigins.win/raw?url=',
+            'https://corsproxy.io/?',
+            'https://api.codetabs.com/v1/proxy?quest='
+        ];
+
+        const THEME_MAP = {
+            'tech': { icon: '🚀', color: '#2b303a' },
+            'blue-light': { icon: '💎', color: '#e3edf7' },
+            'purple-light': { icon: '🍇', color: '#ece8f3' },
+            'pink': { icon: '🌸', color: '#f3e6e8' },
+            'cement': { icon: '🏢', color: '#a3a8b0' },
+            'light': { icon: '🌙', color: '#e0e5ec' }
+        };
+
+        // ========== 狀態 ==========
+        let currentTab = 0;
+        let tabStocks = [[], [], []];
+        let tabRecords = [[], [], []];
+        let tabNames = ['分頁 A', '分頁 B', '分頁 C'];
+        let fugleKey = '';
+        let secondFugleKey = '';
+        let googleCsvUrl = '';
+        let pollTimer = null;
+        let fugleKeyIndex = 0;
+        let cachedGlobalIndices = [];
+
+        // ========== 初始化 ==========
+        function loadState() {
+            try {
+                fugleKey = localStorage.getItem(FK) || '';
+                secondFugleKey = localStorage.getItem(SFK) || '';
+                const ct = localStorage.getItem(CUR_TAB_KEY);
+                if (ct != null) currentTab = parseInt(ct);
+                const tn = localStorage.getItem(TN_KEY);
+                if (tn) tabNames = JSON.parse(tn);
+                for (let i = 0; i < 3; i++) {
+                    const s = localStorage.getItem(getStockKey(i));
+                    if (s) tabStocks[i] = JSON.parse(s);
+                    const r = localStorage.getItem(getRecordKey(i));
+                    if (r) tabRecords[i] = JSON.parse(r);
+                }
+                const t = localStorage.getItem(TK);
+                applyTheme(t || 'light');
+                const cachedIdx = localStorage.getItem('tw_cached_indices');
+                if (cachedIdx) {
+                    cachedGlobalIndices = JSON.parse(cachedIdx);
+                    if (cachedGlobalIndices.length > 0) renderGlobalIndices(cachedGlobalIndices);
+                }
+                googleCsvUrl = localStorage.getItem(GOOGLE_CSV_KEY) || 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR65VYw1-a-i-uKJqR-SiC9XQ4O1IokgVoWCP35eH6rHLqNgk_A9ZFDDT8nniO5dzVLfPhS8m_9IfaA/pub?gid=0&single=true&output=csv';
+            } catch (e) {
+                console.error('Load state error:', e);
+            }
+            document.getElementById('fugleKeyInput').value = fugleKey;
+            document.getElementById('secondFugleKeyInput').value = secondFugleKey;
+            document.getElementById('googleCsvInput').value = localStorage.getItem(GOOGLE_CSV_KEY) || '';
+            updateKeyStatus();
+            updateTabUI();
+        }
+
+        // ========== 主題 ==========
+        function applyTheme(t) {
+            const body = document.body;
+            const themeBtn = document.getElementById('themeBtn');
+            const metaTheme = document.getElementById('themeColorMeta');
+            body.className = '';
+            const config = THEME_MAP[t] || THEME_MAP['light'];
+            if (t !== 'light') body.classList.add(t);
+            themeBtn.textContent = config.icon;
+            metaTheme.content = config.color;
+        }
+
+        function toggleTheme() {
+            const order = ['light', 'tech', 'blue-light', 'purple-light', 'pink', 'cement'];
+            const current = order.find(t => document.body.classList.contains(t)) || 'light';
+            const next = order[(order.indexOf(current) + 1) % order.length];
+            applyTheme(next);
+            try { localStorage.setItem(TK, next); } catch (e) {}
+        }
+
+        // ========== 分頁 ==========
+        function switchTab(tabIndex) {
+            if (currentTab === tabIndex) return;
+            currentTab = tabIndex;
+            try { localStorage.setItem(CUR_TAB_KEY, currentTab); } catch (e) {}
+            updateTabUI();
+            renderAll();
+            renderHistory();
+            refreshPrices();
+        }
+
+        function renameTab(tabIndex) {
+            const oldName = tabNames[tabIndex] || `分頁 ${String.fromCharCode(65 + tabIndex)}`;
+            const newName = prompt('請輸入此分頁的新名稱：', oldName);
+            if (newName !== null) {
+                const finalName = newName.trim() === '' ? `分頁 ${String.fromCharCode(65 + tabIndex)}` : newName.trim();
+                tabNames[tabIndex] = finalName;
+                try { localStorage.setItem(TN_KEY, JSON.stringify(tabNames)); } catch (e) {}
+                updateTabUI();
+                showToast(`已更名為「${finalName}」`);
+            }
+        }
+
+        function updateTabUI() {
+            for (let i = 0; i < 3; i++) {
+                const btn = document.getElementById(`tab${i}`);
+                btn.textContent = tabNames[i] || `分頁 ${String.fromCharCode(65 + i)}`;
+                btn.classList.toggle('active', i === currentTab);
+            }
+        }
+
+        // ========== 儲存 ==========
+        function saveHoldings() {
+            try { localStorage.setItem(getStockKey(currentTab), JSON.stringify(tabStocks[currentTab])); } catch (e) {}
+        }
+        function saveRecords() {
+            try { localStorage.setItem(getRecordKey(currentTab), JSON.stringify(tabRecords[currentTab])); } catch (e) {}
+        }
+        function saveKeys() {
+            fugleKey = document.getElementById('fugleKeyInput').value.trim();
+            secondFugleKey = document.getElementById('secondFugleKeyInput').value.trim();
+            const customCsv = document.getElementById('googleCsvInput').value.trim();
+            googleCsvUrl = customCsv || 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR65VYw1-a-i-uKJqR-SiC9XQ4O1IokgVoWCP35eH6rHLqNgk_A9ZFDDT8nniO5dzVLfPhS8m_9IfaA/pub?gid=0&single=true&output=csv';
+            try {
+                localStorage.setItem(FK, fugleKey);
+                localStorage.setItem(SFK, secondFugleKey);
+                localStorage.setItem(GOOGLE_CSV_KEY, customCsv);
+            } catch (e) {}
+            updateKeyStatus();
+        }
+
+        function updateKeyStatus() {
+            [['fugleKey', fugleKey], ['secondFugleKey', secondFugleKey]].forEach(([id, val]) => {
+                const el = document.getElementById(id + 'Status');
+                if (!el) return;
+                const hasKey = val && val.trim() !== '';
+                el.textContent = hasKey ? '✓ 已設定' : '未設定';
+                el.className = 'key-status ' + (hasKey ? 'ok' : 'none');
+            });
+        }
+
+        // ========== API 請求（多代理備援） ==========
+        async function fetchWithProxy(targetUrl, timeout) {
+            timeout = timeout || 4000;
+            for (const proxy of PROXY_LIST) {
+                try {
+                    const resp = await fetch(proxy + encodeURIComponent(targetUrl), {
+                        signal: AbortSignal.timeout(timeout)
+                    });
+                    if (resp.ok) return resp;
+                } catch (e) {
+                    continue;
+                }
+            }
+            return null;
+        }
+
+        async function fetchFugle(symbol) {
+            const keys = [fugleKey, secondFugleKey].filter(k => k && k.trim() !== '');
+            if (keys.length === 0) return null;
+            const startIndex = fugleKeyIndex % keys.length;
+            fugleKeyIndex++;
+            for (let i = 0; i < keys.length; i++) {
+                const attemptIndex = (startIndex + i) % keys.length;
+                try {
+                    const resp = await fetch(FUGLE_API + encodeURIComponent(symbol), {
+                        headers: { 'X-API-KEY': keys[attemptIndex] },
+                        signal: AbortSignal.timeout(4000)
+                    });
+                    if (resp.ok) {
+                        const d = await resp.json();
+                        if (d && d.lastPrice != null) {
+                            return { price: d.lastPrice, change: d.change, changePercent: d.changePercent, source: 'Fugle' };
+                        }
+                    } else if (resp.status === 429) {
+                        continue;
+                    }
+                } catch (e) {
+                    continue;
+                }
+            }
+            return null;
+        }
+
+        async function fetchYahoo(symbol) {
+            const suffixes = ['.TW', '.TWO'];
+            for (const suffix of suffixes) {
+                const yahooUrl = 'https://query1.finance.yahoo.com/v7/finance/download/' + encodeURIComponent(symbol) + suffix + '?period1=' + (Math.floor(Date.now()/1000)-259200) + '&period2=' + Math.floor(Date.now()/1000) + '&interval=1d&events=history';
+                const resp = await fetchWithProxy(yahooUrl, 5000);
+                if (!resp) continue;
+                try {
+                    const text = await resp.text();
+                    const lines = text.trim().split('\n');
+                    if (lines.length < 2) continue;
+                    const cols = lines[lines.length - 1].split(',');
+                    if (cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') continue;
+                    const price = parseFloat(cols[4]);
+                    const open = parseFloat(cols[1]);
+                    const chg = +(price - open).toFixed(2);
+                    const pct = +((chg / open) * 100).toFixed(2);
+                    return { price, change: chg, changePercent: pct, source: 'Yahoo' };
+                } catch (e) {
+                    continue;
+                }
+            }
+            return null;
+        }
+
+        async function fetchWeightedIndex() {
+            const keys = [fugleKey, secondFugleKey].filter(k => k && k.trim() !== '');
+            if (keys.length > 0) {
+                const startIndex = fugleKeyIndex % keys.length;
+                fugleKeyIndex++;
+                for (let i = 0; i < keys.length; i++) {
+                    const attemptIndex = (startIndex + i) % keys.length;
+                    try {
+                        const resp = await fetch(FUGLE_API + 'IX0001', {
+                            headers: { 'X-API-KEY': keys[attemptIndex] },
+                            signal: AbortSignal.timeout(4000)
+                        });
+                        if (resp.ok) {
+                            const d = await resp.json();
+                            const p = d.lastPrice || d.closePrice || d.price;
+                            if (p != null) return { price: p, change: d.change, changePercent: d.changePercent, source: 'Fugle' };
+                        }
+                    } catch (e) {}
+                }
+            }
+            const yahooUrl = 'https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=' + (Math.floor(Date.now()/1000)-259200) + '&period2=' + Math.floor(Date.now()/1000) + '&interval=1d&events=history';
+            const resp = await fetchWithProxy(yahooUrl);
+            if (resp) {
+                try {
+                    const text = await resp.text();
+                    const lines = text.trim().split('\n');
+                    const cols = lines[lines.length - 1].split(',');
+                    const price = parseFloat(cols[4]);
+                    const open = parseFloat(cols[1]);
+                    return { price, change: price - open, changePercent: ((price - open)/open)*100, source: 'Yahoo' };
+                } catch (e) {}
+            }
+            return null;
+        }
+
+        async function fetchGlobalIndicesFromGoogle() {
+            if (!googleCsvUrl || googleCsvUrl.indexOf('2PACX-xxxxxxxxx') >= 0) return;
+            try {
+                const resp = await fetch(googleCsvUrl + '&cachebust=' + Date.now(), {
+                    signal: AbortSignal.timeout(5000)
+                });
+                if (!resp.ok) return;
+                const text = await resp.text();
+                const rows = text.split('\n').map(r => r.trim()).filter(r => r.length > 0);
+                const parsed = [];
+                for (let i = 1; i < rows.length; i++) {
+                    const cols = rows[i].split(',');
+                    if (cols.length < 3) continue;
+                    const name = cols[0].replace(/"/g, '').trim();
+                    const price = parseFloat(cols[1]);
+                    let rawPct = cols[2].replace(/"/g, '').trim();
+                    let pct = rawPct.indexOf('%') >= 0 ? parseFloat(rawPct.replace('%', '')) : parseFloat(rawPct) * 100;
+                    if (isNaN(price) || isNaN(pct)) continue;
+                    const originalClose = price / (1 + (pct / 100));
+                    parsed.push({ name, price, pct, changeAmt: price - originalClose });
+                }
+                if (parsed.length > 0) {
+                    cachedGlobalIndices = parsed;
+                    try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch (e) {}
+                    renderGlobalIndices(cachedGlobalIndices);
+                }
+            } catch (e) {
+                console.error('[Global Indices]', e);
+            }
+        }
+
+        // ========== 渲染 ==========
+        function renderGlobalIndices(indices) {
+            const container = document.getElementById('idxScrollContainer');
+            while (container.children.length > 1) container.removeChild(container.lastChild);
+            indices.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'idx-card-box';
+                const sign = item.pct >= 0 ? '+' : '';
+                const cls = item.pct >= 0 ? 'up' : 'down';
+                card.innerHTML = '<div class="idx-box-name">' + escapeHtml(item.name) + '</div>' +
+                    '<div class="idx-box-price">' + item.price.toLocaleString('en-US', {maximumFractionDigits:2}) + '</div>' +
+                    '<div class="idx-box-change-row ' + cls + '">' +
+                    '<span>' + sign + item.changeAmt.toFixed(2) + '</span>' +
+                    '<span>(' + sign + item.pct.toFixed(2) + '%)</span>' +
+                    '</div>' +
+                    '<div class="idx-box-src">via Google</div>';
+                container.appendChild(card);
+            });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function renderRow(s) {
+            const el = document.querySelector('.srow[data-id="' + s.id + '"]');
+            if (!el) return;
+            const shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
+            const p = s.price;
+            const chg = s.change || 0;
+
+            const symCont = el.querySelector('.sym-container');
+            if (symCont) {
+                symCont.querySelector('.sym').textContent = s.symbol;
+                let srcEl = symCont.querySelector('.sym-src');
+                if (!srcEl) {
+                    srcEl = document.createElement('div');
+                    srcEl.className = 'sym-src';
+                    symCont.appendChild(srcEl);
+                }
+                srcEl.textContent = (s.source === 'Fugle' && s.updateTime) ? 'via Fugle ' + s.updateTime : '';
+            }
+
+            const qn = el.querySelector('.qty-cell');
+            if (qn) {
+                qn.innerHTML = '<div style="line-height:1.2;font-size:17px;">' + s.displayQty + ' ' + s.displayUnit + '</div>' +
+                    '<div style="font-size:14px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + (s.buyPrice ? '均價 ' + s.buyPrice : '未設均價') + '">' + (s.buyPrice ? '均價 ' + s.buyPrice : '未設均價') + '</div>';
+            }
+
+            const pEl = el.querySelector('.price');
+            if (p != null) {
+                pEl.textContent = formatPrice(p);
+                pEl.className = 'price ' + (chg >= 0 ? 'up' : 'down');
+            }
+
+            const cp = el.querySelector('.chgp');
+            if (s.changePercent != null) {
+                cp.textContent = (s.changePercent >= 0 ? '+' : '') + s.changePercent.toFixed(2) + '%';
+                cp.className = 'chgp ' + (s.changePercent >= 0 ? 'up' : 'down');
+            }
+
+            const cg = el.querySelector('.chg');
+            if (s.change != null) {
+                cg.textContent = (chg >= 0 ? '+' : '') + chg.toFixed(2);
+                cg.className = 'chg ' + (chg >= 0 ? 'up' : 'down');
+            }
+
+            const tp = el.querySelector('.today-pnl');
+            if (s.change != null) {
+                const todayPnl = Math.round(shares * chg);
+                tp.textContent = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString();
+                tp.className = 'today-pnl ' + (todayPnl >= 0 ? 'up' : 'down');
+            }
+
+            updateTotalCell(el, s, shares, p);
+        }
+
+        function updateTotalCell(el, s, shares, p) {
+            let totalHtml = '—';
+            let totalClass = '';
+            if (p != null) {
+                const mktValue = Math.round(shares * p);
+                if (s.buyPrice != null && s.buyPrice > 0) {
+                    const cost = s.buyPrice * shares;
+                    const unPnl = Math.round(mktValue - cost);
+                    const roi = ((mktValue - cost) / cost) * 100;
+                    totalClass = unPnl >= 0 ? 'up' : 'down';
+                    totalHtml = '<div style="line-height:1.2;font-size:17px;">' + (unPnl >= 0 ? '+' : '') + unPnl.toLocaleString() + '</div>' +
+                        '<div style="font-size:14px;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (roi >= 0 ? '+' : '') + roi.toFixed(2) + '%</div>';
+                } else {
+                    totalHtml = '<div style="line-height:1.2;font-size:17px;" class="neutral">—</div>' +
+                        '<div style="font-size:14px;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊設均價</div>';
+                }
+            }
+            const totalEl = el.querySelector('.total');
+            totalEl.innerHTML = totalHtml;
+            totalEl.className = 'total ' + totalClass;
+        }
+
+        function renderAll() {
+            const body = document.getElementById('listBody');
+            const empty = document.getElementById('emptyState');
+            const tableScroll = document.getElementById('tableScroll');
+            const sumArea = document.getElementById('summaryArea');
+            const saveArea = document.getElementById('saveArea');
+            body.innerHTML = '';
+            const currentStocks = tabStocks[currentTab];
+            if (currentStocks.length === 0) {
+                empty.style.display = 'block';
+                tableScroll.style.display = 'none';
+                sumArea.style.display = 'none';
+                saveArea.style.display = 'none';
+                return;
+            }
+            empty.style.display = 'none';
+            tableScroll.style.display = 'block';
+            sumArea.style.display = 'block';
+            saveArea.style.display = 'block';
+
+            for (let idx = 0; idx < currentStocks.length; idx++) {
+                const s = currentStocks[idx];
+                const div = document.createElement('div');
+                div.className = 'srow';
+                div.dataset.id = s.id;
+                const shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
+                const p = s.price;
+                const chg = s.change || 0;
+                const pStr = p != null ? formatPrice(p) : '—';
+                const cgp = s.changePercent != null ? (s.changePercent >= 0 ? '+' : '') + s.changePercent.toFixed(2) + '%' : '—';
+                const cgStr = s.change != null ? (chg >= 0 ? '+' : '') + chg.toFixed(2) : '—';
+                let tpStr = '—', tpClass = '';
+                if (s.change != null) {
+                    const todayPnl = Math.round(shares * chg);
+                    tpStr = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString();
+                    tpClass = todayPnl >= 0 ? 'up' : 'down';
+                }
+                let totalHtml = '—', totalClass = '';
+                if (p != null) {
+                    const mktValue = Math.round(shares * p);
+                    if (s.buyPrice != null && s.buyPrice > 0) {
+                        const cost = s.buyPrice * shares;
+                        const unPnl = Math.round(mktValue - cost);
+                        const roi = ((mktValue - cost) / cost) * 100;
+                        totalClass = unPnl >= 0 ? 'up' : 'down';
+                        totalHtml = '<div style="line-height:1.2;font-size:17px;">' + (unPnl >= 0 ? '+' : '') + unPnl.toLocaleString() + '</div>' +
+                            '<div style="font-size:14px;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (roi >= 0 ? '+' : '') + roi.toFixed(2) + '%</div>';
+                    } else {
+                        totalHtml = '<div style="line-height:1.2;font-size:17px;" class="neutral">—</div>' +
+                            '<div style="font-size:14px;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊設均價</div>';
+                    }
+                }
+                const srcStr = (s.source === 'Fugle' && s.updateTime) ? '<div class="sym-src">via Fugle ' + s.updateTime + '</div>' : '<div class="sym-src"></div>';
+                div.innerHTML = '<div class="sym-container"><div class="sym">' + s.symbol + '</div>' + srcStr + '</div>' +
+                    '<div class="qty-cell"><div style="line-height:1.2;font-size:17px;">' + s.displayQty + ' ' + s.displayUnit + '</div><div style="font-size:14px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="' + (s.buyPrice ? '均價 ' + s.buyPrice : '未設均價') + '">' + (s.buyPrice ? '均價 ' + s.buyPrice : '未設均價') + '</div></div>' +
+                    '<div class="price ' + (p != null ? (chg >= 0 ? 'up' : 'down') : '') + '">' + pStr + '</div>' +
+                    '<div class="chgp ' + (s.changePercent != null ? (s.changePercent >= 0 ? 'up' : 'down') : '') + '">' + cgp + '</div>' +
+                    '<div class="chg ' + (s.change != null ? (chg >= 0 ? 'up' : 'down') : '') + '">' + cgStr + '</div>' +
+                    '<div class="today-pnl ' + tpClass + '">' + tpStr + '</div>' +
+                    '<div class="total ' + totalClass + '" onclick="editBuyPriceInline(\'' + s.id + '\', this)">' + totalHtml + '</div>' +
+                    '<div class="act"><button type="button" onclick="editStock(\'' + s.id + '\')">✎</button><button type="button" class="del-btn" onclick="deleteStock(\'' + s.id + '\')">✕</button></div>';
+                body.appendChild(div);
+            }
+            updateSummary();
+        }
+
+        function updateSummary() {
+            let pnl = 0, asset = 0, totalUnPnl = 0;
+            let hasUnPnl = false;
+            const currentStocks = tabStocks[currentTab];
+            for (let i = 0; i < currentStocks.length; i++) {
+                const s = currentStocks[i];
+                const sh = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
+                const p = s.price || 0, c = s.change || 0;
+                pnl += Math.round(sh * c);
+                asset += Math.round(sh * p);
+                if (s.buyPrice != null && s.price != null && s.buyPrice > 0) {
+                    totalUnPnl += Math.round((s.price - s.buyPrice) * sh);
+                    hasUnPnl = true;
+                }
+            }
+            const pe = document.getElementById('totalPnl');
+            pe.textContent = (pnl >= 0 ? '+' : '') + pnl.toLocaleString();
+            pe.className = 'val ' + (pnl >= 0 ? 'up' : 'down');
+            const ae = document.getElementById('totalAsset');
+            ae.textContent = (asset >= 0 ? '+' : '') + asset.toLocaleString();
+            ae.className = 'val neutral';
+            const ue = document.getElementById('totalUnrealized');
+            if (hasUnPnl) {
+                ue.textContent = (totalUnPnl >= 0 ? '+' : '') + totalUnPnl.toLocaleString();
+                ue.className = 'val ' + (totalUnPnl >= 0 ? 'up' : 'down');
+            } else {
+                ue.textContent = '—';
+                ue.className = 'val neutral';
+            }
+        }
+
+        function toggleSummary(e) {
+            if (e) e.stopPropagation();
+            const details = document.getElementById('summaryDetails');
+            const toggleBtn = document.getElementById('sumToggleBtn');
+            const isHidden = details.style.display === 'none';
+            details.style.display = isHidden ? 'block' : 'none';
+            toggleBtn.style.display = isHidden ? 'none' : 'block';
+        }
+
+        // ========== 股票操作 ==========
+        function addStock() {
+            let sym = document.getElementById('symInput').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+            const qty = parseInt(document.getElementById('qtyInput').value);
+            const unit = document.getElementById('unitSelect').value;
+            const bpRaw = document.getElementById('buyPriceInput').value;
+            const bp = parseFloat(bpRaw);
+            const buyPrice = isNaN(bp) || bp <= 0 ? null : bp;
+            if (!sym || !qty || qty < 1) {
+                showToast('請輸入代號與數量');
+                return;
+            }
+            const currentStocks = tabStocks[currentTab];
+            for (let i = 0; i < currentStocks.length; i++) {
+                if (currentStocks[i].symbol === sym) {
+                    showToast('該股票已存在於此分頁');
+                    return;
+                }
+            }
+            const id = 's_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+            currentStocks.push({
+                id: id, symbol: sym, displayQty: qty, displayUnit: unit,
+                buyPrice: buyPrice, shares: unit === '張' ? qty * 1000 : qty,
+                price: null, change: null, changePercent: null
+            });
+            saveHoldings();
+            renderAll();
+            document.getElementById('symInput').value = '';
+            document.getElementById('qtyInput').value = '';
+            document.getElementById('buyPriceInput').value = '';
+            showToast('已新增 ' + sym);
+            refreshPrices();
+        }
+
+        function deleteStock(id) {
+            if (!confirm('確定刪除？')) return;
+            const currentStocks = tabStocks[currentTab];
+            const filtered = [];
+            for (let i = 0; i < currentStocks.length; i++) {
+                if (currentStocks[i].id !== id) filtered.push(currentStocks[i]);
+            }
+            tabStocks[currentTab] = filtered;
+            saveHoldings();
+            renderAll();
+            showToast('記錄已刪除');
+        }
+
+        function editStock(id) {
+            const s = tabStocks[currentTab].find(function(x) { return x.id === id; });
+            if (!s) return;
+            const ns = prompt('修改代號：', s.symbol);
+            if (ns !== null && ns.trim()) {
+                const cleanSym = ns.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+                if (cleanSym) {
+                    s.symbol = cleanSym;
+                    s.price = null; s.change = null; s.changePercent = null;
+                    s.source = null; s.updateTime = null;
+                }
+            }
+            const nq = prompt('修改數量（單位維持 ' + s.displayUnit + '）：', s.displayQty);
+            if (nq !== null) {
+                const qtyNum = parseInt(nq);
+                if (qtyNum > 0) {
+                    s.displayQty = qtyNum;
+                    s.shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
+                }
+            }
+            const nbp = prompt('設定/修改「買入均價」\n(留空或輸入0代表不計算總損益)：', s.buyPrice || '');
+            if (nbp !== null) {
+                const bpNum = parseFloat(nbp);
+                s.buyPrice = (isNaN(bpNum) || bpNum <= 0) ? null : bpNum;
+            }
+            saveHoldings();
+            renderAll();
+            showToast('已修改');
+            refreshPrices();
+        }
+
+        // 行內編輯均價
+        function editBuyPriceInline(id, element) {
+            const s = tabStocks[currentTab].find(function(x) { return x.id === id; });
+            if (!s) return;
+            const currentVal = s.buyPrice || '';
+            element.innerHTML = '<input type="number" value="' + currentVal + '" step="0.01" min="0" ' +
+                'style="width:90px;padding:6px 8px;background:var(--bg);border:none;border-radius:6px;' +
+                'box-shadow:inset 2px 2px 4px var(--s-dark),inset -2px -2px 4px var(--s-light);' +
+                'color:var(--t-main);font-size:15px;font-weight:600;text-align:right;" ' +
+                'onblur="saveBuyPrice(\'' + id + '\', this.value)" ' +
+                'onkeydown="if(event.key===\'Enter\')this.blur()" ' +
+                'onclick="event.stopPropagation()" autofocus>';
+            const input = element.querySelector('input');
+            input.select();
+            input.focus();
+        }
+
+        function saveBuyPrice(id, value) {
+            const s = tabStocks[currentTab].find(function(x) { return x.id === id; });
+            if (!s) return;
+            const num = parseFloat(value);
+            s.buyPrice = (isNaN(num) || num <= 0) ? null : num;
+            saveHoldings();
+            renderAll();
+            refreshPrices();
+        }
+
+        // ========== 歷史記錄 ==========
+        function saveDailyPnl() {
+            let pnl = 0, asset = 0;
+            const currentStocks = tabStocks[currentTab];
+            for (let i = 0; i < currentStocks.length; i++) {
+                const s = currentStocks[i];
+                const sh = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
+                const p = s.price || 0, c = s.change || 0;
+                pnl += Math.round(sh * c);
+                asset += Math.round(sh * p);
+            }
+            const n = new Date();
+            const ds = n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
+            const ts = String(n.getHours()).padStart(2, '0') + ':' + String(n.getMinutes()).padStart(2, '0');
+            const currentRecords = tabRecords[currentTab];
+            currentRecords.unshift({ date: ds, time: ts, totalPnl: pnl, totalAsset: asset, timestamp: n.getTime() });
+            if (currentRecords.length > 50) tabRecords[currentTab] = currentRecords.slice(0, 50);
+            saveRecords();
+            renderHistory();
+            showToast('已存儲今日損益：' + (pnl >= 0 ? '+' : '') + pnl.toLocaleString());
+        }
+
+        function deleteHistory(timestamp) {
+            if (!confirm('確定刪除此筆記錄？')) return;
+            const filtered = [];
+            const currentRecords = tabRecords[currentTab];
+            for (let i = 0; i < currentRecords.length; i++) {
+                if (currentRecords[i].timestamp !== timestamp) filtered.push(currentRecords[i]);
+            }
+            tabRecords[currentTab] = filtered;
+            saveRecords();
+            renderHistory();
+            showToast('記錄已刪除');
+        }
+
+        function renderHistory() {
+            const body = document.getElementById('historyBody');
+            const currentRecords = tabRecords[currentTab];
+            if (!currentRecords || currentRecords.length === 0) {
+                body.innerHTML = '<div class="hist-empty">尚無記錄</div>';
+                return;
+            }
+            body.innerHTML = '';
+            for (let i = 0; i < currentRecords.length; i++) {
+                const r = currentRecords[i];
+                const d = document.createElement('div');
+                d.className = 'hist-item';
+                d.innerHTML = '<div class="hist-item-left"><span class="hdate">' + r.date + ' ' + r.time + '</span><span class="hval ' + (r.totalPnl >= 0 ? 'up' : 'down') + '">' + (r.totalPnl >= 0 ? '+' : '') + r.totalPnl.toLocaleString() + '</span></div><button type="button" class="del-hist-btn" onclick="deleteHistory(' + r.timestamp + ')">✕</button>';
+                body.appendChild(d);
+            }
+        }
+
+        // ========== 價格刷新 ==========
+        async function refreshPrices() {
+            const idxR = await fetchWeightedIndex();
+            const idxEl = document.getElementById('idxPrice');
+            const idxChgEl = document.getElementById('idxChange');
+            const idxPctEl = document.getElementById('idxPct');
+            const idxSrcEl = document.getElementById('idxSource');
+            if (idxR) {
+                idxEl.textContent = idxR.price.toLocaleString('en-US', { maximumFractionDigits: 0 });
+                idxChgEl.textContent = (idxR.change >= 0 ? '+' : '') + idxR.change.toFixed(2);
+                idxChgEl.className = idxR.change >= 0 ? 'up' : 'down';
+                idxPctEl.textContent = '(' + (idxR.changePercent >= 0 ? '+' : '') + idxR.changePercent.toFixed(2) + '%)';
+                idxPctEl.className = idxR.changePercent >= 0 ? 'up' : 'down';
+                idxSrcEl.textContent = 'via ' + idxR.source + ' ' + new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+            }
+            fetchGlobalIndicesFromGoogle();
+            const currentStocks = tabStocks[currentTab];
+            const results = [];
+            for (let i = 0; i < currentStocks.length; i++) {
+                const s = currentStocks[i];
+                let r = await fetchFugle(s.symbol);
+                if (!r) r = await fetchYahoo(s.symbol);
+                results.push({ s: s, r: r });
+            }
+            for (let i = 0; i < results.length; i++) {
+                const item = results[i];
+                if (item.r) {
+                    item.s.price = item.r.price;
+                    item.s.change = item.r.change;
+                    item.s.changePercent = item.r.changePercent;
+                    item.s.source = item.r.source;
+                    item.s.updateTime = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+                    renderRow(item.s);
+                }
+            }
+            updateSummary();
+        }
+
+        // ========== Modal ==========
+        function openModal() {
+            document.getElementById('fugleKeyInput').value = fugleKey;
+            document.getElementById('secondFugleKeyInput').value = secondFugleKey;
+            updateKeyStatus();
+            document.getElementById('modalOverlay').classList.add('show');
+        }
+
+        function saveAndCloseModal() {
+            saveKeys();
+            document.getElementById('modalOverlay').classList.remove('show');
+            showToast('設定已儲存');
+            refreshPrices();
+        }
+
+        // ========== 工具函數 ==========
+        function formatPrice(p) {
+            if (p == null) return '—';
+            const hasDecimal = p % 1 !== 0;
+            return p.toLocaleString('zh-TW', {
+                minimumFractionDigits: hasDecimal ? 2 : 0,
+                maximumFractionDigits: 2
+            });
+        }
+
+        let toastTimer = null;
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(function() { t.classList.remove('show'); }, 2000);
+        }
+
+        function exportData() {
+            const dataToExport = {
+                tabStocks: [
+                    localStorage.getItem(getStockKey(0)),
+                    localStorage.getItem(getStockKey(1)),
+                    localStorage.getItem(getStockKey(2))
+                ],
+                tabRecords: [
+                    localStorage.getItem(getRecordKey(0)),
+                    localStorage.getItem(getRecordKey(1)),
+                    localStorage.getItem(getRecordKey(2))
+                ],
+                tabNames: localStorage.getItem(TN_KEY),
+                fugleKey: localStorage.getItem(FK),
+                secondFugleKey: localStorage.getItem(SFK),
+                theme: localStorage.getItem(TK)
+            };
+            const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const d = new Date();
+            const ds = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+            a.setAttribute("href", url);
+            a.setAttribute("download", "stock_backup_" + ds + ".json");
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('✅ 備份檔案已成功下載');
+        }
+
+        function triggerImport() {
+            document.getElementById('importFile').click();
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (confirm('⚠️ 警告：這將會覆蓋您目前的所有資料！\n確定要還原備份嗎？')) {
+                        if (data.tabStocks) {
+                            for (let i = 0; i < data.tabStocks.length; i++) {
+                                if (data.tabStocks[i]) localStorage.setItem(getStockKey(i), data.tabStocks[i]);
+                            }
+                        }
+                        if (data.tabRecords) {
+                            for (let i = 0; i < data.tabRecords.length; i++) {
+                                if (data.tabRecords[i]) localStorage.setItem(getRecordKey(i), data.tabRecords[i]);
+                            }
+                        }
+                        if (data.tabNames) localStorage.setItem(TN_KEY, data.tabNames);
+                        if (data.fugleKey) localStorage.setItem(FK, data.fugleKey);
+                        if (data.secondFugleKey) localStorage.setItem(SFK, data.secondFugleKey);
+                        if (data.theme) localStorage.setItem(TK, data.theme);
+                        alert('🎉 備份還原成功！系統將為您重新載入頁面。');
+                        location.reload();
+                    }
+                } catch (err) {
+                    alert('❌ 檔案格式錯誤，無法還原資料。請確認上傳的是正確的 json 備份檔。');
+                }
+                document.getElementById('importFile').value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        // ========== 啟動 ==========
+        async function refresh() {
+            await refreshPrices();
+        }
+
+        loadState();
+        renderAll();
+        renderHistory();
+        setTimeout(refresh, 300);
+        pollTimer = setInterval(refresh, 30000);
+
+        document.getElementById('symInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('qtyInput').focus();
+            }
+        });
+        document.getElementById('qtyInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('buyPriceInput').focus();
+            }
+        });
+        document.getElementById('buyPriceInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addStock();
+            }
+        });
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) this.classList.remove('show');
+        });
+
+        console.log('股票庫存管理 V3.7.4 已啟動 (平板大螢幕適配版)');
+    </script>
+</body>
+</html>
+
