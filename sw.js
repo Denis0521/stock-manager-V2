@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stock-portfolio-v3.7.3';
+const CACHE_NAME = 'stock-portfolio-v3.8.0';
 const urlsToCache = [
   './',
   './index.html',
@@ -7,14 +7,14 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Opened cache');
+        console.log('Opened cache v3.8.0');
         return cache.addAll(urlsToCache);
       })
   );
-  self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
@@ -39,7 +39,8 @@ self.addEventListener('fetch', event => {
     requestUrl.hostname.includes('api.fugle.tw') || 
     requestUrl.hostname.includes('finance.yahoo.com') || 
     requestUrl.hostname.includes('allorigins.win') ||
-    requestUrl.hostname.includes('docs.google.com');
+    requestUrl.hostname.includes('docs.google.com') ||
+    requestUrl.hostname.includes('openapi-t.tdcc.com.tw'); // 新增 TDCC API 不快取
   
   if (isApiRequest) {
     event.respondWith(fetch(event.request));
