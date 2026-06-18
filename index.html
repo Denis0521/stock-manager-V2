@@ -183,14 +183,14 @@
                 <select id="unitSelect"><option value="張">張</option><option value="股">股</option></select>
             </div>
             <div class="form-row">
-                <input type="number" id="buyPriceInput" placeholder="買入均價 (選填計算損益)" step="0.01" min="0" inputmode="decimal">
+                <input type="number" id="buyPriceInput" placeholder="買入均價 (選填)" step="0.01" min="0" inputmode="decimal">
                 <button type="button" onclick="addStock()" style="flex:0 0 80px;">新增</button>
             </div>
         </div>
 
         <div id="fundFormArea" style="display:none;">
             <div class="form-row">
-                <input type="text" id="fundSearchInput" placeholder="輸入基金名稱或代碼搜尋..." autocomplete="off" oninput="debounceSearchFund()">
+                <input type="text" id="fundSearchInput" placeholder="輸入基金名稱或直接貼上網址..." autocomplete="off" oninput="debounceSearchFund()">
                 <input type="hidden" id="fundSymbolHidden">
                 <div id="fundSuggestions" class="autocomplete-list" style="display:none;"></div>
             </div>
@@ -264,7 +264,7 @@
                     <input type="file" id="importFile" style="display:none" onchange="importData(event)">
                 </div>
             </div>
-            <div class="v-box">核心版本：V3.8.0 (包含基金智慧搜尋)</div>
+            <div class="v-box">核心版本：V3.9.0 (雙核心搜尋 + 智慧網頁爬蟲)</div>
             <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
         </div>
     </div>
@@ -309,43 +309,67 @@
             }
         }
 
-        // 🔍 基金智慧搜尋 (透過 Yahoo Finance API via Proxy)
+        // 🔍 基金智慧搜尋 (Yahoo + 鉅亨網雙核心)
         let searchTimeout = null;
         function debounceSearchFund() {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(searchFund, 500);
         }
+
         async function searchFund() {
             const q = document.getElementById('fundSearchInput').value.trim();
             const sugg = document.getElementById('fundSuggestions');
             if(q.length < 2) { sugg.style.display = 'none'; return; }
+            
+            sugg.innerHTML = '<div class="autocomplete-item">🌐 跨平台搜尋中...</div>';
+            sugg.style.display = 'block';
+
+            let results = [];
+
+            // 1. 搜尋 Yahoo Finance
             try {
-                const searchUrl = `https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(q)}&quotesCount=10&newsCount=0`;
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(searchUrl)}`;
-                const resp = await fetch(proxyUrl);
-                const data = await resp.json();
-                const res = JSON.parse(data.contents);
-                
-                if(res.quotes && res.quotes.length > 0) {
-                    // 過濾出基金與 ETF
-                    const funds = res.quotes.filter(x => x.quoteType === 'MUTUALFUND' || x.quoteType === 'ETF');
-                    if(funds.length > 0) {
-                        sugg.innerHTML = '';
-                        funds.forEach(f => {
-                            const name = f.shortname || f.longname || f.symbol;
-                            const div = document.createElement('div');
-                            div.className = 'autocomplete-item';
-                            div.innerHTML = `<div>${name}</div><div class="autocomplete-item-sub">${f.symbol} | ${f.exchDisp || f.exchange}</div>`;
-                            div.onclick = () => selectFund(f.symbol, name);
-                            sugg.appendChild(div);
-                        });
-                        sugg.style.display = 'block';
-                    } else {
-                        sugg.innerHTML = '<div class="autocomplete-item">找不到相關基金，請嘗試其他關鍵字或直接輸入代碼。</div>';
-                        sugg.style.display = 'block';
-                    }
+                const yUrl = `https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(q)}&quotesCount=4`;
+                const yProxy = `https://api.allorigins.win/get?url=${encodeURIComponent(yUrl)}`;
+                const yResp = await fetch(yProxy);
+                const yData = await yResp.json();
+                const yRes = JSON.parse(yData.contents);
+                if(yRes.quotes) {
+                    yRes.quotes.filter(x => x.quoteType === 'MUTUALFUND' || x.quoteType === 'ETF').forEach(f => {
+                        results.push({ symbol: f.symbol, name: f.shortname || f.longname || f.symbol, source: 'Yahoo' });
+                    });
                 }
-            } catch(e) { console.error("Search API Error:", e); }
+            } catch(e) {}
+
+            // 2. 搜尋 鉅亨網 (cnYES)
+            try {
+                const cUrl = `https://fund.cnyes.com/api/v2/search/fund?q=${encodeURIComponent(q)}`;
+                const cProxy = `https://api.allorigins.win/get?url=${encodeURIComponent(cUrl)}`;
+                const cResp = await fetch(cProxy);
+                const cData = await cResp.json();
+                const cRes = JSON.parse(cData.contents);
+                const list = cRes.items?.data || cRes.data || [];
+                list.slice(0, 5).forEach(f => {
+                    const fundUrl = `https://fund.cnyes.com/detail/${f.name}/${f.fundId}`;
+                    results.push({ symbol: fundUrl, name: f.name, source: '鉅亨網' });
+                });
+            } catch(e) {}
+
+            sugg.innerHTML = '';
+            if(results.length > 0) {
+                const seen = new Set();
+                results.forEach(r => {
+                    if(!seen.has(r.name)) {
+                        seen.add(r.name);
+                        const div = document.createElement('div');
+                        div.className = 'autocomplete-item';
+                        div.innerHTML = `<div>${r.name} <span style="font-size:10px;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:0 4px">${r.source}</span></div><div class="autocomplete-item-sub" style="overflow:hidden;text-overflow:ellipsis;">${r.symbol.startsWith('http') ? '支援網頁智能爬蟲' : r.symbol}</div>`;
+                        div.onclick = () => selectFund(r.symbol, r.name);
+                        sugg.appendChild(div);
+                    }
+                });
+            } else {
+                sugg.innerHTML = '<div class="autocomplete-item">找不到相關基金。<br><span style="font-size:12px;color:var(--t-muted);display:block;margin-top:6px;line-height:1.4;">💡 終極大絕招：<br>您可以直接在搜尋框「貼上」該基金在 鉅亨網 或 MoneyDJ 的「網址(URL)」來新增，系統會自動啟動爬蟲為您抓取每日淨值！</span></div>';
+            }
         }
         function selectFund(symbol, name) {
             document.getElementById('fundSearchInput').value = name;
@@ -360,6 +384,45 @@
             }
         });
 
+        // 🕷️ 智慧網頁爬蟲：專門對付非股票代碼的網址
+        async function fetchFundScraper(symbol) {
+            if (!symbol.startsWith('http')) return null;
+            try {
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(symbol)}`;
+                const resp = await fetch(proxyUrl, { signal: AbortSignal.timeout(6000) });
+                if (!resp.ok) return null;
+                
+                const data = await resp.json();
+                const html = data.contents;
+                let price = null;
+
+                if (symbol.includes('cnyes.com')) {
+                    const navMatch = html.match(/"nav":\s*([0-9]+\.[0-9]+)/);
+                    if (navMatch) price = parseFloat(navMatch[1]);
+                } 
+                else if (symbol.includes('moneydj.com')) {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const td = doc.querySelector('.t3n1_rev, .t3n1, .price');
+                    if (td) price = parseFloat(td.textContent.trim());
+                }
+
+                if (price === null || isNaN(price)) {
+                    const bodyText = html.replace(/\s+/g, '');
+                    const genericMatch = bodyText.match(/淨值[:：]?([0-9]+\.[0-9]+)/);
+                    if (genericMatch) price = parseFloat(genericMatch[1]);
+                }
+
+                if (price !== null && !isNaN(price)) {
+                    return { price: price, change: null, changePercent: null, source: '網頁爬蟲' };
+                }
+                return null;
+            } catch (e) {
+                console.warn('網頁爬蟲抓取失敗:', e);
+                return null;
+            }
+        }
+
         async function fetchFugle(symbol){ const keys = [fugleKey, secondFugleKey].filter(k => k && k.trim() !== ''); if(keys.length === 0) return null; const startIndex = fugleKeyIndex % keys.length; fugleKeyIndex++; for(let i = 0; i < keys.length; i++){ const attemptIndex = (startIndex + i) % keys.length; const currentKey = keys[attemptIndex]; try { const resp = await fetch(FUGLE + encodeURIComponent(symbol), { headers: {'X-API-KEY': currentKey}, signal: AbortSignal.timeout(4000) }); if(resp.ok){ const d = await resp.json(); if(d && d.lastPrice != null) return {price: d.lastPrice, change: d.change, changePercent: d.changePercent, source: 'Fugle'}; } else if (resp.status === 429) { continue; } } catch(e) { continue; } } return null; }
         async function fetchYahoo(symbol){ const tryFetch = async (suffix) => { try { const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}${suffix}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`; const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`; const resp = await fetch(proxyUrl, { signal: AbortSignal.timeout(5000) }); if(!resp.ok) return null; const text = await resp.text(); const lines = text.trim().split('\n'); if(lines.length < 2) return null; const cols = lines[lines.length - 1].split(','); if(cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null; const price = parseFloat(cols[4]); const open = parseFloat(cols[1]); const chg = +(price - open).toFixed(2); const pct = +((chg / open) * 100).toFixed(2); return {price, change: chg, changePercent: pct, source: 'Yahoo'}; } catch(e) { return null; } }; let res = await tryFetch('.TW'); if(!res) res = await tryFetch('.TWO'); if(!res) res = await tryFetch(''); return res; }
         async function fetchWeightedIndex(){ const keys = [fugleKey, secondFugleKey].filter(k => k && k.trim() !== ''); if(keys.length > 0){ const startIndex = fugleKeyIndex % keys.length; fugleKeyIndex++; for(let i = 0; i < keys.length; i++){ const attemptIndex = (startIndex + i) % keys.length; try{ const resp = await fetch(FUGLE + 'IX0001', {headers: {'X-API-KEY': keys[attemptIndex]}, signal: AbortSignal.timeout(4000)}); if(resp.ok){ const d = await resp.json(); const p = d.lastPrice ?? d.closePrice ?? d.price; if(p != null) return {price: p, change: d.change, changePercent: d.changePercent, source: 'Fugle'}; } }catch(e){} } } try { const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`; const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`; const resp = await fetch(proxyUrl); if(resp.ok){ const text = await resp.text(); const lines = text.trim().split('\n'); const cols = lines[lines.length - 1].split(','); const price = parseFloat(cols[4]); const open = parseFloat(cols[1]); return {price, change: price - open, changePercent: ((price - open)/open)*100, source: 'Yahoo'}; } }catch(e){} return null; }
@@ -368,8 +431,15 @@
             const idxR = await fetchWeightedIndex(); const idxEl = document.getElementById('idxPrice'); const idxChgEl = document.getElementById('idxChange'); const idxPctEl = document.getElementById('idxPct'); const idxSrcEl = document.getElementById('idxSource'); if(idxR){ idxEl.textContent=idxR.price.toLocaleString('en-US',{maximumFractionDigits:0}); idxChgEl.textContent=(idxR.change>=0?'+':'')+idxR.change.toFixed(2); idxChgEl.className=(idxR.change>=0?'up':'down'); idxPctEl.textContent='('+(idxR.changePercent>=0?'+':'')+idxR.changePercent.toFixed(2)+'%)'; idxPctEl.className=(idxR.changePercent>=0?'up':'down'); idxSrcEl.textContent='via '+idxR.source+' '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'}); } fetchGlobalIndicesFromGoogle(); 
             const currentStocks = tabStocks[currentTab]; 
             const results = await Promise.all(currentStocks.map(async (s)=>{ 
-                let r = await fetchFugle(s.symbol); 
-                if(!r) r = await fetchYahoo(s.symbol); 
+                let r = null;
+                // 判斷：如果是網址，直接發動爬蟲，不要去查股票 API
+                if (s.symbol.startsWith('http')) {
+                    r = await fetchFundScraper(s.symbol);
+                } else {
+                    r = await fetchFugle(s.symbol); 
+                    if(!r) r = await fetchYahoo(s.symbol); 
+                    if(!r) r = await fetchFundScraper(s.symbol); 
+                }
                 return {s,r}; 
             })); 
             for(const {s,r} of results){ 
@@ -381,9 +451,9 @@
             updateSummary(); 
         }
 
-        function renderRow(s){ const el=document.querySelector('.srow[data-id="'+s.id+'"]');if(!el)return; const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty; let p = s.price; let chg = s.change ?? 0; const symCont = el.querySelector('.sym-container'); if(symCont){ let nameDiv = ''; if(s.assetType === 'fund' && s.name) nameDiv = `<div style="font-size:11px;color:var(--accent);margin-top:2px;max-width:110px;overflow:hidden;text-overflow:ellipsis;" title="${s.name}">${s.name}</div>`; symCont.innerHTML = `<div class="sym">${s.symbol}</div>${nameDiv}`; let srcEl = document.createElement('div'); srcEl.className = 'sym-src'; symCont.appendChild(srcEl); srcEl.textContent = (s.source==='Fugle' && s.updateTime) ? 'via Fugle '+s.updateTime : ''; } const qn=el.querySelector('.qty-cell'); if(qn){ qn.innerHTML=`<div style="line-height:1.2;font-size:17px;">${s.displayQty} ${s.displayUnit}</div> <div style="font-size:14px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${s.buyPrice ? '成本 '+s.buyPrice : '未設成本'}">${s.buyPrice ? '成本 '+s.buyPrice : '未設成本'}</div>`; } const pEl=el.querySelector('.price'); if(p!=null){ pEl.textContent=formatPrice(p); pEl.className='price '+(chg>=0?'up':'down'); } const cp=el.querySelector('.chgp'); if(s.changePercent!=null){cp.textContent=(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%';cp.className='chgp '+(s.changePercent>=0?'up':'down');} const cg=el.querySelector('.chg'); if(s.change!=null){cg.textContent=(chg>=0?'+':'')+chg.toFixed(2);cg.className='chg '+(chg>=0?'up':'down');} const tp = el.querySelector('.today-pnl'); if(s.change!=null){ const todayPnl = Math.round(shares * chg); tp.textContent = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString(); tp.className = 'today-pnl ' + (todayPnl >= 0 ? 'up' : 'down'); } let totalHtml = '—'; let totalValForClass = 0; if (p != null) { const mktValue = Math.round(shares * p); if (s.buyPrice != null && s.buyPrice > 0) { const cost = s.buyPrice * shares; const unPnl = Math.round(mktValue - cost); const roi = ((mktValue - cost) / cost) * 100; totalValForClass = unPnl; totalHtml = `<div style="line-height:1.2;font-size:17px;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div> <div style="font-size:14px;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`; } else { totalValForClass = 0; totalHtml = `<div style="line-height:1.2;font-size:17px;" class="neutral">—</div> <div style="font-size:14px;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設成本</div>`; } } el.querySelector('.total').innerHTML = totalHtml; if(totalValForClass !== 0) { el.querySelector('.total').className = 'total ' + (totalValForClass >= 0 ? 'up' : 'down'); } else { el.querySelector('.total').className = 'total'; } }
+        function renderRow(s){ const el=document.querySelector('.srow[data-id="'+s.id+'"]');if(!el)return; const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty; let p = s.price; let chg = s.change ?? 0; const symCont = el.querySelector('.sym-container'); if(symCont){ let nameDiv = ''; if(s.assetType === 'fund' && s.name) nameDiv = `<div style="font-size:11px;color:var(--accent);margin-top:2px;max-width:110px;overflow:hidden;text-overflow:ellipsis;" title="${s.name}">${s.name}</div>`; symCont.innerHTML = `<div class="sym" style="font-size:${s.symbol.length>15?'12px':'17px'};word-break:break-all;">${s.symbol.startsWith('http')?'網頁爬蟲基金':s.symbol}</div>${nameDiv}`; let srcEl = document.createElement('div'); srcEl.className = 'sym-src'; symCont.appendChild(srcEl); srcEl.textContent = (s.source==='Fugle' && s.updateTime) ? 'via Fugle '+s.updateTime : (s.source==='網頁爬蟲'?'via 網頁爬蟲':''); } const qn=el.querySelector('.qty-cell'); if(qn){ qn.innerHTML=`<div style="line-height:1.2;font-size:17px;">${s.displayQty} ${s.displayUnit}</div> <div style="font-size:14px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${s.buyPrice ? '成本 '+s.buyPrice : '未設成本'}">${s.buyPrice ? '成本 '+s.buyPrice : '未設成本'}</div>`; } const pEl=el.querySelector('.price'); if(p!=null){ pEl.textContent=formatPrice(p); pEl.className='price '+(chg>=0?'up':'down'); } const cp=el.querySelector('.chgp'); if(s.changePercent!=null){cp.textContent=(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%';cp.className='chgp '+(s.changePercent>=0?'up':'down');} const cg=el.querySelector('.chg'); if(s.change!=null){cg.textContent=(chg>=0?'+':'')+chg.toFixed(2);cg.className='chg '+(chg>=0?'up':'down');} const tp = el.querySelector('.today-pnl'); if(s.change!=null){ const todayPnl = Math.round(shares * chg); tp.textContent = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString(); tp.className = 'today-pnl ' + (todayPnl >= 0 ? 'up' : 'down'); } let totalHtml = '—'; let totalValForClass = 0; if (p != null) { const mktValue = Math.round(shares * p); if (s.buyPrice != null && s.buyPrice > 0) { const cost = s.buyPrice * shares; const unPnl = Math.round(mktValue - cost); const roi = ((mktValue - cost) / cost) * 100; totalValForClass = unPnl; totalHtml = `<div style="line-height:1.2;font-size:17px;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div> <div style="font-size:14px;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`; } else { totalValForClass = 0; totalHtml = `<div style="line-height:1.2;font-size:17px;" class="neutral">—</div> <div style="font-size:14px;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設成本</div>`; } } el.querySelector('.total').innerHTML = totalHtml; if(totalValForClass !== 0) { el.querySelector('.total').className = 'total ' + (totalValForClass >= 0 ? 'up' : 'down'); } else { el.querySelector('.total').className = 'total'; } }
         
-        function renderAll(){ const body=document.getElementById('listBody'); const empty=document.getElementById('emptyState'); const tableScroll=document.getElementById('tableScroll'); const sumArea = document.getElementById('summaryArea'); const saveArea = document.getElementById('saveArea'); body.innerHTML=''; const currentStocks = tabStocks[currentTab]; if(currentStocks.length===0){ empty.style.display='block';tableScroll.style.display='none';sumArea.style.display='none';saveArea.style.display='none';return; } empty.style.display='none';tableScroll.style.display='block';sumArea.style.display='block';saveArea.style.display='block'; for(const s of currentStocks){ const div=document.createElement('div');div.className='srow';div.dataset.id=s.id; const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty; let p = s.price; let chg = s.change ?? 0; let pStr = '—'; if(p!=null) pStr = formatPrice(p); const cgp = s.changePercent!=null ? (s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%' : '—'; let cgStr = '—'; if(s.change!=null) cgStr = (chg>=0?'+':'') + chg.toFixed(2); let tpStr = '—'; let tpClass = ''; if (s.change != null) { const todayPnl = Math.round(shares * chg); tpStr = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString(); tpClass = todayPnl >= 0 ? 'up' : 'down'; } let totalHtml = '—'; let totalValForClass = 0; if (p != null) { const mktValue = Math.round(shares * p); if (s.buyPrice != null && s.buyPrice > 0) { const cost = s.buyPrice * shares; const unPnl = Math.round(mktValue - cost); const roi = ((mktValue - cost) / cost) * 100; totalValForClass = unPnl; totalHtml = `<div style="line-height:1.2;font-size:17px;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div> <div style="font-size:14px;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`; } else { totalValForClass = 0; totalHtml = `<div style="line-height:1.2;font-size:17px;" class="neutral">—</div> <div style="font-size:14px;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設成本</div>`; } } let srcStr = (s.source==='Fugle' && s.updateTime) ? '<div class="sym-src">via Fugle '+s.updateTime+'</div>' : '<div class="sym-src"></div>'; let nameDiv = ''; if(s.assetType === 'fund' && s.name) nameDiv = `<div style="font-size:11px;color:var(--accent);margin-top:2px;max-width:110px;overflow:hidden;text-overflow:ellipsis;" title="${s.name}">${s.name}</div>`; div.innerHTML= '<div class="sym-container"><div class="sym">'+s.symbol+'</div>'+nameDiv+srcStr+'</div>'+ '<div class="qty-cell"><div style="line-height:1.2;font-size:17px;">'+s.displayQty+' '+s.displayUnit+'</div><div style="font-size:14px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+(s.buyPrice ? '成本 '+s.buyPrice : '未設成本')+'">'+(s.buyPrice ? '成本 '+s.buyPrice : '未設成本')+'</div></div>'+ '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+ '<div class="chgp '+(s.changePercent!=null?(s.changePercent>=0?'up':'down'):'')+'">'+cgp+'</div>'+ '<div class="chg '+(s.change!=null?(chg>=0?'up':'down'):'')+'">'+cgStr+'</div>'+ '<div class="today-pnl '+tpClass+'">'+tpStr+'</div>'+ '<div class="total '+(totalValForClass!==0?(totalValForClass>=0?'up':'down'):'')+'">'+totalHtml+'</div>'+ '<div class="act"><button type="button" onclick="editStock(\''+s.id+'\')">✎</button><button type="button" class="del-btn" onclick="deleteStock(\''+s.id+'\')">✕</button></div>'; body.appendChild(div); } updateSummary(); }
+        function renderAll(){ const body=document.getElementById('listBody'); const empty=document.getElementById('emptyState'); const tableScroll=document.getElementById('tableScroll'); const sumArea = document.getElementById('summaryArea'); const saveArea = document.getElementById('saveArea'); body.innerHTML=''; const currentStocks = tabStocks[currentTab]; if(currentStocks.length===0){ empty.style.display='block';tableScroll.style.display='none';sumArea.style.display='none';saveArea.style.display='none';return; } empty.style.display='none';tableScroll.style.display='block';sumArea.style.display='block';saveArea.style.display='block'; for(const s of currentStocks){ const div=document.createElement('div');div.className='srow';div.dataset.id=s.id; const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty; let p = s.price; let chg = s.change ?? 0; let pStr = '—'; if(p!=null) pStr = formatPrice(p); const cgp = s.changePercent!=null ? (s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%' : '—'; let cgStr = '—'; if(s.change!=null) cgStr = (chg>=0?'+':'') + chg.toFixed(2); let tpStr = '—'; let tpClass = ''; if (s.change != null) { const todayPnl = Math.round(shares * chg); tpStr = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString(); tpClass = todayPnl >= 0 ? 'up' : 'down'; } let totalHtml = '—'; let totalValForClass = 0; if (p != null) { const mktValue = Math.round(shares * p); if (s.buyPrice != null && s.buyPrice > 0) { const cost = s.buyPrice * shares; const unPnl = Math.round(mktValue - cost); const roi = ((mktValue - cost) / cost) * 100; totalValForClass = unPnl; totalHtml = `<div style="line-height:1.2;font-size:17px;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div> <div style="font-size:14px;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`; } else { totalValForClass = 0; totalHtml = `<div style="line-height:1.2;font-size:17px;" class="neutral">—</div> <div style="font-size:14px;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設成本</div>`; } } let srcStr = (s.source==='Fugle' && s.updateTime) ? '<div class="sym-src">via Fugle '+s.updateTime+'</div>' : (s.source==='網頁爬蟲'?'<div class="sym-src">via 網頁爬蟲</div>':'<div class="sym-src"></div>'); let nameDiv = ''; if(s.assetType === 'fund' && s.name) nameDiv = `<div style="font-size:11px;color:var(--accent);margin-top:2px;max-width:110px;overflow:hidden;text-overflow:ellipsis;" title="${s.name}">${s.name}</div>`; div.innerHTML= '<div class="sym-container"><div class="sym" style="font-size:'+(s.symbol.length>15?'12px':'17px')+';word-break:break-all;">'+(s.symbol.startsWith('http')?'網頁爬蟲基金':s.symbol)+'</div>'+nameDiv+srcStr+'</div>'+ '<div class="qty-cell"><div style="line-height:1.2;font-size:17px;">'+s.displayQty+' '+s.displayUnit+'</div><div style="font-size:14px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+(s.buyPrice ? '成本 '+s.buyPrice : '未設成本')+'">'+(s.buyPrice ? '成本 '+s.buyPrice : '未設成本')+'</div></div>'+ '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+ '<div class="chgp '+(s.changePercent!=null?(s.changePercent>=0?'up':'down'):'')+'">'+cgp+'</div>'+ '<div class="chg '+(s.change!=null?(chg>=0?'up':'down'):'')+'">'+cgStr+'</div>'+ '<div class="today-pnl '+tpClass+'">'+tpStr+'</div>'+ '<div class="total '+(totalValForClass!==0?(totalValForClass>=0?'up':'down'):'')+'">'+totalHtml+'</div>'+ '<div class="act"><button type="button" onclick="editStock(\''+s.id+'\')">✎</button><button type="button" class="del-btn" onclick="deleteStock(\''+s.id+'\')">✕</button></div>'; body.appendChild(div); } updateSummary(); }
         function updateSummary(){ let pnl=0, asset=0, totalUnPnl=0; let hasUnPnl = false; const currentStocks = tabStocks[currentTab]; for(const s of currentStocks){ const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty; let p=s.price??0, c=s.change??0; pnl += Math.round(sh * c); asset += Math.round(sh * p); if (s.buyPrice != null && s.price != null && s.buyPrice > 0) { totalUnPnl += Math.round((s.price - s.buyPrice) * sh); hasUnPnl = true; } } const pe=document.getElementById('totalPnl');pe.textContent=(pnl>=0?'+':'')+pnl.toLocaleString();pe.className='val '+(pnl>=0?'up':'down'); const ae = document.getElementById('totalAsset');ae.textContent = (asset>=0?'+':'')+asset.toLocaleString();ae.className = 'val neutral'; const ue = document.getElementById('totalUnrealized'); if(hasUnPnl) { ue.textContent = (totalUnPnl >= 0 ? '+' : '') + totalUnPnl.toLocaleString(); ue.className = 'val ' + (totalUnPnl >= 0 ? 'up' : 'down'); } else { ue.textContent = '—'; ue.className = 'val neutral'; } }
         function toggleSummary(e) { if(e) e.stopPropagation(); const details = document.getElementById('summaryDetails'); const toggleBtn = document.getElementById('sumToggleBtn'); if (details.style.display === 'none') { details.style.display = 'block'; toggleBtn.style.display = 'none'; } else { details.style.display = 'none'; toggleBtn.style.display = 'block'; } }
         
@@ -405,18 +475,39 @@
             
             const id = 's_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
             currentStocks.push({
-                id, assetType: 'fund', symbol: sym, name: name, displayQty: qty, displayUnit: '單位', buyPrice: buyPrice, shares: qty, price: null, change: null, changePercent: null
+                id, assetType: 'fund', symbol: sym, name: name.startsWith('http') ? '自訂網頁基金' : name, displayQty: qty, displayUnit: '單位', buyPrice: buyPrice, shares: qty, price: null, change: null, changePercent: null
             });
             saveHoldings(); renderAll();
             document.getElementById('fundSearchInput').value = '';
             document.getElementById('fundSymbolHidden').value = '';
             document.getElementById('fundQtyInput').value = '';
             document.getElementById('fundPriceInput').value = '';
-            showToast('已新增基金 ' + name); refreshPrices();
+            showToast('已新增基金'); refreshPrices();
         }
 
         function deleteStock(id){ if(!confirm('確定刪除？'))return; tabStocks[currentTab]=tabStocks[currentTab].filter(s=>s.id!==id);saveHoldings();renderAll();showToast('記錄已刪除'); }
-        function editStock(id){ const s=tabStocks[currentTab].find(x=>x.id===id);if(!s)return; const ns=prompt('修改代碼：',s.symbol); if(ns!==null && ns.trim()){ const cleanSym = ns.trim().toUpperCase().replace(/[^A-Z0-9.\-]/g, ''); if(cleanSym) { s.symbol=cleanSym; s.price=null;s.change=null;s.changePercent=null;s.source=null;s.updateTime=null; } } const nq=prompt(`修改數量（單位維持 ${s.displayUnit}）：`, s.displayQty); if(nq!==null){ const qtyNum = s.assetType === 'fund' ? parseFloat(nq) : parseInt(nq); if(qtyNum>0){s.displayQty=qtyNum;s.shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;} } const nbp=prompt('設定/修改「平均成本」\n(留空或輸入0代表不計算總損益)：', s.buyPrice || ''); if(nbp!==null){ const bpNum = parseFloat(nbp); s.buyPrice = (isNaN(bpNum) || bpNum <= 0) ? null : bpNum; } saveHoldings();renderAll();showToast('已修改');refreshPrices(); }
+        function editStock(id){ 
+            const s=tabStocks[currentTab].find(x=>x.id===id);if(!s)return; 
+            const ns=prompt('修改代碼 (或直接貼上網頁 URL)：',s.symbol); 
+            if(ns!==null && ns.trim()){ 
+                const cleanSym = ns.trim();
+                if(cleanSym) { 
+                    // 如果是網址就保留原樣，否則過濾特殊字元
+                    s.symbol = cleanSym.startsWith('http') ? cleanSym : cleanSym.toUpperCase().replace(/[^A-Z0-9.\-]/g, ''); 
+                    s.price=null;s.change=null;s.changePercent=null;s.source=null;s.updateTime=null; 
+                } 
+            } 
+            const nq=prompt(`修改數量（單位維持 ${s.displayUnit}）：`, s.displayQty); 
+            if(nq!==null){ 
+                const qtyNum = s.assetType === 'fund' ? parseFloat(nq) : parseInt(nq); 
+                if(qtyNum>0){s.displayQty=qtyNum;s.shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;} 
+            } 
+            const nbp=prompt('設定/修改「平均成本」\n(留空或輸入0代表不計算總損益)：', s.buyPrice || ''); 
+            if(nbp!==null){ 
+                const bpNum = parseFloat(nbp); s.buyPrice = (isNaN(bpNum) || bpNum <= 0) ? null : bpNum; 
+            } 
+            saveHoldings();renderAll();showToast('已修改');refreshPrices(); 
+        }
         function saveDailyPnl(){ let pnl=0,asset=0; const currentStocks = tabStocks[currentTab]; for(const s of currentStocks){ const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty; let p=s.price??0, c=s.change??0; pnl += Math.round(sh * c); asset += Math.round(sh * p); } const n=new Date(); const ds=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0'); const ts=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0'); const currentRecords = tabRecords[currentTab]; currentRecords.unshift({date:ds,time:ts,totalPnl:pnl,totalAsset:asset,timestamp:n.getTime()}); if(currentRecords.length>50) tabRecords[currentTab]=currentRecords.slice(0,50); saveRecords();renderHistory(); showToast('已存儲今日損益：'+(pnl>=0?'+':'')+pnl.toLocaleString()); }
         function deleteHistory(timestamp) { if(!confirm('確定刪除此筆記錄？')) return; tabRecords[currentTab] = tabRecords[currentTab].filter(r => r.timestamp !== timestamp); saveRecords();renderHistory();showToast('記錄已刪除'); }
         function renderHistory(){ const body=document.getElementById('historyBody'); const currentRecords = tabRecords[currentTab]; if(!currentRecords || currentRecords.length===0){body.innerHTML='<div class="hist-empty">尚無記錄</div>';return;} body.innerHTML=''; for(const r of currentRecords){ const d=document.createElement('div');d.className='hist-item'; d.innerHTML='<div class="hist-item-left"><span class="hdate">'+r.date+' '+r.time+'</span><span class="hval '+(r.totalPnl>=0?'up':'down')+'">'+(r.totalPnl>=0?'+':'')+r.totalPnl.toLocaleString()+'</span></div><button type="button" class="del-hist-btn" onclick="deleteHistory('+r.timestamp+')">✕</button>'; body.appendChild(d); } }
@@ -431,7 +522,7 @@
         document.getElementById('symInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); } }); 
         document.getElementById('qtyInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('buyPriceInput').focus(); } }); 
         document.getElementById('buyPriceInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); addStock(); } }); 
-        document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')}); console.log('股票庫存管理 V3.8.0 已啟動 (包含基金智慧搜尋)');
+        document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')}); console.log('股票庫存管理 V3.9.0 已啟動 (雙核心搜尋 + 智慧網頁爬蟲)');
     </script>
 </body>
 </html>
