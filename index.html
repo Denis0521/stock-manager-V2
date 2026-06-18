@@ -296,7 +296,7 @@
                     <input type="file" id="importFile" style="display:none" onchange="importData(event)">
                 </div>
             </div>
-            <div class="v-box">核心版本：V3.8.0 (基金整合版)</div>
+            <div class="v-box">核心版本：V3.8.1 (CORS 跨域修復版)</div>
             <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
         </div>
     </div>
@@ -429,7 +429,7 @@
         function importData(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); if(confirm('⚠️ 警告：這將會覆蓋您目前的所有資料！\n確定要還原備份嗎？')) { if (data.tabStocks) { data.tabStocks.forEach((val, i) => { if(val) localStorage.setItem(getStockKey(i), val); }); } if (data.tabRecords) { data.tabRecords.forEach((val, i) => { if(val) localStorage.setItem(getRecordKey(i), val); }); } if (data.tabNames) localStorage.setItem(TN_KEY, data.tabNames); if (data.fugleKey) localStorage.setItem(FK, data.fugleKey); if (data.secondFugleKey) localStorage.setItem(SFK, data.secondFugleKey); if (data.theme) localStorage.setItem(TK, data.theme); if (data.fundPortfolio) localStorage.setItem('tw_fund_portfolio', data.fundPortfolio); if (data.fundRecords) localStorage.setItem('tw_fund_records', data.fundRecords); alert('🎉 備份還原成功！系統將為您重新載入頁面。'); location.reload(); } } catch (err) { alert('❌ 檔案格式錯誤，無法還原資料。請確認上傳的是正確的 json 備份檔。'); } document.getElementById('importFile').value = ''; }; reader.readAsText(file); }
 
         // ==========================================
-        // 基金功能 (V3.8.0 新增)
+        // 基金功能 (V3.8.1 CORS 修復與手動輸入版)
         // ==========================================
         function saveFundHoldings() { try { localStorage.setItem('tw_fund_portfolio', JSON.stringify(fundPortfolios)); } catch(e) { console.error('儲存基金資料失敗:', e); } }
         function addFund() {
@@ -448,15 +448,21 @@
             showToast('已新增基金 ' + name);
             refreshFundPrices();
         }
+
+        // 透過 allorigins 代理避開 TDCC CORS 限制
         async function fetchFundNavFromTDCC(fund) {
+            if(!fund.code) return null; // 沒代碼無法查 API
             try {
-                const response = await fetch(`${TDCC_API_BASE}/v1/fund/nav?fund_id=${encodeURIComponent(fund.code)}&fund_name=${encodeURIComponent(fund.name)}`, { method: 'GET', headers: { 'Accept': 'application/json' }, signal: AbortSignal.timeout(5000) });
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const tdccUrl = `${TDCC_API_BASE}/v1/fund/nav?fund_id=${encodeURIComponent(fund.code)}`;
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(tdccUrl)}`;
+                const response = await fetch(proxyUrl, { method: 'GET', headers: { 'Accept': 'application/json' }, signal: AbortSignal.timeout(5000) });
+                if (!response.ok) return null;
                 const data = await response.json();
                 if (data && data.nav) { return { nav: parseFloat(data.nav), prevNav: data.prevNav ? parseFloat(data.prevNav) : null, source: 'TDCC', updateTime: new Date().toLocaleTimeString('zh-TW', {hour: '2-digit', minute: '2-digit'}) }; }
                 return null;
-            } catch (error) { console.error('TDCC API 查詢失敗:', error); return null; }
+            } catch (error) { return null; }
         }
+
         async function refreshFundPrices() {
             const results = await Promise.all(fundPortfolios.map(async (fund) => { const navData = await fetchFundNavFromTDCC(fund); return { fund, navData }; }));
             for (const { fund, navData } of results) {
@@ -468,6 +474,7 @@
             }
             updateFundSummary();
         }
+
         function renderFundRow(fund) {
             const el = document.querySelector(`.fund-srow[data-id="${fund.id}"]`);
             if (!el) return;
@@ -492,6 +499,7 @@
                 }
             }
         }
+
         function renderFundAll() {
             if(currentTab !== 3) return;
             const body = document.getElementById('fundListBody'); const empty = document.getElementById('fundEmptyState'); const tableScroll = document.getElementById('fundTableScroll'); const summaryArea = document.getElementById('fundSummaryArea'); const saveArea = document.getElementById('fundSaveArea');
@@ -518,6 +526,7 @@
             }
             updateFundSummary();
         }
+
         function updateFundSummary() {
             let totalPnl = 0; let totalAsset = 0; let totalUnrealized = 0; let hasUnrealized = false;
             for (const fund of fundPortfolios) {
@@ -529,13 +538,19 @@
             const assetEl = document.getElementById('fundTotalAsset'); if (assetEl) { assetEl.textContent = totalAsset.toFixed(2); assetEl.className = 'val neutral'; }
             const unrealizedEl = document.getElementById('fundTotalUnrealized'); if (unrealizedEl) { if (hasUnrealized) { unrealizedEl.textContent = (totalUnrealized >= 0 ? '+' : '') + totalUnrealized.toFixed(2); unrealizedEl.className = 'val ' + (totalUnrealized >= 0 ? 'up' : 'down'); } else { unrealizedEl.textContent = '—'; unrealizedEl.className = 'val neutral'; } }
         }
+
+        // 增強編輯功能：若 API 抓不到，可手動輸入淨值
         function editFund(id) {
             const fund = fundPortfolios.find(f => f.id === id); if (!fund) return;
             const newQty = prompt('修改持有單位數：', fund.qty); if (newQty !== null) { const qtyNum = parseFloat(newQty); if (qtyNum > 0) fund.qty = qtyNum; }
             const newBuyPrice = prompt('設定/修改「買入均價」\n(留空或輸入0代表不計算總損益)：', fund.buyPrice || ''); if (newBuyPrice !== null) { const priceNum = parseFloat(newBuyPrice); fund.buyPrice = (isNaN(priceNum) || priceNum <= 0) ? null : priceNum; }
+            const newNav = prompt('若 API 無法自動抓取，請手動輸入「最新淨值」：', fund.nav || ''); if (newNav !== null) { const navNum = parseFloat(newNav); if (!isNaN(navNum) && navNum > 0) { fund.nav = navNum; fund.source = '手動'; } else { fund.nav = null; } }
+            const newPrevNav = prompt('手動輸入「昨日淨值」(用於計算漲跌)：', fund.prevNav || ''); if (newPrevNav !== null) { const prevNavNum = parseFloat(newPrevNav); if (!isNaN(prevNavNum) && prevNavNum > 0) { fund.prevNav = prevNavNum; if(fund.nav) { fund.change = fund.nav - fund.prevNav; fund.changePercent = (fund.change / fund.prevNav) * 100; } } else { fund.prevNav = null; fund.change = null; fund.changePercent = null; } }
             saveFundHoldings(); renderFundAll(); showToast('已修改'); refreshFundPrices();
         }
+
         function deleteFund(id) { if (!confirm('確定刪除？')) return; fundPortfolios = fundPortfolios.filter(f => f.id !== id); saveFundHoldings(); renderFundAll(); showToast('記錄已刪除'); }
+        
         function saveFundDailyPnl() {
             let pnl = 0; let asset = 0;
             for (const fund of fundPortfolios) { if (fund.change != null) pnl += fund.qty * fund.change; if (fund.nav != null) asset += fund.qty * fund.nav; }
@@ -546,7 +561,9 @@
             renderFundHistory();
             showToast('已存儲今日基金損益：' + (pnl >= 0 ? '+' : '') + pnl.toFixed(2));
         }
+        
         function deleteFundHistory(timestamp) { if (!confirm('確定刪除此筆記錄？')) return; fundRecords = fundRecords.filter(r => r.timestamp !== timestamp); localStorage.setItem('tw_fund_records', JSON.stringify(fundRecords)); renderFundHistory(); showToast('記錄已刪除'); }
+        
         function renderFundHistory() {
             if(currentTab !== 3) return;
             const body = document.getElementById('fundHistoryBody');
@@ -567,7 +584,7 @@
         document.getElementById('qtyInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('buyPriceInput').focus(); } }); 
         document.getElementById('buyPriceInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addStock(); } }); 
         document.getElementById('modalOverlay').addEventListener('click', function(e) { if (e.target === this) this.classList.remove('show'); }); 
-        console.log('股票庫存管理 V3.8.0 已啟動 (基金整合版)');
+        console.log('股票庫存管理 V3.8.1 已啟動 (CORS 跨域修復版)');
     </script>
 </body>
 </html>
