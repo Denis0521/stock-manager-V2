@@ -199,5 +199,54 @@
             <div id="listBody"></div>
         </div>
     </div>
-    <div id="emptyState" style="display:none;margin:0 14px;padding:32px 14px;text-align:center;color
-
+    <div id="emptyState" style="display:none;margin:0 14px;padding:32px 14px;text-align:center;color:var(--t-muted);font-weight:600;font-size:16px">尚無持股，請在上方新增</div>
+    <div class="summary" id="summaryArea" style="display:none;">
+        <div onclick="toggleSummary()" style="cursor:pointer;">
+            <div class="sum-row" style="padding-bottom:0;">
+                <span class="lab">今日損益總計</span>
+                <span class="val" id="totalPnl">+0</span>
+            </div>
+            <div class="sum-toggle-btn" id="sumToggleBtn">▼ 下拉選單</div>
+        </div>
+        <div id="summaryDetails" style="display:none;">
+            <div class="sum-divider" style="margin-top:10px;"></div>
+            <div class="sum-row"><span class="lab">總未實現損益 (ROI)</span><span class="val" id="totalUnrealized">—</span></div>
+            <div class="sum-divider"></div>
+            <div class="sum-row" style="padding-bottom:0;"><span class="lab">持股資產總計</span><span class="val" id="totalAsset">0</span></div>
+            <div class="sum-toggle-btn" style="margin-top:12px;" onclick="toggleSummary(event)">▲ 收起選單</div>
+        </div>
+    </div>
+    <button type="button" class="btn-save" id="saveArea" style="display:none;" onclick="saveDailyPnl()">存儲今日損益總計</button>
+    <div class="history">
+        <div class="card-title" style="margin:0 0 6px">歷史記錄</div>
+        <div id="historyBody"><div class="hist-empty">尚無記錄</div></div>
+    </div>
+    <div class="toast" id="toast"></div>
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="modalPanel">
+            <h2>進階設定</h2>
+            <div style="text-align:center;margin-bottom:12px">
+                <a class="btn-link" href="https://developer.fugle.tw/docs/key/" target="_blank">🔗 申請 Fugle API Key</a>
+            </div>
+            <label>Fugle API Key（主要）</label>
+            <input type="text" id="fugleKeyInput" placeholder="輸入第一組 Key" autocomplete="off">
+            <div><span class="key-status none" id="fugleKeyStatus">未設定</span></div>
+            <label>Fugle API Key 2（備用）</label>
+            <input type="text" id="secondFugleKeyInput" placeholder="輸入第二組 Key（選填）" autocomplete="off">
+            <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
+            <label>Google 試算表 CSV 網址（選填）</label>
+            <input type="text" id="googleCsvInput" placeholder="留空使用預設全球指數" autocomplete="off">
+            <div class="backup-box">
+                <div class="backup-title">資料備份與還原</div>
+                <div class="backup-btns">
+                    <button type="button" class="btn-backup" onclick="exportData()">📥 匯出備份</button>
+                    <button type="button" class="btn-backup" onclick="triggerImport()">📤 匯入還原</button>
+                    <input type="file" id="importFile" style="display:none" onchange="importData(event)">
+                </div>
+            </div>
+            <div class="v-box">核心版本：V3.7.4 (平板大螢幕適配版)</div>
+            <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
+        </div>
+    </div>
+    <script>
+==========
