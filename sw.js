@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stock-portfolio-v3.9.0'; // 🚀 版本號已升至 3.9.0
+const CACHE_NAME = 'stock-portfolio-v3.7.4'; // ⚠️ 版本號已升至 3.7.4
 const urlsToCache = [
   './',
   './index.html',
@@ -11,7 +11,7 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Opened cache v3.9.0');
+        console.log('Opened cache v3.7.4');
         return cache.addAll(urlsToCache);
       })
   );
@@ -36,7 +36,7 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const requestUrl = new URL(event.request.url);
   
-  // 絕對不快取 API 動態請求與智慧搜尋請求
+  // 絕對不快取 API 動態請求
   const isApiRequest = 
     requestUrl.hostname.includes('api.fugle.tw') || 
     requestUrl.hostname.includes('finance.yahoo.com') || 
@@ -57,3 +57,4 @@ self.addEventListener('fetch', event => {
       })
   );
 });
+
