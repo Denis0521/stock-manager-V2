@@ -1,19 +1,21 @@
-const CACHE_NAME = 'stock-portfolio-v3.7.4'; // ⚠️ 版本號已升至 3.7.4
-const urlsToCache = [
+const CACHE_NAME = 'stock-portfolio-v3.7.4';
+const STATIC_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './icon-512.png'
+  './icon-512.png',
+  './icon.svg'
 ];
+const API_CACHE_NAME = 'stock-api-cache-v3.7.4';
+const API_MAX_AGE = 5 * 60 * 1000;
 
 self.addEventListener('install', event => {
-  self.skipWaiting(); // 強制立即啟用新版的 Service Worker
+  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Opened cache v3.7.4');
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(CACHE_NAME).then(cache => {
+      console.log('[SW] Cache opened:', CACHE_NAME);
+      return cache.addAll(STATIC_ASSETS);
+    })
   );
 });
 
@@ -22,9 +24,9 @@ self.addEventListener('activate', event => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName); // 清除舊版快取
+          if (cacheName !== CACHE_NAME && cacheName !== API_CACHE_NAME) {
+            console.log('[SW] Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
           }
         })
       );
@@ -36,25 +38,64 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const requestUrl = new URL(event.request.url);
   
-  // 絕對不快取 API 動態請求
-  const isApiRequest = 
-    requestUrl.hostname.includes('api.fugle.tw') || 
-    requestUrl.hostname.includes('finance.yahoo.com') || 
-    requestUrl.hostname.includes('allorigins.win') ||
-    requestUrl.hostname.includes('docs.google.com');
-  
+  const isApiRequest = [
+    'api.fugle.tw',
+    'finance.yahoo.com',
+    'allorigins.win',
+    'corsproxy.io',
+    'api.codetabs.com',
+    'docs.google.com'
+  ].some(host => requestUrl.hostname.includes(host));
+
   if (isApiRequest) {
-    event.respondWith(fetch(event.request));
+    event.respondWith(networkFirstWithCache(event.request));
     return;
   }
-  
-  // 靜態檔案使用快取優先
+
   event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) return response;
-        return fetch(event.request);
-      })
+    caches.match(event.request).then(response => {
+      if (response) return response;
+      return fetch(event.request).then(resp => {
+        if (!resp || resp.status !== 200 || resp.type !== 'basic') return resp;
+        const clone = resp.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        return resp;
+      });
+    })
   );
 });
+
+async function networkFirstWithCache(request) {
+  const cache = await caches.open(API_CACHE_NAME);
+  const cached = await cache.match(request);
+
+  if (cached) {
+    const dateHeader = cached.headers.get('sw-cached-date');
+    if (dateHeader && (Date.now() - parseInt(dateHeader)) < API_MAX_AGE) {
+      return cached;
+    }
+  }
+
+  try {
+    const networkResp = await fetch(request);
+    const clone = networkResp.clone();
+    const headers = new Headers(clone.headers);
+    headers.set('sw-cached-date', Date.now().toString());
+    
+    const modifiedResp = new Response(clone.body, {
+      status: clone.status,
+      statusText: clone.statusText,
+      headers
+    });
+    
+    cache.put(request, modifiedResp);
+    return networkResp;
+  } catch (err) {
+    if (cached) {
+      console.log('[SW] Network failed, serving stale cache');
+      return cached;
+    }
+    throw err;
+  }
+}
 
