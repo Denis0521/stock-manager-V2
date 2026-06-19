@@ -255,7 +255,7 @@
                     <input type="file" id="importFile" style="display:none" onchange="importData(event)">
                 </div>
             </div>
-            <div class="v-box">核心版本：V3.9.0 (配息紀錄面板進化版)</div>
+            <div class="v-box">核心版本：V3.9.1 (均價顯示優化版)</div>
             <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
         </div>
     </div>
@@ -320,7 +320,7 @@
         const getStockKey = (idx) => `tw_stock_portfolio_tab_${idx}`;
         const getRecordKey = (idx) => `tw_records_tab_${idx}`;
         let cachedGlobalIndices = [];
-        let tempDividendRecords = []; // 編輯面板用的暫存配息陣列
+        let tempDividendRecords = []; 
         const FUGLE='https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
         
         function loadState(){ try{ const f=localStorage.getItem(FK);if(f)fugleKey=f; const sf=localStorage.getItem(SFK);if(sf)secondFugleKey=sf; const ct=localStorage.getItem(CUR_TAB_KEY);if(ct!=null)currentTab=parseInt(ct); const tn=localStorage.getItem(TN_KEY);if(tn) tabNames=JSON.parse(tn); for(let i=0; i<3; i++){ const s=localStorage.getItem(getStockKey(i)); if(s) tabStocks[i]=JSON.parse(s); const r=localStorage.getItem(getRecordKey(i)); if(r) tabRecords[i]=JSON.parse(r); } const t=localStorage.getItem(TK); applyThemeText(t); const cachedIdx = localStorage.getItem('tw_cached_indices'); if(cachedIdx) { cachedGlobalIndices = JSON.parse(cachedIdx); if(cachedGlobalIndices.length > 0) renderGlobalIndices(cachedGlobalIndices); } }catch(e){console.error(e);} document.getElementById('fugleKeyInput').value=fugleKey; document.getElementById('secondFugleKeyInput').value=secondFugleKey; updateKeyStatus(); updateTabUI(); }
@@ -356,7 +356,7 @@
             currentStocks.push({
                 id, symbol:sym, displayQty:qty, displayUnit:unit, buyPrice:buyPrice, 
                 shares:unit==='張'?qty*1000:qty, price:null, change:null, changePercent:null, 
-                totalDividend:0, dividendRecords:[] // 新增陣列
+                totalDividend:0, dividendRecords:[] 
             }); 
             saveHoldings();renderAll(); 
             document.getElementById('symInput').value=''; 
@@ -367,26 +367,21 @@
 
         function deleteStock(id){ if(!confirm('確定刪除？'))return; tabStocks[currentTab]=tabStocks[currentTab].filter(s=>s.id!==id);saveHoldings();renderAll();showToast('記錄已刪除'); }
         
-        // ================== 新版編輯與配息紀錄面板功能 ==================
         function editStock(id){ 
             const s = tabStocks[currentTab].find(x=>x.id===id); if(!s)return; 
-            
-            // 讀取基礎資料
             document.getElementById('editStockId').value = id;
             document.getElementById('editSym').value = s.symbol;
             document.getElementById('editQty').value = s.displayQty;
             document.getElementById('editUnit').value = s.displayUnit;
             document.getElementById('editBuyPrice').value = s.buyPrice || '';
 
-            // 處理歷史配息資料相容性
             if(s.totalDividend > 0 && (!s.dividendRecords || s.dividendRecords.length === 0)) {
                 s.dividendRecords = [{ id: 'd_'+Date.now(), date: '前期累積', amount: s.totalDividend }];
             } else if (!s.dividendRecords) {
                 s.dividendRecords = [];
             }
-            tempDividendRecords = JSON.parse(JSON.stringify(s.dividendRecords)); // 深拷貝
+            tempDividendRecords = JSON.parse(JSON.stringify(s.dividendRecords)); 
             
-            // 初始化配息輸入框
             document.getElementById('divDate').value = new Date().toISOString().split('T')[0];
             document.getElementById('divAmount').value = '';
 
@@ -405,7 +400,6 @@
             if(tempDividendRecords.length === 0) {
                 list.innerHTML = '<div style="text-align:center; color:var(--t-muted); font-size:13px; padding:12px;">尚無配息紀錄</div>';
             } else {
-                // 照日期降序排列（由新到舊）
                 const sortedRecords = [...tempDividendRecords].sort((a,b) => new Date(b.date) - new Date(a.date));
                 sortedRecords.forEach(r => {
                     total += r.amount;
@@ -454,7 +448,6 @@
             s.shares = unit === '張' ? qty * 1000 : qty;
             s.buyPrice = (isNaN(bpNum) || bpNum <= 0) ? null : bpNum;
 
-            // 儲存配息陣列並更新總額
             s.dividendRecords = tempDividendRecords;
             s.totalDividend = tempDividendRecords.reduce((sum, r) => sum + r.amount, 0);
 
@@ -464,7 +457,6 @@
             showToast('已成功儲存變更');
             refreshPrices();
         }
-        // ================== 新版編輯與配息紀錄面板功能 END ==================
 
         function renderRow(s){ 
             const el=document.querySelector('.srow[data-id="'+s.id+'"]');if(!el)return; 
@@ -485,12 +477,12 @@
             if (s.buyPrice && s.totalDividend > 0) {
                 adjustedCost = originalCost - s.totalDividend;
                 const adjBp = (adjustedCost / shares).toFixed(2);
-                adjBpText = ` <span class="up" style="font-size:12px;font-weight:bold;">(降至 ${adjBp})</span>`;
+                adjBpText = `<div class="up" style="font-size:13px;font-weight:800;margin-top:3px;">(降至 ${adjBp})</div>`;
             }
 
             const qn=el.querySelector('.qty-cell'); 
             if(qn){ 
-                qn.innerHTML=`<div style="line-height:1.2;font-size:17px;">${s.displayQty} ${s.displayUnit}</div> <div style="font-size:14px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${s.buyPrice ? '原始均價 '+s.buyPrice : '未設均價'}">${bpText}${adjBpText}</div>`; 
+                qn.innerHTML=`<div style="line-height:1.2;font-size:17px;">${s.displayQty} ${s.displayUnit}</div> <div style="font-size:14px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${s.buyPrice ? '原始均價 '+s.buyPrice : '未設均價'}">${bpText}</div>${adjBpText}`; 
             } 
             
             const pEl=el.querySelector('.price'); 
@@ -544,7 +536,7 @@
                 if (s.buyPrice && s.totalDividend > 0) {
                     adjustedCost = originalCost - s.totalDividend;
                     const adjBp = (adjustedCost / shares).toFixed(2);
-                    adjBpText = ` <span class="up" style="font-size:12px;font-weight:bold;">(降至 ${adjBp})</span>`;
+                    adjBpText = `<div class="up" style="font-size:13px;font-weight:800;margin-top:3px;">(降至 ${adjBp})</div>`;
                 }
 
                 let totalHtml = '—'; let totalValForClass = 0; 
@@ -561,7 +553,8 @@
                     } 
                 } 
                 let srcStr = (s.source==='Fugle' && s.updateTime) ? '<div class="sym-src">via Fugle '+s.updateTime+'</div>' : '<div class="sym-src"></div>'; 
-                div.innerHTML= '<div class="sym-container"><div class="sym">'+s.symbol+'</div>'+srcStr+'</div>'+ '<div class="qty-cell"><div style="line-height:1.2;font-size:17px;">'+s.displayQty+' '+s.displayUnit+'</div><div style="font-size:14px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+(s.buyPrice ? '原始均價 '+s.buyPrice : '未設均價')+'">'+bpText+adjBpText+'</div></div>'+ '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+ '<div class="chgp '+(s.changePercent!=null?(s.changePercent>=0?'up':'down'):'')+'">'+cgp+'</div>'+ '<div class="chg '+(s.change!=null?(chg>=0?'up':'down'):'')+'">'+cgStr+'</div>'+ '<div class="today-pnl '+tpClass+'">'+tpStr+'</div>'+ '<div class="total '+(totalValForClass!==0?(totalValForClass>=0?'up':'down'):'')+'">'+totalHtml+'</div>'+ '<div class="act"><button type="button" onclick="editStock(\''+s.id+'\')">✎</button><button type="button" class="del-btn" onclick="deleteStock(\''+s.id+'\')">✕</button></div>'; 
+                
+                div.innerHTML= '<div class="sym-container"><div class="sym">'+s.symbol+'</div>'+srcStr+'</div>'+ '<div class="qty-cell"><div style="line-height:1.2;font-size:17px;">'+s.displayQty+' '+s.displayUnit+'</div><div style="font-size:14px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+(s.buyPrice ? '原始均價 '+s.buyPrice : '未設均價')+'">'+bpText+'</div>'+adjBpText+'</div>'+ '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+ '<div class="chgp '+(s.changePercent!=null?(s.changePercent>=0?'up':'down'):'')+'">'+cgp+'</div>'+ '<div class="chg '+(s.change!=null?(chg>=0?'up':'down'):'')+'">'+cgStr+'</div>'+ '<div class="today-pnl '+tpClass+'">'+tpStr+'</div>'+ '<div class="total '+(totalValForClass!==0?(totalValForClass>=0?'up':'down'):'')+'">'+totalHtml+'</div>'+ '<div class="act"><button type="button" onclick="editStock(\''+s.id+'\')">✎</button><button type="button" class="del-btn" onclick="deleteStock(\''+s.id+'\')">✕</button></div>'; 
                 body.appendChild(div); 
             } 
             updateSummary(); 
@@ -601,11 +594,10 @@
         function importData(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); if(confirm('⚠️ 警告：這將會覆蓋您目前的所有資料！\n確定要還原備份嗎？')) { if (data.tabStocks) { data.tabStocks.forEach((val, i) => { if(val) localStorage.setItem(getStockKey(i), val); }); } if (data.tabRecords) { data.tabRecords.forEach((val, i) => { if(val) localStorage.setItem(getRecordKey(i), val); }); } if (data.tabNames) localStorage.setItem(TN_KEY, data.tabNames); if (data.fugleKey) localStorage.setItem(FK, data.fugleKey); if (data.secondFugleKey) localStorage.setItem(SFK, data.secondFugleKey); if (data.theme) localStorage.setItem(TK, data.theme); alert('🎉 備份還原成功！系統將為您重新載入頁面。'); location.reload(); } } catch (err) { alert('❌ 檔案格式錯誤，無法還原資料。請確認上傳的是正確的 json 備份檔。'); } document.getElementById('importFile').value = ''; }; reader.readAsText(file); }
         async function refresh(){await refreshPrices()} loadState();renderAll();renderHistory(); setTimeout(refresh,300); pollTimer=setInterval(refresh,30000); document.getElementById('symInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); } }); document.getElementById('qtyInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('buyPriceInput').focus(); } }); document.getElementById('buyPriceInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); addStock(); } }); 
         
-        // 點擊背景關閉 Modal 的事件處理
         document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')}); 
         document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)closeEditModal()}); 
         
-        console.log('股票庫存管理 V3.9.0 已啟動 (包含配息明細管理面板)');
+        console.log('股票庫存管理 V3.9.1 已啟動 (均價換行優化版)');
     </script>
 </body>
 </html>
