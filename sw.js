@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stock-portfolio-v3.9.1'; // ⚠️ 版本號升級至 3.9.1
+const CACHE_NAME = 'stock-portfolio-v4.0.0'; // ⚠️ 版本號升級至 4.0.0
 const urlsToCache = [
   './',
   './index.html',
@@ -11,7 +11,7 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Opened cache v3.9.1');
+        console.log('Opened cache v4.0.0');
         return cache.addAll(urlsToCache);
       })
   );

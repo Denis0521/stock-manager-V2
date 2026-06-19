@@ -106,10 +106,6 @@
         .key-status.none { background: var(--bg); box-shadow: inset 2px 2px 4px var(--s-dark), inset -2px -2px 4px var(--s-light); color: var(--t-muted); }
 
         .edit-label { display: block; font-size: 12px; color: var(--t-muted); margin-bottom: 4px; font-weight: 600; text-align: left; padding-left: 4px; }
-        .div-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 4px; border-bottom: 1px dashed rgba(150,150,150,0.3); font-size:15px; font-weight:600; }
-        .div-item:last-child { border-bottom: none; }
-        .div-del-btn { background: transparent; box-shadow: none; color: var(--up); padding: 4px 8px; font-size: 14px; text-shadow: none; margin-left:8px; }
-        .div-del-btn:active { box-shadow: none; transform: scale(0.9); }
 
         .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--t-main); color: var(--bg); padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: bold; z-index: 9999; opacity: 0; transition: opacity 0.3s; pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
         .toast.show { opacity: 1; }
@@ -255,7 +251,7 @@
                     <input type="file" id="importFile" style="display:none" onchange="importData(event)">
                 </div>
             </div>
-            <div class="v-box">核心版本：V3.9.1 (均價顯示優化版)</div>
+            <div class="v-box">核心版本：V4.0.0 (乾淨編輯面板版)</div>
             <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
         </div>
     </div>
@@ -271,7 +267,7 @@
                     <input type="text" id="editSym" style="text-transform:uppercase" maxlength="10">
                 </div>
                 <div style="flex:1;">
-                    <div class="edit-label">買入均價 (原始)</div>
+                    <div class="edit-label">買入均價</div>
                     <input type="number" id="editBuyPrice" step="0.01" min="0">
                 </div>
             </div>
@@ -284,20 +280,6 @@
                 <div style="flex:1;">
                     <div class="edit-label">單位</div>
                     <select id="editUnit"><option value="張">張</option><option value="股">股</option></select>
-                </div>
-            </div>
-
-            <div class="backup-box" style="margin:0 0 20px 0; padding:12px;">
-                <div class="backup-title" style="margin-bottom:8px; font-size:14px;">現金配息紀錄 (自動降成本)</div>
-                <div style="display:flex; gap:6px; margin-bottom: 12px;">
-                    <input type="date" id="divDate" style="flex:1.2; padding:10px 6px; font-size:13px;">
-                    <input type="number" id="divAmount" placeholder="總額" style="flex:1; padding:10px 6px;" min="0">
-                    <button type="button" onclick="addDividendRecord()" style="padding:10px; flex:0 0 45px; font-size:18px;">+</button>
-                </div>
-                <div id="dividendList" style="max-height:140px; overflow-y:auto; border-top:2px solid var(--s-dark); padding-top:4px;">
-                    </div>
-                <div style="text-align:right; font-weight:800; margin-top:12px; color:var(--accent); font-size:15px;">
-                    累計抵扣金額：<span id="editTotalDiv">0</span>
                 </div>
             </div>
 
@@ -320,7 +302,6 @@
         const getStockKey = (idx) => `tw_stock_portfolio_tab_${idx}`;
         const getRecordKey = (idx) => `tw_records_tab_${idx}`;
         let cachedGlobalIndices = [];
-        let tempDividendRecords = []; 
         const FUGLE='https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
         
         function loadState(){ try{ const f=localStorage.getItem(FK);if(f)fugleKey=f; const sf=localStorage.getItem(SFK);if(sf)secondFugleKey=sf; const ct=localStorage.getItem(CUR_TAB_KEY);if(ct!=null)currentTab=parseInt(ct); const tn=localStorage.getItem(TN_KEY);if(tn) tabNames=JSON.parse(tn); for(let i=0; i<3; i++){ const s=localStorage.getItem(getStockKey(i)); if(s) tabStocks[i]=JSON.parse(s); const r=localStorage.getItem(getRecordKey(i)); if(r) tabRecords[i]=JSON.parse(r); } const t=localStorage.getItem(TK); applyThemeText(t); const cachedIdx = localStorage.getItem('tw_cached_indices'); if(cachedIdx) { cachedGlobalIndices = JSON.parse(cachedIdx); if(cachedGlobalIndices.length > 0) renderGlobalIndices(cachedGlobalIndices); } }catch(e){console.error(e);} document.getElementById('fugleKeyInput').value=fugleKey; document.getElementById('secondFugleKeyInput').value=secondFugleKey; updateKeyStatus(); updateTabUI(); }
@@ -355,8 +336,7 @@
             const id='s_'+Date.now()+'_'+Math.random().toString(36).slice(2,6); 
             currentStocks.push({
                 id, symbol:sym, displayQty:qty, displayUnit:unit, buyPrice:buyPrice, 
-                shares:unit==='張'?qty*1000:qty, price:null, change:null, changePercent:null, 
-                totalDividend:0, dividendRecords:[] 
+                shares:unit==='張'?qty*1000:qty, price:null, change:null, changePercent:null
             }); 
             saveHoldings();renderAll(); 
             document.getElementById('symInput').value=''; 
@@ -375,55 +355,11 @@
             document.getElementById('editUnit').value = s.displayUnit;
             document.getElementById('editBuyPrice').value = s.buyPrice || '';
 
-            if(s.totalDividend > 0 && (!s.dividendRecords || s.dividendRecords.length === 0)) {
-                s.dividendRecords = [{ id: 'd_'+Date.now(), date: '前期累積', amount: s.totalDividend }];
-            } else if (!s.dividendRecords) {
-                s.dividendRecords = [];
-            }
-            tempDividendRecords = JSON.parse(JSON.stringify(s.dividendRecords)); 
-            
-            document.getElementById('divDate').value = new Date().toISOString().split('T')[0];
-            document.getElementById('divAmount').value = '';
-
-            renderDividendRecords();
             document.getElementById('editModalOverlay').classList.add('show');
         }
 
         function closeEditModal() {
             document.getElementById('editModalOverlay').classList.remove('show');
-        }
-
-        function renderDividendRecords() {
-            const list = document.getElementById('dividendList');
-            list.innerHTML = '';
-            let total = 0;
-            if(tempDividendRecords.length === 0) {
-                list.innerHTML = '<div style="text-align:center; color:var(--t-muted); font-size:13px; padding:12px;">尚無配息紀錄</div>';
-            } else {
-                const sortedRecords = [...tempDividendRecords].sort((a,b) => new Date(b.date) - new Date(a.date));
-                sortedRecords.forEach(r => {
-                    total += r.amount;
-                    const div = document.createElement('div');
-                    div.className = 'div-item';
-                    div.innerHTML = `<span>${r.date}</span><span>+ ${r.amount.toLocaleString()} <button type="button" class="div-del-btn" onclick="removeDividendRecord('${r.id}')">✕</button></span>`;
-                    list.appendChild(div);
-                });
-            }
-            document.getElementById('editTotalDiv').textContent = total.toLocaleString();
-        }
-
-        function addDividendRecord() {
-            const d = document.getElementById('divDate').value;
-            const a = parseFloat(document.getElementById('divAmount').value);
-            if(!d || isNaN(a) || a <= 0) { showToast('請填寫完整配息日期與金額'); return; }
-            tempDividendRecords.push({ id: 'd_'+Date.now()+'_'+Math.random().toString(36).slice(2,5), date: d, amount: a });
-            document.getElementById('divAmount').value = '';
-            renderDividendRecords();
-        }
-
-        function removeDividendRecord(id) {
-            tempDividendRecords = tempDividendRecords.filter(r => r.id !== id);
-            renderDividendRecords();
         }
 
         function saveEditStock() {
@@ -448,9 +384,6 @@
             s.shares = unit === '張' ? qty * 1000 : qty;
             s.buyPrice = (isNaN(bpNum) || bpNum <= 0) ? null : bpNum;
 
-            s.dividendRecords = tempDividendRecords;
-            s.totalDividend = tempDividendRecords.reduce((sum, r) => sum + r.amount, 0);
-
             saveHoldings();
             renderAll();
             closeEditModal();
@@ -471,18 +404,10 @@
             } 
             
             let bpText = s.buyPrice ? '均價 ' + s.buyPrice : '未設均價';
-            let adjBpText = '';
-            let adjustedCost = s.buyPrice ? (s.buyPrice * shares) : 0;
-            const originalCost = adjustedCost;
-            if (s.buyPrice && s.totalDividend > 0) {
-                adjustedCost = originalCost - s.totalDividend;
-                const adjBp = (adjustedCost / shares).toFixed(2);
-                adjBpText = `<div class="up" style="font-size:13px;font-weight:800;margin-top:3px;">(降至 ${adjBp})</div>`;
-            }
 
             const qn=el.querySelector('.qty-cell'); 
             if(qn){ 
-                qn.innerHTML=`<div style="line-height:1.2;font-size:17px;">${s.displayQty} ${s.displayUnit}</div> <div style="font-size:14px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${s.buyPrice ? '原始均價 '+s.buyPrice : '未設均價'}">${bpText}</div>${adjBpText}`; 
+                qn.innerHTML=`<div style="line-height:1.2;font-size:17px;">${s.displayQty} ${s.displayUnit}</div> <div style="font-size:14px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}">${bpText}</div>`; 
             } 
             
             const pEl=el.querySelector('.price'); 
@@ -502,8 +427,9 @@
             if (p != null) { 
                 const mktValue = Math.round(shares * p); 
                 if (s.buyPrice != null && s.buyPrice > 0) { 
-                    const unPnl = Math.round(mktValue - adjustedCost); 
-                    const roi = ((mktValue - adjustedCost) / originalCost) * 100; 
+                    const originalCost = s.buyPrice * shares;
+                    const unPnl = Math.round(mktValue - originalCost); 
+                    const roi = ((mktValue - originalCost) / originalCost) * 100; 
                     totalValForClass = unPnl; 
                     totalHtml = `<div style="line-height:1.2;font-size:17px;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div> <div style="font-size:14px;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`; 
                 } else { 
@@ -530,21 +456,14 @@
                 if (s.change != null) { const todayPnl = Math.round(shares * chg); tpStr = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString(); tpClass = todayPnl >= 0 ? 'up' : 'down'; } 
                 
                 let bpText = s.buyPrice ? '均價 ' + s.buyPrice : '未設均價';
-                let adjBpText = '';
-                let adjustedCost = s.buyPrice ? (s.buyPrice * shares) : 0;
-                const originalCost = adjustedCost;
-                if (s.buyPrice && s.totalDividend > 0) {
-                    adjustedCost = originalCost - s.totalDividend;
-                    const adjBp = (adjustedCost / shares).toFixed(2);
-                    adjBpText = `<div class="up" style="font-size:13px;font-weight:800;margin-top:3px;">(降至 ${adjBp})</div>`;
-                }
 
                 let totalHtml = '—'; let totalValForClass = 0; 
                 if (p != null) { 
                     const mktValue = Math.round(shares * p); 
                     if (s.buyPrice != null && s.buyPrice > 0) { 
-                        const unPnl = Math.round(mktValue - adjustedCost); 
-                        const roi = ((mktValue - adjustedCost) / originalCost) * 100; 
+                        const originalCost = s.buyPrice * shares;
+                        const unPnl = Math.round(mktValue - originalCost); 
+                        const roi = ((mktValue - originalCost) / originalCost) * 100; 
                         totalValForClass = unPnl; 
                         totalHtml = `<div style="line-height:1.2;font-size:17px;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div> <div style="font-size:14px;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`; 
                     } else { 
@@ -554,7 +473,7 @@
                 } 
                 let srcStr = (s.source==='Fugle' && s.updateTime) ? '<div class="sym-src">via Fugle '+s.updateTime+'</div>' : '<div class="sym-src"></div>'; 
                 
-                div.innerHTML= '<div class="sym-container"><div class="sym">'+s.symbol+'</div>'+srcStr+'</div>'+ '<div class="qty-cell"><div style="line-height:1.2;font-size:17px;">'+s.displayQty+' '+s.displayUnit+'</div><div style="font-size:14px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+(s.buyPrice ? '原始均價 '+s.buyPrice : '未設均價')+'">'+bpText+'</div>'+adjBpText+'</div>'+ '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+ '<div class="chgp '+(s.changePercent!=null?(s.changePercent>=0?'up':'down'):'')+'">'+cgp+'</div>'+ '<div class="chg '+(s.change!=null?(chg>=0?'up':'down'):'')+'">'+cgStr+'</div>'+ '<div class="today-pnl '+tpClass+'">'+tpStr+'</div>'+ '<div class="total '+(totalValForClass!==0?(totalValForClass>=0?'up':'down'):'')+'">'+totalHtml+'</div>'+ '<div class="act"><button type="button" onclick="editStock(\''+s.id+'\')">✎</button><button type="button" class="del-btn" onclick="deleteStock(\''+s.id+'\')">✕</button></div>'; 
+                div.innerHTML= '<div class="sym-container"><div class="sym">'+s.symbol+'</div>'+srcStr+'</div>'+ '<div class="qty-cell"><div style="line-height:1.2;font-size:17px;">'+s.displayQty+' '+s.displayUnit+'</div><div style="font-size:14px;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'">'+bpText+'</div></div>'+ '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+ '<div class="chgp '+(s.changePercent!=null?(s.changePercent>=0?'up':'down'):'')+'">'+cgp+'</div>'+ '<div class="chg '+(s.change!=null?(chg>=0?'up':'down'):'')+'">'+cgStr+'</div>'+ '<div class="today-pnl '+tpClass+'">'+tpStr+'</div>'+ '<div class="total '+(totalValForClass!==0?(totalValForClass>=0?'up':'down'):'')+'">'+totalHtml+'</div>'+ '<div class="act"><button type="button" onclick="editStock(\''+s.id+'\')">✎</button><button type="button" class="del-btn" onclick="deleteStock(\''+s.id+'\')">✕</button></div>'; 
                 body.appendChild(div); 
             } 
             updateSummary(); 
@@ -568,8 +487,8 @@
                 let p=s.price??0, c=s.change??0; 
                 pnl += Math.round(sh * c); asset += Math.round(sh * p); 
                 if (s.buyPrice != null && s.price != null && s.buyPrice > 0) { 
-                    let adjustedCost = (s.buyPrice * sh) - (s.totalDividend || 0);
-                    totalUnPnl += Math.round((s.price * sh) - adjustedCost); 
+                    let cost = s.buyPrice * sh;
+                    totalUnPnl += Math.round((s.price * sh) - cost); 
                     hasUnPnl = true; 
                 } 
             } 
@@ -597,7 +516,7 @@
         document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')}); 
         document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)closeEditModal()}); 
         
-        console.log('股票庫存管理 V3.9.1 已啟動 (均價換行優化版)');
+        console.log('股票庫存管理 V4.0.0 已啟動 (全新純淨編輯面板版)');
     </script>
 </body>
 </html>
