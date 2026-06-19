@@ -246,7 +246,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V3.7.6 (動態API與UI優化版)</div>
+    <div class="v-box">核心版本：V3.7.7 (動態API與UI優化版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -293,6 +293,14 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 
       <h3>四、資料備份</h3>
       <p>您可以在進階設定中將庫存與歷史記錄匯出為 JSON 檔案，或從備份檔還原。</p>
+      
+      <h3>五、國際指數與 Google 報價說明</h3>
+      <p>除了台股加權指數外，其他國際股市指數（如道瓊、那斯達克等）是透過 <strong>Google 試算表</strong> 的公開資料抓取。</p>
+      <ul>
+        <li><strong>為什麼不用 Fugle API？</strong> 因為 Fugle 的方案主要針對台股資料，若要取得國際指數需要相當昂貴的企業方案。使用 Google 試算表作為免費的替代方案。</li>
+        <li><strong>為什麼不是即時的？</strong> Google 試算表本身的資料就有<strong>大約 15 分鐘</strong>的延遲。此外，Google 伺服器會對公開發布的網頁進行快取（Cache）。</li>
+        <li><strong>更新頻率：</strong> 本系統設定為每 <strong>30 秒</strong>向 Google 發送一次請求，但實際上 Google 回傳的數據可能與真實市場有 15 分鐘以上的落差。這屬於免費資料源的先天限制。</li>
+      </ul>
     </div>
     <button type="button" class="modal-close" onclick="closeManual()">關閉說明</button>
   </div>
@@ -866,7 +874,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V3.7.6 已啟動 (動態API與UI優化版)');
+console.log('股票庫存管理 V3.7.7 已啟動 (動態API與UI優化版)');
 </script>
 </body>
 </html>
