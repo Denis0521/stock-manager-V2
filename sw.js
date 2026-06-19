@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stock-portfolio-v3.7.4'; // ⚠️ 版本號已升至 3.7.4
+const CACHE_NAME = 'stock-portfolio-v3.7.6'; // ⚠️ 版本號已升至 3.7.6，與 HTML 同步
 const urlsToCache = [
   './',
   './index.html',
@@ -11,7 +11,7 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Opened cache v3.7.4');
+        console.log('Opened cache v3.7.6');
         return cache.addAll(urlsToCache);
       })
   );
@@ -35,19 +35,18 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   const requestUrl = new URL(event.request.url);
-  
+
   // 絕對不快取 API 動態請求
-  const isApiRequest = 
-    requestUrl.hostname.includes('api.fugle.tw') || 
-    requestUrl.hostname.includes('finance.yahoo.com') || 
-    requestUrl.hostname.includes('allorigins.win') ||
-    requestUrl.hostname.includes('docs.google.com');
-  
+  const isApiRequest = requestUrl.hostname.includes('api.fugle.tw') || 
+                       requestUrl.hostname.includes('finance.yahoo.com') || 
+                       requestUrl.hostname.includes('allorigins.win') || 
+                       requestUrl.hostname.includes('docs.google.com');
+
   if (isApiRequest) {
     event.respondWith(fetch(event.request));
     return;
   }
-  
+
   // 靜態檔案使用快取優先
   event.respondWith(
     caches.match(event.request)
