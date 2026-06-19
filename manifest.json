@@ -1,15 +1,15 @@
 {
   "name": "股票庫存管理",
-  "short_name": "股票庫存",
+  "short_name": "股票庫存管理",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#e0e5ec",
   "theme_color": "#e0e5ec",
   "icons": [
     {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any"
     },
     {
@@ -20,4 +20,3 @@
     }
   ]
 }
-
