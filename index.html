@@ -29,7 +29,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC
 input,select,button{font-family:inherit;font-size:inherit;outline:none;text-align:center}
 .header, .tabs-bar, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .backup-box { background: var(--bg); border: none; box-shadow: 6px 6px 12px var(--s-dark), -6px -6px 12px var(--s-light); border-radius: 12px; transition: background-color 0.4s ease, box-shadow 0.4s ease; }
 .header { border-radius: 0 0 16px 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-.header h1 { font-size: 18px; font-weight: 700; color: var(--t-main); }
+.header h1 { font-size: 22px; font-weight: 700; color: var(--t-main); } /* 標題加大至 22px */
 .header .hdr-right { display: flex; gap: 8px; }
 .tabs-bar { padding: 8px 10px; margin: 14px; gap: 8px; display: flex; }
 .card { padding: 16px; margin: 14px; }
@@ -52,13 +52,13 @@ button:active, .tab-btn.active { transform: translateY(0); box-shadow: inset 4px
 .idx-card-box { flex: 0 0 auto; min-width: 160px; padding: 6px 16px; scroll-snap-align: start; border-right: 1px solid var(--s-dark); text-align: left; }
 .idx-card-box:last-child { border-right: none; }
 .idx-box-name { font-size: 16px; color: var(--t-muted); font-weight: 600; }
-.idx-box-price { font-size: 22px; font-weight: 700; margin: 2px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
+.idx-box-price { font-size: 18px; font-weight: 700; margin: 2px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); } /* 指數價格縮小至 18px */
 .idx-box-change-row { display: flex; align-items: center; justify-content: flex-start; gap: 6px; font-size: 16px; font-weight: 600; white-space: nowrap; }
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 2px; opacity: 0.7; }
 .table-scroll { margin: 14px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; }
 .list-wrap { min-width: 710px; }
 .list-header, .srow { grid-template-columns: 110px 100px 90px 90px 80px 90px 120px 90px; }
-.list-header { display: grid; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 15px; color: var(--t-muted); font-weight: 600; }
+.list-header { display: grid; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 17px; color: var(--t-muted); font-weight: 600; } /* 明細標題加大至 17px */
 .srow { display: grid; align-items: stretch; border-bottom: 1px solid var(--s-dark); font-size: 19px; }
 .srow:last-child { border-bottom: none; }
 .list-header > div, .srow > div { padding: 14px 6px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; white-space: nowrap; }
@@ -66,9 +66,9 @@ button:active, .tab-btn.active { transform: translateY(0); box-shadow: inset 4px
 .list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after { content: ''; position: absolute; top: 0; bottom: 0; right: -6px; width: 6px; background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; }
 .list-header > div:nth-child(8) { align-items: center; justify-content: center; padding-left: 14px; }
 .srow > div:nth-child(8) { flex-direction: row; align-items: center; justify-content: center; gap: 6px; padding-left: 14px; }
-.sym-container { align-items: flex-start !important; line-height: 1.2 !important; }
+.sym-container { align-items: flex-start !important; line-height: 1.2 !important; width: 100%; max-width: 110px; } /* 限制寬度避免超界 */
 .srow .sym { font-weight: 800; font-size: 19px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; }
-.sym-src { font-size: 11px; color: var(--t-muted); font-weight: normal; margin-top: 2px; }
+.sym-src { font-size: 11px; color: var(--t-muted); font-weight: normal; margin-top: 2px; text-align: center; width: 100%; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } /* via Fugle 置中且防溢出 */
 .srow .qty-cell { font-weight: 600; color: var(--t-main); overflow: hidden; width: 100%; }
 .srow .price { font-weight: 700; }
 .srow .chgp { font-size: 19px; font-weight: 700; }
@@ -112,8 +112,8 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 
 /* 使用說明頁面樣式 */
 .btn-manual { width: 100%; padding: 12px; font-size: 16px; margin-bottom: 16px; color: var(--accent); }
-.manual-content { text-align: left; font-size: 15px; line-height: 1.7; color: var(--t-main); }
-.manual-content h3 { font-size: 17px; margin: 16px 0 8px; color: var(--accent); text-align: left; }
+.manual-content { text-align: left; font-size: 16px; line-height: 1.8; color: var(--t-main); } /* 說明內文加大至 16px */
+.manual-content h3 { font-size: 18px; margin: 16px 0 8px; color: var(--accent); text-align: left; }
 .manual-content p { margin-bottom: 10px; }
 .manual-content ul { padding-left: 20px; margin-bottom: 12px; }
 .manual-content li { margin-bottom: 6px; }
@@ -129,17 +129,17 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 /* 🖥️ 平板與大螢幕適配 (>= 768px) */
 @media (min-width: 768px) {
   body { font-size: 16px; }
-  .header h1 { font-size: 22px; }
+  .header h1 { font-size: 24px; }
   .header .btn-theme, .header .btn-adv { font-size: 16px; padding: 10px 16px; }
   .card-title { font-size: 18px; }
   .tab-btn { font-size: 18px; padding: 14px 10px; }
   .list-wrap { min-width: 100%; }
   .list-header, .srow { grid-template-columns: 1.5fr 1.5fr 1fr 1.2fr 1.2fr 1.5fr 1.5fr 1.5fr; }
-  .list-header { font-size: 17px; }
+  .list-header { font-size: 18px; }
   .srow { font-size: 22px; }
   .srow .sym { font-size: 22px; }
   .srow .chgp { font-size: 22px; }
-  .sym-src { font-size: 12px; }
+  .sym-src { font-size: 12px; max-width: 120px; }
   .srow .act button { padding: 8px 14px; font-size: 17px; }
   .sum-row .lab { font-size: 19px; }
   .sum-row .val { font-size: 24px; }
@@ -155,8 +155,10 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   .v-box { font-size: 15px; }
   .idx-card-box { min-width: 200px; padding: 8px 20px; }
   .idx-box-name { font-size: 18px; }
-  .idx-box-price { font-size: 26px; }
+  .idx-box-price { font-size: 20px; }
   .idx-box-change-row { font-size: 18px; }
+  .manual-content { font-size: 18px; }
+  .manual-content h3 { font-size: 20px; }
 }
 </style>
 <link rel="manifest" href="manifest.json">
@@ -251,7 +253,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V3.7.8 (字體與介面優化版)</div>
+    <div class="v-box">核心版本：V3.7.9 (字體微調優化版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -879,7 +881,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V3.7.8 已啟動 (字體與介面優化版)');
+console.log('股票庫存管理 V3.7.9 已啟動 (字體微調優化版)');
 </script>
 </body>
 </html>
