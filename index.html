@@ -47,28 +47,32 @@ button:active, .tab-btn.active { transform: translateY(0); box-shadow: inset 4px
 .btn-theme, .btn-adv { padding: 8px 14px; font-size: 15px; }
 .form-row button { font-size: 16px; letter-spacing: 2px; padding-left: 18px; }
 .btn-save { width: 100%; padding: 14px; font-size: 17px; margin: 14px; width: calc(100% - 28px); }
-.idx-scroll-container { margin: 14px; overflow-x: auto; display: flex; gap: 0; padding: 6px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+
+/* 📉 指數區塊縮小高度 */
+.idx-scroll-container { margin: 14px; overflow-x: auto; display: flex; gap: 0; padding: 2px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
-.idx-card-box { flex: 0 0 auto; min-width: 160px; padding: 6px 16px; scroll-snap-align: start; border-right: 1px solid var(--s-dark); text-align: left; }
+.idx-card-box { flex: 0 0 auto; min-width: 160px; padding: 2px 16px; scroll-snap-align: start; border-right: 1px solid var(--s-dark); text-align: left; }
 .idx-card-box:last-child { border-right: none; }
-.idx-box-name { font-size: 16px; color: var(--t-muted); font-weight: 600; }
-.idx-box-price { font-size: 18px; font-weight: 700; margin: 2px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
+.idx-box-name { font-size: 16px; color: var(--t-muted); font-weight: 600; margin-top: 2px; }
+.idx-box-price { font-size: 18px; font-weight: 700; margin: 1px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
 .idx-box-change-row { display: flex; align-items: center; justify-content: flex-start; gap: 6px; font-size: 16px; font-weight: 600; white-space: nowrap; }
-.idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 2px; opacity: 0.7; }
+.idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 0; opacity: 0.7; }
+
+/* 📊 明細列表縮小高度與代號欄位瘦身 */
 .table-scroll { margin: 14px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; }
 .list-wrap { min-width: 710px; }
-.list-header, .srow { grid-template-columns: 130px 110px 90px 90px 80px 90px 120px 90px; }
+.list-header, .srow { grid-template-columns: 115px 110px 90px 90px 80px 90px 120px 90px; } /* 代號欄位縮小至 115px */
 .list-header { display: grid; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 17px; color: var(--t-muted); font-weight: 600; }
 .srow { display: grid; align-items: stretch; border-bottom: 1px solid var(--s-dark); font-size: 19px; }
 .srow:last-child { border-bottom: none; }
-.list-header > div, .srow > div { padding: 14px 6px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; white-space: nowrap; }
+.list-header > div, .srow > div { padding: 10px 6px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; white-space: nowrap; } /* padding 縮小為 10px */
 .list-header > div:nth-child(1), .srow > div:nth-child(1) { align-items: flex-start; text-align: left; position: sticky; left: 0; z-index: 2; background: var(--bg); padding-left: 14px; }
 .list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after { content: ''; position: absolute; top: 0; bottom: 0; right: -6px; width: 6px; background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; }
 .list-header > div:nth-child(8) { align-items: center; justify-content: center; padding-left: 14px; }
 .srow > div:nth-child(8) { flex-direction: row; align-items: center; justify-content: center; gap: 6px; padding-left: 14px; }
-.sym-container { align-items: flex-start !important; line-height: 1.2 !important; width: 100%; max-width: 130px; }
+.sym-container { align-items: flex-start !important; line-height: 1.1 !important; width: 100%; max-width: 115px; } /* max-width 同步縮小 */
 .srow .sym { font-weight: 800; font-size: 19px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; }
-.sym-src { font-size: 11px; color: var(--t-muted); font-weight: normal; margin-top: 2px; text-align: left; width: 100%; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sym-src { font-size: 11px; color: var(--t-muted); font-weight: normal; margin-top: 0px; text-align: left; width: 100%; max-width: 115px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } /* max-width 同步縮小 */
 .srow .qty-cell { font-weight: 600; color: var(--t-main); overflow: hidden; width: 100%; }
 .srow .price { font-weight: 700; }
 .srow .chgp { font-size: 19px; font-weight: 700; }
@@ -326,7 +330,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V3.9.2 (進階設定介面優化版)</div>
+    <div class="v-box">核心版本：V3.9.3 (介面瘦身優化版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -667,7 +671,8 @@ async function refreshPrices(){
     idxEl.textContent=idxR.price.toLocaleString('en-US',{maximumFractionDigits:0});
     idxChgEl.textContent=(idxR.change>=0?'+':'')+idxR.change.toFixed(2); idxChgEl.className=(idxR.change>=0?'up':'down');
     idxPctEl.textContent='('+(idxR.changePercent>=0?'+':'')+idxR.changePercent.toFixed(2)+'%)'; idxPctEl.className=(idxR.changePercent>=0?'up':'down');
-    idxSrcEl.textContent='via '+idxR.source+' '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+    // 修改：via Fugle 顯示 24 小時制
+    idxSrcEl.textContent='via '+idxR.source+' '+new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'});
   }
   fetchGlobalIndicesFromGoogle();
   
@@ -682,7 +687,8 @@ async function refreshPrices(){
   for(const {s,r} of results){
     if(r){
       s.price=r.price; s.change=r.change; s.changePercent=r.changePercent; s.source=r.source;
-      s.updateTime=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+      // 修改：via Fugle 顯示 24 小時制
+      s.updateTime=new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'});
       renderRow(s);
     }
   }
@@ -1004,8 +1010,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V3.9.2 已啟動 (進階設定介面優化版)');
+console.log('股票庫存管理 V3.9.3 已啟動 (介面瘦身優化版)');
 </script>
 </body>
 </html>
-
