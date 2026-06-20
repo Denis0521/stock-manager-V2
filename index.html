@@ -331,7 +331,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal fullscreen-modal">
-    <button type="button" class="btn-close-icon" onclick="saveAndCloseModal()">✕</button>
+    <button type="button" class="btn-close-icon" onclick="closeModal()">✕</button>
     
     <h2>進階設定</h2>
     
@@ -963,6 +963,11 @@ function openModal(){
   document.getElementById('secondFugleKeyInput').value=secondFugleKey;
   document.getElementById('tabCountSelect').value=tabCount;
   updateKeyStatus();document.getElementById('modalOverlay').classList.add('show');
+}
+
+// 增加只負責關閉，不儲存變更的新函數
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
 }
 
 function saveAndCloseModal(){
