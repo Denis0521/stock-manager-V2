@@ -177,6 +177,44 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   box-shadow: 3px 3px 6px var(--s-dark), -3px -3px 6px var(--s-light);
 }
 
+/* ========================================================= 🆕 進階設定全畫面樣式 ========================================================= */
+.modal.fullscreen-modal {
+  width: 100vw !important;
+  max-width: 100vw !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  border-radius: 0;
+  padding: 60px 20px 20px !important; /* 上方保留空間給關閉按鈕 */
+  margin: 0 !important;
+  border: none;
+  box-sizing: border-box;
+}
+
+/* 右上角關閉按鈕 (X) 樣式 */
+.btn-close-icon {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--t-muted);
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  text-shadow: none !important;
+  cursor: pointer;
+}
+
+.btn-close-icon:hover {
+  color: var(--t-main);
+  transform: scale(1.1);
+}
+
 /* 📱 手機版限制最大寬度 (<= 767px) */
 @media (max-width: 767px) {
   body { max-width: 480px; margin: 0 auto; font-size: 15px; }
@@ -291,12 +329,12 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </div>
 <div class="toast" id="toast"></div>
 
-<!-- 進階設定 Modal -->
 <div class="modal-overlay" id="modalOverlay">
-  <div class="modal">
+  <div class="modal fullscreen-modal">
+    <button type="button" class="btn-close-icon" onclick="saveAndCloseModal()">✕</button>
+    
     <h2>進階設定</h2>
     
-    <!-- 上方功能列：使用說明 與 分頁數量 並排 -->
     <div class="settings-row">
       <button type="button" class="btn-manual-row" onclick="openManual()">📖 使用說明</button>
       <div class="tab-count-wrapper">
@@ -311,7 +349,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       </div>
     </div>
 
-    <!-- 下方 API 設定區塊 -->
     <div class="api-section">
       <div class="api-link-box">
         <a class="btn-link" href="https://developer.fugle.tw/docs/key/" target="_blank">🔗 申請 Fugle API Key</a>
@@ -337,7 +374,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   </div>
 </div>
 
-<!-- 使用說明 Modal -->
 <div class="modal-overlay" id="manualOverlay">
   <div class="modal">
     <h2>📖 使用說明</h2>
@@ -392,7 +428,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   </div>
 </div>
 
-<!-- 編輯持股 Modal -->
 <div class="modal-overlay" id="editModalOverlay">
   <div class="modal">
     <h2>編輯持股</h2>
