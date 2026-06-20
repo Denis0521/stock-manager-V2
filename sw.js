@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stock-portfolio-v3.8.0'; // ⚠️ 版本號已升至 3.8.0，與 HTML 同步
+const CACHE_NAME = 'stock-portfolio-v3.9.1'; // ⚠️ 版本號已升至 3.9.1，與 HTML 同步
 const urlsToCache = [
   './',
   './index.html',

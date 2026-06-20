@@ -57,7 +57,7 @@ button:active, .tab-btn.active { transform: translateY(0); box-shadow: inset 4px
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 2px; opacity: 0.7; }
 .table-scroll { margin: 14px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; }
 .list-wrap { min-width: 710px; }
-.list-header, .srow { grid-template-columns: 130px 110px 90px 90px 80px 90px 120px 90px; } /* 微調欄位寬度 */
+.list-header, .srow { grid-template-columns: 130px 110px 90px 90px 80px 90px 120px 90px; }
 .list-header { display: grid; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 17px; color: var(--t-muted); font-weight: 600; }
 .srow { display: grid; align-items: stretch; border-bottom: 1px solid var(--s-dark); font-size: 19px; }
 .srow:last-child { border-bottom: none; }
@@ -66,9 +66,9 @@ button:active, .tab-btn.active { transform: translateY(0); box-shadow: inset 4px
 .list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after { content: ''; position: absolute; top: 0; bottom: 0; right: -6px; width: 6px; background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; }
 .list-header > div:nth-child(8) { align-items: center; justify-content: center; padding-left: 14px; }
 .srow > div:nth-child(8) { flex-direction: row; align-items: center; justify-content: center; gap: 6px; padding-left: 14px; }
-.sym-container { align-items: flex-start !important; line-height: 1.2 !important; width: 100%; max-width: 130px; } /* 放寬限制 */
+.sym-container { align-items: flex-start !important; line-height: 1.2 !important; width: 100%; max-width: 130px; }
 .srow .sym { font-weight: 800; font-size: 19px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; }
-.sym-src { font-size: 11px; color: var(--t-muted); font-weight: normal; margin-top: 2px; text-align: left; width: 100%; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } /* 改為靠左對齊 */
+.sym-src { font-size: 11px; color: var(--t-muted); font-weight: normal; margin-top: 2px; text-align: left; width: 100%; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .srow .qty-cell { font-weight: 600; color: var(--t-main); overflow: hidden; width: 100%; }
 .srow .price { font-weight: 700; }
 .srow .chgp { font-size: 19px; font-weight: 700; }
@@ -124,6 +124,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   input, select { font-size: 16px; }
   .srow .sym { font-size: 19px; }
   .srow .chgp { font-size: 19px; }
+  .tab-btn { font-size: 15px; padding: 10px 4px; }
 }
 
 /* 🖥️ 平板與大螢幕適配 (>= 768px) */
@@ -171,11 +172,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <button type="button" class="btn-adv" onclick="openModal()">進階</button>
   </div>
 </div>
-<div class="tabs-bar">
-  <button type="button" class="tab-btn active" onclick="switchTab(0)" ondblclick="renameTab(0)" id="tab0">分頁 A</button>
-  <button type="button" class="tab-btn" onclick="switchTab(1)" ondblclick="renameTab(1)" id="tab1">分頁 B</button>
-  <button type="button" class="tab-btn" onclick="switchTab(2)" ondblclick="renameTab(2)" id="tab2">分頁 C</button>
-</div>
+<div class="tabs-bar" id="tabsBarContainer"></div>
 <div class="card">
   <div class="card-title">新增持股</div>
   <div class="form-row">
@@ -239,6 +236,18 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <div style="text-align:center;margin-bottom:12px">
       <a class="btn-link" href="https://developer.fugle.tw/docs/key/" target="_blank">🔗 申請 Fugle API Key</a>
     </div>
+    
+    <label>分頁數量設定</label>
+    <div class="form-row" style="margin-bottom: 16px;">
+      <select id="tabCountSelect" style="flex: 0 0 100%;">
+        <option value="1">1 個分頁</option>
+        <option value="2">2 個分頁</option>
+        <option value="3">3 個分頁</option>
+        <option value="4">4 個分頁</option>
+        <option value="5">5 個分頁</option>
+      </select>
+    </div>
+
     <label>Fugle API Key（主要）</label>
     <input type="text" id="fugleKeyInput" placeholder="輸入第一組 Key" autocomplete="off">
     <div><span class="key-status none" id="fugleKeyStatus">未設定</span></div>
@@ -253,7 +262,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V3.8.0 (介面細節優化版)</div>
+    <div class="v-box">核心版本：V3.9.1 (分頁數量動態調整修正版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -268,7 +277,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <li><strong>新增持股：</strong>輸入股票代號、數量、單位（張/股），可選填買入均價以計算總損益。</li>
         <li><strong>編輯持股：</strong>點擊列表中的「✎」按鈕，可修改股票資訊。</li>
         <li><strong>刪除持股：</strong>點擊列表中的「✕」按鈕。</li>
-        <li><strong>分頁管理：</strong>支援三個獨立分頁，雙擊分頁名稱可重新命名。</li>
+        <li><strong>分頁管理：</strong>支援 1~5 個自訂分頁，可在「進階設定」中調整數量。雙擊分頁名稱可重新命名。</li>
         <li><strong>主題切換：</strong>點擊右上角圖示切換多種介面主題。</li>
       </ul>
       
@@ -276,7 +285,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       <p>本軟體支援 <strong>Fugle API</strong> 以獲取即時股價。您可以在上方「進階設定」中輸入 API Key。</p>
       
       <h3>三、一組 Key 與兩組 Key 的差異</h3>
-      <p>為了避免超過 API 速率限制而被禁用，系統會根據您輸入的 Key 数量<strong>動態調整</strong>更新頻率：</p>
+      <p>為了避免超過 API 速率限制而被禁用，系統會根據您輸入的 Key 數量<strong>動態調整</strong>更新頻率：</p>
       <ul>
         <li><strong>一組 API Key：</strong>
           <ul>
@@ -334,15 +343,16 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 <script>
 let googleCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR65VYw1-a-i-uKJqR-SiC9XQ4O1IokgVoWCP35eH6rHLqNgk_A9ZFDDT8nniO5dzVLfPhS8m_9IfaA/pub?gid=0&single=true&output=csv';
 let currentTab = 0;
-let tabStocks = [[], [], []];
-let tabRecords = [[], [], []];
-let tabNames = ['分頁 A', '分頁 B', '分頁 C'];
+let tabStocks = [[], [], [], [], []];
+let tabRecords = [[], [], [], [], []];
+let tabNames = ['分頁 1', '分頁 2', '分頁 3', '分頁 4', '分頁 5'];
+let tabCount = 3;
 let fugleKey='',secondFugleKey='';
 let fugleKeyIndex = 0;
 let pollTimer = null;
 let currentInterval = 30000;
 
-const FK='tw_fugle_key',SFK='tw_second_fugle_key',TK='tw_theme', CUR_TAB_KEY='tw_current_tab', TN_KEY='tw_tab_names';
+const FK='tw_fugle_key',SFK='tw_second_fugle_key',TK='tw_theme', CUR_TAB_KEY='tw_current_tab', TN_KEY='tw_tab_names', TC_KEY='tw_tab_count';
 const getStockKey = (idx) => `tw_stock_portfolio_tab_${idx}`;
 const getRecordKey = (idx) => `tw_records_tab_${idx}`;
 let cachedGlobalIndices = [];
@@ -354,17 +364,26 @@ function loadState(){
     const sf=localStorage.getItem(SFK);if(sf)secondFugleKey=sf;
     const ct=localStorage.getItem(CUR_TAB_KEY);if(ct!=null)currentTab=parseInt(ct);
     const tn=localStorage.getItem(TN_KEY);if(tn) tabNames=JSON.parse(tn);
-    for(let i=0; i<3; i++){
+    const tc=localStorage.getItem(TC_KEY);if(tc) tabCount=parseInt(tc);
+    
+    for(let i=0; i<5; i++){
       const s=localStorage.getItem(getStockKey(i)); if(s) tabStocks[i]=JSON.parse(s);
       const r=localStorage.getItem(getRecordKey(i)); if(r) tabRecords[i]=JSON.parse(r);
     }
+    
+    // 確保當前分頁不超過設定數量
+    if(currentTab >= tabCount) currentTab = 0;
+    
     const t=localStorage.getItem(TK); applyThemeText(t);
     const cachedIdx = localStorage.getItem('tw_cached_indices');
     if(cachedIdx) { cachedGlobalIndices = JSON.parse(cachedIdx); if(cachedGlobalIndices.length > 0) renderGlobalIndices(cachedGlobalIndices); }
   }catch(e){console.error(e);}
+  
   document.getElementById('fugleKeyInput').value=fugleKey;
   document.getElementById('secondFugleKeyInput').value=secondFugleKey;
-  updateKeyStatus(); updateTabUI();
+  document.getElementById('tabCountSelect').value=tabCount;
+  updateKeyStatus(); 
+  renderTabs();
 }
 
 function applyThemeText(t){
@@ -379,8 +398,33 @@ function applyThemeText(t){
 }
 
 function saveHoldings(){try{localStorage.setItem(getStockKey(currentTab),JSON.stringify(tabStocks[currentTab]));}catch(e){}}
-function saveKeys(){ fugleKey=document.getElementById('fugleKeyInput').value.trim(); secondFugleKey=document.getElementById('secondFugleKeyInput').value.trim(); try{localStorage.setItem(FK,fugleKey);localStorage.setItem(SFK,secondFugleKey);}catch(e){} updateKeyStatus(); }
+function saveKeys(){ 
+  fugleKey=document.getElementById('fugleKeyInput').value.trim(); 
+  secondFugleKey=document.getElementById('secondFugleKeyInput').value.trim(); 
+  try{localStorage.setItem(FK,fugleKey);localStorage.setItem(SFK,secondFugleKey);}catch(e){} 
+  updateKeyStatus(); 
+}
 function saveRecords(){try{localStorage.setItem(getRecordKey(currentTab),JSON.stringify(tabRecords[currentTab]));}catch(e){}}
+
+// 強化：儲存分頁數量並處理畫面刷新
+function saveTabCount(){ 
+  const newCount = parseInt(document.getElementById('tabCountSelect').value);
+  if(newCount === tabCount) return; // 若數量沒變則不執行
+  
+  tabCount = newCount; 
+  try{localStorage.setItem(TC_KEY, tabCount);}catch(e){}
+  
+  // 如果當前分頁超出新設定，則切換到第一頁
+  if(currentTab >= tabCount) { 
+    currentTab = 0; 
+    try{localStorage.setItem(CUR_TAB_KEY, currentTab);}catch(e){} 
+  }
+  
+  renderTabs(); // 重新渲染分頁按鈕
+  renderAll();  // 重新渲染當前分頁列表
+  renderHistory(); // 重新渲染歷史記錄
+  refreshPrices(); // 立即刷新新分頁的價格
+}
 
 function toggleTheme(){
   const body=document.body; let nextTheme = 'light';
@@ -396,25 +440,44 @@ function toggleTheme(){
 function switchTab(tabIndex){
   if(currentTab === tabIndex) return;
   currentTab = tabIndex; try{localStorage.setItem(CUR_TAB_KEY, currentTab);}catch(e){}
-  updateTabUI(); renderAll(); renderHistory(); refreshPrices();
+  renderTabs(); renderAll(); renderHistory(); refreshPrices();
 }
 
 function renameTab(tabIndex) {
-  const oldName = tabNames[tabIndex] || `分頁 ${String.fromCharCode(65 + tabIndex)}`;
+  const oldName = tabNames[tabIndex] || `分頁 ${tabIndex + 1}`;
   const newName = prompt('請輸入此分頁的新名稱：', oldName);
   if (newName !== null) {
-    const finalName = newName.trim() === '' ? `分頁 ${String.fromCharCode(65 + tabIndex)}` : newName.trim();
+    const finalName = newName.trim() === '' ? `分頁 ${tabIndex + 1}` : newName.trim();
     tabNames[tabIndex] = finalName;
     try { localStorage.setItem(TN_KEY, JSON.stringify(tabNames)); } catch(e){}
-    updateTabUI(); showToast(`已更名為「${finalName}」`);
+    renderTabs(); showToast(`已更名為「${finalName}」`);
   }
 }
 
-function updateTabUI(){
-  for(let i=0; i<3; i++){
-    const btn = document.getElementById(`tab${i}`);
-    btn.textContent = tabNames[i] || `分頁 ${String.fromCharCode(65 + i)}`;
-    if(i === currentTab) btn.classList.add('active'); else btn.classList.remove('active');
+function renderTabs() {
+  const container = document.getElementById('tabsBarContainer');
+  container.innerHTML = '';
+  
+  for(let i=0; i<tabCount; i++){
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'tab-btn';
+    btn.id = `tab${i}`;
+    btn.textContent = tabNames[i] || `分頁 ${i + 1}`;
+    btn.onclick = () => switchTab(i);
+    btn.ondblclick = () => renameTab(i);
+    if(i === currentTab) btn.classList.add('active');
+    container.appendChild(btn);
+  }
+  
+  // 根據分頁數量動態調整字體大小
+  const btns = container.querySelectorAll('.tab-btn');
+  if(tabCount >= 4) {
+    btns.forEach(b => b.style.fontSize = '14px');
+  } else if(tabCount === 3) {
+    btns.forEach(b => b.style.fontSize = '16px');
+  } else {
+    btns.forEach(b => b.style.fontSize = '18px');
   }
 }
 
@@ -797,12 +860,15 @@ function renderHistory(){
 function openModal(){
   document.getElementById('fugleKeyInput').value=fugleKey;
   document.getElementById('secondFugleKeyInput').value=secondFugleKey;
+  document.getElementById('tabCountSelect').value=tabCount;
   updateKeyStatus();document.getElementById('modalOverlay').classList.add('show');
 }
 
 function saveAndCloseModal(){
-  saveKeys();document.getElementById('modalOverlay').classList.remove('show');
-  showToast('設定已儲存，API更新頻率將動態調整');refreshPrices();
+  saveKeys();
+  saveTabCount(); // 儲存分頁數量設定
+  document.getElementById('modalOverlay').classList.remove('show');
+  showToast('設定已儲存，API更新頻率將動態調整');
 }
 
 function openManual() {
@@ -824,9 +890,9 @@ function showToast(msg){ const t=document.getElementById('toast');t.textContent=
 
 function exportData() {
   const dataToExport = {
-    tabStocks: [localStorage.getItem(getStockKey(0)), localStorage.getItem(getStockKey(1)), localStorage.getItem(getStockKey(2))],
-    tabRecords: [localStorage.getItem(getRecordKey(0)), localStorage.getItem(getRecordKey(1)), localStorage.getItem(getRecordKey(2))],
-    tabNames: localStorage.getItem(TN_KEY), fugleKey: localStorage.getItem(FK), secondFugleKey: localStorage.getItem(SFK), theme: localStorage.getItem(TK)
+    tabStocks: [localStorage.getItem(getStockKey(0)), localStorage.getItem(getStockKey(1)), localStorage.getItem(getStockKey(2)), localStorage.getItem(getStockKey(3)), localStorage.getItem(getStockKey(4))],
+    tabRecords: [localStorage.getItem(getRecordKey(0)), localStorage.getItem(getRecordKey(1)), localStorage.getItem(getRecordKey(2)), localStorage.getItem(getRecordKey(3)), localStorage.getItem(getRecordKey(4))],
+    tabNames: localStorage.getItem(TN_KEY), fugleKey: localStorage.getItem(FK), secondFugleKey: localStorage.getItem(SFK), theme: localStorage.getItem(TK), tabCount: localStorage.getItem(TC_KEY)
   };
   const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -855,6 +921,7 @@ function importData(event) {
         if (data.fugleKey) localStorage.setItem(FK, data.fugleKey);
         if (data.secondFugleKey) localStorage.setItem(SFK, data.secondFugleKey);
         if (data.theme) localStorage.setItem(TK, data.theme);
+        if (data.tabCount) localStorage.setItem(TC_KEY, data.tabCount);
         alert('🎉 備份還原成功！系統將為您重新載入頁面。');
         location.reload();
       }
@@ -877,7 +944,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V3.8.0 已啟動 (介面細節優化版)');
+console.log('股票庫存管理 V3.9.1 已啟動 (分頁數量動態調整修正版)');
 </script>
 </body>
 </html>
