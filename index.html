@@ -72,7 +72,7 @@ button:active, .tab-btn.active { transform: translateY(0); box-shadow: inset 4px
 .srow > div:nth-child(8) { flex-direction: row; align-items: center; justify-content: center; gap: 6px; padding-left: 14px; }
 .sym-container { align-items: flex-start !important; line-height: 1.1 !important; width: 100%; max-width: 100px; } /* max-width 同步縮小 */
 .srow .sym { font-weight: 800; font-size: 17px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; } /* 代號字體縮小至 17px */
-.sym-src { font-size: 11px; color: var(--t-muted); font-weight: normal; margin-top: 0px; text-align: left; width: 100%; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } /* max-width 同步縮小 */
+.sym-src { font-size: 11px; color: var(--t-muted); font-weight: normal; margin-top: 0px; text-align: left; width: 100%; max-width: 100px; overflow: visible; white-space: nowrap; } /* max-width 同步縮小 */
 .srow .qty-cell { font-weight: 600; color: var(--t-main); overflow: hidden; width: 100%; }
 .srow .price { font-weight: 700; }
 .srow .chgp { font-size: 17px; font-weight: 700; } /* 漲跌幅字體縮小至 17px */
@@ -379,7 +379,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.0.0 (API 管理引擎整合版)</div>
+    <div class="v-box">核心版本：V4.0.1 (時間格式與說明優化版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -396,11 +396,21 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <li><strong>分頁管理：</strong>支援 1~5 個自訂分頁，可在「進階設定」中調整數量。雙擊分頁名稱可重新命名。</li>
         <li><strong>主題切換：</strong>點擊右上角圖示切換多種介面主題。</li>
       </ul>
-      
-      <h3>二、API 設定與限制</h3>
+
+      <h3>二、分頁應用建議 💡</h3>
+      <p>分頁功能不僅可以分類不同類型的股票，還有許多實用的應用場景：</p>
+      <ul>
+        <li><strong>家庭成員庫存：</strong>為每位家庭成員建立獨立分頁，例如「爸爸持股」、「媽媽持股」、「配偶帳戶」，方便統一管理全家資產。</li>
+        <li><strong>投資策略分類：</strong>將「長期存股」、「短線交易」、「ETF 配置」分開記錄，各自追蹤不同策略的績效。</li>
+        <li><strong>帳戶區隔：</strong>若您有多個券商帳戶，可分頁記錄「A 券商現股」、「B 券商當沖」，避免混淆。</li>
+        <li><strong>模擬倉位：</strong>建立一個「觀察名單」分頁，只輸入代號不設均價，追蹤有興趣但尚未買進的股票。</li>
+        <li><strong>歷史記錄獨立：</strong>每個分頁的歷史損益記錄完全獨立，方便分別檢視各個投資組合的長期績效。</li>
+      </ul>
+
+      <h3>三、API 設定與限制</h3>
       <p>本軟體支援 <strong>Fugle API</strong> 以獲取即時股價。您可以在上方「進階設定」中輸入 API Key。</p>
-      
-      <h3>三、一組 Key 與兩組 Key 的差異</h3>
+
+      <h3>四、一組 Key 與兩組 Key 的差異</h3>
       <p>為了避免超過 API 速率限制而被禁用，系統會根據您輸入的 Key 數量<strong>動態調整</strong>更新頻率：</p>
       <ul>
         <li><strong>一組 API Key：</strong>
@@ -420,21 +430,32 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
             <li>系統偵測到收盤（13:30 後或週末）時，自動調整為每 <strong>60 秒</strong>更新一次，以節省 API 額度。</li>
           </ul>
         </li>
+        <li><strong>連續錯誤保護：</strong>
+          <ul>
+            <li>若 API 連續 <strong>5 次</strong>請求失敗，系統會自動<strong>暫停更新 5 分鐘</strong>，避免帳號被臨時封鎖。</li>
+          </ul>
+        </li>
       </ul>
       <p>💡 <strong>建議：</strong>若需追蹤較多股票（超過 10 支），建議申請兩組 Key 以獲得更快的更新頻率並分散風險。</p>
 
-      <h3>四、資料備份</h3>
-      <p>您可以在進階設定中將庫存與歷史記錄匯出為 JSON 檔案，或從備份檔還原。</p>
-      
-      <h3>五、國際指數與 Google 報價說明</h3>
+      <h3>五、資料備份</h3>
+      <p>您可以在進階設定中將庫存與歷史記錄匯出為 JSON 檔案，或從備份檔還原。建議定期備份，尤其在使用多個分頁管理大量資料時。</p>
+
+      <h3>六、國際指數與 Google 報價說明</h3>
       <p>除了台股加權指數外，其他國際股市指數（如道瓊、那斯達克等）是透過 <strong>Google 試算表</strong> 的公開資料抓取。</p>
       <ul>
         <li><strong>為什麼不用 Fugle API？</strong> 因為 Fugle 的方案主要針對台股資料，若要取得國際指數需要相當昂貴的企業方案。使用 Google 試算表作為免費的替代方案。</li>
         <li><strong>為什麼不是即時的？</strong> Google 試算表本身的資料就有<strong>大約 15 分鐘</strong>的延遲。此外，Google 伺服器會對公開發布的網頁進行快取（Cache）。</li>
         <li><strong>更新頻率：</strong> 本系統設定為每 <strong>30 秒</strong>向 Google 發送一次請求，但實際上 Google 回傳的數據可能與真實市場有 15 分鐘以上的落差。這屬於免費資料源的先天限制。</li>
       </ul>
-    </div>
-    <button type="button" class="modal-close" onclick="closeManual()">關閉說明</button>
+
+      <h3>七、常見問題</h3>
+      <ul>
+        <li><strong>為什麼 via Fugle 時間顯示有時不更新？</strong> 若價格沒有變動，Fugle API 可能不會回傳新時間戳。這不代表系統故障，而是市場暫無成交。</li>
+        <li><strong>可以同時開啟多個分頁看不同投資組合嗎？</strong> 可以，但請注意每個分頁的股票都會獨立計算 API 請求次數，建議兩組 Key 以上再這樣使用。</li>
+        <li><strong>手機加入主畫面後可以離線使用嗎？</strong> 可以查看上次更新的價格與歷史記錄，但無法取得即時報價。離線時系統會自動暫停 API 更新。</li>
+      </ul>
+    </div><button type="button" class="modal-close" onclick="closeManual()">關閉說明</button>
   </div>
 </div>
 
@@ -895,7 +916,8 @@ async function refreshPrices(){
         if (r) {
           currentStocks.filter(s => s.symbol === sym).forEach(s => {
             s.price=r.price; s.change=r.change; s.changePercent=r.changePercent; s.source=r.source;
-            s.updateTime=new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'});
+            const now = new Date();
+      s.updateTime = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
             renderRow(s);
           });
         }
@@ -1228,7 +1250,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.0.0 已啟動 (API 管理引擎整合版)');
+console.log('股票庫存管理 V4.0.1 已啟動 (時間格式與說明優化版)');
 </script>
 </body>
 </html>
