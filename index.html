@@ -32,7 +32,6 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .header h1 { font-size: 22px; font-weight: 700; color: var(--t-main); }
 .header .hdr-right { display: flex; gap: 8px; }
 
-/* 版面間距縮小 */
 .tabs-bar { padding: 6px 10px; margin: 8px 10px; gap: 8px; display: flex; }
 .card { padding: 12px 16px; margin: 8px 10px; }
 .card-title { font-size: 16px; color: var(--t-muted); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; text-align: left; }
@@ -50,7 +49,6 @@ button:active, .tab-btn.active { transform: translateY(0); box-shadow: inset 4px
 .form-row button { font-size: 16px; letter-spacing: 2px; padding-left: 18px; }
 .btn-save { width: calc(100% - 20px); padding: 14px; font-size: 17px; margin: 8px 10px; }
 
-/* 📉 指數區塊縮小高度與間距 */
 .idx-scroll-container { margin: 8px 10px; overflow-x: auto; display: flex; gap: 0; padding: 2px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
 .idx-card-box { flex: 0 0 auto; min-width: 160px; padding: 2px 16px; scroll-snap-align: start; border-right: 1px solid var(--s-dark); text-align: left; }
@@ -60,7 +58,6 @@ button:active, .tab-btn.active { transform: translateY(0); box-shadow: inset 4px
 .idx-box-change-row { display: flex; align-items: center; justify-content: flex-start; gap: 6px; font-size: 16px; font-weight: 600; white-space: nowrap; }
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 0; opacity: 0.7; }
 
-/* 📊 明細列表優化 */
 .table-scroll { margin: 8px 10px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; }
 .list-wrap { min-width: 710px; }
 .list-header, .srow { grid-template-columns: 100px 110px 90px 90px 80px 90px 120px 90px; }
@@ -117,7 +114,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 .down { color: var(--down) !important; text-shadow: none !important; }
 .neutral { color: var(--t-main) !important; text-shadow: none !important; }
 
-/* 使用說明頁面樣式 */
 .btn-manual { width: 100%; padding: 12px; font-size: 16px; margin-bottom: 16px; color: var(--accent); }
 .manual-content { text-align: left; font-size: 16px; line-height: 1.8; color: var(--t-main); }
 .manual-content h3 { font-size: 18px; margin: 16px 0 8px; color: var(--accent); text-align: left; }
@@ -125,25 +121,19 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 .manual-content ul { padding-left: 20px; margin-bottom: 12px; }
 .manual-content li { margin-bottom: 6px; }
 
-/* 進階設定：功能列並排樣式 */
 .settings-row { display: flex; gap: 12px; margin-bottom: 20px; align-items: stretch; }
 .btn-manual-row { flex: 0 0 45%; padding: 12px 10px; font-size: 15px; color: var(--accent); margin: 0; white-space: nowrap; }
 .tab-count-wrapper { flex: 1; display: flex; flex-direction: column; justify-content: center; background: var(--bg); border-radius: 8px; box-shadow: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light); padding: 4px 12px; }
 .tab-count-label { font-size: 12px; color: var(--t-muted); font-weight: 600; margin-bottom: 2px; text-align: left; }
 .tab-count-wrapper select { width: 100%; box-shadow: none; padding: 4px 0; background: transparent; font-size: 15px; }
 
-/* API 設定區塊樣式 */
 .api-section { margin-bottom: 20px; padding-top: 10px; border-top: 1px solid var(--s-dark); }
 .api-link-box { text-align: center; margin-bottom: 16px; padding: 10px; background: var(--bg); border-radius: 8px; box-shadow: 3px 3px 6px var(--s-dark), -3px -3px 6px var(--s-light); }
 
-/* ========================================================= 🆕 進階設定全畫面樣式 ========================================================= */
 .modal.fullscreen-modal { width: 100vw !important; max-width: 100vw !important; height: 100vh !important; max-height: 100vh !important; border-radius: 0; padding: 18px 20px 20px !important; margin: 0 !important; border: none; box-sizing: border-box; }
-
-/* 右上角關閉按鈕 (X) 樣式 */
 .btn-close-icon { position: absolute; top: 15px; right: 15px; background: transparent !important; box-shadow: none !important; color: var(--t-muted); font-size: 24px; width: 40px; height: 40px; padding: 0; display: flex; justify-content: center; align-items: center; border-radius: 50%; text-shadow: none !important; cursor: pointer; }
 .btn-close-icon:hover { color: var(--t-main); transform: scale(1.1); }
 
-/* 📱 手機版限制最大寬度 (<= 767px) */
 @media (max-width: 767px) {
   body { max-width: 480px; margin: 0 auto; font-size: 15px; }
   input, select { font-size: 16px; }
@@ -154,7 +144,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   .btn-manual-row { font-size: 14px; padding: 10px 6px; }
 }
 
-/* 🖥️ 平板與大螢幕適配 (>= 768px) */
 @media (min-width: 768px) {
   body { font-size: 16px; }
   .header h1 { font-size: 24px; }
@@ -258,9 +247,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal fullscreen-modal">
     <button type="button" class="btn-close-icon" onclick="closeModal()">✕</button>
-    
     <h2>進階設定</h2>
-    
     <div class="settings-row">
       <button type="button" class="btn-manual-row" onclick="openManual()">📖 使用說明</button>
       <div class="tab-count-wrapper">
@@ -274,7 +261,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         </select>
       </div>
     </div>
-
     <div class="api-section">
       <div class="api-link-box">
         <a class="btn-link" href="https://developer.fugle.tw/docs/key/" target="_blank">🔗 申請 Fugle API Key</a>
@@ -291,14 +277,11 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <button type="button" onclick="toggleKeyVisibility('secondFugleKeyInput','keyToggle2')" id="keyToggle2" style="flex:0 0 44px;font-size:16px;">👁</button>
       </div>
       <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
-      
-      <!-- API 用量統計 -->
       <div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:12px;box-shadow:inset 4px 4px 8px var(--s-dark),inset -4px -4px 8px var(--s-light);">
         <div style="font-size:13px;color:var(--t-muted);font-weight:600;margin-bottom:8px;text-align:center;">📊 今日 API 使用量</div>
         <div id="apiStatsBox"></div>
       </div>
     </div>
-
     <div class="backup-box">
       <div class="backup-title">資料備份與還原</div>
       <div class="backup-btns">
@@ -307,7 +290,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.3.2 (首頁緊湊 & 移除台指期版)</div>
+    <div class="v-box">核心版本：V4.3.3 (國內指數多重容錯版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -321,23 +304,11 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <li><strong>新增持股：</strong>輸入股票代號、數量、單位（張/股），可選填買入均價以計算總損益。</li>
         <li><strong>編輯持股：</strong>點擊列表中的「✎」按鈕，可修改股票資訊。</li>
         <li><strong>刪除持股：</strong>點擊列表中的「✕」按鈕。</li>
-        <li><strong>分頁管理：</strong>支援 1~5 個自訂分頁，可在「進階設定」中調整數量。雙擊分頁名稱可重新命名。</li>
+        <li><strong>分頁管理：</strong>支援 1~5 個自訂分頁，可在「進階設定」中調整數量。</li>
         <li><strong>主題切換：</strong>點擊右上角圖示切換多種介面主題。</li>
       </ul>
-
-      <h3>二、API 設定與動態頻率</h3>
-      <p>為了避免超過 API 速率限制，系統會根據您輸入的 Key 數量以及<strong>全球股市開盤狀態</strong>自動調整頻率：</p>
-      <ul>
-        <li><strong>一組 API Key：</strong>正常情況下每 20 秒更新一次。</li>
-        <li><strong>兩組 API Key（推薦）：</strong>正常情況下每 10 秒更新一次，由兩組 Key 輪流請求。</li>
-        <li><strong>智能休市降頻：</strong>系統會自動判斷亞股（08:00-14:00）與美股（21:30-05:00）時段。若所有主要市場皆休市，將自動放緩至每分鐘更新一次，省電又省流量。</li>
-      </ul>
-
-      <h3>三、國際指數報價</h3>
-      <p>除了 Fugle 提供的台股加權指數外，我們也透過代理技術直接抓取 Yahoo Finance 的即時資料。內建包含：道瓊工業指數、那斯達克指數、標普500指數、費城半導體指數、日經225指數、韓國綜合指數。</p>
-
-      <h3>四、離線使用與快取</h3>
-      <p>遇到斷網時，系統會自動讀取最後一次的快取報價，並在名稱旁標示 <code>(離線)</code>，待網路恢復後會自動重新連線。</p>
+      <h3>二、API 設定與防呆</h3>
+      <p>系統支援主要與備用共兩組 Fugle Key。針對國內高股息 ETF (如 00878) 或槓桿型 ETF (如 00631L)，本版本已升級盤後多重欄位取值機制，在休市或非交易時段會自動抓取當日收盤價或參考價墊檔，絕不輕易斷價。</p>
     </div><button type="button" class="modal-close" onclick="closeManual()">關閉說明</button>
   </div>
 </div>
@@ -352,7 +323,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <input type="number" id="editQtyInput" placeholder="數量" min="1" step="1" inputmode="numeric">
     <label>單位</label>
     <select id="editUnitSelect"><option value="張">張</option><option value="股">股</option></select>
-    <label>買入均價 (留空或不填則不計算總損益)</label>
+    <label>買入均價</label>
     <input type="number" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal">
     <button type="button" class="modal-close" onclick="saveEditStock()" style="background:var(--accent); color:#fff; text-shadow:none;">確認儲存</button>
     <button type="button" class="modal-close" onclick="closeEditModal()" style="margin-top:10px;">取消</button>
@@ -360,7 +331,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </div>
 
 <script>
-/* ========================================================= 🔧 API 管理引擎 V4.3.2 ========================================================= */
+/* ========================================================= 🔧 API 管理引擎 V4.3.3 ========================================================= */
 const PROXY_LIST = [
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
@@ -582,19 +553,14 @@ function renameTab(tabIndex) {
 function renderTabs() {
   const container = document.getElementById('tabsBarContainer');
   container.innerHTML = '';
-  
   for(let i=0; i<tabCount; i++){
     const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'tab-btn';
-    btn.id = `tab${i}`;
+    btn.type = 'button'; btn.className = 'tab-btn'; btn.id = `tab${i}`;
     btn.textContent = tabNames[i] || `分頁 ${i + 1}`;
-    btn.onclick = () => switchTab(i);
-    btn.ondblclick = () => renameTab(i);
+    btn.onclick = () => switchTab(i); btn.ondblclick = () => renameTab(i);
     if(i === currentTab) btn.classList.add('active');
     container.appendChild(btn);
   }
-  
   const btns = container.querySelectorAll('.tab-btn');
   if(tabCount >= 4) { btns.forEach(b => b.style.fontSize = '14px'); } 
   else if(tabCount === 3) { btns.forEach(b => b.style.fontSize = '16px'); } 
@@ -611,11 +577,10 @@ function updateKeyStatus(){
   renderApiStats();
 }
 
-// 渲染國際指數清單
 function renderGlobalIndices(indices, isOffline = false) {
   const container = document.getElementById('idxScrollContainer');
   const boxes = container.querySelectorAll('.idx-card-box');
-  for(let i = 1; i < boxes.length; i++) boxes[i].remove(); // 保留第一個(台股)
+  for(let i = 1; i < boxes.length; i++) boxes[i].remove();
 
   const offlineTag = isOffline ? '<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>' : '';
 
@@ -661,10 +626,7 @@ async function fetchGlobalIndicesFromWorker() {
           const name = item.name || item.symbol;
           return { symbol: item.symbol, name, price, pct, changeAmt };
         });
-        
-        // 確保照著 AVAILABLE_INDICES 的順序排列
         parsedIndices.sort((a, b) => activeForeignIndices.indexOf(a.symbol) - activeForeignIndices.indexOf(b.symbol));
-        
         cachedGlobalIndices = parsedIndices;
         trackApiUsage('Yahoo');
         try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
@@ -678,6 +640,7 @@ async function fetchGlobalIndicesFromWorker() {
   }
 }
 
+// 🛡️ 升級多欄位取值核心：徹底解決個股/ETF盤後與不定期 Null 的問題
 async function fetchFugle(symbol){
   if (navigator.onLine === false) return null;
   const kr = getKeyRotator();
@@ -692,6 +655,7 @@ async function fetchFugle(symbol){
       });
       if (resp.ok) {
         const d = await resp.json();
+        // 💎 強力防呆鏈：最新成交價 ?? 當日收盤價 ?? 昨收價 ?? 開盤參考價
         const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
         if (p != null) {
           trackApiUsage('Fugle');
@@ -731,8 +695,9 @@ async function fetchYahoo(symbol){
   return res;
 }
 
+// 🛡️ 升級加權指數防呆鏈
 async function fetchWeightedIndex(){
-  if (navigator.onLine === false) return null; // 離線直接不呼叫
+  if (navigator.onLine === false) return null;
   const kr = getKeyRotator();
   if (kr.count > 0){
     for (let i = 0; i < kr.count; i++){
@@ -755,21 +720,12 @@ async function fetchWeightedIndex(){
   return null;
 }
 
-// 智能判定是否有任一主力市場正在開盤
 function isAnyMarketOpen() {
-  const now = new Date();
-  const day = now.getDay();
-  const hour = now.getHours();
-  const min = now.getMinutes();
-
-  if (day === 0 || day === 6) return false; // 週末休市
-
+  const now = new Date(); const day = now.getDay(); const hour = now.getHours(); const min = now.getMinutes();
+  if (day === 0 || day === 6) return false;
   const time = hour + min / 60;
-  // 台股與亞股活躍期: 08:00 ~ 14:00 (時間值 8 ~ 14)
   if (time >= 8 && time <= 14) return true;
-  // 美股與台指夜盤活躍期: 15:00 ~ 05:00 (時間值大於 15 或 小於 5)
   if (time >= 15 || time <= 5) return true;
-
   return false;
 }
 
@@ -779,13 +735,11 @@ async function refreshPrices(){
   const isOffline = navigator.onLine === false;
   if (isOffline) { 
     showToast('目前處於離線狀態，顯示快取資料'); 
-    // 為台股加上離線標籤
     const twNameBox = document.querySelector('#idxScrollContainer .idx-card-box:first-child .idx-box-name');
     if (twNameBox && !twNameBox.innerHTML.includes('(離線)')) {
       twNameBox.innerHTML = `臺灣加權指數<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>`;
     }
   } else {
-    // 恢復台股名稱
     const twNameBox = document.querySelector('#idxScrollContainer .idx-card-box:first-child .idx-box-name');
     if (twNameBox) twNameBox.innerHTML = `臺灣加權指數`;
   }
@@ -827,7 +781,7 @@ async function refreshPrices(){
           currentStocks.filter(s => s.symbol === sym).forEach(s => {
             s.price=r.price; s.change=r.change; s.changePercent=r.changePercent; s.source=r.source;
             const now = new Date();
-      s.updateTime = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+            s.updateTime = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
             renderRow(s);
           });
         }
@@ -841,27 +795,11 @@ async function refreshPrices(){
 }
 
 function adjustPollingInterval(hasError) {
-  const kr = getKeyRotator();
-  const keyCount = kr.count;
-  let newInterval = currentInterval;
-  
-  if (shouldPauseApi()) {
-    newInterval = 300000;
-  } else if (!isAnyMarketOpen()) {
-    newInterval = 60000; // 所有主力市場都收盤時降頻
-  } else {
-    if (hasError) {
-      newInterval = keyCount === 2 ? 15000 : 30000;
-    } else {
-      newInterval = keyCount === 2 ? 10000 : 20000;
-    }
-  }
-  if (newInterval !== currentInterval) {
-    currentInterval = newInterval;
-    clearInterval(pollTimer);
-    pollTimer = setInterval(refresh, currentInterval);
-    console.log(`API 輪詢時間已調整為: ${currentInterval / 1000} 秒`);
-  }
+  const kr = getKeyRotator(); const keyCount = kr.count; let newInterval = currentInterval;
+  if (shouldPauseApi()) { newInterval = 300000; } 
+  else if (!isAnyMarketOpen()) { newInterval = 60000; } 
+  else { if (hasError) { newInterval = keyCount === 2 ? 15000 : 30000; } else { newInterval = keyCount === 2 ? 10000 : 20000; } }
+  if (newInterval !== currentInterval) { currentInterval = newInterval; clearInterval(pollTimer); pollTimer = setInterval(refresh, currentInterval); }
 }
 
 function renderRow(s){
@@ -1005,33 +943,23 @@ function saveEditStock() {
   const id = document.getElementById('editId').value;
   const s = tabStocks[currentTab].find(x => x.id === id);
   if (!s) return;
-
   const ns = document.getElementById('editSymInput').value.trim().toUpperCase();
   const cleanSym = ns.replace(/[^A-Z0-9]/g, '');
-  if (cleanSym) {
-    s.symbol = cleanSym; s.price = null; s.change = null; s.changePercent = null; s.source = null; s.updateTime = null;
-  }
-
+  if (cleanSym) { s.symbol = cleanSym; s.price = null; s.change = null; s.changePercent = null; s.source = null; s.updateTime = null; }
   const nq = parseInt(document.getElementById('editQtyInput').value);
   if (nq > 0) { s.displayQty = nq; s.shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty; }
-
   s.displayUnit = document.getElementById('editUnitSelect').value;
   s.shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
-
-  const nbp = document.getElementById('editBuyPriceInput').value;
-  const bpNum = parseFloat(nbp);
+  const nbp = document.getElementById('editBuyPriceInput').value; const bpNum = parseFloat(nbp);
   s.buyPrice = (isNaN(bpNum) || bpNum <= 0) ? null : bpNum;
-
-  saveHoldings(); renderAll(); closeEditModal();
-  showToast('已修改'); refreshPrices();
+  saveHoldings(); renderAll(); closeEditModal(); showToast('已修改'); refreshPrices();
 }
 
 function saveDailyPnl(){
   let pnl=0,asset=0; const currentStocks = tabStocks[currentTab];
   for(const s of currentStocks){
     const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
-    let p=s.price??0, c=s.change??0;
-    pnl += Math.round(sh * c); asset += Math.round(sh * p);
+    let p=s.price??0, c=s.change??0; pnl += Math.round(sh * c); asset += Math.round(sh * p);
   }
   const n=new Date();
   const ds=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
@@ -1039,8 +967,7 @@ function saveDailyPnl(){
   const currentRecords = tabRecords[currentTab];
   currentRecords.unshift({date:ds,time:ts,totalPnl:pnl,totalAsset:asset,timestamp:n.getTime()});
   if(currentRecords.length>50) tabRecords[currentTab]=currentRecords.slice(0,50);
-  saveRecords();renderHistory();
-  showToast('已存儲今日損益：'+(pnl>=0?'+':'')+pnl.toLocaleString());
+  saveRecords();renderHistory(); showToast('已存儲今日損益：'+(pnl>=0?'+':'')+pnl.toLocaleString());
 }
 
 function deleteHistory(timestamp) {
@@ -1053,22 +980,14 @@ function openModal(){
   document.getElementById('fugleKeyInput').value=fugleKey;
   document.getElementById('secondFugleKeyInput').value=secondFugleKey;
   document.getElementById('tabCountSelect').value=tabCount;
-  updateKeyStatus(); 
-  renderApiStats(); 
-  document.getElementById('modalOverlay').classList.add('show');
+  updateKeyStatus(); renderApiStats(); document.getElementById('modalOverlay').classList.add('show');
 }
 
-function closeModal() {
-  document.getElementById('modalOverlay').classList.remove('show');
-}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('remove'); document.getElementById('modalOverlay').classList.remove('show'); }
 
 function saveAndCloseModal(){
-  saveKeys();
-  saveTabCount();
-  globalKeyRotator = null; 
-  document.getElementById('modalOverlay').classList.remove('show');
-  showToast('設定已儲存，更新頻率將智能調整');
-  refreshPrices(); 
+  saveKeys(); saveTabCount(); globalKeyRotator = null; 
+  document.getElementById('modalOverlay').classList.remove('show'); showToast('設定已儲存'); refreshPrices(); 
 }
 
 function openManual() { document.getElementById('manualOverlay').classList.add('show'); }
@@ -1092,12 +1011,9 @@ function exportData() {
   const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const downloadAnchorElement = document.createElement('a');
-  const d = new Date();
-  const dateString = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
-  downloadAnchorElement.setAttribute("href", url);
-  downloadAnchorElement.setAttribute("download", "stock_backup_" + dateString + ".json");
-  document.body.appendChild(downloadAnchorElement); downloadAnchorElement.click();
-  document.body.removeChild(downloadAnchorElement); URL.revokeObjectURL(url);
+  const d = new Date(); const dateString = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+  downloadAnchorElement.setAttribute("href", url); downloadAnchorElement.setAttribute("download", "stock_backup_" + dateString + ".json");
+  document.body.appendChild(downloadAnchorElement); downloadAnchorElement.click(); document.body.removeChild(downloadAnchorElement); URL.revokeObjectURL(url);
   showToast('✅ 備份檔案已成功下載');
 }
 
@@ -1117,10 +1033,9 @@ function importData(event) {
         if (data.secondFugleKey) localStorage.setItem(SFK, data.secondFugleKey);
         if (data.theme) localStorage.setItem(TK, data.theme);
         if (data.tabCount) localStorage.setItem(TC_KEY, data.tabCount);
-        alert('🎉 備份還原成功！系統將為您重新載入頁面。');
-        location.reload();
+        alert('🎉 備份還原成功！'); location.reload();
       }
-    } catch (err) { alert('❌ 檔案格式錯誤，無法還原資料。請確認上傳的是正確的 json 備份檔。'); }
+    } catch (err) { alert('❌ 檔案格式錯誤，無法還原資料。'); }
     document.getElementById('importFile').value = '';
   };
   reader.readAsText(file);
@@ -1139,7 +1054,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.3.2 已啟動 (首頁緊湊 & 取消台指期版)');
+console.log('股票庫存管理 V4.3.3 已啟動 (國內指數多重容錯版)');
 </script>
 </body>
 </html>
