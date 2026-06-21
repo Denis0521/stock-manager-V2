@@ -1,9 +1,9 @@
-/* ========================================================= 🛡️ Service Worker V5.0.0 ========================================================= */
+/* ========================================================= 🛡️ Service Worker V5.1.0 ========================================================= */
 
-const CACHE_NAME = 'stock-portfolio-v5';
-const STATIC_CACHE = 'stock-static-v5';
-const DYNAMIC_CACHE = 'stock-dynamic-v5';
-const IMAGE_CACHE = 'stock-images-v5';
+const CACHE_NAME = 'stock-portfolio-v5-1';
+const STATIC_CACHE = 'stock-static-v5-1';
+const DYNAMIC_CACHE = 'stock-dynamic-v5-1';
+const IMAGE_CACHE = 'stock-images-v5-1';
 
 // 核心靜態資源（安裝時預快取）
 const CORE_ASSETS = [
@@ -54,7 +54,7 @@ self.addEventListener('activate', (event) => {
         cacheNames
           .filter(name => {
             return name.startsWith('stock-') && 
-                   !name.includes('v5');
+                   !name.includes('v5-1');
           })
           .map(name => {
             console.log('[SW] Deleting old cache:', name);
@@ -383,4 +383,4 @@ self.addEventListener('message', (event) => {
   }
 });
 
-console.log('[SW] Service Worker V5.0.0 loaded');
+console.log('[SW] Service Worker V5.1.0 loaded');
