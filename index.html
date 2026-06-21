@@ -962,7 +962,7 @@ function renderRow(s){
     symCont.querySelector('.sym').textContent=s.symbol;
     let srcEl = symCont.querySelector('.sym-src');
     if(!srcEl){ srcEl = document.createElement('div'); srcEl.className = 'sym-src'; symCont.appendChild(srcEl); }
-    srcEl.textContent = (s.source==='Fugle' && s.updateTime) ? s.updateTime : '';
+    srcEl.textContent = '';
   }
   const qn=el.querySelector('.qty-cell');
   if(qn){
@@ -1024,8 +1024,8 @@ function renderAll(){
         <div style="font-size:0.8em;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
       }
     }
-    let srcStr = (s.source==='Fugle' && s.updateTime) ? s.updateTime : '';
-    div.innerHTML= '<div class="sym-container"><div class="sym">'+s.symbol+'</div>'+srcStr+'</div>'+
+    let srcStr = '';
+    div.innerHTML= '<div class="sym-container"><div class="sym">'+s.symbol+'</div></div>'+
     '<div class="qty-cell"><div style="line-height:1.2;font-size:inherit;">'+s.displayQty+' '+s.displayUnit+'</div><div style="font-size:0.8em;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'">'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'</div></div>'+
     '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+
     '<div class="chgp '+(s.changePercent!=null?(s.changePercent>=0?'up':'down'):'')+'">'+cgp+'</div>'+
