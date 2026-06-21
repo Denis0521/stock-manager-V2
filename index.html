@@ -23,18 +23,20 @@ body.purple-light { --bg: #ece8f3; --s-light: #ffffff; --s-dark: #cfc7df; --t-ma
 body.pink { --bg: #f3e6e8; --s-light: #ffffff; --s-dark: #d5c3c6; --t-main: #4a123a; --t-muted: #9b2c2c; --up: #e53e3e; --down: #38a169; --engrave-l: rgba(255,255,255,0.7); --engrave-d: rgba(0,0,0,0.1); --protrude-l: rgba(255,255,255,0.7); --protrude-d: rgba(0,0,0,0.15); --accent: #d63384; }
 body.cement { --bg: #a3a8b0; --s-light: #c0c5cd; --s-dark: #868b93; --t-main: #22252a; --t-muted: #4a5059; --up: #c62828; --down: #1b5e20; --engrave-l: rgba(255,255,255,0.6); --engrave-d: rgba(0,0,0,0.3); --protrude-l: rgba(255,255,255,0.5); --protrude-d: rgba(0,0,0,0.4); --accent: #111111; }
 
-/* ========================================================= 🌐 基礎排版與 3D 結構 ========================================================= */
+/* ========================================================= 🌐 基礎排版與緊湊化間距 ========================================================= */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif; background:var(--bg); color:var(--t-main); padding:0 0 80px; min-height:100vh; font-size:15px; overflow-x:hidden; transition:background-color 0.4s ease, color 0.4s ease}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif; background:var(--bg); color:var(--t-main); padding:0 0 60px; min-height:100vh; font-size:15px; overflow-x:hidden; transition:background-color 0.4s ease, color 0.4s ease}
 input,select,button{font-family:inherit;font-size:inherit;outline:none;text-align:center}
 .header, .tabs-bar, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .backup-box { background: var(--bg); border: none; box-shadow: 6px 6px 12px var(--s-dark), -6px -6px 12px var(--s-light); border-radius: 12px; transition: background-color 0.4s ease, box-shadow 0.4s ease; }
 .header { border-radius: 0 0 16px 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
 .header h1 { font-size: 22px; font-weight: 700; color: var(--t-main); }
 .header .hdr-right { display: flex; gap: 8px; }
-.tabs-bar { padding: 8px 10px; margin: 14px; gap: 8px; display: flex; }
-.card { padding: 16px; margin: 14px; }
-.card-title { font-size: 16px; color: var(--t-muted); margin-bottom: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; text-align: left; }
-.form-row { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+
+/* 版面間距縮小 */
+.tabs-bar { padding: 6px 10px; margin: 8px 10px; gap: 8px; display: flex; }
+.card { padding: 12px 16px; margin: 8px 10px; }
+.card-title { font-size: 16px; color: var(--t-muted); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; text-align: left; }
+.form-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
 .form-row:last-child { margin-bottom: 0; }
 input, select { flex: 1; min-width: 0; padding: 12px; background: var(--bg); border: none; border-radius: 8px; box-shadow: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light); color: var(--t-main); font-weight: 600; text-align: left; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); transition: background-color 0.4s ease, box-shadow 0.4s ease; }
 input::placeholder { color: var(--t-muted); text-shadow: none; font-weight: normal; }
@@ -43,13 +45,13 @@ input::placeholder { color: var(--t-muted); text-shadow: none; font-weight: norm
 button, .tab-btn { background: var(--bg); border: none; border-radius: 8px; padding: 10px 16px; box-shadow: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light); color: var(--t-main); font-weight: 600; cursor: pointer; transition: all 0.25s ease; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); display: flex; align-items: center; justify-content: center; }
 button:hover, .tab-btn:hover { transform: translateY(-1px); box-shadow: 6px 6px 12px var(--s-dark), -6px -6px 12px var(--s-light); }
 button:active, .tab-btn.active { transform: translateY(0); box-shadow: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light); color: var(--accent); }
-.tab-btn { flex: 1; padding: 12px 8px; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tab-btn { flex: 1; padding: 10px 6px; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .btn-theme, .btn-adv { padding: 8px 14px; font-size: 15px; }
 .form-row button { font-size: 16px; letter-spacing: 2px; padding-left: 18px; }
-.btn-save { width: 100%; padding: 14px; font-size: 17px; margin: 14px; width: calc(100% - 28px); }
+.btn-save { width: calc(100% - 20px); padding: 14px; font-size: 17px; margin: 8px 10px; }
 
-/* 📉 指數區塊縮小高度 */
-.idx-scroll-container { margin: 14px; overflow-x: auto; display: flex; gap: 0; padding: 2px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+/* 📉 指數區塊縮小高度與間距 */
+.idx-scroll-container { margin: 8px 10px; overflow-x: auto; display: flex; gap: 0; padding: 2px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
 .idx-card-box { flex: 0 0 auto; min-width: 160px; padding: 2px 16px; scroll-snap-align: start; border-right: 1px solid var(--s-dark); text-align: left; }
 .idx-card-box:last-child { border-right: none; }
@@ -58,8 +60,8 @@ button:active, .tab-btn.active { transform: translateY(0); box-shadow: inset 4px
 .idx-box-change-row { display: flex; align-items: center; justify-content: flex-start; gap: 6px; font-size: 16px; font-weight: 600; white-space: nowrap; }
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 0; opacity: 0.7; }
 
-/* 📊 明細列表優化：縮小代號寬度、縮小行高、調整字體大小 */
-.table-scroll { margin: 14px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; }
+/* 📊 明細列表優化 */
+.table-scroll { margin: 8px 10px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; }
 .list-wrap { min-width: 710px; }
 .list-header, .srow { grid-template-columns: 100px 110px 90px 90px 80px 90px 120px 90px; }
 .list-header { display: grid; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 17px; color: var(--t-muted); font-weight: 600; }
@@ -78,19 +80,21 @@ button:active, .tab-btn.active { transform: translateY(0); box-shadow: inset 4px
 .srow .chg, .srow .today-pnl { font-weight: 700; }
 .srow .total { font-weight: 700; overflow: hidden; width: 100%; }
 .srow .act button { padding: 6px 10px; font-size: 15px; border-radius: 6px; }
-.summary { padding: 16px; margin: 14px; }
+
+.summary { padding: 12px 16px; margin: 8px 10px; }
 .sum-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
 .sum-row .lab { color: var(--t-muted); font-size: 17px; font-weight: 600; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
 .sum-row .val { font-size: 20px; font-weight: 800; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
-.sum-divider { height: 2px; background: var(--s-dark); opacity: 0.5; margin: 8px 0; border-radius: 2px; }
-.sum-toggle-btn { text-align: center; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px; padding-top: 4px; color: var(--t-muted); text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
-.history { margin: 14px; }
-.hist-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; margin-top: 10px; }
+.sum-divider { height: 2px; background: var(--s-dark); opacity: 0.5; margin: 6px 0; border-radius: 2px; }
+.sum-toggle-btn { text-align: center; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 6px; padding-top: 4px; color: var(--t-muted); text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
+.history { margin: 8px 10px; }
+.hist-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; margin-top: 8px; }
 .hist-item-left { display: flex; align-items: baseline; gap: 12px; }
 .hist-item .hdate { color: var(--t-muted); font-size: 14px; font-weight: 600; }
 .hist-item .hval { font-weight: 800; font-size: 17px; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
 .del-hist-btn { padding: 6px 12px; font-size: 14px; border-radius: 8px; }
 .hist-empty { color: var(--t-muted); font-size: 15px; text-align: center; padding: 20px; font-weight: 600; }
+
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 999; align-items: center; justify-content: center; }
 .modal-overlay.show { display: flex; }
 .modal { position: relative; border-radius: 20px; padding: 24px 20px; width: calc(100% - 28px); max-width: 400px; max-height: 85vh; overflow-y: auto; background: var(--bg); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 25px 50px rgba(0,0,0,0.5), 6px 6px 12px var(--s-dark), -6px -6px 12px var(--s-light); }
@@ -104,7 +108,7 @@ button:active, .tab-btn.active { transform: translateY(0); box-shadow: inset 4px
 .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--t-main); color: var(--bg); padding: 12px 24px; border-radius: 30px; font-size: 15px; font-weight: bold; z-index: 9999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
 .toast.show { opacity: 1; }
 a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
-.backup-box { padding: 16px; margin: 14px 0 0; }
+.backup-box { padding: 16px; margin: 8px 0 0; }
 .backup-title { font-size: 16px; font-weight: 700; color: var(--t-muted); margin-bottom: 12px; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); text-align: left; }
 .backup-btns { display: flex; gap: 12px; }
 .btn-backup { flex: 1; padding: 12px; font-size: 15px; }
@@ -132,12 +136,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 .api-section { margin-bottom: 20px; padding-top: 10px; border-top: 1px solid var(--s-dark); }
 .api-link-box { text-align: center; margin-bottom: 16px; padding: 10px; background: var(--bg); border-radius: 8px; box-shadow: 3px 3px 6px var(--s-dark), -3px -3px 6px var(--s-light); }
 
-/* 勾選清單樣式 (國際指數) */
-.checkbox-group { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; padding: 12px; background: var(--bg); border-radius: 8px; box-shadow: inset 3px 3px 6px var(--s-dark), inset -3px -3px 6px var(--s-light); }
-.checkbox-label { display: flex; align-items: center; gap: 6px; font-size: 15px; color: var(--t-main); font-weight: 600; cursor: pointer; width: calc(50% - 6px); }
-.checkbox-label input[type="checkbox"] { width: 18px; height: 18px; margin: 0; box-shadow: none; accent-color: var(--accent); }
-@media (min-width: 768px) { .checkbox-label { width: calc(33.33% - 8px); } }
-
 /* ========================================================= 🆕 進階設定全畫面樣式 ========================================================= */
 .modal.fullscreen-modal { width: 100vw !important; max-width: 100vw !important; height: 100vh !important; max-height: 100vh !important; border-radius: 0; padding: 18px 20px 20px !important; margin: 0 !important; border: none; box-sizing: border-box; }
 
@@ -152,7 +150,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   .srow { font-size: 17px; }
   .srow .sym { font-size: 17px; }
   .srow .chgp { font-size: 17px; }
-  .tab-btn { font-size: 15px; padding: 10px 4px; }
+  .tab-btn { font-size: 15px; padding: 8px 4px; }
   .btn-manual-row { font-size: 14px; padding: 10px 6px; }
 }
 
@@ -233,7 +231,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <div id="listBody"></div>
   </div>
 </div>
-<div id="emptyState" style="display:none;margin:0 14px;padding:32px 14px;text-align:center;color:var(--t-muted);font-weight:600;font-size:16px">尚無持股，請在上方新增</div>
+<div id="emptyState" style="display:none;margin:8px 10px;padding:24px 14px;text-align:center;color:var(--t-muted);font-weight:600;font-size:16px">尚無持股，請在上方新增</div>
 <div class="summary" id="summaryArea" style="display:none;">
   <div onclick="toggleSummary()" style="cursor:pointer;">
     <div class="sum-row" style="padding-bottom:0;">
@@ -247,12 +245,12 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <div class="sum-row"><span class="lab">總未實現損益 (ROI)</span><span class="val" id="totalUnrealized">—</span></div>
     <div class="sum-divider"></div>
     <div class="sum-row" style="padding-bottom:0;"><span class="lab">持股資產總計</span><span class="val" id="totalAsset">0</span></div>
-    <div class="sum-toggle-btn" style="margin-top:12px;" onclick="toggleSummary(event)">▲ 收起選單</div>
+    <div class="sum-toggle-btn" style="margin-top:10px;" onclick="toggleSummary(event)">▲ 收起選單</div>
   </div>
 </div>
 <button type="button" class="btn-save" id="saveArea" style="display:none;" onclick="saveDailyPnl()">存儲今日損益總計</button>
 <div class="history">
-  <div class="card-title" style="margin:0 0 6px">歷史記錄</div>
+  <div class="card-title" style="margin:0 0 4px">歷史記錄</div>
   <div id="historyBody"><div class="hist-empty">尚無記錄</div></div>
 </div>
 <div class="toast" id="toast"></div>
@@ -294,17 +292,10 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       </div>
       <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
       
-      <!-- API 用量統計 -->
       <div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:12px;box-shadow:inset 4px 4px 8px var(--s-dark),inset -4px -4px 8px var(--s-light);">
         <div style="font-size:13px;color:var(--t-muted);font-weight:600;margin-bottom:8px;text-align:center;">📊 今日 API 使用量</div>
         <div id="apiStatsBox"></div>
       </div>
-    </div>
-
-    <!-- 🌍 國際指數勾選清單 -->
-    <div class="api-section">
-      <div style="font-size:15px; color:var(--t-muted); font-weight:700; margin-bottom:4px; margin-left:4px;">🌍 國際指數顯示設定</div>
-      <div class="checkbox-group" id="foreignIndicesToggles"></div>
     </div>
 
     <div class="backup-box">
@@ -315,7 +306,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.2.1 (多國市場智能輪詢版)</div>
+    <div class="v-box">核心版本：V4.3.0 (首頁緊湊 & 台指期貨版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -341,8 +332,9 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <li><strong>智能休市降頻：</strong>系統會自動判斷亞股（08:00-14:00）與美股（21:30-05:00）時段。若所有主要市場皆休市，將自動放緩至每分鐘更新一次，省電又省流量。</li>
       </ul>
 
-      <h3>三、國際指數報價</h3>
-      <p>除了台股加權指數外，國際股市透過 Cloudflare Worker 代理直接抓取 Yahoo Finance 即時資料，延遲極低。您可以在「進階設定」中勾選欲顯示的國際指數（支援道瓊工業指數、那斯達克指數、標普500指數、費城半導體指數、日經225指數、韓國綜合指數）。</p>
+      <h3>三、國際指數與台指期貨</h3>
+      <p>除了 Fugle 提供的台股加權指數外，我們也透過代理技術直接抓取 Yahoo Finance 的即時資料。內建包含：<strong>台指期貨</strong>、道瓊、那斯達克、標普500、費城半導體、日經225、韓國綜合指數。</p>
+      <p>💡 <strong>關於台指期貨：</strong>Yahoo Finance 的台指期（代號 TXF=F）為連續報價，<strong>不分早盤或夜盤</strong>，它會在日間交易與夜間盤後時段自動連續更新。</p>
 
       <h3>四、離線使用與快取</h3>
       <p>遇到斷網時，系統會自動讀取最後一次的快取報價，並在名稱旁標示 <code>(離線)</code>，待網路恢復後會自動重新連線。</p>
@@ -368,7 +360,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </div>
 
 <script>
-/* ========================================================= 🔧 API 管理引擎 V4.2.1 ========================================================= */
+/* ========================================================= 🔧 API 管理引擎 V4.3.0 ========================================================= */
 const PROXY_LIST = [
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
@@ -474,6 +466,7 @@ function toggleKeyVisibility(inputId, btnId) {
 
 let cfWorkerUrl = 'https://yahoo-index-proxy.denis0521.workers.dev';
 const AVAILABLE_INDICES = [
+  { symbol: 'TXF=F', name: '台指期貨' },
   { symbol: '^DJI', name: '道瓊工業指數' },
   { symbol: '^IXIC', name: '那斯達克指數' },
   { symbol: '^GSPC', name: '標普500指數' },
@@ -481,7 +474,7 @@ const AVAILABLE_INDICES = [
   { symbol: '^N225', name: '日經225指數' },
   { symbol: '^KS11', name: '韓國綜合指數' }
 ];
-let selectedForeignIndices = ['^DJI','^IXIC','^GSPC','^SOX','^N225','^KS11']; // 預設全開
+const activeForeignIndices = AVAILABLE_INDICES.map(idx => idx.symbol);
 
 let currentTab = 0;
 let tabStocks = [[], [], [], [], []];
@@ -508,9 +501,6 @@ function loadState(){
     const tc=localStorage.getItem(TC_KEY);if(tc) tabCount=parseInt(tc);
     const pauseUntil = localStorage.getItem('api_pause_until');
     if (pauseUntil) apiPauseUntil = parseInt(pauseUntil);
-
-    const storedIndices = localStorage.getItem('tw_foreign_indices');
-    if (storedIndices) selectedForeignIndices = JSON.parse(storedIndices);
 
     for(let i=0; i<5; i++){
       const s=localStorage.getItem(getStockKey(i)); if(s) tabStocks[i]=JSON.parse(s);
@@ -622,7 +612,7 @@ function updateKeyStatus(){
   renderApiStats();
 }
 
-// 渲染國際指數清單
+// 渲染國際指數與期貨清單
 function renderGlobalIndices(indices, isOffline = false) {
   const container = document.getElementById('idxScrollContainer');
   const boxes = container.querySelectorAll('.idx-card-box');
@@ -631,10 +621,6 @@ function renderGlobalIndices(indices, isOffline = false) {
   const offlineTag = isOffline ? '<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>' : '';
 
   indices.forEach(item => {
-    // 過濾未勾選的指數
-    if (!selectedForeignIndices.includes(item.symbol)) return;
-
-    // 將快取的舊名稱對應到新的在地化名稱
     let displayIndexName = item.name;
     const matchedIndex = AVAILABLE_INDICES.find(idx => idx.symbol === item.symbol);
     if (matchedIndex) displayIndexName = matchedIndex.name;
@@ -654,8 +640,6 @@ function renderGlobalIndices(indices, isOffline = false) {
 
 async function fetchGlobalIndicesFromWorker() {
   if (!cfWorkerUrl || cfWorkerUrl === '') return;
-  if (selectedForeignIndices.length === 0) { renderGlobalIndices([], false); return; } // 若全沒勾選直接清空
-  
   if (navigator.onLine === false) {
     const cachedIdx = localStorage.getItem('tw_cached_indices');
     if (cachedIdx) { try { renderGlobalIndices(JSON.parse(cachedIdx), true); } catch(e) {} }
@@ -663,7 +647,7 @@ async function fetchGlobalIndicesFromWorker() {
   }
   
   try {
-    const symbolsStr = selectedForeignIndices.join(',');
+    const symbolsStr = activeForeignIndices.join(',');
     const response = await fetch(`${cfWorkerUrl}/indices?symbols=${encodeURIComponent(symbolsStr)}&_=${Date.now()}`, { 
       signal: AbortSignal.timeout(API_TIMEOUT),
       headers: { 'Accept': 'application/json' }
@@ -679,6 +663,9 @@ async function fetchGlobalIndicesFromWorker() {
         const name = item.name || item.symbol;
         return { symbol: item.symbol, name, price, pct, changeAmt };
       });
+      // 確保照著 AVAILABLE_INDICES 的順序排列 (台指期排最前面)
+      parsedIndices.sort((a, b) => activeForeignIndices.indexOf(a.symbol) - activeForeignIndices.indexOf(b.symbol));
+      
       cachedGlobalIndices = parsedIndices;
       trackApiUsage('Yahoo');
       try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
@@ -780,8 +767,8 @@ function isAnyMarketOpen() {
   const time = hour + min / 60;
   // 台股與亞股活躍期: 08:00 ~ 14:00 (時間值 8 ~ 14)
   if (time >= 8 && time <= 14) return true;
-  // 美股活躍期 (以夏令時間概算為準): 21:30 ~ 05:00 (時間值大於 21.5 或 小於 5)
-  if (time >= 21.5 || time <= 5) return true;
+  // 美股與台指夜盤活躍期: 15:00 ~ 05:00 (時間值大於 15 或 小於 5)
+  if (time >= 15 || time <= 5) return true;
 
   return false;
 }
@@ -1073,25 +1060,12 @@ function renderHistory(){
   }
 }
 
-// 渲染進階設定對話框內的勾選清單
-function renderForeignIndicesToggles() {
-  const container = document.getElementById('foreignIndicesToggles');
-  if (!container) return;
-  container.innerHTML = AVAILABLE_INDICES.map(idx => `
-    <label class="checkbox-label">
-      <input type="checkbox" value="${idx.symbol}" ${selectedForeignIndices.includes(idx.symbol) ? 'checked' : ''}>
-      ${idx.name}
-    </label>
-  `).join('');
-}
-
 function openModal(){
   document.getElementById('fugleKeyInput').value=fugleKey;
   document.getElementById('secondFugleKeyInput').value=secondFugleKey;
   document.getElementById('tabCountSelect').value=tabCount;
   updateKeyStatus(); 
   renderApiStats(); 
-  renderForeignIndicesToggles(); // 載入勾選清單
   document.getElementById('modalOverlay').classList.add('show');
 }
 
@@ -1102,17 +1076,10 @@ function closeModal() {
 function saveAndCloseModal(){
   saveKeys();
   saveTabCount();
-  
-  // 儲存國際指數勾選狀態
-  const checkboxes = document.querySelectorAll('#foreignIndicesToggles input[type="checkbox"]');
-  selectedForeignIndices = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
-  try { localStorage.setItem('tw_foreign_indices', JSON.stringify(selectedForeignIndices)); } catch(e){}
-
   globalKeyRotator = null; 
   document.getElementById('modalOverlay').classList.remove('show');
   showToast('設定已儲存，更新頻率將智能調整');
-  
-  refreshPrices(); // 立即刷新顯示剛設定的指數
+  refreshPrices(); 
 }
 
 function openManual() { document.getElementById('manualOverlay').classList.add('show'); }
@@ -1131,8 +1098,7 @@ function exportData() {
   const dataToExport = {
     tabStocks: [localStorage.getItem(getStockKey(0)), localStorage.getItem(getStockKey(1)), localStorage.getItem(getStockKey(2)), localStorage.getItem(getStockKey(3)), localStorage.getItem(getStockKey(4))],
     tabRecords: [localStorage.getItem(getRecordKey(0)), localStorage.getItem(getRecordKey(1)), localStorage.getItem(getRecordKey(2)), localStorage.getItem(getRecordKey(3)), localStorage.getItem(getRecordKey(4))],
-    tabNames: localStorage.getItem(TN_KEY), fugleKey: localStorage.getItem(FK), secondFugleKey: localStorage.getItem(SFK), theme: localStorage.getItem(TK), tabCount: localStorage.getItem(TC_KEY),
-    foreignIndices: localStorage.getItem('tw_foreign_indices') // 備份勾選狀態
+    tabNames: localStorage.getItem(TN_KEY), fugleKey: localStorage.getItem(FK), secondFugleKey: localStorage.getItem(SFK), theme: localStorage.getItem(TK), tabCount: localStorage.getItem(TC_KEY)
   };
   const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -1162,7 +1128,6 @@ function importData(event) {
         if (data.secondFugleKey) localStorage.setItem(SFK, data.secondFugleKey);
         if (data.theme) localStorage.setItem(TK, data.theme);
         if (data.tabCount) localStorage.setItem(TC_KEY, data.tabCount);
-        if (data.foreignIndices) localStorage.setItem('tw_foreign_indices', data.foreignIndices);
         alert('🎉 備份還原成功！系統將為您重新載入頁面。');
         location.reload();
       }
@@ -1185,7 +1150,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.2.1 已啟動 (台灣在地化指數名稱版)');
+console.log('股票庫存管理 V4.3.0 已啟動 (首頁緊湊 & 台指期貨版)');
 </script>
 </body>
 </html>
