@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>股票庫存管理 Pro</title>
+<title>股票庫存管理</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="股票庫存管理">
@@ -11,698 +11,258 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <style>
-/* ========================================================= 🎨 設計系統 Design System ========================================================= */
+/* ========================================================= 🎨 設計系統 ========================================================= */
 :root {
-  /* 色彩系統 */
-  --bg: #e0e5ec;
-  --s-light: #ffffff;
-  --s-dark: #a3b1c6;
-  --t-main: #2d3436;
-  --t-muted: #6b7280;
-  --up: #d93025;
-  --down: #188038;
-  --engrave-l: rgba(255,255,255,0.8);
-  --engrave-d: rgba(0,0,0,0.15);
-  --protrude-l: rgba(255,255,255,0.8);
-  --protrude-d: rgba(0,0,0,0.2);
-  --accent: #1a73e8;
-  --accent-rgb: 26, 115, 232;
-
-  /* 陰影系統 */
-  --shadow-out: 6px 6px 12px var(--s-dark), -6px -6px 12px var(--s-light);
-  --shadow-out-sm: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
-  --shadow-in: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
-  --shadow-in-sm: inset 2px 2px 4px var(--s-dark), inset -2px -2px 4px var(--s-light);
-
-  /* 間距系統 */
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 12px;
-  --space-lg: 16px;
-  --space-xl: 24px;
-
-  /* 字體系統 */
-  --font-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
-  --font-mono: "SF Mono", "Fira Code", monospace;
-
-  /* 動畫 */
-  --transition-fast: 0.15s ease;
-  --transition-base: 0.25s ease;
-  --transition-slow: 0.4s ease;
-
-  /* 圓角 */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
+  --bg: #e0e5ec; --s-light: #ffffff; --s-dark: #a3b1c6; --t-main: #2d3436; --t-muted: #6b7280;
+  --up: #d93025; --down: #188038; --engrave-l: rgba(255,255,255,0.8); --engrave-d: rgba(0,0,0,0.15);
+  --protrude-l: rgba(255,255,255,0.8); --protrude-d: rgba(0,0,0,0.2); --accent: #1a73e8;
 }
+body.theme-tech { --bg: #2b303a; --s-light: #363c48; --s-dark: #20242c; --t-main: #e2e8f0; --t-muted: #a0aec0; --up: #ff6b6b; --down: #51cf66; --engrave-l: rgba(255,255,255,0.05); --engrave-d: rgba(0,0,0,0.5); --protrude-l: rgba(255,255,255,0.1); --protrude-d: rgba(0,0,0,0.6); --accent: #58a6ff; }
+body.theme-blue-light { --bg: #e3edf7; --s-light: #ffffff; --s-dark: #b8c6d6; --t-main: #102a43; --t-muted: #486581; --up: #e53e3e; --down: #2f855a; --engrave-l: rgba(255,255,255,0.8); --engrave-d: rgba(0,0,0,0.15); --protrude-l: rgba(255,255,255,0.8); --protrude-d: rgba(0,0,0,0.2); --accent: #2b6cb0; }
+body.theme-purple-light { --bg: #ece8f3; --s-light: #ffffff; --s-dark: #cfc7df; --t-main: #322659; --t-muted: #6b5b8e; --up: #d53f8c; --down: #2f855a; --engrave-l: rgba(255,255,255,0.8); --engrave-d: rgba(0,0,0,0.15); --protrude-l: rgba(255,255,255,0.8); --protrude-d: rgba(0,0,0,0.2); --accent: #6b46c1; }
+body.theme-pink { --bg: #f3e6e8; --s-light: #ffffff; --s-dark: #d5c3c6; --t-main: #4a123a; --t-muted: #9b2c2c; --up: #e53e3e; --down: #38a169; --engrave-l: rgba(255,255,255,0.7); --engrave-d: rgba(0,0,0,0.1); --protrude-l: rgba(255,255,255,0.7); --protrude-d: rgba(0,0,0,0.15); --accent: #d63384; }
+body.theme-cement { --bg: #a3a8b0; --s-light: #c0c5cd; --s-dark: #868b93; --t-main: #22252a; --t-muted: #4a5059; --up: #c62828; --down: #1b5e20; --engrave-l: rgba(255,255,255,0.6); --engrave-d: rgba(0,0,0,0.3); --protrude-l: rgba(255,255,255,0.5); --protrude-d: rgba(0,0,0,0.4); --accent: #111111; }
 
-/* 主題變體 */
-body.theme-tech { 
-  --bg: #2b303a; --s-light: #363c48; --s-dark: #20242c; --t-main: #e2e8f0; --t-muted: #a0aec0; 
-  --up: #ff6b6b; --down: #51cf66; --engrave-l: rgba(255,255,255,0.05); --engrave-d: rgba(0,0,0,0.5); 
-  --protrude-l: rgba(255,255,255,0.1); --protrude-d: rgba(0,0,0,0.6); --accent: #58a6ff; --accent-rgb: 88, 166, 255;
-}
-body.theme-blue-light { 
-  --bg: #e3edf7; --s-light: #ffffff; --s-dark: #b8c6d6; --t-main: #102a43; --t-muted: #486581; 
-  --up: #e53e3e; --down: #2f855a; --accent: #2b6cb0; --accent-rgb: 43, 108, 176;
-}
-body.theme-purple-light { 
-  --bg: #ece8f3; --s-light: #ffffff; --s-dark: #cfc7df; --t-main: #322659; --t-muted: #6b5b8e; 
-  --up: #d53f8c; --down: #2f855a; --accent: #6b46c1; --accent-rgb: 107, 70, 193;
-}
-body.theme-pink { 
-  --bg: #f3e6e8; --s-light: #ffffff; --s-dark: #d5c3c6; --t-main: #4a123a; --t-muted: #9b2c2c; 
-  --up: #e53e3e; --down: #38a169; --accent: #d63384; --accent-rgb: 214, 51, 132;
-}
-body.theme-cement { 
-  --bg: #a3a8b0; --s-light: #c0c5cd; --s-dark: #868b93; --t-main: #22252a; --t-muted: #4a5059; 
-  --up: #c62828; --down: #1b5e20; --accent: #111111; --accent-rgb: 17, 17, 17;
-}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC",sans-serif; background:var(--bg); color:var(--t-main); padding:0 0 60px; min-height:100vh; font-size:15px; overflow-x:hidden; transition:background-color 0.4s ease, color 0.4s ease}
+input,select,button{font-family:inherit;font-size:inherit;outline:none;text-align:center}
 
-/* ========================================================= 🏗️ 基礎樣式 ========================================================= */
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+.header, .tabs-bar, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .backup-box { background: var(--bg); border: none; box-shadow: 6px 6px 12px var(--s-dark), -6px -6px 12px var(--s-light); border-radius: 12px; transition: background-color 0.4s ease, box-shadow 0.4s ease; }
+.header { border-radius: 0 0 16px 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header h1 { font-size: 22px; font-weight: 700; color: var(--t-main); }
+.header .hdr-right { display: flex; gap: 8px; }
 
-html { scroll-behavior: smooth; }
-
-body { 
-  font-family: var(--font-base); 
-  background: var(--bg); 
-  color: var(--t-main); 
-  padding: 0 0 80px; 
-  min-height: 100vh; 
-  font-size: 15px; 
-  overflow-x: hidden; 
-  transition: background-color var(--transition-slow), color var(--transition-slow);
-  -webkit-font-smoothing: antialiased;
-}
-
-input, select, button { font-family: inherit; font-size: inherit; outline: none; text-align: center; }
-
-/* 無障礙焦點 */
-button:focus-visible, input:focus-visible, select:focus-visible, .tab-btn:focus-visible { 
-  outline: 2px solid var(--accent); outline-offset: 2px; 
-}
-
-/* ========================================================= 🧩 Neumorphism 元件庫 ========================================================= */
-.neu-panel { 
-  background: var(--bg); 
-  border: none; 
-  box-shadow: var(--shadow-out); 
-  border-radius: var(--radius-md); 
-  transition: background-color var(--transition-slow), box-shadow var(--transition-slow); 
-}
-
-.neu-panel--inset { 
-  box-shadow: var(--shadow-in); 
-}
-
-.neu-btn { 
-  background: var(--bg); 
-  border: none; 
-  border-radius: var(--radius-sm); 
-  padding: 10px 16px; 
-  box-shadow: var(--shadow-out-sm); 
-  color: var(--t-main); 
-  font-weight: 600; 
-  cursor: pointer; 
-  transition: all var(--transition-base); 
-  text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); 
-  display: inline-flex; 
-  align-items: center; 
-  justify-content: center; 
-  gap: 6px;
-}
-
-.neu-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-out); }
-.neu-btn:active, .neu-btn.is-active { 
-  transform: translateY(0); 
-  box-shadow: var(--shadow-in); 
-  color: var(--accent); 
-}
-
-.neu-btn--primary { 
-  background: var(--accent); 
-  color: #fff; 
-  text-shadow: none; 
-  box-shadow: 4px 4px 8px rgba(0,0,0,0.2), -4px -4px 8px rgba(255,255,255,0.1); 
-}
-.neu-btn--primary:hover { box-shadow: 6px 6px 12px rgba(0,0,0,0.25), -6px -6px 12px rgba(255,255,255,0.15); }
-.neu-btn--primary:active { box-shadow: inset 4px 4px 8px rgba(0,0,0,0.3), inset -4px -4px 8px rgba(255,255,255,0.1); }
-
-.neu-input { 
-  flex: 1; 
-  min-width: 0; 
-  padding: 12px; 
-  background: var(--bg); 
-  border: none; 
-  border-radius: var(--radius-sm); 
-  box-shadow: var(--shadow-in); 
-  color: var(--t-main); 
-  font-weight: 600; 
-  text-align: left; 
-  text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); 
-  transition: background-color var(--transition-slow), box-shadow var(--transition-slow); 
-}
-
-.neu-input::placeholder { color: var(--t-muted); text-shadow: none; font-weight: normal; }
-.neu-input:focus { box-shadow: inset 5px 5px 10px var(--s-dark), inset -5px -5px 10px var(--s-light); }
-
-.neu-select { 
-  flex: 0 0 68px; 
-  padding: 12px 4px; 
-  text-align: center; 
-  appearance: none; 
-  -webkit-appearance: none;
-}
-
-/* ========================================================= 📱 佈局元件 ========================================================= */
-.app-header { 
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg); 
-  padding: var(--space-md) var(--space-lg); 
-  display: flex; 
-  align-items: center; 
-  justify-content: space-between; 
-  position: sticky; 
-  top: 0; 
-  z-index: 100; 
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.app-header__title { font-size: 22px; font-weight: 700; color: var(--t-main); letter-spacing: -0.5px; }
-.app-header__actions { display: flex; gap: var(--space-sm); }
-
-.tabs-bar { 
-  padding: var(--space-sm) 10px; 
-  margin: var(--space-sm) 10px; 
-  gap: var(--space-sm); 
-  display: flex; 
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-}
-.tabs-bar::-webkit-scrollbar { height: 0; }
-
-.tab-btn { 
-  flex: 1; 
-  padding: 10px 6px; 
-  font-size: 16px; 
-  white-space: nowrap; 
-  overflow: hidden; 
-  text-overflow: ellipsis; 
-  scroll-snap-align: start;
-  min-width: 80px;
-}
-
-.card { padding: var(--space-md) var(--space-lg); margin: var(--space-sm) 10px; }
-.card__title { 
-  font-size: 16px; 
-  color: var(--t-muted); 
-  margin-bottom: var(--space-md); 
-  font-weight: 600; 
-  text-transform: uppercase; 
-  letter-spacing: 1px; 
-  text-align: left; 
-}
-
+.tabs-bar { padding: 6px 10px; margin: 8px 10px; gap: 8px; display: flex; min-height: 50px; }
+.card { padding: 12px 16px; margin: 8px 10px; }
+.card-title { font-size: 16px; color: var(--t-muted); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; text-align: left; }
 .form-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
 .form-row:last-child { margin-bottom: 0; }
+input, select { flex: 1; min-width: 0; padding: 12px; background: var(--bg); border: none; border-radius: 8px; box-shadow: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light); color: var(--t-main); font-weight: 600; text-align: left; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); transition: background-color 0.4s ease, box-shadow 0.4s ease; }
+input::placeholder { color: var(--t-muted); text-shadow: none; font-weight: normal; }
+.form-row select { flex: 0 0 68px; padding: 12px 4px; text-align: center; }
 .form-row .sym-inp { flex: 0 0 90px; }
-.form-row .unit-select { flex: 0 0 68px; }
-.form-row .action-btn { flex: 0 0 80px; }
+button, .tab-btn { background: var(--bg); border: none; border-radius: 8px; padding: 10px 16px; box-shadow: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light); color: var(--t-main); font-weight: 600; cursor: pointer; transition: all 0.25s ease; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); display: flex; align-items: center; justify-content: center; }
+button:hover, .tab-btn:hover { transform: translateY(-1px); box-shadow: 6px 6px 12px var(--s-dark), -6px -6px 12px var(--s-light); }
+button:active, .tab-btn.active { transform: translateY(0); box-shadow: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light); color: var(--accent); }
+.tab-btn { flex: 1; padding: 10px 6px; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.btn-theme, .btn-adv { padding: 8px 14px; font-size: 15px; }
+.form-row button { font-size: 16px; letter-spacing: 2px; padding-left: 18px; }
+.btn-save { width: calc(100% - 20px); padding: 14px; font-size: 17px; margin: 8px 10px; }
 
-/* ========================================================= 📊 指數滾動區 ========================================================= */
-.idx-scroll-container { 
-  margin: var(--space-sm) 10px; 
-  overflow-x: auto; 
-  display: flex; 
-  gap: 0; 
-  padding: 2px 0; 
-  scroll-snap-type: x mandatory; 
-  -webkit-overflow-scrolling: touch; 
-}
+.idx-scroll-container { margin: 8px 10px; overflow-x: auto; display: flex; gap: 0; padding: 2px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
+.idx-card-box { flex: 0 0 auto; min-width: 160px; padding: 2px 16px; scroll-snap-align: start; border-right: 1px solid var(--s-dark); text-align: left; }
+.idx-card-box:last-child { border-right: none; }
+.idx-box-name { font-size: 16px; color: var(--t-muted); font-weight: 600; margin-top: 2px; }
+.idx-box-price { font-size: 18px; font-weight: 700; margin: 1px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
+.idx-box-change-row { display: flex; align-items: center; justify-content: flex-start; gap: 6px; font-size: 16px; font-weight: 600; white-space: nowrap; }
+.idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 0; opacity: 0.7; }
 
-.idx-card { 
-  flex: 0 0 auto; 
-  min-width: 160px; 
-  padding: 2px var(--space-lg); 
-  scroll-snap-align: start; 
-  border-right: 1px solid var(--s-dark); 
-  text-align: left; 
-}
-.idx-card:last-child { border-right: none; }
+.table-scroll { margin: 8px 10px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; }
+.list-wrap { min-width: 710px; }
+.list-header, .srow { grid-template-columns: 100px 110px 90px 90px 80px 90px 120px 90px; }
+.list-header { display: grid; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 17px; color: var(--t-muted); font-weight: 600; }
+.srow { display: grid; align-items: stretch; border-bottom: 1px solid var(--s-dark); font-size: 17px; }
+.srow:last-child { border-bottom: none; }
+.list-header > div, .srow > div { padding: 6px 6px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; white-space: nowrap; }
+.list-header > div:nth-child(1), .srow > div:nth-child(1) { align-items: flex-start; text-align: left; position: sticky; left: 0; z-index: 2; background: var(--bg); padding-left: 14px; }
+.list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after { content: ''; position: absolute; top: 0; bottom: 0; right: -6px; width: 6px; background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; }
+.list-header > div:nth-child(8) { align-items: center; justify-content: center; padding-left: 14px; }
+.srow > div:nth-child(8) { flex-direction: row; align-items: center; justify-content: center; gap: 6px; padding-left: 14px; }
+.sym-container { align-items: flex-start !important; line-height: 1.1 !important; width: 100%; max-width: 100px; }
+.srow .sym { font-weight: 800; font-size: 17px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; }
+.srow .qty-cell { font-weight: 600; color: var(--t-main); overflow: hidden; width: 100%; }
+.srow .price { font-weight: 700; }
+.srow .chgp { font-size: 17px; font-weight: 700; }
+.srow .chg, .srow .today-pnl { font-weight: 700; }
+.srow .total { font-weight: 700; overflow: hidden; width: 100%; }
+.srow .act button { padding: 6px 10px; font-size: 15px; border-radius: 6px; }
 
-.idx-card__name { font-size: 16px; color: var(--t-muted); font-weight: 600; margin-top: 2px; }
-.idx-card__price { font-size: 18px; font-weight: 700; margin: 1px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
-.idx-card__change { display: flex; align-items: center; justify-content: flex-start; gap: 6px; font-size: 16px; font-weight: 600; white-space: nowrap; }
-.idx-card__source { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 0; opacity: 0.7; }
-.idx-card__offline-badge { color: var(--t-muted); font-size: 12px; margin-left: 6px; opacity: 0.8; }
-
-/* ========================================================= 📋 持股表格 ========================================================= */
-.table-scroll { margin: var(--space-sm) 10px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; }
-.table-scroll__wrap { min-width: 710px; }
-
-.stock-table { display: grid; font-size: 17px; }
-.stock-table__header, .stock-table__row { 
-  display: grid; 
-  grid-template-columns: 100px 110px 90px 90px 80px 90px 120px 90px; 
-  align-items: stretch; 
-}
-.stock-table__header { 
-  border-bottom: 2px solid var(--s-dark); 
-  font-size: 17px; 
-  color: var(--t-muted); 
-  font-weight: 600; 
-}
-.stock-table__row { border-bottom: 1px solid var(--s-dark); }
-.stock-table__row:last-child { border-bottom: none; }
-.stock-table__row.is-updating { animation: pulse-row 0.5s ease; }
-
-@keyframes pulse-row {
-  0% { background: transparent; }
-  50% { background: rgba(var(--accent-rgb), 0.05); }
-  100% { background: transparent; }
-}
-
-.stock-table__cell { 
-  padding: 6px 6px; 
-  display: flex; 
-  flex-direction: column; 
-  justify-content: center; 
-  align-items: flex-end; 
-  text-align: right; 
-  white-space: nowrap; 
-}
-
-.stock-table__cell--sticky { 
-  align-items: flex-start !important; 
-  text-align: left; 
-  position: sticky; 
-  left: 0; 
-  z-index: 2; 
-  background: var(--bg); 
-  padding-left: var(--space-lg); 
-}
-.stock-table__cell--sticky::after { 
-  content: ''; 
-  position: absolute; 
-  top: 0; bottom: 0; right: -6px; 
-  width: 6px; 
-  background: linear-gradient(to right, var(--s-dark), transparent); 
-  opacity: 0.3; 
-  pointer-events: none; 
-}
-
-.stock-table__cell--actions { 
-  flex-direction: row !important; 
-  align-items: center !important; 
-  justify-content: center !important; 
-  gap: 6px; 
-  padding-left: var(--space-lg); 
-}
-
-.stock-symbol { font-weight: 800; font-size: 17px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; }
-.stock-symbol:hover { color: var(--accent); }
-.stock-qty { font-weight: 600; color: var(--t-main); }
-.stock-qty__sub { font-size: 0.8em; color: var(--t-muted); margin-top: 2px; }
-.stock-price { font-weight: 700; }
-.stock-chgp { font-size: 17px; font-weight: 700; }
-.stock-chg { font-weight: 700; }
-.stock-today-pnl { font-weight: 700; }
-.stock-total { font-weight: 700; }
-.stock-total__sub { font-size: 0.8em; opacity: 0.85; margin-top: 2px; }
-.stock-total__hint { font-size: 0.8em; opacity: 0.6; margin-top: 2px; font-weight: normal; }
-
-.stock-table__action-btn { padding: 6px 10px; font-size: 15px; border-radius: 6px; }
-
-/* ========================================================= 💰 摘要區 ========================================================= */
-.summary { padding: var(--space-md) var(--space-lg); margin: var(--space-sm) 10px; cursor: pointer; }
-.summary__row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
-.summary__label { color: var(--t-muted); font-size: 17px; font-weight: 600; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
-.summary__value { font-size: 20px; font-weight: 800; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
-.summary__divider { height: 2px; background: var(--s-dark); opacity: 0.5; margin: 6px 0; border-radius: 2px; }
-.summary__toggle { text-align: center; font-size: 15px; font-weight: 700; margin-top: 6px; padding-top: 4px; color: var(--t-muted); text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
-.summary__details { display: none; }
-.summary__details.is-open { display: block; }
-
-/* ========================================================= 📝 歷史記錄 ========================================================= */
-.history { margin: var(--space-sm) 10px; }
-.hist-item { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  padding: 10px var(--space-lg); 
-  margin-top: var(--space-sm); 
-}
-.hist-item__left { display: flex; align-items: baseline; gap: var(--space-lg); }
-.hist-item__date { color: var(--t-muted); font-size: 14px; font-weight: 600; }
-.hist-item__value { font-weight: 800; font-size: 17px; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
-.hist-item__delete { padding: 6px 12px; font-size: 14px; border-radius: var(--radius-sm); }
+.summary { padding: 12px 16px; margin: 8px 10px; }
+.sum-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
+.sum-row .lab { color: var(--t-muted); font-size: 17px; font-weight: 600; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
+.sum-row .val { font-size: 20px; font-weight: 800; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
+.sum-divider { height: 2px; background: var(--s-dark); opacity: 0.5; margin: 6px 0; border-radius: 2px; }
+.sum-toggle-btn { text-align: center; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 6px; padding-top: 4px; color: var(--t-muted); text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
+.history { margin: 8px 10px; }
+.hist-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; margin-top: 8px; }
+.hist-item-left { display: flex; align-items: baseline; gap: 12px; }
+.hist-item .hdate { color: var(--t-muted); font-size: 14px; font-weight: 600; }
+.hist-item .hval { font-weight: 800; font-size: 17px; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
+.del-hist-btn { padding: 6px 12px; font-size: 14px; border-radius: 8px; }
 .hist-empty { color: var(--t-muted); font-size: 15px; text-align: center; padding: 20px; font-weight: 600; }
 
-/* ========================================================= 🔔 Toast ========================================================= */
-.toast { 
-  position: fixed; 
-  bottom: 90px; 
-  left: 50%; 
-  transform: translateX(-50%) translateY(20px); 
-  background: var(--t-main); 
-  color: var(--bg); 
-  padding: 12px 24px; 
-  border-radius: 30px; 
-  font-size: 15px; 
-  font-weight: bold; 
-  z-index: 9999; 
-  opacity: 0; 
-  transition: opacity 0.3s, transform 0.3s; 
-  pointer-events: none; 
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-}
-.toast.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 999; align-items: center; justify-content: center; }
+.modal-overlay.show { display: flex; }
+.modal { position: relative; border-radius: 20px; padding: 24px 20px; width: calc(100% - 28px); max-width: 400px; max-height: 85vh; overflow-y: auto; background: var(--bg); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 25px 50px rgba(0,0,0,0.5), 6px 6px 12px var(--s-dark), -6px -6px 12px var(--s-light); }
+.modal h2 { font-size: 20px; margin-bottom: 16px; text-align: center; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
+.modal label { display: block; font-size: 15px; color: var(--t-muted); margin: 12px 0 6px; font-weight: 600; text-align: left; }
+.modal-close { margin-top: 20px; width: 100%; padding: 14px; font-size: 17px; }
+.key-status { font-size: 12px; padding: 4px 10px; border-radius: 12px; display: inline-block; margin-top: 6px; font-weight: 600; }
+.key-status.ok { background: var(--bg); box-shadow: inset 2px 2px 4px var(--s-dark), inset -2px -2px 4px var(--s-light); color: var(--up); }
+.key-status.none { background: var(--bg); box-shadow: inset 2px 2px 4px var(--s-dark), inset -2px -2px 4px var(--s-light); color: var(--t-muted); }
+.info-box { padding: 12px 14px; font-size: 13px; line-height: 1.6; margin-bottom: 16px; font-weight: 600; color: var(--accent); background: var(--bg); box-shadow: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light); border-radius: 12px; }
+.toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--t-main); color: var(--bg); padding: 12px 24px; border-radius: 30px; font-size: 15px; font-weight: bold; z-index: 9999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+.toast.show { opacity: 1; }
+a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
+.backup-box { padding: 16px; margin: 8px 0 0; }
+.backup-title { font-size: 16px; font-weight: 700; color: var(--t-muted); margin-bottom: 12px; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); text-align: left; }
+.backup-btns { display: flex; gap: 12px; }
+.btn-backup { flex: 1; padding: 12px; font-size: 15px; }
+.v-box { text-align: center; font-size: 13px; color: var(--t-muted); margin-top: 24px; font-weight: 600; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
+.up { color: var(--up) !important; text-shadow: none !important; }
+.down { color: var(--down) !important; text-shadow: none !important; }
+.neutral { color: var(--t-main) !important; text-shadow: none !important; }
 
-/* ========================================================= 🪟 Modal 系統 ========================================================= */
-.modal-overlay { 
-  display: none; 
-  position: fixed; 
-  top: 0; left: 0; right: 0; bottom: 0; 
-  background: rgba(0,0,0,0.6); 
-  z-index: 999; 
-  align-items: center; 
-  justify-content: center; 
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-.modal-overlay.is-open { display: flex; opacity: 1; }
-
-.modal { 
-  position: relative; 
-  border-radius: var(--radius-xl); 
-  padding: 24px 20px; 
-  width: calc(100% - 28px); 
-  max-width: 400px; 
-  max-height: 85vh; 
-  overflow-y: auto; 
-  background: var(--bg); 
-  border: 1px solid rgba(255, 255, 255, 0.05); 
-  box-shadow: 0 25px 50px rgba(0,0,0,0.5), var(--shadow-out); 
-  transform: scale(0.95) translateY(10px);
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.modal-overlay.is-open .modal { transform: scale(1) translateY(0); }
-
-.modal__title { font-size: 20px; margin-bottom: var(--space-lg); text-align: center; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
-.modal__label { display: block; font-size: 15px; color: var(--t-muted); margin: var(--space-lg) 0 6px; font-weight: 600; text-align: left; }
-.modal__close { margin-top: 20px; width: 100%; padding: 14px; font-size: 17px; }
-
-.modal--fullscreen { 
-  width: 100vw !important; 
-  max-width: 100vw !important; 
-  height: 100vh !important; 
-  max-height: 100vh !important; 
-  border-radius: 0; 
-  padding: 18px 20px 20px !important; 
-  margin: 0 !important; 
-  border: none; 
-  box-sizing: border-box; 
-  transform: none;
-  transition: none;
-}
-
-.modal__close-icon { 
-  position: absolute; 
-  top: 15px; right: 15px; 
-  background: transparent !important; 
-  box-shadow: none !important; 
-  color: var(--t-muted); 
-  font-size: 24px; 
-  width: 40px; 
-  height: 40px; 
-  padding: 0; 
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
-  border-radius: 50%; 
-  text-shadow: none !important; 
-  cursor: pointer; 
-}
-.modal__close-icon:hover { color: var(--t-main); transform: scale(1.1); }
-
-/* ========================================================= 🔧 設定頁面元件 ========================================================= */
-.settings-row { display: flex; gap: var(--space-lg); margin-bottom: 20px; align-items: stretch; }
-.settings-row__btn { flex: 0 0 45%; padding: 12px 10px; font-size: 15px; color: var(--accent); margin: 0; white-space: nowrap; }
-
-.tab-count-wrapper { 
-  flex: 1; 
-  display: flex; 
-  flex-direction: column; 
-  justify-content: center; 
-  background: var(--bg); 
-  border-radius: var(--radius-sm); 
-  box-shadow: var(--shadow-in); 
-  padding: 4px var(--space-lg); 
-}
-.tab-count-wrapper__label { font-size: 12px; color: var(--t-muted); font-weight: 600; margin-bottom: 2px; text-align: left; }
-.tab-count-wrapper__select { width: 100%; box-shadow: none; padding: 4px 0; background: transparent; font-size: 15px; }
-
-.api-section { margin-bottom: 20px; padding-top: 10px; border-top: 1px solid var(--s-dark); }
-.api-link-box { 
-  text-align: center; 
-  margin-bottom: var(--space-lg); 
-  padding: 10px; 
-  background: var(--bg); 
-  border-radius: var(--radius-sm); 
-  box-shadow: 3px 3px 6px var(--s-dark), -3px -3px 6px var(--s-light); 
-}
-
-.key-status { 
-  font-size: 12px; 
-  padding: 4px 10px; 
-  border-radius: 12px; 
-  display: inline-block; 
-  margin-top: 6px; 
-  font-weight: 600; 
-}
-.key-status.is-ok { background: var(--bg); box-shadow: var(--shadow-in-sm); color: var(--down); }
-.key-status.is-none { background: var(--bg); box-shadow: var(--shadow-in-sm); color: var(--t-muted); }
-
-.info-box { 
-  padding: var(--space-md) 14px; 
-  font-size: 13px; 
-  line-height: 1.6; 
-  margin-bottom: var(--space-lg); 
-  font-weight: 600; 
-  color: var(--accent); 
-  background: var(--bg); 
-  box-shadow: var(--shadow-in); 
-  border-radius: var(--radius-md); 
-}
-
-.api-stats { 
-  margin-top: var(--space-lg); 
-  padding: var(--space-md); 
-  background: var(--bg); 
-  border-radius: var(--radius-md); 
-  box-shadow: var(--shadow-in); 
-}
-.api-stats__grid { display: flex; justify-content: space-around; text-align: center; font-size: 13px; color: var(--t-muted); }
-.api-stats__value { font-size: 18px; font-weight: 800; color: var(--t-main); }
-
-.backup-box { padding: var(--space-lg); margin: var(--space-sm) 0 0; }
-.backup-box__title { 
-  font-size: 16px; 
-  font-weight: 700; 
-  color: var(--t-muted); 
-  margin-bottom: var(--space-md); 
-  text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); 
-  text-align: left; 
-}
-.backup-box__actions { display: flex; gap: var(--space-lg); }
-
-.version-box { text-align: center; font-size: 13px; color: var(--t-muted); margin-top: var(--space-xl); font-weight: 600; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
-
-/* ========================================================= 📖 使用說明 ========================================================= */
+.btn-manual { width: 100%; padding: 12px; font-size: 16px; margin-bottom: 16px; color: var(--accent); }
 .manual-content { text-align: left; font-size: 16px; line-height: 1.8; color: var(--t-main); }
-.manual-content h3 { font-size: 18px; margin: var(--space-lg) 0 8px; color: var(--accent); text-align: left; }
+.manual-content h3 { font-size: 18px; margin: 16px 0 8px; color: var(--accent); text-align: left; }
 .manual-content p { margin-bottom: 10px; }
 .manual-content ul { padding-left: 20px; margin-bottom: 12px; }
 .manual-content li { margin-bottom: 6px; }
 
-/* ========================================================= 🎨 工具類 ========================================================= */
-.text-up { color: var(--up) !important; text-shadow: none !important; }
-.text-down { color: var(--down) !important; text-shadow: none !important; }
-.text-neutral { color: var(--t-main) !important; text-shadow: none !important; }
-.text-muted { color: var(--t-muted) !important; }
-.text-accent { color: var(--accent) !important; }
+.settings-row { display: flex; gap: 12px; margin-bottom: 20px; align-items: stretch; }
+.btn-manual-row { flex: 0 0 45%; padding: 12px 10px; font-size: 15px; color: var(--accent); margin: 0; white-space: nowrap; }
+.tab-count-wrapper { flex: 1; display: flex; flex-direction: column; justify-content: center; background: var(--bg); border-radius: 8px; box-shadow: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light); padding: 4px 12px; }
+.tab-count-label { font-size: 12px; color: var(--t-muted); font-weight: 600; margin-bottom: 2px; text-align: left; }
+.tab-count-wrapper select { width: 100%; box-shadow: none; padding: 4px 0; background: transparent; font-size: 15px; }
 
-.link-accent { color: var(--accent); text-decoration: none; font-weight: 800; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
-.link-accent:hover { text-decoration: underline; }
+.api-section { margin-bottom: 20px; padding-top: 10px; border-top: 1px solid var(--s-dark); }
+.api-link-box { text-align: center; margin-bottom: 16px; padding: 10px; background: var(--bg); border-radius: 8px; box-shadow: 3px 3px 6px var(--s-dark), -3px -3px 6px var(--s-light); }
 
-.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.modal.fullscreen-modal { width: 100vw !important; max-width: 100vw !important; height: 100vh !important; max-height: 100vh !important; border-radius: 0; padding: 18px 20px 20px !important; margin: 0 !important; border: none; box-sizing: border-box; }
+.btn-close-icon { position: absolute; top: 15px; right: 15px; background: transparent !important; box-shadow: none !important; color: var(--t-muted); font-size: 24px; width: 40px; height: 40px; padding: 0; display: flex; justify-content: center; align-items: center; border-radius: 50%; text-shadow: none !important; cursor: pointer; }
+.btn-close-icon:hover { color: var(--t-main); transform: scale(1.1); }
 
-.skeleton { 
-  background: linear-gradient(90deg, var(--s-dark) 25%, var(--bg) 50%, var(--s-dark) 75%); 
-  background-size: 200% 100%; 
-  animation: skeleton-loading 1.5s infinite; 
-  border-radius: 4px; 
-}
-@keyframes skeleton-loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-
-/* ========================================================= 📱 響應式 ========================================================= */
 @media (max-width: 767px) {
   body { max-width: 480px; margin: 0 auto; font-size: 15px; }
   input, select { font-size: 16px; }
-  .stock-table__row { font-size: 17px; }
-  .stock-symbol { font-size: 17px; }
-  .stock-chgp { font-size: 17px; }
+  .srow { font-size: 17px; }
+  .srow .sym { font-size: 17px; }
+  .srow .chgp { font-size: 17px; }
   .tab-btn { font-size: 15px; padding: 8px 4px; }
-  .settings-row__btn { font-size: 14px; padding: 10px 6px; }
+  .btn-manual-row { font-size: 14px; padding: 10px 6px; }
 }
 
 @media (min-width: 768px) {
   body { font-size: 16px; }
-  .app-header__title { font-size: 24px; }
-  .app-header .neu-btn { font-size: 16px; padding: 10px 16px; }
-  .card__title { font-size: 18px; }
+  .header h1 { font-size: 24px; }
+  .header .btn-theme, .header .btn-adv { font-size: 16px; padding: 10px 16px; }
+  .card-title { font-size: 18px; }
   .tab-btn { font-size: 18px; padding: 14px 10px; }
-  .table-scroll__wrap { min-width: 100%; }
-  .stock-table__header, .stock-table__row { grid-template-columns: 1.5fr 1.5fr 1fr 1.2fr 1.2fr 1.5fr 1.5fr 1.5fr; }
-  .stock-table__header { font-size: 18px; }
-  .stock-table__row { font-size: 19px; }
-  .stock-symbol { font-size: 19px; }
-  .stock-chgp { font-size: 19px; }
-  .stock-table__action-btn { padding: 8px 14px; font-size: 17px; }
-  .summary__label { font-size: 19px; }
-  .summary__value { font-size: 24px; }
-  .summary__toggle { font-size: 17px; }
-  .hist-item__date { font-size: 16px; }
-  .hist-item__value { font-size: 19px; }
-  .hist-item__delete { font-size: 16px; padding: 8px 16px; }
+  .list-wrap { min-width: 100%; }
+  .list-header, .srow { grid-template-columns: 1.5fr 1.5fr 1fr 1.2fr 1.2fr 1.5fr 1.5fr 1.5fr; }
+  .list-header { font-size: 18px; }
+  .srow { font-size: 19px; }
+  .srow .sym { font-size: 19px; }
+  .srow .chgp { font-size: 19px; }
+  .srow .act button { padding: 8px 14px; font-size: 17px; }
+  .sum-row .lab { font-size: 19px; }
+  .sum-row .val { font-size: 24px; }
+  .sum-toggle-btn { font-size: 17px; }
+  .hist-item .hdate { font-size: 16px; }
+  .hist-item .hval { font-size: 19px; }
+  .del-hist-btn { font-size: 16px; padding: 8px 16px; }
   .modal { max-width: 560px; padding: 32px; }
-  .modal__title { font-size: 24px; }
-  .modal__label { font-size: 17px; }
-  .modal__close { font-size: 19px; padding: 16px; }
+  .modal h2 { font-size: 24px; }
+  .modal label { font-size: 17px; }
+  .modal-close { font-size: 19px; padding: 16px; }
   .btn-backup { font-size: 17px; padding: 14px; }
-  .version-box { font-size: 15px; }
-  .idx-card { min-width: 200px; padding: 8px 20px; }
-  .idx-card__name { font-size: 18px; }
-  .idx-card__price { font-size: 20px; }
-  .idx-card__change { font-size: 18px; }
+  .v-box { font-size: 15px; }
+  .idx-card-box { min-width: 200px; padding: 8px 20px; }
+  .idx-box-name { font-size: 18px; }
+  .idx-box-price { font-size: 20px; }
+  .idx-box-change-row { font-size: 18px; }
   .manual-content { font-size: 18px; }
   .manual-content h3 { font-size: 20px; }
-  .settings-row__btn { font-size: 17px; padding: 12px 10px; }
-}
-
-/* 減少動畫偏好 */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+  .btn-manual-row { font-size: 17px; padding: 12px 10px; }
 }
 </style>
 <link rel="manifest" href="manifest.json">
 </head>
 <body>
 
-<!-- ========================================================= 🏠 主應用 ========================================================= -->
-<header class="app-header neu-panel">
-  <h1 class="app-header__title">股票庫存管理</h1>
-  <div class="app-header__actions">
-    <button type="button" class="neu-btn" id="themeBtn" aria-label="切換主題">🌙</button>
-    <button type="button" class="neu-btn" id="advSettingsBtn" aria-label="進階設定">進階</button>
+<div class="header">
+  <h1>股票庫存管理</h1>
+  <div class="hdr-right">
+    <button type="button" class="btn-theme" id="themeBtn">🌙</button>
+    <button type="button" class="btn-adv" id="advSettingsBtn">進階</button>
   </div>
-</header>
+</div>
 
-<nav class="tabs-bar neu-panel" id="tabsBarContainer" role="tablist" aria-label="投資組合分頁"></nav>
+<div class="tabs-bar" id="tabsBarContainer"></div>
 
-<section class="card neu-panel" aria-labelledby="addStockTitle">
-  <h2 class="card__title" id="addStockTitle">新增持股</h2>
+<div class="card">
+  <div class="card-title">新增持股</div>
   <div class="form-row">
-    <input type="text" class="neu-input sym-inp" id="symInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase" aria-label="股票代號">
-    <input type="number" class="neu-input" id="qtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" aria-label="持股數量">
-    <select class="neu-input neu-select unit-select" id="unitSelect" aria-label="單位">
-      <option value="張">張</option>
-      <option value="股">股</option>
-    </select>
+    <input type="text" class="sym-inp" id="symInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase">
+    <input type="number" id="qtyInput" placeholder="數量" min="1" step="1" inputmode="numeric">
+    <select id="unitSelect"><option value="張">張</option><option value="股">股</option></select>
   </div>
   <div class="form-row">
-    <input type="number" class="neu-input" id="buyPriceInput" placeholder="買入均價 (選填計算損益)" step="0.01" min="0" inputmode="decimal" aria-label="買入均價">
-    <button type="button" class="neu-btn action-btn" id="addStockBtn" aria-label="新增持股">新增</button>
+    <input type="number" id="buyPriceInput" placeholder="買入均價 (選填計算損益)" step="0.01" min="0" inputmode="decimal">
+    <button type="button" id="addStockBtn" style="flex:0 0 80px;">新增</button>
   </div>
-</section>
+</div>
 
-<section class="idx-scroll-container neu-panel" id="idxScrollContainer" aria-label="市場指數">
-  <article class="idx-card">
-    <div class="idx-card__name">臺灣加權指數</div>
-    <div class="idx-card__price" id="idxPrice">—</div>
-    <div class="idx-card__change" id="idxChangeRow">
+<div class="idx-scroll-container" id="idxScrollContainer">
+  <div class="idx-card-box" id="twIndexCard">
+    <div class="idx-box-name">臺灣加權指數</div>
+    <div class="idx-box-price" id="idxPrice">—</div>
+    <div class="idx-box-change-row">
       <span id="idxChange"></span>
       <span id="idxPct"></span>
     </div>
-    <div class="idx-card__source" id="idxSource">Loading...</div>
-  </article>
-</section>
-
-<section class="table-scroll" id="tableScroll" style="display:none;" aria-label="持股列表">
-  <div class="table-scroll__wrap">
-    <div class="stock-table" id="stockTable">
-      <div class="stock-table__header">
-        <div class="stock-table__cell stock-table__cell--sticky">代號</div>
-        <div class="stock-table__cell">庫存/均價</div>
-        <div class="stock-table__cell">現價</div>
-        <div class="stock-table__cell">今日幅度</div>
-        <div class="stock-table__cell">今日漲跌</div>
-        <div class="stock-table__cell">今日損益</div>
-        <div class="stock-table__cell">總損益</div>
-        <div class="stock-table__cell stock-table__cell--actions">動作</div>
-      </div>
-      <div id="stockTableBody"></div>
-    </div>
+    <div class="idx-box-src" id="idxSource">Loading...</div>
   </div>
-</section>
+</div>
+
+<div class="table-scroll" id="tableScroll" style="display:none;">
+  <div class="list-wrap" id="listContainer">
+    <div class="list-header">
+      <div>代號</div><div>庫存/均價</div><div>現價</div><div>今日幅度</div><div>今日漲跌</div><div>今日損益</div><div>總損益</div><div>動作</div>
+    </div>
+    <div id="listBody"></div>
+  </div>
+</div>
 
 <div id="emptyState" style="display:none;margin:8px 10px;padding:24px 14px;text-align:center;color:var(--t-muted);font-weight:600;font-size:16px">尚無持股，請在上方新增</div>
 
-<section class="summary neu-panel" id="summaryArea" style="display:none;" aria-label="損益摘要">
-  <div id="summaryToggleArea">
-    <div class="summary__row">
-      <span class="summary__label">今日損益總計</span>
-      <span class="summary__value" id="totalPnl">+0</span>
+<div class="summary" id="summaryArea" style="display:none;">
+  <div id="summaryToggleArea" style="cursor:pointer;">
+    <div class="sum-row" style="padding-bottom:0;">
+      <span class="lab">今日損益總計</span>
+      <span class="val" id="totalPnl">+0</span>
     </div>
-    <div class="summary__toggle" id="sumToggleBtn">▼ 下拉選單</div>
+    <div class="sum-toggle-btn" id="sumToggleBtn">▼ 下拉選單</div>
   </div>
-  <div class="summary__details" id="summaryDetails">
-    <div class="summary__divider" style="margin-top:10px;"></div>
-    <div class="summary__row"><span class="summary__label">總未實現損益 (ROI)</span><span class="summary__value" id="totalUnrealized">—</span></div>
-    <div class="summary__divider"></div>
-    <div class="summary__row" style="padding-bottom:0;"><span class="summary__label">持股資產總計</span><span class="summary__value" id="totalAsset">0</span></div>
-    <div class="summary__toggle" style="margin-top:10px;" id="sumCollapseBtn">▲ 收起選單</div>
+  <div id="summaryDetails" style="display:none;">
+    <div class="sum-divider" style="margin-top:10px;"></div>
+    <div class="sum-row"><span class="lab">總未實現損益 (ROI)</span><span class="val" id="totalUnrealized">—</span></div>
+    <div class="sum-divider"></div>
+    <div class="sum-row" style="padding-bottom:0;"><span class="lab">持股資產總計</span><span class="val" id="totalAsset">0</span></div>
+    <div class="sum-toggle-btn" style="margin-top:10px;" id="sumCollapseBtn">▲ 收起選單</div>
   </div>
-</section>
+</div>
 
-<button type="button" class="neu-btn btn-save" id="saveArea" style="display:none;width:calc(100% - 20px);padding:14px;font-size:17px;margin:8px 10px;" aria-label="存儲今日損益">存儲今日損益總計</button>
+<button type="button" class="btn-save" id="saveArea" style="display:none;">存儲今日損益總計</button>
 
-<section class="history" aria-labelledby="historyTitle">
-  <h2 class="card__title" id="historyTitle" style="margin:0 0 4px">歷史記錄</h2>
+<div class="history">
+  <div class="card-title" style="margin:0 0 4px">歷史記錄</div>
   <div id="historyBody"><div class="hist-empty">尚無記錄</div></div>
-</section>
+</div>
 
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="toast" id="toast"></div>
 
-<!-- ========================================================= ⚙️ 進階設定 Modal ========================================================= -->
-<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-  <div class="modal modal--fullscreen">
-    <button type="button" class="modal__close-icon" id="modalCloseBtn" aria-label="關閉">✕</button>
-    <h2 class="modal__title" id="modalTitle">進階設定</h2>
-
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal fullscreen-modal">
+    <button type="button" class="btn-close-icon" id="modalCloseBtn">✕</button>
+    <h2>進階設定</h2>
     <div class="settings-row">
-      <button type="button" class="neu-btn settings-row__btn" id="openManualBtn">📖 使用說明</button>
+      <button type="button" class="btn-manual-row" id="openManualBtn">📖 使用說明</button>
       <div class="tab-count-wrapper">
-        <div class="tab-count-wrapper__label">分頁數量</div>
-        <select class="neu-input neu-select tab-count-wrapper__select" id="tabCountSelect">
+        <div class="tab-count-label">分頁數量</div>
+        <select id="tabCountSelect">
           <option value="1">1 個分頁</option>
           <option value="2">2 個分頁</option>
           <option value="3">3 個分頁</option>
@@ -711,50 +271,43 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab-btn:focus-
         </select>
       </div>
     </div>
-
     <div class="api-section">
       <div class="api-link-box">
-        <a class="link-accent" href="https://developer.fugle.tw/docs/key/" target="_blank" rel="noopener">🔗 申請 Fugle API Key</a>
+        <a class="btn-link" href="https://developer.fugle.tw/docs/key/" target="_blank">🔗 申請 Fugle API Key</a>
       </div>
-
-      <label class="modal__label">Fugle API Key（主要）</label>
+      <label>Fugle API Key（主要）</label>
       <div style="display:flex;gap:8px;align-items:stretch;">
-        <input type="password" class="neu-input" id="fugleKeyInput" placeholder="輸入第一組 Key" autocomplete="off" style="flex:1;">
-        <button type="button" class="neu-btn" id="keyToggle1" style="flex:0 0 44px;font-size:16px;" aria-label="切換密碼顯示">👁</button>
+        <input type="password" id="fugleKeyInput" placeholder="輸入第一組 Key" autocomplete="off" style="flex:1;">
+        <button type="button" id="keyToggle1" style="flex:0 0 44px;font-size:16px;">👁</button>
       </div>
-      <div><span class="key-status is-none" id="fugleKeyStatus">未設定</span></div>
-
-      <label class="modal__label">Fugle API Key 2（備用）</label>
+      <div><span class="key-status none" id="fugleKeyStatus">未設定</span></div>
+      <label>Fugle API Key 2（備用）</label>
       <div style="display:flex;gap:8px;align-items:stretch;">
-        <input type="password" class="neu-input" id="secondFugleKeyInput" placeholder="輸入第二組 Key（選填）" autocomplete="off" style="flex:1;">
-        <button type="button" class="neu-btn" id="keyToggle2" style="flex:0 0 44px;font-size:16px;" aria-label="切換密碼顯示">👁</button>
+        <input type="password" id="secondFugleKeyInput" placeholder="輸入第二組 Key（選填）" autocomplete="off" style="flex:1;">
+        <button type="button" id="keyToggle2" style="flex:0 0 44px;font-size:16px;">👁</button>
       </div>
-      <div><span class="key-status is-none" id="secondFugleKeyStatus">未設定</span></div>
-
-      <div class="api-stats">
+      <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
+      <div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:12px;box-shadow:inset 4px 4px 8px var(--s-dark),inset -4px -4px 8px var(--s-light);">
         <div style="font-size:13px;color:var(--t-muted);font-weight:600;margin-bottom:8px;text-align:center;">📊 今日 API 使用量</div>
-        <div class="api-stats__grid" id="apiStatsBox"></div>
+        <div id="apiStatsBox"></div>
       </div>
     </div>
-
-    <div class="backup-box neu-panel">
-      <div class="backup-box__title">資料備份與還原</div>
-      <div class="backup-box__actions">
-        <button type="button" class="neu-btn btn-backup" id="exportBtn">📥 匯出備份</button>
-        <button type="button" class="neu-btn btn-backup" id="importBtn">📤 匯入還原</button>
+    <div class="backup-box">
+      <div class="backup-title">資料備份與還原</div>
+      <div class="backup-btns">
+        <button type="button" class="btn-backup" id="exportBtn">📥 匯出備份</button>
+        <button type="button" class="btn-backup" id="importBtn">📤 匯入還原</button>
         <input type="file" id="importFile" style="display:none" accept=".json">
       </div>
     </div>
-
-    <div class="version-box">核心版本：V5.0.0 (架構重構版)</div>
-    <button type="button" class="neu-btn modal__close neu-btn--primary" id="saveSettingsBtn">儲存設定並關閉</button>
+    <div class="v-box">核心版本：V5.1.0 (修復版)</div>
+    <button type="button" class="modal-close" id="saveSettingsBtn">儲存設定並關閉</button>
   </div>
 </div>
 
-<!-- ========================================================= 📖 使用說明 Modal ========================================================= -->
-<div class="modal-overlay" id="manualOverlay" role="dialog" aria-modal="true" aria-labelledby="manualTitle">
+<div class="modal-overlay" id="manualOverlay">
   <div class="modal">
-    <h2 class="modal__title" id="manualTitle">📖 系統使用說明</h2>
+    <h2>📖 系統使用說明</h2>
     <div class="manual-content">
       <h3>一、主要功能簡介</h3>
       <ul>
@@ -762,7 +315,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab-btn:focus-
         <li><strong>資產歷史存儲：</strong>收盤後可點擊「存儲今日損益總計」，將當日的資產總額與盈虧永久記錄在手機本地，建立長期資產曲線。</li>
         <li><strong>多主題切換：</strong>點擊右上角 🌙 顆粒按鈕，可在極簡科技風、擬物化灰灰、優雅紫羅蘭等多種 3D 視覺主題間切換。</li>
       </ul>
-
       <h3>二、分頁（組合）的靈活妙用 💡</h3>
       <p>分頁數量可在進階設定中自訂（1~5 個），雙擊分頁標籤即可重新命名。您可以這樣規劃：</p>
       <ul>
@@ -770,7 +322,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab-btn:focus-
         <li><strong>投資策略分流：</strong>建立「長期存股（領息）」與「波段短線（價差）」分頁，將不同核心邏輯的股票分開追蹤，避免績效混淆。</li>
         <li><strong>市場動態觀察：</strong>建立一個「純觀察名單」分頁，只輸入代號、數量填 0 或不填均價，當作純看盤的即時自選股清單。</li>
       </ul>
-
       <h3>三、Fugle Key 報價更新原則與建議</h3>
       <p>為避免觸發 Fugle API 的每分鐘速率限制，系統會根據您的金鑰數量與市場狀態<strong>自動進行智慧分流與調頻</strong>：</p>
       <ul>
@@ -787,13 +338,11 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab-btn:focus-
           </ul>
         </li>
       </ul>
-
       <h3>四、Yahoo Finance 國外指數報價原則</h3>
       <ul>
         <li><strong>多層容錯防呆：</strong>全球國際指數直接透過高效能的邊緣代理網道（Cloudflare Worker）介接 Yahoo 數據。</li>
         <li><strong>全時段不化白（—）：</strong>新版程式碼內建強大的防呆鏈，就算國際市場遇到盤後或清晨資料清洗，系統也會自動抓取昨收價或常規市場參考價補位，保證畫面不壞死。</li>
       </ul>
-
       <h3>五、補充注意事項與日常維護</h3>
       <ul>
         <li><strong>綠色本地儲存：</strong>本軟體不使用任何雲端資料庫，所有庫存與歷史損益均安全地儲存在您手機瀏覽器的本地空間中。</li>
@@ -801,1405 +350,923 @@ button:focus-visible, input:focus-visible, select:focus-visible, .tab-btn:focus-
         <li><strong>智慧降頻省電：</strong>當系統偵測到全球市場皆處於休市時段（如台灣半夜且週末），輪詢計時器會自動放慢至 <strong>60 秒</strong>，以節省您的手機電力與流量。</li>
       </ul>
     </div>
-    <button type="button" class="neu-btn modal__close" id="closeManualBtn">關閉說明</button>
+    <button type="button" class="modal-close" id="closeManualBtn">關閉說明</button>
   </div>
 </div>
 
-<!-- ========================================================= ✏️ 編輯 Modal ========================================================= -->
-<div class="modal-overlay" id="editModalOverlay" role="dialog" aria-modal="true" aria-labelledby="editModalTitle">
+<div class="modal-overlay" id="editModalOverlay">
   <div class="modal">
-    <h2 class="modal__title" id="editModalTitle">編輯持股</h2>
+    <h2>編輯持股</h2>
     <input type="hidden" id="editId">
-    <label class="modal__label">股票代號</label>
-    <input type="text" class="neu-input" id="editSymInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase;width:100%;">
-    <label class="modal__label">數量</label>
-    <input type="number" class="neu-input" id="editQtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" style="width:100%;">
-    <label class="modal__label">單位</label>
-    <select class="neu-input neu-select" id="editUnitSelect" style="width:100%;">
-      <option value="張">張</option>
-      <option value="股">股</option>
-    </select>
-    <label class="modal__label">買入均價 (留空或不填則不計算總損益)</label>
-    <input type="number" class="neu-input" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" style="width:100%;">
-    <button type="button" class="neu-btn modal__close neu-btn--primary" id="saveEditBtn" style="margin-top:var(--space-lg);">確認儲存</button>
-    <button type="button" class="neu-btn modal__close" id="cancelEditBtn" style="margin-top:10px;">取消</button>
+    <label>股票代號</label>
+    <input type="text" id="editSymInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase;width:100%;">
+    <label>數量</label>
+    <input type="number" id="editQtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" style="width:100%;">
+    <label>單位</label>
+    <select id="editUnitSelect" style="width:100%;"><option value="張">張</option><option value="股">股</option></select>
+    <label>買入均價 (留空或不填則不計算總損益)</label>
+    <input type="number" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" style="width:100%;">
+    <button type="button" class="modal-close" id="saveEditBtn" style="background:var(--accent); color:#fff; text-shadow:none;margin-top:20px;">確認儲存</button>
+    <button type="button" class="modal-close" id="cancelEditBtn" style="margin-top:10px;">取消</button>
   </div>
 </div>
 
 <script>
 
-/* ========================================================= 🏗️ 核心架構 V5.0.0 ========================================================= */
+/* ========================================================= 🔧 API 管理引擎 V5.1.0 (修復版) ========================================================= */
 
-/**
- * 純工具函數庫 - 無副作用
- */
-const Utils = {
-  /** 防抖函數 */
-  debounce(fn, delay = 300) {
-    let timer;
-    return (...args) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => fn.apply(this, args), delay);
-    };
-  },
+const PROXY_LIST = [
+  'https://api.allorigins.win/raw?url=',
+  'https://corsproxy.io/?',
+  'https://api.codetabs.com/v1/proxy?quest=',
+  'https://thingproxy.freeboard.io/fetch/'
+];
+const API_TIMEOUT = 5000;
+const MAX_CONCURRENT_REQUESTS = 3;
+const MAX_CONSECUTIVE_ERRORS = 5;
+const PAUSE_DURATION_MS = 300000;
 
-  /** 節流函數 */
-  throttle(fn, limit = 100) {
-    let inThrottle;
-    return (...args) => {
-      if (!inThrottle) {
-        fn.apply(this, args);
-        inThrottle = true;
-        setTimeout(() => inThrottle = false, limit);
-      }
-    };
-  },
-
-  /** 生成唯一 ID */
-  generateId() {
-    return 's_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
-  },
-
-  /** 格式化價格 */
-  formatPrice(p) {
-    if (p == null) return '—';
-    return Math.abs(p) >= 1000 
-      ? p.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-      : p.toFixed(2);
-  },
-
-  /** 格式化數字帶正負號 */
-  formatSigned(n) {
-    if (n == null) return '—';
-    return (n >= 0 ? '+' : '') + n.toLocaleString();
-  },
-
-  /** 格式化百分比 */
-  formatPercent(n) {
-    if (n == null) return '—';
-    return (n >= 0 ? '+' : '') + n.toFixed(2) + '%';
-  },
-
-  /** 獲取今日日期字串 YYYY-MM-DD */
-  getTodayString() {
-    const n = new Date();
-    return n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0') + '-' + String(n.getDate()).padStart(2, '0');
-  },
-
-  /** 獲取當前時間 HH:MM */
-  getTimeString() {
-    const n = new Date();
-    return String(n.getHours()).padStart(2, '0') + ':' + String(n.getMinutes()).padStart(2, '0');
-  },
-
-  /** 判斷市場是否開盤 */
-  isMarketOpen() {
-    const now = new Date();
-    const day = now.getDay();
-    const hour = now.getHours();
-    const min = now.getMinutes();
-    if (day === 0 || day === 6) return false;
-    const time = hour + min / 60;
-    return (time >= 8 && time <= 14) || (time >= 15 || time <= 5);
-  },
-
-  /** 深拷貝 */
-  deepClone(obj) {
-    return JSON.parse(JSON.stringify(obj));
-  },
-
-  /** 安全解析 JSON */
-  safeParse(str, fallback = null) {
-    try { return JSON.parse(str); } catch (e) { return fallback; }
-  }
-};
-
-/**
- * 常數配置
- */
-const CONFIG = {
-  PROXY_LIST: [
-    'https://api.allorigins.win/raw?url=',
-    'https://corsproxy.io/?',
-    'https://api.codetabs.com/v1/proxy?quest=',
-    'https://thingproxy.freeboard.io/fetch/'
-  ],
-  API_TIMEOUT: 5000,
-  MAX_CONCURRENT: 3,
-  MAX_CONSECUTIVE_ERRORS: 5,
-  PAUSE_DURATION_MS: 300000,
-  FUGLE_BASE: 'https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/',
-  CF_WORKER: 'https://yahoo-index-proxy.denis0521.workers.dev',
-  AVAILABLE_INDICES: [
-    { symbol: '^DJI', name: '道瓊工業指數' },
-    { symbol: '^IXIC', name: '那斯達克指數' },
-    { symbol: '^GSPC', name: '標普500指數' },
-    { symbol: '^SOX', name: '費城半導體指數' },
-    { symbol: '^N225', name: '日經225指數' },
-    { symbol: '^KS11', name: '韓國綜合指數' }
-  ],
-  STORAGE_KEYS: {
-    FUGLE_KEY: 'tw_fugle_key',
-    SECOND_FUGLE_KEY: 'tw_second_fugle_key',
-    THEME: 'tw_theme',
-    CURRENT_TAB: 'tw_current_tab',
-    TAB_NAMES: 'tw_tab_names',
-    TAB_COUNT: 'tw_tab_count',
-    API_PAUSE: 'api_pause_until',
-    CACHED_INDICES: 'tw_cached_indices',
-    getStockKey: (idx) => `tw_stock_portfolio_tab_${idx}`,
-    getRecordKey: (idx) => `tw_records_tab_${idx}`
-  },
-  THEMES: ['light', 'tech', 'blue-light', 'purple-light', 'pink', 'cement'],
-  THEME_ICONS: { 'light': '🌙', 'tech': '🚀', 'blue-light': '💎', 'purple-light': '🍇', 'pink': '🌸', 'cement': '🏢' },
-  THEME_COLORS: { 'light': '#e0e5ec', 'tech': '#2b303a', 'blue-light': '#e3edf7', 'purple-light': '#ece8f3', 'pink': '#f3e6e8', 'cement': '#a3a8b0' },
-  MAX_HISTORY: 50,
-  MAX_TABS: 5
-};
-
-/**
- * 🗄️ 數據層 - 統一存儲管理
- * 封裝 localStorage 操作，未來可輕鬆遷移到 IndexedDB
- */
-class DataStore {
-  constructor() {
-    this.prefix = 'tw_';
-  }
-
-  get(key, fallback = null) {
-    try {
-      const val = localStorage.getItem(key);
-      return val !== null ? val : fallback;
-    } catch (e) {
-      console.warn('Storage read error:', e);
-      return fallback;
-    }
-  }
-
-  getJSON(key, fallback = null) {
-    return Utils.safeParse(this.get(key), fallback);
-  }
-
-  set(key, value) {
-    try {
-      localStorage.setItem(key, value);
-      return true;
-    } catch (e) {
-      console.warn('Storage write error:', e);
-      return false;
-    }
-  }
-
-  setJSON(key, value) {
-    return this.set(key, JSON.stringify(value));
-  }
-
-  remove(key) {
-    try { localStorage.removeItem(key); } catch (e) {}
-  }
-
-  /** 批量獲取 */
-  getBulk(keys) {
-    const result = {};
-    keys.forEach(k => result[k] = this.get(k));
-    return result;
-  }
-
-  /** 批量設置 */
-  setBulk(entries) {
-    Object.entries(entries).forEach(([k, v]) => this.set(k, v));
-  }
-
-  /** 追蹤 API 使用量 */
-  trackApiUsage(source) {
-    const today = Utils.getTodayString();
-    const key = `api_usage_${today}_${source}`;
-    const count = (parseInt(this.get(key) || '0')) + 1;
-    this.set(key, String(count));
-    return count;
-  }
-
-  /** 獲取 API 統計 */
-  getApiStats() {
-    const today = Utils.getTodayString();
-    return {
-      fugle: parseInt(this.get(`api_usage_${today}_Fugle`) || '0'),
-      yahoo: parseInt(this.get(`api_usage_${today}_Yahoo`) || '0')
-    };
-  }
-
-  /** 導出所有數據 */
-  exportAll() {
-    const data = {};
-    for (let i = 0; i < CONFIG.MAX_TABS; i++) {
-      data[`stock_${i}`] = this.get(CONFIG.STORAGE_KEYS.getStockKey(i));
-      data[`record_${i}`] = this.get(CONFIG.STORAGE_KEYS.getRecordKey(i));
-    }
-    data.tabNames = this.get(CONFIG.STORAGE_KEYS.TAB_NAMES);
-    data.fugleKey = this.get(CONFIG.STORAGE_KEYS.FUGLE_KEY);
-    data.secondFugleKey = this.get(CONFIG.STORAGE_KEYS.SECOND_FUGLE_KEY);
-    data.theme = this.get(CONFIG.STORAGE_KEYS.THEME);
-    data.tabCount = this.get(CONFIG.STORAGE_KEYS.TAB_COUNT);
-    data.cachedIndices = this.get(CONFIG.STORAGE_KEYS.CACHED_INDICES);
-    return data;
-  }
-
-  /** 導入數據 */
-  importAll(data) {
-    if (data.tabStocks) {
-      data.tabStocks.forEach((val, i) => { if (val) this.set(CONFIG.STORAGE_KEYS.getStockKey(i), val); });
-    }
-    if (data.tabRecords) {
-      data.tabRecords.forEach((val, i) => { if (val) this.set(CONFIG.STORAGE_KEYS.getRecordKey(i), val); });
-    }
-    if (data.tabNames) this.set(CONFIG.STORAGE_KEYS.TAB_NAMES, data.tabNames);
-    if (data.fugleKey) this.set(CONFIG.STORAGE_KEYS.FUGLE_KEY, data.fugleKey);
-    if (data.secondFugleKey) this.set(CONFIG.STORAGE_KEYS.SECOND_FUGLE_KEY, data.secondFugleKey);
-    if (data.theme) this.set(CONFIG.STORAGE_KEYS.THEME, data.theme);
-    if (data.tabCount) this.set(CONFIG.STORAGE_KEYS.TAB_COUNT, data.tabCount);
-  }
-}
-
-/**
- * 🔑 API Key 輪轉器
- */
 class KeyRotator {
-  constructor(keys) {
-    this.keys = keys.filter(k => k && k.trim() !== '');
-    this.index = 0;
-  }
-
-  next() {
-    if (this.keys.length === 0) return null;
-    const k = this.keys[this.index % this.keys.length];
-    this.index++;
-    return k;
-  }
-
+  constructor(keys) { this.keys = keys.filter(k => k && k.trim() !== ''); this.index = 0; }
+  next() { if (this.keys.length === 0) return null; const k = this.keys[this.index % this.keys.length]; this.index++; return k; }
   get count() { return this.keys.length; }
-  get isEmpty() { return this.keys.length === 0; }
 }
 
-/**
- * 📡 價格服務 - 統一處理所有報價請求
- */
-class PriceService {
-  constructor(store) {
-    this.store = store;
-    this.keyRotator = null;
-    this.consecutiveErrors = 0;
-    this.apiPauseUntil = 0;
-    this._initPauseState();
+let globalKeyRotator = null;
+function getKeyRotator() {
+  const keys = [fugleKey, secondFugleKey].filter(k => k && k.trim() !== '');
+  if (!globalKeyRotator || globalKeyRotator.count !== keys.length) {
+    globalKeyRotator = new KeyRotator(keys);
   }
+  return globalKeyRotator;
+}
 
-  _initPauseState() {
-    const pauseUntil = this.store.get(CONFIG.STORAGE_KEYS.API_PAUSE);
-    if (pauseUntil) this.apiPauseUntil = parseInt(pauseUntil);
+async function fetchWithProxy(targetUrl, proxyIndex = 0) {
+  if (proxyIndex >= PROXY_LIST.length) return null;
+  try {
+    const proxyUrl = PROXY_LIST[proxyIndex] + encodeURIComponent(targetUrl);
+    const resp = await fetch(proxyUrl, { signal: AbortSignal.timeout(API_TIMEOUT) });
+    if (!resp.ok) throw new Error('Proxy error');
+    return resp;
+  } catch (e) {
+    return fetchWithProxy(targetUrl, proxyIndex + 1);
   }
+}
 
-  _getRotator() {
-    const keys = [
-      this.store.get(CONFIG.STORAGE_KEYS.FUGLE_KEY, ''),
-      this.store.get(CONFIG.STORAGE_KEYS.SECOND_FUGLE_KEY, '')
-    ].filter(k => k && k.trim() !== '');
+let consecutiveErrors = 0;
+let apiPauseUntil = 0;
 
-    if (!this.keyRotator || this.keyRotator.count !== keys.length) {
-      this.keyRotator = new KeyRotator(keys);
+function shouldPauseApi() {
+  if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+    if (Date.now() < apiPauseUntil) return true;
+    consecutiveErrors = 0;
+  }
+  return false;
+}
+
+function recordApiError() {
+  consecutiveErrors++;
+  if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+    apiPauseUntil = Date.now() + PAUSE_DURATION_MS;
+    try { localStorage.setItem('api_pause_until', String(apiPauseUntil)); } catch(e){}
+    showToast('API 連續失敗，暫停更新 5 分鐘');
+  }
+}
+
+function recordApiSuccess() {
+  if (consecutiveErrors > 0) {
+    consecutiveErrors = 0;
+    apiPauseUntil = 0;
+    try { localStorage.removeItem('api_pause_until'); } catch(e){}
+  }
+}
+
+function trackApiUsage(source) {
+  const today = new Date().toISOString().split('T')[0];
+  const key = `api_usage_${today}_${source}`;
+  const count = (parseInt(localStorage.getItem(key) || '0')) + 1;
+  try { localStorage.setItem(key, String(count)); } catch(e){}
+  return count;
+}
+
+function getApiUsageStats() {
+  const today = new Date().toISOString().split('T')[0];
+  return {
+    fugle: parseInt(localStorage.getItem(`api_usage_${today}_Fugle`) || '0'),
+    yahoo: parseInt(localStorage.getItem(`api_usage_${today}_Yahoo`) || '0')
+  };
+}
+
+function renderApiStats() {
+  const stats = getApiUsageStats();
+  const el = document.getElementById('apiStatsBox');
+  if (el) {
+    el.innerHTML = `<div style="display:flex;justify-content:space-around;text-align:center;font-size:13px;color:var(--t-muted);">
+      <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${stats.fugle}</div><div>Fugle</div></div>
+      <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${stats.yahoo}</div><div>Yahoo</div></div>
+    </div>`;
+  }
+}
+
+function toggleKeyVisibility(inputId, btnId) {
+  const input = document.getElementById(inputId);
+  const btn = document.getElementById(btnId);
+  if (!input || !btn) return;
+  if (input.type === 'password') {
+    input.type = 'text'; btn.textContent = '🙈';
+  } else {
+    input.type = 'password'; btn.textContent = '👁';
+  }
+}
+
+let cfWorkerUrl = 'https://yahoo-index-proxy.denis0521.workers.dev';
+const AVAILABLE_INDICES = [
+  { symbol: '^DJI', name: '道瓊工業指數' },
+  { symbol: '^IXIC', name: '那斯達克指數' },
+  { symbol: '^GSPC', name: '標普500指數' },
+  { symbol: '^SOX', name: '費城半導體指數' },
+  { symbol: '^N225', name: '日經225指數' },
+  { symbol: '^KS11', name: '韓國綜合指數' }
+];
+const activeForeignIndices = AVAILABLE_INDICES.map(idx => idx.symbol);
+
+let currentTab = 0;
+let tabStocks = [[], [], [], [], []];
+let tabRecords = [[], [], [], [], []];
+let tabNames = ['分頁 1', '分頁 2', '分頁 3', '分頁 4', '分頁 5'];
+let tabCount = 3;
+let fugleKey='',secondFugleKey='';
+let fugleKeyIndex = 0;
+let pollTimer = null;
+let currentInterval = 30000;
+
+const FK='tw_fugle_key',SFK='tw_second_fugle_key',TK='tw_theme', CUR_TAB_KEY='tw_current_tab', TN_KEY='tw_tab_names', TC_KEY='tw_tab_count';
+const getStockKey = (idx) => `tw_stock_portfolio_tab_${idx}`;
+const getRecordKey = (idx) => `tw_records_tab_${idx}`;
+let cachedGlobalIndices = [];
+const FUGLE='https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
+
+/* ========================================================= 🛡️ 安全解析工具 ========================================================= */
+
+function safeParseInt(val, fallback) {
+  const n = parseInt(val);
+  return (isNaN(n) || n < 0) ? fallback : n;
+}
+
+function safeParseJSON(str, fallback) {
+  try { return JSON.parse(str); } catch(e) { return fallback; }
+}
+
+function safeGetItem(key, fallback) {
+  try {
+    const val = localStorage.getItem(key);
+    return val !== null ? val : fallback;
+  } catch(e) { return fallback; }
+}
+
+function safeSetItem(key, val) {
+  try { localStorage.setItem(key, val); } catch(e) {}
+}
+
+function safeRemoveItem(key) {
+  try { localStorage.removeItem(key); } catch(e) {}
+}
+
+/* ========================================================= 🔄 狀態管理 ========================================================= */
+
+function loadState(){
+  try{
+    const f = safeGetItem(FK, ''); if(f) fugleKey = f;
+    const sf = safeGetItem(SFK, ''); if(sf) secondFugleKey = sf;
+
+    const ct = safeGetItem(CUR_TAB_KEY, '0');
+    currentTab = safeParseInt(ct, 0);
+
+    const tn = safeGetItem(TN_KEY, '');
+    if(tn) tabNames = safeParseJSON(tn, tabNames);
+    if(!Array.isArray(tabNames) || tabNames.length !== 5) tabNames = ['分頁 1', '分頁 2', '分頁 3', '分頁 4', '分頁 5'];
+
+    const tc = safeGetItem(TC_KEY, '3');
+    tabCount = safeParseInt(tc, 3);
+    if(tabCount < 1) tabCount = 1;
+    if(tabCount > 5) tabCount = 5;
+
+    const pauseUntil = safeGetItem('api_pause_until', '');
+    if (pauseUntil) apiPauseUntil = parseInt(pauseUntil);
+
+    for(let i=0; i<5; i++){
+      const s = safeGetItem(getStockKey(i), ''); 
+      if(s) { tabStocks[i] = safeParseJSON(s, []); }
+      else { tabStocks[i] = []; }
+
+      const r = safeGetItem(getRecordKey(i), ''); 
+      if(r) { tabRecords[i] = safeParseJSON(r, []); }
+      else { tabRecords[i] = []; }
     }
-    return this.keyRotator;
-  }
 
-  shouldPause() {
-    if (this.consecutiveErrors >= CONFIG.MAX_CONSECUTIVE_ERRORS) {
-      if (Date.now() < this.apiPauseUntil) return true;
-      this.consecutiveErrors = 0;
+    if(currentTab >= tabCount) currentTab = 0;
+
+    const t = safeGetItem(TK, ''); 
+    applyThemeText(t);
+
+    const cachedIdx = safeGetItem('tw_cached_indices', '');
+    if(cachedIdx) { 
+      cachedGlobalIndices = safeParseJSON(cachedIdx, []); 
+      if(cachedGlobalIndices.length > 0) renderGlobalIndices(cachedGlobalIndices, false); 
     }
-    return false;
+  }catch(e){
+    console.error('loadState error:', e);
+    // 確保即使出錯也有預設值
+    tabCount = 3; currentTab = 0;
+    for(let i=0;i<5;i++){ tabStocks[i]=[]; tabRecords[i]=[]; }
   }
 
-  recordError() {
-    this.consecutiveErrors++;
-    if (this.consecutiveErrors >= CONFIG.MAX_CONSECUTIVE_ERRORS) {
-      this.apiPauseUntil = Date.now() + CONFIG.PAUSE_DURATION_MS;
-      this.store.set(CONFIG.STORAGE_KEYS.API_PAUSE, String(this.apiPauseUntil));
-      return true; // 表示進入暫停
+  const fkInput = document.getElementById('fugleKeyInput');
+  const sfkInput = document.getElementById('secondFugleKeyInput');
+  const tcSelect = document.getElementById('tabCountSelect');
+  if(fkInput) fkInput.value = fugleKey;
+  if(sfkInput) sfkInput.value = secondFugleKey;
+  if(tcSelect) tcSelect.value = tabCount;
+
+  updateKeyStatus(); 
+  renderTabs();
+  renderApiStats();
+}
+
+function applyThemeText(t){
+  const body = document.body; 
+  const themeBtn = document.getElementById('themeBtn'); 
+  const metaTheme = document.getElementById('themeColorMeta');
+  if(!body || !themeBtn || !metaTheme) return;
+
+  body.className = '';
+  if(t==='tech'){ body.classList.add('theme-tech'); themeBtn.textContent='🚀'; metaTheme.content='#2b303a'; }
+  else if(t==='blue-light'){ body.classList.add('theme-blue-light'); themeBtn.textContent='💎'; metaTheme.content='#e3edf7'; }
+  else if(t==='purple-light'){ body.classList.add('theme-purple-light'); themeBtn.textContent='🍇'; metaTheme.content='#ece8f3'; }
+  else if(t==='pink'){ body.classList.add('theme-pink'); themeBtn.textContent='🌸'; metaTheme.content='#f3e6e8'; }
+  else if(t==='cement'){ body.classList.add('theme-cement'); themeBtn.textContent='🏢'; metaTheme.content='#a3a8b0'; }
+  else { themeBtn.textContent='🌙'; metaTheme.content='#e0e5ec'; }
+}
+
+function saveHoldings(){ try{ safeSetItem(getStockKey(currentTab), JSON.stringify(tabStocks[currentTab])); }catch(e){} }
+function saveKeys(){ 
+  fugleKey = document.getElementById('fugleKeyInput')?.value?.trim() || ''; 
+  secondFugleKey = document.getElementById('secondFugleKeyInput')?.value?.trim() || ''; 
+  try{ safeSetItem(FK, fugleKey); safeSetItem(SFK, secondFugleKey); }catch(e){} 
+  globalKeyRotator = null; 
+  updateKeyStatus(); 
+}
+function saveRecords(){ try{ safeSetItem(getRecordKey(currentTab), JSON.stringify(tabRecords[currentTab])); }catch(e){} }
+
+function saveTabCount(){ 
+  const tcSelect = document.getElementById('tabCountSelect');
+  if(!tcSelect) return;
+  const newCount = safeParseInt(tcSelect.value, 3);
+  if(newCount === tabCount) return;
+  tabCount = newCount; 
+  try{ safeSetItem(TC_KEY, String(tabCount)); }catch(e){}
+  if(currentTab >= tabCount) { currentTab = 0; try{ safeSetItem(CUR_TAB_KEY, '0'); }catch(e){} }
+  renderTabs(); renderAll(); renderHistory(); 
+}
+
+function toggleTheme(){
+  const body = document.body; 
+  if(!body) return;
+  let nextTheme = 'light';
+  if(body.classList.contains('theme-tech')) nextTheme = 'blue-light';
+  else if(body.classList.contains('theme-blue-light')) nextTheme = 'purple-light';
+  else if(body.classList.contains('theme-purple-light')) nextTheme = 'pink';
+  else if(body.classList.contains('theme-pink')) nextTheme = 'cement';
+  else if(body.classList.contains('theme-cement')) nextTheme = 'light';
+  else nextTheme = 'tech';
+  applyThemeText(nextTheme); 
+  try{ safeSetItem(TK, nextTheme); }catch(e){}
+}
+
+function switchTab(tabIndex){
+  if(currentTab === tabIndex) return;
+  currentTab = tabIndex; 
+  try{ safeSetItem(CUR_TAB_KEY, String(currentTab)); }catch(e){}
+  renderTabs(); renderAll(); renderHistory(); refreshPrices();
+}
+
+function renameTab(tabIndex) {
+  const oldName = tabNames[tabIndex] || `分頁 ${tabIndex + 1}`;
+  const newName = prompt('請輸入此分頁的新名稱：', oldName);
+  if (newName !== null) {
+    const finalName = newName.trim() === '' ? `分頁 ${tabIndex + 1}` : newName.trim();
+    tabNames[tabIndex] = finalName;
+    try { safeSetItem(TN_KEY, JSON.stringify(tabNames)); } catch(e){}
+    renderTabs(); showToast(`已更名為「${finalName}」`);
+  }
+}
+
+function renderTabs() {
+  const container = document.getElementById('tabsBarContainer');
+  if(!container) return;
+  container.innerHTML = '';
+
+  // 確保 tabCount 有效
+  const effectiveCount = Math.max(1, Math.min(5, tabCount || 3));
+
+  for(let i=0; i<effectiveCount; i++){
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'tab-btn'; btn.id = `tab${i}`;
+    btn.textContent = tabNames[i] || `分頁 ${i + 1}`;
+    btn.onclick = () => switchTab(i); 
+    btn.ondblclick = () => renameTab(i);
+    if(i === currentTab) btn.classList.add('active');
+    container.appendChild(btn);
+  }
+  const btns = container.querySelectorAll('.tab-btn');
+  if(effectiveCount >= 4) { btns.forEach(b => b.style.fontSize = '14px'); } 
+  else if(effectiveCount === 3) { btns.forEach(b => b.style.fontSize = '16px'); } 
+  else { btns.forEach(b => b.style.fontSize = '18px'); }
+}
+
+function updateKeyStatus(){
+  ['fugleKey','secondFugleKey'].forEach((id,i)=>{
+    const el=document.getElementById(id+'Status');if(!el)return;
+    const val=i===0?fugleKey:secondFugleKey;
+    if(val){el.textContent='✓ 已設定';el.className='key-status ok';}
+    else{el.textContent='未設定';el.className='key-status none';}
+  });
+  renderApiStats();
+}
+
+function renderGlobalIndices(indices, isOffline = false) {
+  const container = document.getElementById('idxScrollContainer');
+  if(!container) return;
+
+  // 保留臺灣加權指數卡片
+  const twCard = document.getElementById('twIndexCard');
+  container.innerHTML = '';
+  if(twCard) container.appendChild(twCard);
+
+  const offlineTag = isOffline ? '<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>' : '';
+
+  indices.forEach(item => {
+    let displayIndexName = item.name;
+    const matchedIndex = AVAILABLE_INDICES.find(idx => idx.symbol === item.symbol);
+    if (matchedIndex) displayIndexName = matchedIndex.name;
+
+    const card = document.createElement('div'); card.className = 'idx-card-box';
+    const sign = item.pct >= 0 ? '+' : ''; const cls = item.pct >= 0 ? 'up' : 'down';
+    card.innerHTML = `<div class="idx-box-name">${displayIndexName}${offlineTag}</div>
+      <div class="idx-box-price">${item.price.toLocaleString('en-US', {maximumFractionDigits:2})}</div>
+      <div class="idx-box-change-row ${cls}">
+        <span>${sign}${item.changeAmt.toFixed(2)}</span>
+        <span>(${sign}${item.pct.toFixed(2)}%)</span>
+      </div>
+      <div class="idx-box-src">via Yahoo ${isOffline ? 'Cache' : ''}</div>`;
+    container.appendChild(card);
+  });
+}
+
+async function fetchGlobalIndicesFromWorker() {
+  if (!cfWorkerUrl || cfWorkerUrl === '') return;
+  if (navigator.onLine === false) {
+    const cachedIdx = safeGetItem('tw_cached_indices', '');
+    if (cachedIdx) { try { renderGlobalIndices(safeParseJSON(cachedIdx, []), true); } catch(e) {} }
+    return;
+  }
+
+  try {
+    const workerSymbols = activeForeignIndices.join(',');
+    const response = await fetch(`${cfWorkerUrl}/indices?symbols=${encodeURIComponent(workerSymbols)}&_=${Date.now()}`, { 
+      signal: AbortSignal.timeout(API_TIMEOUT),
+      headers: { 'Accept': 'application/json' }
+    });
+    if (response.ok) {
+      const data = await response.json();
+      if (data.indices && data.indices.length > 0) {
+        const parsedIndices = data.indices.map(item => {
+          const price = item.price ?? item.regularMarketPrice ?? item.previousClose ?? 0;
+          const changeAmt = item.change ?? item.regularMarketChange ?? 0;
+          const pct = item.changePercent ?? item.regularMarketChangePercent ?? 0;
+          const name = item.name || item.symbol;
+          return { symbol: item.symbol, name, price, pct, changeAmt };
+        });
+        parsedIndices.sort((a, b) => activeForeignIndices.indexOf(a.symbol) - activeForeignIndices.indexOf(b.symbol));
+        cachedGlobalIndices = parsedIndices;
+        trackApiUsage('Yahoo');
+        try { safeSetItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
+        renderGlobalIndices(cachedGlobalIndices, false);
+      }
     }
-    return false;
+  } catch (e) {
+    console.error("Worker Index Fetch Error:", e);
+    const cachedIdx = safeGetItem('tw_cached_indices', '');
+    if (cachedIdx) { try { renderGlobalIndices(safeParseJSON(cachedIdx, []), true); } catch(e2) {} }
   }
+}
 
-  recordSuccess() {
-    if (this.consecutiveErrors > 0) {
-      this.consecutiveErrors = 0;
-      this.apiPauseUntil = 0;
-      this.store.remove(CONFIG.STORAGE_KEYS.API_PAUSE);
-    }
-  }
-
-  /** 帶代理的 fetch */
-  async fetchWithProxy(targetUrl, proxyIndex = 0) {
-    if (proxyIndex >= CONFIG.PROXY_LIST.length) return null;
+async function fetchFugle(symbol){
+  if (navigator.onLine === false) return null;
+  const kr = getKeyRotator();
+  if (kr.count === 0) return null;
+  let hasError = false;
+  for (let i = 0; i < kr.count; i++){
+    const currentKey = kr.next();
     try {
-      const proxyUrl = CONFIG.PROXY_LIST[proxyIndex] + encodeURIComponent(targetUrl);
-      const resp = await fetch(proxyUrl, { signal: AbortSignal.timeout(CONFIG.API_TIMEOUT) });
-      if (!resp.ok) throw new Error('Proxy error');
-      return resp;
-    } catch (e) {
-      return this.fetchWithProxy(targetUrl, proxyIndex + 1);
-    }
+      const resp = await fetch(FUGLE + encodeURIComponent(symbol), {
+        headers: {'X-API-KEY': currentKey, 'X-Requested-With': 'StockPortfolioApp'},
+        signal: AbortSignal.timeout(API_TIMEOUT)
+      });
+      if (resp.ok) {
+        const d = await resp.json();
+        const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
+        if (p != null) {
+          trackApiUsage('Fugle');
+          return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle'};
+        }
+      } else if (resp.status === 429) {
+        hasError = true; continue;
+      }
+    } catch(e) { hasError = true; continue; }
   }
+  if (hasError) return { error: true };
+  return null;
+}
 
-  /** 從 Fugle 獲取個股報價 */
-  async fetchFugle(symbol) {
-    if (navigator.onLine === false) return null;
-    const kr = this._getRotator();
-    if (kr.isEmpty) return null;
+async function fetchYahoo(symbol){
+  if (navigator.onLine === false) return null;
+  const tryFetch = async (suffix) => {
+    try {
+      const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}${suffix}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
+      const resp = await fetchWithProxy(yahooUrl);
+      if (!resp) return null;
+      const text = await resp.text();
+      const lines = text.trim().split('\n');
+      if (lines.length < 2) return null;
+      const cols = lines[lines.length - 1].split(',');
+      if (cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
+      const price = parseFloat(cols[4]);
+      const open = parseFloat(cols[1]);
+      const chg = +(price - open).toFixed(2);
+      const pct = +((chg / open) * 100).toFixed(2);
+      trackApiUsage('Yahoo');
+      return {price, change: chg, changePercent: pct, source: 'Yahoo'};
+    } catch(e) { return null; }
+  };
+  let res = await tryFetch('.TW');
+  if (!res) res = await tryFetch('.TWO');
+  return res;
+}
 
-    let hasError = false;
-    for (let i = 0; i < kr.count; i++) {
-      const key = kr.next();
+async function fetchWeightedIndex(){
+  if (navigator.onLine === false) return null;
+  const kr = getKeyRotator();
+  if (kr.count > 0){
+    for (let i = 0; i < kr.count; i++){
       try {
-        const resp = await fetch(CONFIG.FUGLE_BASE + encodeURIComponent(symbol), {
-          headers: { 'X-API-KEY': key, 'X-Requested-With': 'StockPortfolioApp' },
-          signal: AbortSignal.timeout(CONFIG.API_TIMEOUT)
+        const resp = await fetch(FUGLE + 'IX0001', {
+          headers: {'X-API-KEY': kr.next(), 'X-Requested-With': 'StockPortfolioApp'},
+          signal: AbortSignal.timeout(API_TIMEOUT)
         });
         if (resp.ok) {
           const d = await resp.json();
           const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
           if (p != null) {
-            this.store.trackApiUsage('Fugle');
-            return { price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle' };
+            trackApiUsage('Fugle');
+            return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle'};
           }
-        } else if (resp.status === 429) {
-          hasError = true; continue;
         }
-      } catch (e) { hasError = true; continue; }
+      } catch(e) {}
     }
-    if (hasError) return { error: true };
-    return null;
+  }
+  return null;
+}
+
+function isAnyMarketOpen() {
+  const now = new Date(); const day = now.getDay(); const hour = now.getHours(); const min = now.getMinutes();
+  if (day === 0 || day === 6) return false;
+  const time = hour + min / 60;
+  if (time >= 8 && time <= 14) return true;
+  if (time >= 15 || time <= 5) return true;
+  return false;
+}
+
+async function refreshPrices(){
+  if (shouldPauseApi()) { console.log('API 暫停中，跳過本次更新'); return; }
+
+  const isOffline = navigator.onLine === false;
+  if (isOffline) { 
+    showToast('目前處於離線狀態，顯示快取資料'); 
+    const twNameBox = document.querySelector('#twIndexCard .idx-box-name');
+    if (twNameBox && !twNameBox.innerHTML.includes('(離線)')) {
+      twNameBox.innerHTML = `臺灣加權指數<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>`;
+    }
+  } else {
+    const twNameBox = document.querySelector('#twIndexCard .idx-box-name');
+    if (twNameBox) twNameBox.textContent = `臺灣加權指數`;
   }
 
-  /** 從 Yahoo 獲取個股報價 */
-  async fetchYahoo(symbol) {
-    if (navigator.onLine === false) return null;
+  let apiErrorOccurred = false;
 
-    const tryFetch = async (suffix) => {
-      try {
-        const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}${suffix}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
-        const resp = await this.fetchWithProxy(yahooUrl);
-        if (!resp) return null;
-        const text = await resp.text();
-        const lines = text.trim().split('\n');
-        if (lines.length < 2) return null;
-        const cols = lines[lines.length - 1].split(',');
-        if (cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
-        const price = parseFloat(cols[4]);
-        const open = parseFloat(cols[1]);
-        const chg = +(price - open).toFixed(2);
-        const pct = +((chg / open) * 100).toFixed(2);
-        this.store.trackApiUsage('Yahoo');
-        return { price, change: chg, changePercent: pct, source: 'Yahoo' };
-      } catch (e) { return null; }
-    };
+  // 更新加權指數
+  try {
+    const idxR = await fetchWeightedIndex();
+    if(idxR) {
+      const idxEl = document.getElementById('idxPrice'); 
+      const idxChgEl = document.getElementById('idxChange');
+      const idxPctEl = document.getElementById('idxPct'); 
+      const idxSrcEl = document.getElementById('idxSource');
+      if(idxEl) idxEl.textContent = idxR.price.toLocaleString('en-US',{maximumFractionDigits:0});
+      if(idxChgEl) { idxChgEl.textContent = (idxR.change>=0?'+':'')+idxR.change.toFixed(2); idxChgEl.className = idxR.change>=0?'up':'down'; }
+      if(idxPctEl) { idxPctEl.textContent = '('+(idxR.changePercent>=0?'+':'')+idxR.changePercent.toFixed(2)+'%)'; idxPctEl.className = idxR.changePercent>=0?'up':'down'; }
+      if(idxSrcEl) idxSrcEl.textContent = 'via '+idxR.source+' '+new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'});
+    }
+  } catch(e) { console.error('Index fetch error:', e); }
 
-    let res = await tryFetch('.TW');
-    if (!res) res = await tryFetch('.TWO');
-    return res;
-  }
+  fetchGlobalIndicesFromWorker();
 
-  /** 獲取加權指數 */
-  async fetchWeightedIndex() {
-    if (navigator.onLine === false) return null;
-    const kr = this._getRotator();
-    if (kr.count > 0) {
-      for (let i = 0; i < kr.count; i++) {
-        try {
-          const resp = await fetch(CONFIG.FUGLE_BASE + 'IX0001', {
-            headers: { 'X-API-KEY': kr.next(), 'X-Requested-With': 'StockPortfolioApp' },
-            signal: AbortSignal.timeout(CONFIG.API_TIMEOUT)
+  const currentStocks = tabStocks[currentTab];
+  if (currentStocks.length === 0) return;
+  const uniqueSymbols = [...new Set(currentStocks.map(s => s.symbol))];
+  const batchSize = MAX_CONCURRENT_REQUESTS;
+  for (let i = 0; i < uniqueSymbols.length; i += batchSize) {
+    const batch = uniqueSymbols.slice(i, i + batchSize);
+    const promises = batch.map(async (sym) => {
+      let r = await fetchFugle(sym);
+      if (r && r.error) { apiErrorOccurred = true; r = null; }
+      if (!r) r = await fetchYahoo(sym);
+      return { sym, r };
+    });
+    const results = await Promise.allSettled(promises);
+    results.forEach((result) => {
+      if (result.status === 'fulfilled') {
+        const { sym, r } = result.value;
+        if (r) {
+          currentStocks.filter(s => s.symbol === sym).forEach(s => {
+            s.price=r.price; s.change=r.change; s.changePercent=r.changePercent; s.source=r.source;
+            const now = new Date();
+            s.updateTime = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+            renderRow(s);
           });
-          if (resp.ok) {
-            const d = await resp.json();
-            const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
-            if (p != null) {
-              this.store.trackApiUsage('Fugle');
-              return { price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle' };
-            }
-          }
-        } catch (e) {}
-      }
-    }
-    return null;
-  }
-
-  /** 獲取國際指數 */
-  async fetchGlobalIndices() {
-    if (!CONFIG.CF_WORKER) return [];
-    if (navigator.onLine === false) {
-      const cached = this.store.getJSON(CONFIG.STORAGE_KEYS.CACHED_INDICES);
-      return cached || [];
-    }
-
-    try {
-      const symbols = CONFIG.AVAILABLE_INDICES.map(i => i.symbol).join(',');
-      const response = await fetch(`${CONFIG.CF_WORKER}/indices?symbols=${encodeURIComponent(symbols)}&_=${Date.now()}`, {
-        signal: AbortSignal.timeout(CONFIG.API_TIMEOUT),
-        headers: { 'Accept': 'application/json' }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        if (data.indices && data.indices.length > 0) {
-          const parsed = data.indices.map(item => ({
-            symbol: item.symbol,
-            name: item.name || item.symbol,
-            price: item.price ?? item.regularMarketPrice ?? item.previousClose ?? 0,
-            changeAmt: item.change ?? item.regularMarketChange ?? 0,
-            pct: item.changePercent ?? item.regularMarketChangePercent ?? 0
-          }));
-          this.store.trackApiUsage('Yahoo');
-          this.store.setJSON(CONFIG.STORAGE_KEYS.CACHED_INDICES, parsed);
-          return parsed;
         }
       }
-    } catch (e) {
-      console.error('Global indices fetch error:', e);
-    }
-    return this.store.getJSON(CONFIG.STORAGE_KEYS.CACHED_INDICES) || [];
+    });
   }
-
-  /** 批次更新股票價格 */
-  async batchUpdatePrices(symbols) {
-    if (this.shouldPause()) {
-      console.log('API 暫停中，跳過本次更新');
-      return { results: [], hasError: false };
-    }
-
-    const uniqueSymbols = [...new Set(symbols)];
-    const results = [];
-    let hasError = false;
-
-    for (let i = 0; i < uniqueSymbols.length; i += CONFIG.MAX_CONCURRENT) {
-      const batch = uniqueSymbols.slice(i, i + CONFIG.MAX_CONCURRENT);
-      const promises = batch.map(async (sym) => {
-        try {
-          let r = await this.fetchFugle(sym);
-          if (r && r.error) { hasError = true; r = null; }
-          if (!r) r = await this.fetchYahoo(sym);
-          return { sym, data: r };
-        } catch (e) {
-          console.error(`Error fetching ${sym}:`, e);
-          return { sym, data: null };
-        }
-      });
-
-      const batchResults = await Promise.allSettled(promises);
-      batchResults.forEach(result => {
-        if (result.status === 'fulfilled') {
-          results.push(result.value);
-        }
-      });
-    }
-
-    if (hasError) this.recordError();
-    else this.recordSuccess();
-
-    return { results, hasError };
-  }
+  updateSummary();
+  if (apiErrorOccurred) recordApiError(); else recordApiSuccess();
+  adjustPollingInterval(apiErrorOccurred);
+  renderApiStats();
 }
 
-/**
- * 📊 股票計算引擎 - 純函數，無副作用
- */
-const StockCalculator = {
-  /** 計算股數 */
-  getShares(qty, unit) {
-    return unit === '張' ? qty * 1000 : qty;
-  },
+function adjustPollingInterval(hasError) {
+  const kr = getKeyRotator(); const keyCount = kr.count; let newInterval = currentInterval;
+  if (shouldPauseApi()) { newInterval = 300000; } 
+  else if (!isAnyMarketOpen()) { newInterval = 60000; } 
+  else { if (hasError) { newInterval = keyCount === 2 ? 15000 : 30000; } else { newInterval = keyCount === 2 ? 10000 : 20000; } }
+  if (newInterval !== currentInterval) { currentInterval = newInterval; clearInterval(pollTimer); pollTimer = setInterval(refresh, currentInterval); }
+}
 
-  /** 計算今日損益 */
-  calcTodayPnl(shares, change) {
-    return Math.round(shares * (change ?? 0));
-  },
-
-  /** 計算總損益和 ROI */
-  calcTotalPnl(price, buyPrice, shares) {
-    if (price == null || buyPrice == null || buyPrice <= 0) return null;
-    const mktValue = Math.round(shares * price);
-    const cost = buyPrice * shares;
-    const unPnl = Math.round(mktValue - cost);
-    const roi = ((mktValue - cost) / cost) * 100;
-    return { unPnl, roi };
-  },
-
-  /** 計算市值 */
-  calcMarketValue(price, shares) {
-    return price != null ? Math.round(shares * price) : 0;
-  },
-
-  /** 格式化股票數據為顯示格式 */
-  formatStockDisplay(stock) {
-    const shares = this.getShares(stock.displayQty, stock.displayUnit);
-    const p = stock.price;
-    const chg = stock.change ?? 0;
-
-    const result = {
-      symbol: stock.symbol,
-      qty: `${stock.displayQty} ${stock.displayUnit}`,
-      avgPrice: stock.buyPrice ? `均價 ${stock.buyPrice}` : '未設均價',
-      price: p != null ? Utils.formatPrice(p) : '—',
-      priceClass: p != null ? (chg >= 0 ? 'text-up' : 'text-down') : '',
-      chgp: stock.changePercent != null ? Utils.formatPercent(stock.changePercent) : '—',
-      chgpClass: stock.changePercent != null ? (stock.changePercent >= 0 ? 'text-up' : 'text-down') : '',
-      chg: stock.change != null ? Utils.formatSigned(chg) : '—',
-      chgClass: stock.change != null ? (chg >= 0 ? 'text-up' : 'text-down') : '',
-      todayPnl: '—',
-      todayPnlClass: '',
-      totalHtml: '—',
-      totalClass: ''
-    };
-
-    if (stock.change != null) {
-      const todayPnl = this.calcTodayPnl(shares, chg);
-      result.todayPnl = Utils.formatSigned(todayPnl);
-      result.todayPnlClass = todayPnl >= 0 ? 'text-up' : 'text-down';
+function renderRow(s){
+  const el=document.querySelector('.srow[data-id="'+s.id+'"]');if(!el)return;
+  const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
+  let p = s.price; let chg = s.change ?? 0;
+  const symCont = el.querySelector('.sym-container');
+  if(symCont){ symCont.querySelector('.sym').textContent=s.symbol; }
+  const qn=el.querySelector('.qty-cell');
+  if(qn){
+    qn.innerHTML=`<div style="line-height:1.2;font-size:inherit;">${s.displayQty} ${s.displayUnit}</div>
+    <div style="font-size:0.8em;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}">${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}</div>`;
+  }
+  const pEl=el.querySelector('.price');
+  if(p!=null && pEl){ pEl.textContent=formatPrice(p); pEl.className='price '+(chg>=0?'up':'down'); }
+  const cp=el.querySelector('.chgp');
+  if(s.changePercent!=null && cp){cp.textContent=(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%';cp.className='chgp '+(s.changePercent>=0?'up':'down');}
+  const cg=el.querySelector('.chg');
+  if(s.change!=null && cg){cg.textContent=(chg>=0?'+':'')+chg.toFixed(2);cg.className='chg '+(chg>=0?'up':'down');}
+  const tp = el.querySelector('.today-pnl');
+  if(s.change!=null && tp){ const todayPnl = Math.round(shares * chg); tp.textContent = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString(); tp.className = 'today-pnl ' + (todayPnl >= 0 ? 'up' : 'down'); }
+  let totalHtml = '—'; let totalValForClass = 0;
+  if (p != null) {
+    const mktValue = Math.round(shares * p);
+    if (s.buyPrice != null && s.buyPrice > 0) {
+      const cost = s.buyPrice * shares; const unPnl = Math.round(mktValue - cost); const roi = ((mktValue - cost) / cost) * 100;
+      totalValForClass = unPnl;
+      totalHtml = `<div style="line-height:1.2;font-size:inherit;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
+      <div style="font-size:0.8em;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`;
+    } else {
+      totalValForClass = 0;
+      totalHtml = `<div style="line-height:1.2;font-size:inherit;" class="neutral">—</div>
+      <div style="font-size:0.8em;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
     }
+  }
+  const totalEl = el.querySelector('.total');
+  if(totalEl) { totalEl.innerHTML = totalHtml; totalEl.className = 'total ' + (totalValForClass !== 0 ? (totalValForClass >= 0 ? 'up' : 'down') : ''); }
+}
 
+function renderAll(){
+  const body=document.getElementById('listBody'); 
+  const empty=document.getElementById('emptyState');
+  const tableScroll=document.getElementById('tableScroll'); 
+  const sumArea = document.getElementById('summaryArea'); 
+  const saveArea = document.getElementById('saveArea');
+  if(!body || !empty || !tableScroll || !sumArea || !saveArea) return;
+
+  body.innerHTML=''; 
+  const currentStocks = tabStocks[currentTab];
+  if(currentStocks.length===0){ empty.style.display='block';tableScroll.style.display='none';sumArea.style.display='none';saveArea.style.display='none';return; }
+  empty.style.display='none';tableScroll.style.display='block';sumArea.style.display='block';saveArea.style.display='block';
+  for(const s of currentStocks){
+    const div=document.createElement('div');div.className='srow';div.dataset.id=s.id;
+    const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
+    let p = s.price; let chg = s.change ?? 0;
+    let pStr = '—'; if(p!=null) pStr = formatPrice(p);
+    const cgp = s.changePercent!=null ? (s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%' : '—';
+    let cgStr = '—'; if(s.change!=null) cgStr = (chg>=0?'+':'') + chg.toFixed(2);
+    let tpStr = '—'; let tpClass = '';
+    if (s.change != null) { const todayPnl = Math.round(shares * chg); tpStr = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString(); tpClass = todayPnl >= 0 ? 'up' : 'down'; }
+    let totalHtml = '—'; let totalValForClass = 0;
     if (p != null) {
-      const pnlData = this.calcTotalPnl(p, stock.buyPrice, shares);
-      if (pnlData) {
-        result.totalHtml = `<div>${Utils.formatSigned(pnlData.unPnl)}</div><div class="stock-total__sub">${Utils.formatPercent(pnlData.roi)}</div>`;
-        result.totalClass = pnlData.unPnl >= 0 ? 'text-up' : 'text-down';
+      const mktValue = Math.round(shares * p);
+      if (s.buyPrice != null && s.buyPrice > 0) {
+        const cost = s.buyPrice * shares; const unPnl = Math.round(mktValue - cost); const roi = ((mktValue - cost) / cost) * 100;
+        totalValForClass = unPnl;
+        totalHtml = `<div style="line-height:1.2;font-size:inherit;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
+        <div style="font-size:0.8em;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`;
       } else {
-        result.totalHtml = '<div class="text-neutral">—</div><div class="stock-total__hint">點擊 ✎ 設均價</div>';
-        result.totalClass = '';
+        totalValForClass = 0;
+        totalHtml = `<div style="line-height:1.2;font-size:inherit;" class="neutral">—</div>
+        <div style="font-size:0.8em;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
       }
     }
-
-    return result;
+    div.innerHTML= '<div class="sym-container"><div class="sym">'+s.symbol+'</div></div>'+
+    '<div class="qty-cell"><div style="line-height:1.2;font-size:inherit;">'+s.displayQty+' '+s.displayUnit+'</div><div style="font-size:0.8em;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'">'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'</div></div>'+
+    '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+
+    '<div class="chgp '+(s.changePercent!=null?(s.changePercent>=0?'up':'down'):'')+'">'+cgp+'</div>'+
+    '<div class="chg '+(s.change!=null?(chg>=0?'up':'down'):'')+'">'+cgStr+'</div>'+
+    '<div class="today-pnl '+tpClass+'">'+tpStr+'</div>'+
+    '<div class="total '+(totalValForClass!==0?(totalValForClass>=0?'up':'down'):'')+'">'+totalHtml+'</div>'+
+    '<div class="act"><button type="button" onclick="openEditModal(''+s.id+'')">✎</button><button type="button" class="del-btn" onclick="deleteStock(''+s.id+'')">✕</button></div>';
+    body.appendChild(div);
   }
-};
+  updateSummary();
+}
 
-/**
- * 🎨 UI 渲染器
- */
-class UIRenderer {
-  constructor() {
-    this.elements = {};
-    this._cacheElements();
+function updateSummary(){
+  let pnl=0, asset=0, totalUnPnl=0; let hasUnPnl = false;
+  const currentStocks = tabStocks[currentTab];
+  for(const s of currentStocks){
+    const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
+    let p=s.price??0, c=s.change??0;
+    pnl += Math.round(sh * c); asset += Math.round(sh * p);
+    if (s.buyPrice != null && s.price != null && s.buyPrice > 0) { totalUnPnl += Math.round((s.price - s.buyPrice) * sh); hasUnPnl = true; }
   }
-
-  _cacheElements() {
-    const ids = [
-      'tabsBarContainer', 'stockTableBody', 'emptyState', 'tableScroll',
-      'summaryArea', 'saveArea', 'historyBody', 'totalPnl', 'totalUnrealized',
-      'totalAsset', 'summaryDetails', 'sumToggleBtn', 'sumCollapseBtn',
-      'summaryToggleArea', 'idxPrice', 'idxChange', 'idxPct', 'idxSource',
-      'idxChangeRow', 'modalOverlay', 'manualOverlay', 'editModalOverlay',
-      'fugleKeyInput', 'secondFugleKeyInput', 'fugleKeyStatus', 'secondFugleKeyStatus',
-      'apiStatsBox', 'tabCountSelect', 'themeBtn', 'importFile',
-      'symInput', 'qtyInput', 'unitSelect', 'buyPriceInput',
-      'editId', 'editSymInput', 'editQtyInput', 'editUnitSelect', 'editBuyPriceInput'
-    ];
-    ids.forEach(id => { this.elements[id] = document.getElementById(id); });
-  }
-
-  /** 渲染分頁標籤 */
-  renderTabs(tabCount, currentTab, tabNames, onSwitch, onRename) {
-    const container = this.elements.tabsBarContainer;
-    container.innerHTML = '';
-
-    for (let i = 0; i < tabCount; i++) {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'neu-btn tab-btn';
-      btn.id = `tab${i}`;
-      btn.textContent = tabNames[i] || `分頁 ${i + 1}`;
-      btn.setAttribute('role', 'tab');
-      btn.setAttribute('aria-selected', i === currentTab);
-      btn.setAttribute('aria-controls', 'stockTableBody');
-
-      if (i === currentTab) btn.classList.add('is-active');
-
-      btn.addEventListener('click', () => onSwitch(i));
-      btn.addEventListener('dblclick', () => onRename(i));
-
-      container.appendChild(btn);
-    }
-
-    // 調整字體大小
-    const fontSize = tabCount >= 4 ? '14px' : tabCount === 3 ? '16px' : '18px';
-    container.querySelectorAll('.tab-btn').forEach(b => b.style.fontSize = fontSize);
-  }
-
-  /** 渲染持股列表 */
-  renderStockList(stocks) {
-    const body = this.elements.stockTableBody;
-    const empty = this.elements.emptyState;
-    const tableScroll = this.elements.tableScroll;
-    const sumArea = this.elements.summaryArea;
-    const saveArea = this.elements.saveArea;
-
-    if (stocks.length === 0) {
-      empty.style.display = 'block';
-      tableScroll.style.display = 'none';
-      sumArea.style.display = 'none';
-      saveArea.style.display = 'none';
-      body.innerHTML = '';
-      return;
-    }
-
-    empty.style.display = 'none';
-    tableScroll.style.display = 'block';
-    sumArea.style.display = 'block';
-    saveArea.style.display = 'block';
-
-    const fragment = document.createDocumentFragment();
-
-    for (const stock of stocks) {
-      const display = StockCalculator.formatStockDisplay(stock);
-      const row = document.createElement('div');
-      row.className = 'stock-table__row';
-      row.dataset.id = stock.id;
-
-      row.innerHTML = `
-        <div class="stock-table__cell stock-table__cell--sticky">
-          <div class="stock-symbol">${display.symbol}</div>
-        </div>
-        <div class="stock-table__cell">
-          <div class="stock-qty">${display.qty}</div>
-          <div class="stock-qty__sub" title="${display.avgPrice}">${display.avgPrice}</div>
-        </div>
-        <div class="stock-table__cell stock-price ${display.priceClass}">${display.price}</div>
-        <div class="stock-table__cell stock-chgp ${display.chgpClass}">${display.chgp}</div>
-        <div class="stock-table__cell stock-chg ${display.chgClass}">${display.chg}</div>
-        <div class="stock-table__cell stock-today-pnl ${display.todayPnlClass}">${display.todayPnl}</div>
-        <div class="stock-table__cell stock-total ${display.totalClass}">${display.totalHtml}</div>
-        <div class="stock-table__cell stock-table__cell--actions">
-          <button type="button" class="neu-btn stock-table__action-btn" data-action="edit" data-id="${stock.id}" aria-label="編輯 ${display.symbol}">✎</button>
-          <button type="button" class="neu-btn stock-table__action-btn" data-action="delete" data-id="${stock.id}" aria-label="刪除 ${display.symbol}">✕</button>
-        </div>
-      `;
-
-      fragment.appendChild(row);
-    }
-
-    body.innerHTML = '';
-    body.appendChild(fragment);
-  }
-
-  /** 更新單行數據（增量更新） */
-  updateStockRow(stock) {
-    const row = document.querySelector(`.stock-table__row[data-id="${stock.id}"]`);
-    if (!row) return;
-
-    const display = StockCalculator.formatStockDisplay(stock);
-
-    // 添加更新動畫
-    row.classList.add('is-updating');
-    setTimeout(() => row.classList.remove('is-updating'), 500);
-
-    const cells = row.querySelectorAll('.stock-table__cell');
-    cells[1].innerHTML = `<div class="stock-qty">${display.qty}</div><div class="stock-qty__sub" title="${display.avgPrice}">${display.avgPrice}</div>`;
-    cells[2].textContent = display.price;
-    cells[2].className = `stock-table__cell stock-price ${display.priceClass}`;
-    cells[3].textContent = display.chgp;
-    cells[3].className = `stock-table__cell stock-chgp ${display.chgpClass}`;
-    cells[4].textContent = display.chg;
-    cells[4].className = `stock-table__cell stock-chg ${display.chgClass}`;
-    cells[5].textContent = display.todayPnl;
-    cells[5].className = `stock-table__cell stock-today-pnl ${display.todayPnlClass}`;
-    cells[6].innerHTML = display.totalHtml;
-    cells[6].className = `stock-table__cell stock-total ${display.totalClass}`;
-  }
-
-  /** 更新摘要 */
-  updateSummary(stocks) {
-    let pnl = 0, asset = 0, totalUnPnl = 0;
-    let hasUnPnl = false;
-
-    for (const s of stocks) {
-      const shares = StockCalculator.getShares(s.displayQty, s.displayUnit);
-      const p = s.price ?? 0;
-      const c = s.change ?? 0;
-      pnl += Math.round(shares * c);
-      asset += Math.round(shares * p);
-      if (s.buyPrice != null && s.price != null && s.buyPrice > 0) {
-        totalUnPnl += Math.round((s.price - s.buyPrice) * shares);
-        hasUnPnl = true;
-      }
-    }
-
-    const pnlEl = this.elements.totalPnl;
-    pnlEl.textContent = Utils.formatSigned(pnl);
-    pnlEl.className = 'summary__value ' + (pnl >= 0 ? 'text-up' : 'text-down');
-
-    const assetEl = this.elements.totalAsset;
-    assetEl.textContent = Utils.formatSigned(asset);
-    assetEl.className = 'summary__value text-neutral';
-
-    const unPnlEl = this.elements.totalUnrealized;
-    if (hasUnPnl) {
-      unPnlEl.textContent = Utils.formatSigned(totalUnPnl);
-      unPnlEl.className = 'summary__value ' + (totalUnPnl >= 0 ? 'text-up' : 'text-down');
-    } else {
-      unPnlEl.textContent = '—';
-      unPnlEl.className = 'summary__value text-neutral';
-    }
-  }
-
-  /** 渲染歷史記錄 */
-  renderHistory(records) {
-    const body = this.elements.historyBody;
-    if (records.length === 0) {
-      body.innerHTML = '<div class="hist-empty">尚無記錄</div>';
-      return;
-    }
-
-    const fragment = document.createDocumentFragment();
-    for (const r of records) {
-      const item = document.createElement('div');
-      item.className = 'hist-item neu-panel';
-      item.innerHTML = `
-        <div class="hist-item__left">
-          <span class="hist-item__date">${r.date} ${r.time}</span>
-          <span class="hist-item__value ${r.totalPnl >= 0 ? 'text-up' : 'text-down'}">${Utils.formatSigned(r.totalPnl)}</span>
-        </div>
-        <button type="button" class="neu-btn hist-item__delete" data-action="delete-history" data-timestamp="${r.timestamp}" aria-label="刪除 ${r.date} 記錄">刪除</button>
-      `;
-      fragment.appendChild(item);
-    }
-    body.innerHTML = '';
-    body.appendChild(fragment);
-  }
-
-  /** 渲染指數 */
-  renderIndices(indices, isOffline = false) {
-    const container = document.getElementById('idxScrollContainer');
-    // 保留第一個（台灣加權）
-    const firstCard = container.querySelector('.idx-card');
-    container.innerHTML = '';
-    if (firstCard) container.appendChild(firstCard);
-
-    const offlineTag = isOffline ? '<span class="idx-card__offline-badge">(離線)</span>' : '';
-
-    for (const item of indices) {
-      const matched = CONFIG.AVAILABLE_INDICES.find(idx => idx.symbol === item.symbol);
-      const displayName = matched ? matched.name : item.name;
-      const sign = item.pct >= 0 ? '+' : '';
-      const cls = item.pct >= 0 ? 'text-up' : 'text-down';
-
-      const card = document.createElement('article');
-      card.className = 'idx-card';
-      card.innerHTML = `
-        <div class="idx-card__name">${displayName}${offlineTag}</div>
-        <div class="idx-card__price">${item.price.toLocaleString('en-US', { maximumFractionDigits: 2 })}</div>
-        <div class="idx-card__change ${cls}">
-          <span>${sign}${item.changeAmt.toFixed(2)}</span>
-          <span>(${sign}${item.pct.toFixed(2)}%)</span>
-        </div>
-        <div class="idx-card__source">via Yahoo ${isOffline ? 'Cache' : ''}</div>
-      `;
-      container.appendChild(card);
-    }
-  }
-
-  /** 更新台灣加權指數 */
-  updateWeightedIndex(data) {
-    if (!data) return;
-    this.elements.idxPrice.textContent = data.price.toLocaleString('en-US', { maximumFractionDigits: 0 });
-    this.elements.idxChange.textContent = (data.change >= 0 ? '+' : '') + data.change.toFixed(2);
-    this.elements.idxChange.className = data.change >= 0 ? 'text-up' : 'text-down';
-    this.elements.idxPct.textContent = '(' + (data.changePercent >= 0 ? '+' : '') + data.changePercent.toFixed(2) + '%)';
-    this.elements.idxPct.className = data.changePercent >= 0 ? 'text-up' : 'text-down';
-    this.elements.idxSource.textContent = 'via ' + data.source + ' ' + Utils.getTimeString();
-  }
-
-  /** 渲染 API 統計 */
-  renderApiStats(stats) {
-    const el = this.elements.apiStatsBox;
-    if (!el) return;
-    el.innerHTML = `
-      <div><div class="api-stats__value">${stats.fugle}</div><div>Fugle</div></div>
-      <div><div class="api-stats__value">${stats.yahoo}</div><div>Yahoo</div></div>
-    `;
-  }
-
-  /** 更新 Key 狀態 */
-  updateKeyStatus(fugleKey, secondFugleKey) {
-    const updateStatus = (id, val) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      if (val && val.trim()) {
-        el.textContent = '✓ 已設定';
-        el.className = 'key-status is-ok';
-      } else {
-        el.textContent = '未設定';
-        el.className = 'key-status is-none';
-      }
-    };
-    updateStatus('fugleKeyStatus', fugleKey);
-    updateStatus('secondFugleKeyStatus', secondFugleKey);
-  }
-
-  /** 顯示/隱藏 Modal */
-  showModal(id) { document.getElementById(id).classList.add('is-open'); }
-  hideModal(id) { document.getElementById(id).classList.remove('is-open'); }
-
-  /** 切換摘要詳情 */
-  toggleSummary() {
-    const details = this.elements.summaryDetails;
-    const toggleBtn = this.elements.sumToggleBtn;
-    if (details.classList.contains('is-open')) {
-      details.classList.remove('is-open');
-      toggleBtn.style.display = 'block';
-    } else {
-      details.classList.add('is-open');
-      toggleBtn.style.display = 'none';
-    }
-  }
-
-  /** Toast 提示 */
-  showToast(msg) {
-    const toast = document.getElementById('toast');
-    toast.textContent = msg;
-    toast.classList.add('is-visible');
-    clearTimeout(this._toastTimer);
-    this._toastTimer = setTimeout(() => toast.classList.remove('is-visible'), 2000);
-  }
-
-  /** 應用主題 */
-  applyTheme(theme) {
-    const body = document.body;
-    const themeBtn = this.elements.themeBtn;
-    const metaTheme = document.getElementById('themeColorMeta');
-
-    body.className = '';
-    if (theme && theme !== 'light') {
-      body.classList.add(`theme-${theme}`);
-    }
-
-    themeBtn.textContent = CONFIG.THEME_ICONS[theme] || '🌙';
-    metaTheme.content = CONFIG.THEME_COLORS[theme] || '#e0e5ec';
+  const pe=document.getElementById('totalPnl');
+  if(pe) { pe.textContent=(pnl>=0?'+':'')+pnl.toLocaleString(); pe.className='val '+(pnl>=0?'up':'down'); }
+  const ae = document.getElementById('totalAsset');
+  if(ae) { ae.textContent = (asset>=0?'+':'')+asset.toLocaleString(); ae.className = 'val neutral'; }
+  const ue = document.getElementById('totalUnrealized');
+  if(ue) {
+    if(hasUnPnl) { ue.textContent = (totalUnPnl >= 0 ? '+' : '') + totalUnPnl.toLocaleString(); ue.className = 'val ' + (totalUnPnl >= 0 ? 'up' : 'down'); }
+    else { ue.textContent = '—'; ue.className = 'val neutral'; }
   }
 }
 
-/**
- * 🎯 主應用控制器
- */
-class StockPortfolioApp {
-  constructor() {
-    this.store = new DataStore();
-    this.priceService = new PriceService(this.store);
-    this.ui = new UIRenderer();
+function toggleSummary(e) {
+  if(e) e.stopPropagation();
+  const details = document.getElementById('summaryDetails'); 
+  const toggleBtn = document.getElementById('sumToggleBtn');
+  if(!details || !toggleBtn) return;
+  if (details.style.display === 'none') { details.style.display = 'block'; toggleBtn.style.display = 'none'; }
+  else { details.style.display = 'none'; toggleBtn.style.display = 'block'; }
+}
 
-    this.currentTab = 0;
-    this.tabStocks = Array.from({ length: CONFIG.MAX_TABS }, () => []);
-    this.tabRecords = Array.from({ length: CONFIG.MAX_TABS }, () => []);
-    this.tabNames = ['分頁 1', '分頁 2', '分頁 3', '分頁 4', '分頁 5'];
-    this.tabCount = 3;
-    this.currentTheme = 'light';
-    this.pollTimer = null;
-    this.currentInterval = 30000;
+function addStock(){
+  let sym=document.getElementById('symInput')?.value?.trim().toUpperCase() || '';
+  sym = sym.replace(/[^A-Z0-9]/g, '');
+  const qty=parseInt(document.getElementById('qtyInput')?.value || '0');
+  const unit=document.getElementById('unitSelect')?.value || '張';
+  const bpRaw = document.getElementById('buyPriceInput')?.value || ''; 
+  const bp = parseFloat(bpRaw);
+  const buyPrice = isNaN(bp) || bp <= 0 ? null : bp;
+  if(!sym||!qty||qty<1){showToast('請輸入代號與數量');return}
+  const currentStocks = tabStocks[currentTab];
+  if(currentStocks.some(s=>s.symbol===sym)){showToast('該股票已存在於此分頁');return}
+  const id='s_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+  currentStocks.push({id,symbol:sym,displayQty:qty,displayUnit:unit,buyPrice:buyPrice,shares:unit==='張'?qty*1000:qty,price:null,change:null,changePercent:null});
+  saveHoldings();renderAll();
+  const symInp = document.getElementById('symInput');
+  const qtyInp = document.getElementById('qtyInput');
+  const bpInp = document.getElementById('buyPriceInput');
+  if(symInp) symInp.value=''; 
+  if(qtyInp) qtyInp.value=''; 
+  if(bpInp) bpInp.value='';
+  showToast('已新增 '+sym);refreshPrices();
+}
 
-    this._boundHandlers = {};
-    this._init();
+function deleteStock(id){
+  if(!confirm('確定刪除？'))return;
+  tabStocks[currentTab]=tabStocks[currentTab].filter(s=>s.id!==id);saveHoldings();renderAll();showToast('記錄已刪除');
+}
+
+function openEditModal(id) {
+  const s = tabStocks[currentTab].find(x => x.id === id);
+  if (!s) return;
+  document.getElementById('editId').value = s.id;
+  document.getElementById('editSymInput').value = s.symbol;
+  document.getElementById('editQtyInput').value = s.displayQty;
+  document.getElementById('editUnitSelect').value = s.displayUnit;
+  document.getElementById('editBuyPriceInput').value = s.buyPrice || '';
+  document.getElementById('editModalOverlay').classList.add('show');
+}
+
+function closeEditModal() { document.getElementById('editModalOverlay').classList.remove('show'); }
+
+function saveEditStock() {
+  const id = document.getElementById('editId')?.value;
+  if(!id) return;
+  const s = tabStocks[currentTab].find(x => x.id === id);
+  if (!s) return;
+  const ns = (document.getElementById('editSymInput')?.value || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (ns) { s.symbol = ns; s.price = null; s.change = null; s.changePercent = null; s.source = null; s.updateTime = null; }
+  const nq = parseInt(document.getElementById('editQtyInput')?.value || '0');
+  if (nq > 0) { s.displayQty = nq; s.shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty; }
+  s.displayUnit = document.getElementById('editUnitSelect')?.value || '張';
+  s.shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
+  const nbp = document.getElementById('editBuyPriceInput')?.value || ''; 
+  const bpNum = parseFloat(nbp);
+  s.buyPrice = (isNaN(bpNum) || bpNum <= 0) ? null : bpNum;
+  saveHoldings(); renderAll(); closeEditModal(); showToast('已修改'); refreshPrices();
+}
+
+function saveDailyPnl(){
+  let pnl=0,asset=0; 
+  const currentStocks = tabStocks[currentTab];
+  for(const s of currentStocks){
+    const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
+    let p=s.price??0, c=s.change??0; pnl += Math.round(sh * c); asset += Math.round(sh * p);
   }
+  const n=new Date();
+  const ds=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
+  const ts=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  const currentRecords = tabRecords[currentTab];
+  currentRecords.unshift({date:ds,time:ts,totalPnl:pnl,totalAsset:asset,timestamp:n.getTime()});
+  if(currentRecords.length>50) tabRecords[currentTab]=currentRecords.slice(0,50);
+  saveRecords();renderHistory(); showToast('已存儲今日損益：'+(pnl>=0?'+':'')+pnl.toLocaleString());
+}
 
-  /** 初始化 */
-  _init() {
-    this._loadState();
-    this._bindEvents();
-    this._renderAll();
-    this._startPolling();
+function deleteHistory(timestamp) {
+  if(!confirm('確定刪除此筆記錄？')) return;
+  tabRecords[currentTab] = tabRecords[currentTab].filter(r => r.timestamp !== timestamp);
+  saveRecords();renderHistory();showToast('記錄已刪除');
+}
 
-    // 延遲首次刷新
-    setTimeout(() => this._refreshPrices(), 300);
-  }
+function openModal(){
+  const fkInp = document.getElementById('fugleKeyInput');
+  const sfkInp = document.getElementById('secondFugleKeyInput');
+  const tcSel = document.getElementById('tabCountSelect');
+  if(fkInp) fkInp.value=fugleKey;
+  if(sfkInp) sfkInp.value=secondFugleKey;
+  if(tcSel) tcSel.value=tabCount;
+  updateKeyStatus(); renderApiStats(); 
+  document.getElementById('modalOverlay').classList.add('show');
+}
 
-  /** 載入狀態 */
-  _loadState() {
-    this.currentTab = parseInt(this.store.get(CONFIG.STORAGE_KEYS.CURRENT_TAB, '0'));
-    this.tabNames = this.store.getJSON(CONFIG.STORAGE_KEYS.TAB_NAMES, this.tabNames);
-    this.tabCount = parseInt(this.store.get(CONFIG.STORAGE_KEYS.TAB_COUNT, '3'));
-    this.currentTheme = this.store.get(CONFIG.STORAGE_KEYS.THEME, 'light');
+function closeModal() { 
+  const mo = document.getElementById('modalOverlay');
+  if(mo) mo.classList.remove('show'); 
+}
 
-    for (let i = 0; i < CONFIG.MAX_TABS; i++) {
-      this.tabStocks[i] = this.store.getJSON(CONFIG.STORAGE_KEYS.getStockKey(i), []);
-      this.tabRecords[i] = this.store.getJSON(CONFIG.STORAGE_KEYS.getRecordKey(i), []);
-    }
+function saveAndCloseModal(){
+  saveKeys(); saveTabCount(); globalKeyRotator = null; 
+  closeModal(); showToast('設定已儲存'); refreshPrices(); 
+}
 
-    if (this.currentTab >= this.tabCount) this.currentTab = 0;
+function openManual() { document.getElementById('manualOverlay').classList.add('show'); }
+function closeManual() { document.getElementById('manualOverlay').classList.remove('show'); }
 
-    this.ui.applyTheme(this.currentTheme);
-  }
+function formatPrice(p){
+  if(p==null)return '—';
+  if(Math.abs(p)>=1000)return p.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  return p.toFixed(2);
+}
 
-  /** 保存持股 */
-  _saveHoldings() {
-    this.store.setJSON(CONFIG.STORAGE_KEYS.getStockKey(this.currentTab), this.tabStocks[this.currentTab]);
-  }
+let toastTimer=null;
+function showToast(msg){ 
+  const t=document.getElementById('toast');
+  if(!t) return;
+  t.textContent=msg; t.classList.add('show'); 
+  clearTimeout(toastTimer); 
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2000); 
+}
 
-  /** 保存記錄 */
-  _saveRecords() {
-    this.store.setJSON(CONFIG.STORAGE_KEYS.getRecordKey(this.currentTab), this.tabRecords[this.currentTab]);
-  }
+function exportData() {
+  const dataToExport = {
+    tabStocks: [safeGetItem(getStockKey(0),''), safeGetItem(getStockKey(1),''), safeGetItem(getStockKey(2),''), safeGetItem(getStockKey(3),''), safeGetItem(getStockKey(4),'')],
+    tabRecords: [safeGetItem(getRecordKey(0),''), safeGetItem(getRecordKey(1),''), safeGetItem(getRecordKey(2),''), safeGetItem(getRecordKey(3),''), safeGetItem(getRecordKey(4),'')],
+    tabNames: safeGetItem(TN_KEY,''), fugleKey: safeGetItem(FK,''), secondFugleKey: safeGetItem(SFK,''), theme: safeGetItem(TK,''), tabCount: safeGetItem(TC_KEY,'')
+  };
+  const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const downloadAnchorElement = document.createElement('a');
+  const d = new Date(); 
+  const dateString = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+  downloadAnchorElement.setAttribute("href", url); 
+  downloadAnchorElement.setAttribute("download", "stock_backup_" + dateString + ".json");
+  document.body.appendChild(downloadAnchorElement); 
+  downloadAnchorElement.click(); 
+  document.body.removeChild(downloadAnchorElement); 
+  URL.revokeObjectURL(url);
+  showToast('✅ 備份檔案已成功下載');
+}
 
-  /** 保存所有狀態 */
-  _saveAll() {
-    this._saveHoldings();
-    this.store.set(CONFIG.STORAGE_KEYS.CURRENT_TAB, String(this.currentTab));
-    this.store.setJSON(CONFIG.STORAGE_KEYS.TAB_NAMES, this.tabNames);
-    this.store.set(CONFIG.STORAGE_KEYS.TAB_COUNT, String(this.tabCount));
-    this.store.set(CONFIG.STORAGE_KEYS.THEME, this.currentTheme);
-  }
+function triggerImport() { document.getElementById('importFile').click(); }
 
-  /** 事件綁定 */
-  _bindEvents() {
-    // 新增持股
-    this._boundHandlers.addStock = () => this.addStock();
-    document.getElementById('addStockBtn').addEventListener('click', this._boundHandlers.addStock);
-
-    // 輸入框 Enter 鍵
-    document.getElementById('symInput').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); }
-    });
-    document.getElementById('qtyInput').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); document.getElementById('buyPriceInput').focus(); }
-    });
-    document.getElementById('buyPriceInput').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') { e.preventDefault(); this.addStock(); }
-    });
-
-    // 主題切換
-    this._boundHandlers.toggleTheme = () => this.toggleTheme();
-    document.getElementById('themeBtn').addEventListener('click', this._boundHandlers.toggleTheme);
-
-    // 進階設定
-    this._boundHandlers.openModal = () => this.openModal();
-    document.getElementById('advSettingsBtn').addEventListener('click', this._boundHandlers.openModal);
-    document.getElementById('modalCloseBtn').addEventListener('click', () => this.ui.hideModal('modalOverlay'));
-    document.getElementById('saveSettingsBtn').addEventListener('click', () => this.saveSettings());
-
-    // Modal 點擊外部關閉
-    document.getElementById('modalOverlay').addEventListener('click', (e) => {
-      if (e.target === e.currentTarget) this.ui.hideModal('modalOverlay');
-    });
-    document.getElementById('manualOverlay').addEventListener('click', (e) => {
-      if (e.target === e.currentTarget) this.ui.hideModal('manualOverlay');
-    });
-    document.getElementById('editModalOverlay').addEventListener('click', (e) => {
-      if (e.target === e.currentTarget) this.ui.hideModal('editModalOverlay');
-    });
-
-    // 使用說明
-    document.getElementById('openManualBtn').addEventListener('click', () => this.ui.showModal('manualOverlay'));
-    document.getElementById('closeManualBtn').addEventListener('click', () => this.ui.hideModal('manualOverlay'));
-
-    // Key 顯示切換
-    document.getElementById('keyToggle1').addEventListener('click', () => this.toggleKeyVisibility('fugleKeyInput', 'keyToggle1'));
-    document.getElementById('keyToggle2').addEventListener('click', () => this.toggleKeyVisibility('secondFugleKeyInput', 'keyToggle2'));
-
-    // 備份
-    document.getElementById('exportBtn').addEventListener('click', () => this.exportData());
-    document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
-    document.getElementById('importFile').addEventListener('change', (e) => this.importData(e));
-
-    // 編輯 Modal
-    document.getElementById('saveEditBtn').addEventListener('click', () => this.saveEditStock());
-    document.getElementById('cancelEditBtn').addEventListener('click', () => this.ui.hideModal('editModalOverlay'));
-
-    // 存儲損益
-    document.getElementById('saveArea').addEventListener('click', () => this.saveDailyPnl());
-
-    // 摘要切換
-    this.elements.summaryToggleArea = document.getElementById('summaryToggleArea');
-    this.elements.summaryToggleArea.addEventListener('click', () => this.ui.toggleSummary());
-    document.getElementById('sumCollapseBtn').addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.ui.toggleSummary();
-    });
-
-    // 表格事件委派
-    document.getElementById('stockTableBody').addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-action]');
-      if (!btn) return;
-      const action = btn.dataset.action;
-      const id = btn.dataset.id;
-      const timestamp = btn.dataset.timestamp;
-
-      if (action === 'edit') this.openEditModal(id);
-      else if (action === 'delete') this.deleteStock(id);
-      else if (action === 'delete-history') this.deleteHistory(parseInt(timestamp));
-    });
-
-    // 歷史記錄事件委派
-    document.getElementById('historyBody').addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-action="delete-history"]');
-      if (!btn) return;
-      this.deleteHistory(parseInt(btn.dataset.timestamp));
-    });
-  }
-
-  /** 渲染所有 UI */
-  _renderAll() {
-    this.ui.renderTabs(this.tabCount, this.currentTab, this.tabNames, 
-      (idx) => this.switchTab(idx), 
-      (idx) => this.renameTab(idx)
-    );
-    this.ui.renderStockList(this.tabStocks[this.currentTab]);
-    this.ui.updateSummary(this.tabStocks[this.currentTab]);
-    this.ui.renderHistory(this.tabRecords[this.currentTab]);
-  }
-
-  /** 切換分頁 */
-  switchTab(tabIndex) {
-    if (this.currentTab === tabIndex) return;
-    this.currentTab = tabIndex;
-    this.store.set(CONFIG.STORAGE_KEYS.CURRENT_TAB, String(tabIndex));
-    this._renderAll();
-    this._refreshPrices();
-  }
-
-  /** 重命名分頁 */
-  renameTab(tabIndex) {
-    const oldName = this.tabNames[tabIndex] || `分頁 ${tabIndex + 1}`;
-    const newName = prompt('請輸入此分頁的新名稱：', oldName);
-    if (newName !== null) {
-      const finalName = newName.trim() === '' ? `分頁 ${tabIndex + 1}` : newName.trim();
-      this.tabNames[tabIndex] = finalName;
-      this.store.setJSON(CONFIG.STORAGE_KEYS.TAB_NAMES, this.tabNames);
-      this.ui.renderTabs(this.tabCount, this.currentTab, this.tabNames,
-        (idx) => this.switchTab(idx),
-        (idx) => this.renameTab(idx)
-      );
-      this.ui.showToast(`已更名為「${finalName}」`);
-    }
-  }
-
-  /** 切換主題 */
-  toggleTheme() {
-    const currentIdx = CONFIG.THEMES.indexOf(this.currentTheme);
-    const nextIdx = (currentIdx + 1) % CONFIG.THEMES.length;
-    this.currentTheme = CONFIG.THEMES[nextIdx];
-    this.ui.applyTheme(this.currentTheme);
-    this.store.set(CONFIG.STORAGE_KEYS.THEME, this.currentTheme);
-  }
-
-  /** 新增持股 */
-  addStock() {
-    const symInput = document.getElementById('symInput');
-    const qtyInput = document.getElementById('qtyInput');
-    const unitSelect = document.getElementById('unitSelect');
-    const buyPriceInput = document.getElementById('buyPriceInput');
-
-    let sym = symInput.value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-    const qty = parseInt(qtyInput.value);
-    const unit = unitSelect.value;
-    const bp = parseFloat(buyPriceInput.value);
-    const buyPrice = isNaN(bp) || bp <= 0 ? null : bp;
-
-    if (!sym || !qty || qty < 1) {
-      this.ui.showToast('請輸入代號與數量');
-      return;
-    }
-
-    const currentStocks = this.tabStocks[this.currentTab];
-    if (currentStocks.some(s => s.symbol === sym)) {
-      this.ui.showToast('該股票已存在於此分頁');
-      return;
-    }
-
-    const id = Utils.generateId();
-    currentStocks.push({
-      id, symbol: sym, displayQty: qty, displayUnit: unit,
-      buyPrice, shares: unit === '張' ? qty * 1000 : qty,
-      price: null, change: null, changePercent: null, source: null
-    });
-
-    this._saveHoldings();
-    this._renderAll();
-    symInput.value = '';
-    qtyInput.value = '';
-    buyPriceInput.value = '';
-    this.ui.showToast('已新增 ' + sym);
-    this._refreshPrices();
-  }
-
-  /** 刪除持股 */
-  deleteStock(id) {
-    if (!confirm('確定刪除？')) return;
-    this.tabStocks[this.currentTab] = this.tabStocks[this.currentTab].filter(s => s.id !== id);
-    this._saveHoldings();
-    this._renderAll();
-    this.ui.showToast('記錄已刪除');
-  }
-
-  /** 開啟編輯 */
-  openEditModal(id) {
-    const s = this.tabStocks[this.currentTab].find(x => x.id === id);
-    if (!s) return;
-    document.getElementById('editId').value = s.id;
-    document.getElementById('editSymInput').value = s.symbol;
-    document.getElementById('editQtyInput').value = s.displayQty;
-    document.getElementById('editUnitSelect').value = s.displayUnit;
-    document.getElementById('editBuyPriceInput').value = s.buyPrice || '';
-    this.ui.showModal('editModalOverlay');
-  }
-
-  /** 保存編輯 */
-  saveEditStock() {
-    const id = document.getElementById('editId').value;
-    const s = this.tabStocks[this.currentTab].find(x => x.id === id);
-    if (!s) return;
-
-    const ns = document.getElementById('editSymInput').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-    if (ns) {
-      s.symbol = ns;
-      s.price = null; s.change = null; s.changePercent = null; s.source = null;
-    }
-
-    const nq = parseInt(document.getElementById('editQtyInput').value);
-    if (nq > 0) {
-      s.displayQty = nq;
-      s.shares = s.displayUnit === '張' ? nq * 1000 : nq;
-    }
-
-    s.displayUnit = document.getElementById('editUnitSelect').value;
-    s.shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
-
-    const nbp = parseFloat(document.getElementById('editBuyPriceInput').value);
-    s.buyPrice = (isNaN(nbp) || nbp <= 0) ? null : nbp;
-
-    this._saveHoldings();
-    this._renderAll();
-    this.ui.hideModal('editModalOverlay');
-    this.ui.showToast('已修改');
-    this._refreshPrices();
-  }
-
-  /** 存儲今日損益 */
-  saveDailyPnl() {
-    let pnl = 0, asset = 0;
-    const currentStocks = this.tabStocks[this.currentTab];
-    for (const s of currentStocks) {
-      const sh = StockCalculator.getShares(s.displayQty, s.displayUnit);
-      const p = s.price ?? 0;
-      const c = s.change ?? 0;
-      pnl += Math.round(sh * c);
-      asset += Math.round(sh * p);
-    }
-
-    const now = new Date();
-    const record = {
-      date: Utils.getTodayString(),
-      time: Utils.getTimeString(),
-      totalPnl: pnl,
-      totalAsset: asset,
-      timestamp: now.getTime()
-    };
-
-    this.tabRecords[this.currentTab].unshift(record);
-    if (this.tabRecords[this.currentTab].length > CONFIG.MAX_HISTORY) {
-      this.tabRecords[this.currentTab] = this.tabRecords[this.currentTab].slice(0, CONFIG.MAX_HISTORY);
-    }
-
-    this._saveRecords();
-    this.ui.renderHistory(this.tabRecords[this.currentTab]);
-    this.ui.showToast('已存儲今日損益：' + Utils.formatSigned(pnl));
-  }
-
-  /** 刪除歷史 */
-  deleteHistory(timestamp) {
-    if (!confirm('確定刪除此筆記錄？')) return;
-    this.tabRecords[this.currentTab] = this.tabRecords[this.currentTab].filter(r => r.timestamp !== timestamp);
-    this._saveRecords();
-    this.ui.renderHistory(this.tabRecords[this.currentTab]);
-    this.ui.showToast('記錄已刪除');
-  }
-
-  /** 打開設定 Modal */
-  openModal() {
-    const fugleKey = this.store.get(CONFIG.STORAGE_KEYS.FUGLE_KEY, '');
-    const secondKey = this.store.get(CONFIG.STORAGE_KEYS.SECOND_FUGLE_KEY, '');
-    document.getElementById('fugleKeyInput').value = fugleKey;
-    document.getElementById('secondFugleKeyInput').value = secondKey;
-    document.getElementById('tabCountSelect').value = this.tabCount;
-    this.ui.updateKeyStatus(fugleKey, secondKey);
-    this.ui.renderApiStats(this.store.getApiStats());
-    this.ui.showModal('modalOverlay');
-  }
-
-  /** 保存設定 */
-  saveSettings() {
-    const fugleKey = document.getElementById('fugleKeyInput').value.trim();
-    const secondKey = document.getElementById('secondFugleKeyInput').value.trim();
-    const newCount = parseInt(document.getElementById('tabCountSelect').value);
-
-    this.store.set(CONFIG.STORAGE_KEYS.FUGLE_KEY, fugleKey);
-    this.store.set(CONFIG.STORAGE_KEYS.SECOND_FUGLE_KEY, secondKey);
-
-    if (newCount !== this.tabCount) {
-      this.tabCount = newCount;
-      this.store.set(CONFIG.STORAGE_KEYS.TAB_COUNT, String(newCount));
-      if (this.currentTab >= this.tabCount) {
-        this.currentTab = 0;
-        this.store.set(CONFIG.STORAGE_KEYS.CURRENT_TAB, '0');
+function importData(event) {
+  const file = event.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if(confirm('⚠️ 警告：這將會覆蓋您目前的所有資料！\n確定要還原備份嗎？')) {
+        if (data.tabStocks) { data.tabStocks.forEach((val, i) => { if(val) safeSetItem(getStockKey(i), val); }); }
+        if (data.tabRecords) { data.tabRecords.forEach((val, i) => { if(val) safeSetItem(getRecordKey(i), val); }); }
+        if (data.tabNames) safeSetItem(TN_KEY, data.tabNames);
+        if (data.fugleKey) safeSetItem(FK, data.fugleKey);
+        if (data.secondFugleKey) safeSetItem(SFK, data.secondFugleKey);
+        if (data.theme) safeSetItem(TK, data.theme);
+        if (data.tabCount) safeSetItem(TC_KEY, data.tabCount);
+        alert('🎉 備份還原成功！'); location.reload();
       }
-    }
+    } catch (err) { alert('❌ 檔案格式錯誤，無法還原資料。'); }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
 
-    this.priceService.keyRotator = null; // 重置輪轉器
-    this.ui.hideModal('modalOverlay');
-    this.ui.showToast('設定已儲存');
-    this._renderAll();
-    this._refreshPrices();
-  }
+async function refresh(){await refreshPrices()}
 
-  /** 切換密碼顯示 */
-  toggleKeyVisibility(inputId, btnId) {
-    const input = document.getElementById(inputId);
-    const btn = document.getElementById(btnId);
-    if (input.type === 'password') {
-      input.type = 'text';
-      btn.textContent = '🙈';
-    } else {
-      input.type = 'password';
-      btn.textContent = '👁';
-    }
-  }
+/* ========================================================= 🚀 安全初始化 ========================================================= */
 
-  /** 匯出數據 */
-  exportData() {
-    const data = this.store.exportAll();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const d = new Date();
-    const dateStr = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
-    a.href = url;
-    a.download = `stock_backup_${dateStr}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    this.ui.showToast('✅ 備份檔案已成功下載');
-  }
-
-  /** 匯入數據 */
-  importData(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const data = JSON.parse(e.target.result);
-        if (confirm('⚠️ 警告：這將會覆蓋您目前的所有資料！\n確定要還原備份嗎？')) {
-          this.store.importAll(data);
-          alert('🎉 備份還原成功！');
-          location.reload();
-        }
-      } catch (err) {
-        alert('❌ 檔案格式錯誤，無法還原資料。');
-      }
-      event.target.value = '';
-    };
-    reader.readAsText(file);
-  }
-
-  /** 調整輪詢間隔 */
-  _adjustInterval(hasError) {
-    const kr = this.priceService._getRotator();
-    const keyCount = kr.count;
-    let newInterval = this.currentInterval;
-
-    if (this.priceService.shouldPause()) {
-      newInterval = 300000;
-    } else if (!Utils.isMarketOpen()) {
-      newInterval = 60000;
-    } else {
-      if (hasError) {
-        newInterval = keyCount === 2 ? 15000 : 30000;
-      } else {
-        newInterval = keyCount === 2 ? 10000 : 20000;
-      }
-    }
-
-    if (newInterval !== this.currentInterval) {
-      this.currentInterval = newInterval;
-      clearInterval(this.pollTimer);
-      this.pollTimer = setInterval(() => this._refreshPrices(), this.currentInterval);
-    }
-  }
-
-  /** 啟動輪詢 */
-  _startPolling() {
-    this.pollTimer = setInterval(() => this._refreshPrices(), this.currentInterval);
-  }
-
-  /** 刷新價格 */
-  async _refreshPrices() {
-    if (this.priceService.shouldPause()) {
-      console.log('API 暫停中，跳過本次更新');
-      return;
-    }
-
-    const isOffline = navigator.onLine === false;
-    if (isOffline) {
-      this.ui.showToast('目前處於離線狀態，顯示快取資料');
-    }
-
-    // 更新加權指數
-    const idxData = await this.priceService.fetchWeightedIndex();
-    if (idxData) this.ui.updateWeightedIndex(idxData);
-
-    // 更新國際指數
-    const globalIndices = await this.priceService.fetchGlobalIndices();
-    this.ui.renderIndices(globalIndices, isOffline);
-
-    // 更新個股
-    const currentStocks = this.tabStocks[this.currentTab];
-    if (currentStocks.length === 0) return;
-
-    const symbols = currentStocks.map(s => s.symbol);
-    const { results, hasError } = await this.priceService.batchUpdatePrices(symbols);
-
-    let hasUpdate = false;
-    for (const { sym, data } of results) {
-      if (data) {
-        currentStocks.filter(s => s.symbol === sym).forEach(s => {
-          s.price = data.price;
-          s.change = data.change;
-          s.changePercent = data.changePercent;
-          s.source = data.source;
-          s.updateTime = Utils.getTimeString();
-          this.ui.updateStockRow(s);
-          hasUpdate = true;
-        });
-      }
-    }
-
-    if (hasUpdate) {
-      this.ui.updateSummary(currentStocks);
-    }
-
-    this._adjustInterval(hasError);
-    this.ui.renderApiStats(this.store.getApiStats());
+function safeInit() {
+  try {
+    loadState();
+    renderAll();
+    renderHistory();
+    setTimeout(refresh, 300);
+    pollTimer = setInterval(refresh, currentInterval);
+  } catch(e) {
+    console.error('Initialization error:', e);
+    showToast('初始化失敗，請重新整理頁面');
   }
 }
 
-/* ========================================================= 🚀 啟動應用 ========================================================= */
+// 綁定事件（安全檢查元素存在）
+function bindEvents() {
+  const bind = (id, event, handler) => {
+    const el = document.getElementById(id);
+    if(el) el.addEventListener(event, handler);
+  };
 
-// 等待 DOM 就緒
-document.addEventListener('DOMContentLoaded', () => {
-  window.app = new StockPortfolioApp();
-  console.log('股票庫存管理 V5.0.0 (架構重構版) 已啟動');
-});
+  bind('addStockBtn', 'click', addStock);
+  bind('themeBtn', 'click', toggleTheme);
+  bind('advSettingsBtn', 'click', openModal);
+  bind('modalCloseBtn', 'click', closeModal);
+  bind('saveSettingsBtn', 'click', saveAndCloseModal);
+  bind('openManualBtn', 'click', openManual);
+  bind('closeManualBtn', 'click', closeManual);
+  bind('keyToggle1', 'click', () => toggleKeyVisibility('fugleKeyInput','keyToggle1'));
+  bind('keyToggle2', 'click', () => toggleKeyVisibility('secondFugleKeyInput','keyToggle2'));
+  bind('exportBtn', 'click', exportData);
+  bind('importBtn', 'click', triggerImport);
+  bind('importFile', 'change', importData);
+  bind('saveEditBtn', 'click', saveEditStock);
+  bind('cancelEditBtn', 'click', closeEditModal);
+  bind('saveArea', 'click', saveDailyPnl);
 
-// 註冊 Service Worker (如果存在)
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(err => {
-      console.log('SW registration failed:', err);
-    });
-  });
+  const summaryToggle = document.getElementById('summaryToggleArea');
+  if(summaryToggle) summaryToggle.addEventListener('click', toggleSummary);
+
+  const sumCollapse = document.getElementById('sumCollapseBtn');
+  if(sumCollapse) sumCollapse.addEventListener('click', (e) => { e.stopPropagation(); toggleSummary(); });
+
+  bind('symInput', 'keydown', (e) => { if(e.key==='Enter'){e.preventDefault();document.getElementById('qtyInput')?.focus();} });
+  bind('qtyInput', 'keydown', (e) => { if(e.key==='Enter'){e.preventDefault();document.getElementById('buyPriceInput')?.focus();} });
+  bind('buyPriceInput', 'keydown', (e) => { if(e.key==='Enter'){e.preventDefault();addStock();} });
+
+  const modalOverlay = document.getElementById('modalOverlay');
+  if(modalOverlay) modalOverlay.addEventListener('click', function(e){if(e.target===this)this.classList.remove('show')});
+
+  const manualOverlay = document.getElementById('manualOverlay');
+  if(manualOverlay) manualOverlay.addEventListener('click', function(e){if(e.target===this)this.classList.remove('show')});
+
+  const editModalOverlay = document.getElementById('editModalOverlay');
+  if(editModalOverlay) editModalOverlay.addEventListener('click', function(e){if(e.target===this)this.classList.remove('show')});
 }
+
+// DOM 就緒後初始化
+if(document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => { bindEvents(); safeInit(); });
+} else {
+  bindEvents(); safeInit();
+}
+
+console.log('股票庫存管理 V5.1.0 (修復版) 已啟動');
 </script>
 </body>
 </html>
