@@ -72,7 +72,7 @@ button:active, .tab-btn.active { transform: translateY(0); box-shadow: inset 4px
 .srow > div:nth-child(8) { flex-direction: row; align-items: center; justify-content: center; gap: 6px; padding-left: 14px; }
 .sym-container { align-items: flex-start !important; line-height: 1.1 !important; width: 100%; max-width: 100px; } /* max-width 同步縮小 */
 .srow .sym { font-weight: 800; font-size: 17px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; } /* 代號字體縮小至 17px */
-.sym-src { font-size: 11px; color: var(--t-muted); font-weight: normal; margin-top: 0px; text-align: left; width: 100%; max-width: 100px; overflow: visible; white-space: nowrap; } /* max-width 同步縮小 */
+ /* max-width 同步縮小 */
 .srow .qty-cell { font-weight: 600; color: var(--t-main); overflow: hidden; width: 100%; }
 .srow .price { font-weight: 700; }
 .srow .chgp { font-size: 17px; font-weight: 700; } /* 漲跌幅字體縮小至 17px */
@@ -184,7 +184,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   height: 100vh !important;
   max-height: 100vh !important;
   border-radius: 0;
-  padding: 60px 20px 20px !important; /* 上方保留空間給關閉按鈕 */
+  padding: 18px 20px 20px !important; /* 內容頂部與關閉按鈕對齊 */
   margin: 0 !important;
   border: none;
   box-sizing: border-box;
@@ -240,7 +240,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   .srow { font-size: 19px; } /* 平板數字縮小一階至 19px */
   .srow .sym { font-size: 19px; } /* 平板代號縮小一階至 19px */
   .srow .chgp { font-size: 19px; } /* 平板漲跌幅縮小一階至 19px */
-  .sym-src { font-size: 12px; max-width: 140px; }
+
   .srow .act button { padding: 8px 14px; font-size: 17px; }
   .sum-row .lab { font-size: 19px; }
   .sum-row .val { font-size: 24px; }
@@ -960,9 +960,7 @@ function renderRow(s){
   const symCont = el.querySelector('.sym-container');
   if(symCont){
     symCont.querySelector('.sym').textContent=s.symbol;
-    let srcEl = symCont.querySelector('.sym-src');
-    if(!srcEl){ srcEl = document.createElement('div'); srcEl.className = 'sym-src'; symCont.appendChild(srcEl); }
-    srcEl.textContent = '';
+    
   }
   const qn=el.querySelector('.qty-cell');
   if(qn){
@@ -1024,7 +1022,6 @@ function renderAll(){
         <div style="font-size:0.8em;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
       }
     }
-    let srcStr = '';
     div.innerHTML= '<div class="sym-container"><div class="sym">'+s.symbol+'</div></div>'+
     '<div class="qty-cell"><div style="line-height:1.2;font-size:inherit;">'+s.displayQty+' '+s.displayUnit+'</div><div style="font-size:0.8em;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'">'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'</div></div>'+
     '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+
