@@ -371,6 +371,16 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       </div>
     </div>
 
+        <div class="api-section" style="margin-top:20px;border-top:1px solid var(--s-dark);padding-top:20px;">
+      <div class="api-link-box" style="margin-bottom:12px;">
+        <span style="font-size:13px;color:var(--t-muted);font-weight:600;">☁️ 國際指數資料來源</span>
+      </div>
+      <div style="font-size:13px;color:var(--t-muted);line-height:1.6;padding:10px;background:var(--bg);border-radius:8px;box-shadow:inset 3px 3px 6px var(--s-dark),inset -3px -3px 6px var(--s-light);">
+        國際指數透過 Cloudflare Worker 代理 Yahoo Finance 即時資料，延遲約 5~13 秒。<br>
+        目前支援：道瓊、那斯達克、S&P 500、費城半導體、日經 225、韓國 KOSPI。
+      </div>
+    </div>
+
     <div class="backup-box">
       <div class="backup-title">資料備份與還原</div>
       <div class="backup-btns">
@@ -379,7 +389,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.0.1 (時間格式與說明優化版)</div>
+    <div class="v-box">核心版本：V4.1.0 (Worker 內建國際指數版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -441,12 +451,13 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       <h3>五、資料備份</h3>
       <p>您可以在進階設定中將庫存與歷史記錄匯出為 JSON 檔案，或從備份檔還原。建議定期備份，尤其在使用多個分頁管理大量資料時。</p>
 
-      <h3>六、國際指數與 Google 報價說明</h3>
-      <p>除了台股加權指數外，其他國際股市指數（如道瓊、那斯達克等）是透過 <strong>Google 試算表</strong> 的公開資料抓取。</p>
+      <h3>六、國際指數報價說明</h3>
+      <p>除了台股加權指數外，國際股市指數透過內建的 <strong>Cloudflare Worker 代理</strong> 直接抓取 Yahoo Finance 即時資料。</p>
       <ul>
-        <li><strong>為什麼不用 Fugle API？</strong> 因為 Fugle 的方案主要針對台股資料，若要取得國際指數需要相當昂貴的企業方案。使用 Google 試算表作為免費的替代方案。</li>
-        <li><strong>為什麼不是即時的？</strong> Google 試算表本身的資料就有<strong>大約 15 分鐘</strong>的延遲。此外，Google 伺服器會對公開發布的網頁進行快取（Cache）。</li>
-        <li><strong>更新頻率：</strong> 本系統設定為每 <strong>30 秒</strong>向 Google 發送一次請求，但實際上 Google 回傳的數據可能與真實市場有 15 分鐘以上的落差。這屬於免費資料源的先天限制。</li>
+        <li><strong>為什麼不用 Fugle API？</strong> Fugle 的方案主要針對台股資料，國際指數需企業方案。使用 Cloudflare Worker 代理 Yahoo Finance 作為免費替代方案。</li>
+        <li><strong>延遲有多低？</strong> Cloudflare Worker 在全球邊緣節點執行，延遲僅 <strong>50~200 毫秒</strong>。搭配快取機制，實際資料延遲約 <strong>5~13 秒</strong>。</li>
+        <li><strong>更新頻率：</strong> 每 <strong>10 秒</strong>更新一次，達到接近即時的效果。</li>
+        <li><strong>支援指數：</strong> 道瓊工業指數（^DJI）、那斯達克指數（^IXIC）、S&P 500（^GSPC）、費城半導體指數（^SOX）、日經 225（^N225）、韓國 KOSPI（^KS11）。</li>
       </ul>
 
       <h3>七、常見問題</h3>
@@ -585,7 +596,8 @@ function toggleKeyVisibility(inputId, btnId) {
 }
 
 
-let googleCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR65VYw1-a-i-uKJqR-SiC9XQ4O1IokgVoWCP35eH6rHLqNgk_A9ZFDDT8nniO5dzVLfPhS8m_9IfaA/pub?gid=0&single=true&output=csv';
+let cfWorkerUrl = 'https://yahoo-index-proxy.denis0521.workers.dev'; // Cloudflare Worker 已內建
+let cfWorkerIndices = '^DJI,^IXIC,^GSPC,^SOX,^N225,^KS11'; // 道瓊/那斯達克/S&P500/費半/日經/韓國
 let currentTab = 0;
 let tabStocks = [[], [], [], [], []];
 let tabRecords = [[], [], [], [], []];
@@ -611,6 +623,7 @@ function loadState(){
     const tc=localStorage.getItem(TC_KEY);if(tc) tabCount=parseInt(tc);
     const pauseUntil = localStorage.getItem('api_pause_until');
     if (pauseUntil) apiPauseUntil = parseInt(pauseUntil);
+    // cfWorkerUrl 已硬編碼，無需從 localStorage 載入
 
     for(let i=0; i<5; i++){
       const s=localStorage.getItem(getStockKey(i)); if(s) tabStocks[i]=JSON.parse(s);
@@ -748,37 +761,36 @@ function renderGlobalIndices(indices) {
         <span>${sign}${item.changeAmt.toFixed(2)}</span>
         <span>(${sign}${item.pct.toFixed(2)}%)</span>
       </div>
-      <div class="idx-box-src">via Google</div>`;
+      <div class="idx-box-src">via Yahoo</div>`;
     container.appendChild(card);
   });
 }
 
-async function fetchGlobalIndicesFromGoogle() {
-  if (!googleCsvUrl || googleCsvUrl.includes('2PACX-xxxxxxxxx')) return;
+async function fetchGlobalIndicesFromWorker() {
+  if (!cfWorkerUrl || cfWorkerUrl === '') return;
   if (navigator.onLine === false) return;
   try {
-    const response = await fetch(googleCsvUrl + '&cachebust=' + Date.now(), { signal: AbortSignal.timeout(API_TIMEOUT) });
-    if (!response.ok) throw new Error('Network error');
-    const text = await response.text();
-    const rows = text.split('\n').map(row => row.trim()).filter(row => row.length > 0);
-    const parsedIndices = [];
-    for (let i = 1; i < rows.length; i++) {
-      const columns = rows[i].split(','); if (columns.length < 3) continue;
-      const name = columns[0].replace(/"/g, '').trim(); const price = parseFloat(columns[1]);
-      let rawPctStr = columns[2].replace(/"/g, '').trim(); let pct = 0;
-      if (rawPctStr.includes('%')) { pct = parseFloat(rawPctStr.replace('%', '')); } else { pct = parseFloat(rawPctStr) * 100; }
-      if (isNaN(price) || isNaN(pct)) continue;
-      const originalClose = price / (1 + (pct / 100)); const changeAmt = price - originalClose;
-      parsedIndices.push({ name, price, pct, changeAmt });
-    }
-    if (parsedIndices.length > 0) {
+    const response = await fetch(`${cfWorkerUrl}/indices?symbols=${encodeURIComponent(cfWorkerIndices)}&_=${Date.now()}`, { 
+      signal: AbortSignal.timeout(API_TIMEOUT),
+      headers: { 'Accept': 'application/json' }
+    });
+    if (!response.ok) throw new Error(`Worker error: ${response.status}`);
+    const data = await response.json();
+    if (data.indices && data.indices.length > 0) {
+      const parsedIndices = data.indices.map(item => {
+        const price = item.price;
+        const changeAmt = item.change || 0;
+        const pct = item.changePercent || 0;
+        const name = item.name || item.symbol;
+        return { name, price, pct, changeAmt };
+      });
       cachedGlobalIndices = parsedIndices;
-      trackApiUsage('Google');
+      trackApiUsage('Yahoo');
       try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); localStorage.setItem('tw_indices_cache_time', String(Date.now())); } catch(e){}
       renderGlobalIndices(cachedGlobalIndices);
     }
   } catch (e) {
-    console.error("Google Index Fetch Error:", e);
+    console.error("Worker Index Fetch Error:", e);
     const cachedIdx = localStorage.getItem('tw_cached_indices');
     if (cachedIdx) { try { renderGlobalIndices(JSON.parse(cachedIdx)); } catch(e2) {} }
   }
@@ -896,7 +908,7 @@ async function refreshPrices(){
     idxPctEl.textContent='('+(idxR.changePercent>=0?'+':'')+idxR.changePercent.toFixed(2)+'%)'; idxPctEl.className=(idxR.changePercent>=0?'up':'down');
     idxSrcEl.textContent='via '+idxR.source+' '+new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'});
   }
-  fetchGlobalIndicesFromGoogle();
+  fetchGlobalIndicesFromWorker();
   const currentStocks = tabStocks[currentTab];
   if (currentStocks.length === 0) return;
   const uniqueSymbols = [...new Set(currentStocks.map(s => s.symbol))];
@@ -1247,7 +1259,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.0.1 已啟動 (時間格式與說明優化版)');
+console.log('股票庫存管理 V4.1.0 已啟動 (Worker 內建國際指數版)');
 </script>
 </body>
 </html>
