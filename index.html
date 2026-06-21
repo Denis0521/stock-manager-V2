@@ -451,7 +451,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 
       <h3>七、常見問題</h3>
       <ul>
-        <li><strong>為什麼 via Fugle 時間顯示有時不更新？</strong> 若價格沒有變動，Fugle API 可能不會回傳新時間戳。這不代表系統故障，而是市場暫無成交。</li>
+        <li><strong>為什麼時間戳顯示有時不更新？</strong> 若價格沒有變動，Fugle API 可能不會回傳新時間戳。這不代表系統故障，而是市場暫無成交。</li>
         <li><strong>可以同時開啟多個分頁看不同投資組合嗎？</strong> 可以，但請注意每個分頁的股票都會獨立計算 API 請求次數，建議兩組 Key 以上再這樣使用。</li>
         <li><strong>手機加入主畫面後可以離線使用嗎？</strong> 可以查看上次更新的價格與歷史記錄，但無法取得即時報價。離線時系統會自動暫停 API 更新。</li>
       </ul>
@@ -962,7 +962,7 @@ function renderRow(s){
     symCont.querySelector('.sym').textContent=s.symbol;
     let srcEl = symCont.querySelector('.sym-src');
     if(!srcEl){ srcEl = document.createElement('div'); srcEl.className = 'sym-src'; symCont.appendChild(srcEl); }
-    srcEl.textContent = (s.source==='Fugle' && s.updateTime) ? 'via Fugle '+s.updateTime : '';
+    srcEl.textContent = (s.source==='Fugle' && s.updateTime) ? s.updateTime : '';
   }
   const qn=el.querySelector('.qty-cell');
   if(qn){
@@ -1024,7 +1024,7 @@ function renderAll(){
         <div style="font-size:0.8em;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
       }
     }
-    let srcStr = (s.source==='Fugle' && s.updateTime) ? '<div class="sym-src">via Fugle '+s.updateTime+'</div>' : '<div class="sym-src"></div>';
+    let srcStr = (s.source==='Fugle' && s.updateTime) ? s.updateTime : '';
     div.innerHTML= '<div class="sym-container"><div class="sym">'+s.symbol+'</div>'+srcStr+'</div>'+
     '<div class="qty-cell"><div style="line-height:1.2;font-size:inherit;">'+s.displayQty+' '+s.displayUnit+'</div><div style="font-size:0.8em;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'">'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'</div></div>'+
     '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+
