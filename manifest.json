@@ -1,5 +1,5 @@
 {
-  "name": "股票庫存管理 Pro",
+  "name": "股票庫存管理",
   "short_name": "股票庫存",
   "description": "台股庫存即時記帳與資產管理工具",
   "start_url": "/index.html",
@@ -9,34 +9,10 @@
   "orientation": "portrait",
   "scope": "/",
   "icons": [
-    {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ],
   "categories": ["finance", "productivity"],
   "lang": "zh-TW",
-  "dir": "ltr",
-  "screenshots": [
-    {
-      "src": "/screenshot-wide.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
-    },
-    {
-      "src": "/screenshot-narrow.png",
-      "sizes": "750x1334",
-      "type": "image/png",
-      "form_factor": "narrow"
-    }
-  ]
+  "dir": "ltr"
 }

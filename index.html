@@ -11,28 +11,28 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <style>
-/* ========================================================= 🎨 設計系統 ========================================================= */
+/* ========================================================= 🚀 核心變數引擎 ========================================================= */
 :root {
   --bg: #e0e5ec; --s-light: #ffffff; --s-dark: #a3b1c6; --t-main: #2d3436; --t-muted: #6b7280;
   --up: #d93025; --down: #188038; --engrave-l: rgba(255,255,255,0.8); --engrave-d: rgba(0,0,0,0.15);
   --protrude-l: rgba(255,255,255,0.8); --protrude-d: rgba(0,0,0,0.2); --accent: #1a73e8;
 }
-body.theme-tech { --bg: #2b303a; --s-light: #363c48; --s-dark: #20242c; --t-main: #e2e8f0; --t-muted: #a0aec0; --up: #ff6b6b; --down: #51cf66; --engrave-l: rgba(255,255,255,0.05); --engrave-d: rgba(0,0,0,0.5); --protrude-l: rgba(255,255,255,0.1); --protrude-d: rgba(0,0,0,0.6); --accent: #58a6ff; }
-body.theme-blue-light { --bg: #e3edf7; --s-light: #ffffff; --s-dark: #b8c6d6; --t-main: #102a43; --t-muted: #486581; --up: #e53e3e; --down: #2f855a; --engrave-l: rgba(255,255,255,0.8); --engrave-d: rgba(0,0,0,0.15); --protrude-l: rgba(255,255,255,0.8); --protrude-d: rgba(0,0,0,0.2); --accent: #2b6cb0; }
-body.theme-purple-light { --bg: #ece8f3; --s-light: #ffffff; --s-dark: #cfc7df; --t-main: #322659; --t-muted: #6b5b8e; --up: #d53f8c; --down: #2f855a; --engrave-l: rgba(255,255,255,0.8); --engrave-d: rgba(0,0,0,0.15); --protrude-l: rgba(255,255,255,0.8); --protrude-d: rgba(0,0,0,0.2); --accent: #6b46c1; }
-body.theme-pink { --bg: #f3e6e8; --s-light: #ffffff; --s-dark: #d5c3c6; --t-main: #4a123a; --t-muted: #9b2c2c; --up: #e53e3e; --down: #38a169; --engrave-l: rgba(255,255,255,0.7); --engrave-d: rgba(0,0,0,0.1); --protrude-l: rgba(255,255,255,0.7); --protrude-d: rgba(0,0,0,0.15); --accent: #d63384; }
-body.theme-cement { --bg: #a3a8b0; --s-light: #c0c5cd; --s-dark: #868b93; --t-main: #22252a; --t-muted: #4a5059; --up: #c62828; --down: #1b5e20; --engrave-l: rgba(255,255,255,0.6); --engrave-d: rgba(0,0,0,0.3); --protrude-l: rgba(255,255,255,0.5); --protrude-d: rgba(0,0,0,0.4); --accent: #111111; }
+body.tech { --bg: #2b303a; --s-light: #363c48; --s-dark: #20242c; --t-main: #e2e8f0; --t-muted: #a0aec0; --up: #ff6b6b; --down: #51cf66; --engrave-l: rgba(255,255,255,0.05); --engrave-d: rgba(0,0,0,0.5); --protrude-l: rgba(255,255,255,0.1); --protrude-d: rgba(0,0,0,0.6); --accent: #58a6ff; }
+body.blue-light { --bg: #e3edf7; --s-light: #ffffff; --s-dark: #b8c6d6; --t-main: #102a43; --t-muted: #486581; --up: #e53e3e; --down: #2f855a; --engrave-l: rgba(255,255,255,0.8); --engrave-d: rgba(0,0,0,0.15); --protrude-l: rgba(255,255,255,0.8); --protrude-d: rgba(0,0,0,0.2); --accent: #2b6cb0; }
+body.purple-light { --bg: #ece8f3; --s-light: #ffffff; --s-dark: #cfc7df; --t-main: #322659; --t-muted: #6b5b8e; --up: #d53f8c; --down: #2f855a; --engrave-l: rgba(255,255,255,0.8); --engrave-d: rgba(0,0,0,0.15); --protrude-l: rgba(255,255,255,0.8); --protrude-d: rgba(0,0,0,0.2); --accent: #6b46c1; }
+body.pink { --bg: #f3e6e8; --s-light: #ffffff; --s-dark: #d5c3c6; --t-main: #4a123a; --t-muted: #9b2c2c; --up: #e53e3e; --down: #38a169; --engrave-l: rgba(255,255,255,0.7); --engrave-d: rgba(0,0,0,0.1); --protrude-l: rgba(255,255,255,0.7); --protrude-d: rgba(0,0,0,0.15); --accent: #d63384; }
+body.cement { --bg: #a3a8b0; --s-light: #c0c5cd; --s-dark: #868b93; --t-main: #22252a; --t-muted: #4a5059; --up: #c62828; --down: #1b5e20; --engrave-l: rgba(255,255,255,0.6); --engrave-d: rgba(0,0,0,0.3); --protrude-l: rgba(255,255,255,0.5); --protrude-d: rgba(0,0,0,0.4); --accent: #111111; }
 
+/* ========================================================= 🌐 基礎排版與緊湊化間距 ========================================================= */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans TC",sans-serif; background:var(--bg); color:var(--t-main); padding:0 0 60px; min-height:100vh; font-size:15px; overflow-x:hidden; transition:background-color 0.4s ease, color 0.4s ease}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif; background:var(--bg); color:var(--t-main); padding:0 0 60px; min-height:100vh; font-size:15px; overflow-x:hidden; transition:background-color 0.4s ease, color 0.4s ease}
 input,select,button{font-family:inherit;font-size:inherit;outline:none;text-align:center}
-
 .header, .tabs-bar, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .backup-box { background: var(--bg); border: none; box-shadow: 6px 6px 12px var(--s-dark), -6px -6px 12px var(--s-light); border-radius: 12px; transition: background-color 0.4s ease, box-shadow 0.4s ease; }
 .header { border-radius: 0 0 16px 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
 .header h1 { font-size: 22px; font-weight: 700; color: var(--t-main); }
 .header .hdr-right { display: flex; gap: 8px; }
 
-.tabs-bar { padding: 6px 10px; margin: 8px 10px; gap: 8px; display: flex; min-height: 50px; }
+.tabs-bar { padding: 6px 10px; margin: 8px 10px; gap: 8px; display: flex; }
 .card { padding: 12px 16px; margin: 8px 10px; }
 .card-title { font-size: 16px; color: var(--t-muted); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; text-align: left; }
 .form-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
@@ -181,17 +181,14 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 <link rel="manifest" href="manifest.json">
 </head>
 <body>
-
 <div class="header">
   <h1>股票庫存管理</h1>
   <div class="hdr-right">
-    <button type="button" class="btn-theme" id="themeBtn">🌙</button>
-    <button type="button" class="btn-adv" id="advSettingsBtn">進階</button>
+    <button type="button" class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙</button>
+    <button type="button" class="btn-adv" onclick="openModal()">進階</button>
   </div>
 </div>
-
 <div class="tabs-bar" id="tabsBarContainer"></div>
-
 <div class="card">
   <div class="card-title">新增持股</div>
   <div class="form-row">
@@ -201,12 +198,11 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   </div>
   <div class="form-row">
     <input type="number" id="buyPriceInput" placeholder="買入均價 (選填計算損益)" step="0.01" min="0" inputmode="decimal">
-    <button type="button" id="addStockBtn" style="flex:0 0 80px;">新增</button>
+    <button type="button" onclick="addStock()" style="flex:0 0 80px;">新增</button>
   </div>
 </div>
-
 <div class="idx-scroll-container" id="idxScrollContainer">
-  <div class="idx-card-box" id="twIndexCard">
+  <div class="idx-card-box">
     <div class="idx-box-name">臺灣加權指數</div>
     <div class="idx-box-price" id="idxPrice">—</div>
     <div class="idx-box-change-row">
@@ -216,7 +212,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <div class="idx-box-src" id="idxSource">Loading...</div>
   </div>
 </div>
-
 <div class="table-scroll" id="tableScroll" style="display:none;">
   <div class="list-wrap" id="listContainer">
     <div class="list-header">
@@ -225,11 +220,9 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <div id="listBody"></div>
   </div>
 </div>
-
 <div id="emptyState" style="display:none;margin:8px 10px;padding:24px 14px;text-align:center;color:var(--t-muted);font-weight:600;font-size:16px">尚無持股，請在上方新增</div>
-
 <div class="summary" id="summaryArea" style="display:none;">
-  <div id="summaryToggleArea" style="cursor:pointer;">
+  <div onclick="toggleSummary()" style="cursor:pointer;">
     <div class="sum-row" style="padding-bottom:0;">
       <span class="lab">今日損益總計</span>
       <span class="val" id="totalPnl">+0</span>
@@ -241,25 +234,22 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <div class="sum-row"><span class="lab">總未實現損益 (ROI)</span><span class="val" id="totalUnrealized">—</span></div>
     <div class="sum-divider"></div>
     <div class="sum-row" style="padding-bottom:0;"><span class="lab">持股資產總計</span><span class="val" id="totalAsset">0</span></div>
-    <div class="sum-toggle-btn" style="margin-top:10px;" id="sumCollapseBtn">▲ 收起選單</div>
+    <div class="sum-toggle-btn" style="margin-top:10px;" onclick="toggleSummary(event)">▲ 收起選單</div>
   </div>
 </div>
-
-<button type="button" class="btn-save" id="saveArea" style="display:none;">存儲今日損益總計</button>
-
+<button type="button" class="btn-save" id="saveArea" style="display:none;" onclick="saveDailyPnl()">存儲今日損益總計</button>
 <div class="history">
   <div class="card-title" style="margin:0 0 4px">歷史記錄</div>
   <div id="historyBody"><div class="hist-empty">尚無記錄</div></div>
 </div>
-
 <div class="toast" id="toast"></div>
 
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal fullscreen-modal">
-    <button type="button" class="btn-close-icon" id="modalCloseBtn">✕</button>
+    <button type="button" class="btn-close-icon" onclick="closeModal()">✕</button>
     <h2>進階設定</h2>
     <div class="settings-row">
-      <button type="button" class="btn-manual-row" id="openManualBtn">📖 使用說明</button>
+      <button type="button" class="btn-manual-row" onclick="openManual()">📖 使用說明</button>
       <div class="tab-count-wrapper">
         <div class="tab-count-label">分頁數量</div>
         <select id="tabCountSelect">
@@ -278,13 +268,13 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       <label>Fugle API Key（主要）</label>
       <div style="display:flex;gap:8px;align-items:stretch;">
         <input type="password" id="fugleKeyInput" placeholder="輸入第一組 Key" autocomplete="off" style="flex:1;">
-        <button type="button" id="keyToggle1" style="flex:0 0 44px;font-size:16px;">👁</button>
+        <button type="button" onclick="toggleKeyVisibility('fugleKeyInput','keyToggle1')" id="keyToggle1" style="flex:0 0 44px;font-size:16px;">👁</button>
       </div>
       <div><span class="key-status none" id="fugleKeyStatus">未設定</span></div>
       <label>Fugle API Key 2（備用）</label>
       <div style="display:flex;gap:8px;align-items:stretch;">
         <input type="password" id="secondFugleKeyInput" placeholder="輸入第二組 Key（選填）" autocomplete="off" style="flex:1;">
-        <button type="button" id="keyToggle2" style="flex:0 0 44px;font-size:16px;">👁</button>
+        <button type="button" onclick="toggleKeyVisibility('secondFugleKeyInput','keyToggle2')" id="keyToggle2" style="flex:0 0 44px;font-size:16px;">👁</button>
       </div>
       <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
       <div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:12px;box-shadow:inset 4px 4px 8px var(--s-dark),inset -4px -4px 8px var(--s-light);">
@@ -295,13 +285,13 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <div class="backup-box">
       <div class="backup-title">資料備份與還原</div>
       <div class="backup-btns">
-        <button type="button" class="btn-backup" id="exportBtn">📥 匯出備份</button>
-        <button type="button" class="btn-backup" id="importBtn">📤 匯入還原</button>
-        <input type="file" id="importFile" style="display:none" accept=".json">
+        <button type="button" class="btn-backup" onclick="exportData()">📥 匯出備份</button>
+        <button type="button" class="btn-backup" onclick="triggerImport()">📤 匯入還原</button>
+        <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V5.1.0 (修復版)</div>
-    <button type="button" class="modal-close" id="saveSettingsBtn">儲存設定並關閉</button>
+    <div class="v-box">核心版本：V4.3.4 (最終整合版)</div>
+    <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
 
@@ -315,6 +305,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <li><strong>資產歷史存儲：</strong>收盤後可點擊「存儲今日損益總計」，將當日的資產總額與盈虧永久記錄在手機本地，建立長期資產曲線。</li>
         <li><strong>多主題切換：</strong>點擊右上角 🌙 顆粒按鈕，可在極簡科技風、擬物化灰灰、優雅紫羅蘭等多種 3D 視覺主題間切換。</li>
       </ul>
+
       <h3>二、分頁（組合）的靈活妙用 💡</h3>
       <p>分頁數量可在進階設定中自訂（1~5 個），雙擊分頁標籤即可重新命名。您可以這樣規劃：</p>
       <ul>
@@ -322,6 +313,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <li><strong>投資策略分流：</strong>建立「長期存股（領息）」與「波段短線（價差）」分頁，將不同核心邏輯的股票分開追蹤，避免績效混淆。</li>
         <li><strong>市場動態觀察：</strong>建立一個「純觀察名單」分頁，只輸入代號、數量填 0 或不填均價，當作純看盤的即時自選股清單。</li>
       </ul>
+
       <h3>三、Fugle Key 報價更新原則與建議</h3>
       <p>為避免觸發 Fugle API 的每分鐘速率限制，系統會根據您的金鑰數量與市場狀態<strong>自動進行智慧分流與調頻</strong>：</p>
       <ul>
@@ -338,11 +330,13 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
           </ul>
         </li>
       </ul>
+
       <h3>四、Yahoo Finance 國外指數報價原則</h3>
       <ul>
         <li><strong>多層容錯防呆：</strong>全球國際指數直接透過高效能的邊緣代理網道（Cloudflare Worker）介接 Yahoo 數據。</li>
         <li><strong>全時段不化白（—）：</strong>新版程式碼內建強大的防呆鏈，就算國際市場遇到盤後或清晨資料清洗，系統也會自動抓取昨收價或常規市場參考價補位，保證畫面不壞死。</li>
       </ul>
+
       <h3>五、補充注意事項與日常維護</h3>
       <ul>
         <li><strong>綠色本地儲存：</strong>本軟體不使用任何雲端資料庫，所有庫存與歷史損益均安全地儲存在您手機瀏覽器的本地空間中。</li>
@@ -350,7 +344,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <li><strong>智慧降頻省電：</strong>當系統偵測到全球市場皆處於休市時段（如台灣半夜且週末），輪詢計時器會自動放慢至 <strong>60 秒</strong>，以節省您的手機電力與流量。</li>
       </ul>
     </div>
-    <button type="button" class="modal-close" id="closeManualBtn">關閉說明</button>
+    <button type="button" class="modal-close" onclick="closeManual()">關閉說明</button>
   </div>
 </div>
 
@@ -359,22 +353,39 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <h2>編輯持股</h2>
     <input type="hidden" id="editId">
     <label>股票代號</label>
-    <input type="text" id="editSymInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase;width:100%;">
+    <input type="text" id="editSymInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase">
     <label>數量</label>
-    <input type="number" id="editQtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" style="width:100%;">
+    <input type="number" id="editQtyInput" placeholder="數量" min="1" step="1" inputmode="numeric">
     <label>單位</label>
-    <select id="editUnitSelect" style="width:100%;"><option value="張">張</option><option value="股">股</option></select>
+    <select id="editUnitSelect"><option value="張">張</option><option value="股">股</option></select>
     <label>買入均價 (留空或不填則不計算總損益)</label>
-    <input type="number" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" style="width:100%;">
-    <button type="button" class="modal-close" id="saveEditBtn" style="background:var(--accent); color:#fff; text-shadow:none;margin-top:20px;">確認儲存</button>
-    <button type="button" class="modal-close" id="cancelEditBtn" style="margin-top:10px;">取消</button>
+    <input type="number" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal">
+    <button type="button" class="modal-close" onclick="saveEditStock()" style="background:var(--accent); color:#fff; text-shadow:none;">確認儲存</button>
+    <button type="button" class="modal-close" onclick="closeEditModal()" style="margin-top:10px;">取消</button>
   </div>
 </div>
 
 <script>
 
-/* ========================================================= 🔧 API 管理引擎 V5.1.0 (修復版) ========================================================= */
+/* 🛡️ 安全工具函数 */
+function safeParseInt(val, fallback) {
+  var n = parseInt(val);
+  return (isNaN(n) || n < 0) ? fallback : n;
+}
+function safeParseJSON(str, fallback) {
+  try { return JSON.parse(str); } catch(e) { return fallback; }
+}
+function safeGetItem(key, fallback) {
+  try {
+    var val = localStorage.getItem(key);
+    return val !== null ? val : fallback;
+  } catch(e) { return fallback; }
+}
+function safeSetItem(key, val) {
+  try { localStorage.setItem(key, val); } catch(e) {}
+}
 
+/* ========================================================= 🔧 API 管理引擎 V4.3.4 ========================================================= */
 const PROXY_LIST = [
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
@@ -471,7 +482,6 @@ function renderApiStats() {
 function toggleKeyVisibility(inputId, btnId) {
   const input = document.getElementById(inputId);
   const btn = document.getElementById(btnId);
-  if (!input || !btn) return;
   if (input.type === 'password') {
     input.type = 'text'; btn.textContent = '🙈';
   } else {
@@ -506,147 +516,80 @@ const getRecordKey = (idx) => `tw_records_tab_${idx}`;
 let cachedGlobalIndices = [];
 const FUGLE='https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
 
-/* ========================================================= 🛡️ 安全解析工具 ========================================================= */
-
-function safeParseInt(val, fallback) {
-  const n = parseInt(val);
-  return (isNaN(n) || n < 0) ? fallback : n;
-}
-
-function safeParseJSON(str, fallback) {
-  try { return JSON.parse(str); } catch(e) { return fallback; }
-}
-
-function safeGetItem(key, fallback) {
-  try {
-    const val = localStorage.getItem(key);
-    return val !== null ? val : fallback;
-  } catch(e) { return fallback; }
-}
-
-function safeSetItem(key, val) {
-  try { localStorage.setItem(key, val); } catch(e) {}
-}
-
-function safeRemoveItem(key) {
-  try { localStorage.removeItem(key); } catch(e) {}
-}
-
-/* ========================================================= 🔄 狀態管理 ========================================================= */
-
 function loadState(){
   try{
-    const f = safeGetItem(FK, ''); if(f) fugleKey = f;
-    const sf = safeGetItem(SFK, ''); if(sf) secondFugleKey = sf;
-
-    const ct = safeGetItem(CUR_TAB_KEY, '0');
-    currentTab = safeParseInt(ct, 0);
-
-    const tn = safeGetItem(TN_KEY, '');
-    if(tn) tabNames = safeParseJSON(tn, tabNames);
-    if(!Array.isArray(tabNames) || tabNames.length !== 5) tabNames = ['分頁 1', '分頁 2', '分頁 3', '分頁 4', '分頁 5'];
-
-    const tc = safeGetItem(TC_KEY, '3');
-    tabCount = safeParseInt(tc, 3);
-    if(tabCount < 1) tabCount = 1;
-    if(tabCount > 5) tabCount = 5;
-
-    const pauseUntil = safeGetItem('api_pause_until', '');
+    const f=localStorage.getItem(FK);if(f)fugleKey=f;
+    const sf=localStorage.getItem(SFK);if(sf)secondFugleKey=sf;
+    const ct=localStorage.getItem(CUR_TAB_KEY);if(ct!=null)currentTab=safeParseInt(ct, 0);
+    const tn=localStorage.getItem(TN_KEY);if(tn) tabNames=safeParseJSON(tn, tabNames);
+    const tc=localStorage.getItem(TC_KEY);if(tc) tabCount=safeParseInt(tc, 3);
+    const pauseUntil = localStorage.getItem('api_pause_until');
     if (pauseUntil) apiPauseUntil = parseInt(pauseUntil);
 
     for(let i=0; i<5; i++){
-      const s = safeGetItem(getStockKey(i), ''); 
-      if(s) { tabStocks[i] = safeParseJSON(s, []); }
-      else { tabStocks[i] = []; }
-
-      const r = safeGetItem(getRecordKey(i), ''); 
-      if(r) { tabRecords[i] = safeParseJSON(r, []); }
-      else { tabRecords[i] = []; }
+      const s=localStorage.getItem(getStockKey(i)); if(s) tabStocks[i]=safeParseJSON(s, []);
+      const r=localStorage.getItem(getRecordKey(i)); if(r) tabRecords[i]=safeParseJSON(r, []);
     }
 
     if(currentTab >= tabCount) currentTab = 0;
 
-    const t = safeGetItem(TK, ''); 
-    applyThemeText(t);
+    const t=localStorage.getItem(TK); applyThemeText(t);
+    const cachedIdx = localStorage.getItem('tw_cached_indices');
+    if(cachedIdx) { cachedGlobalIndices = JSON.parse(cachedIdx); if(cachedGlobalIndices.length > 0) renderGlobalIndices(cachedGlobalIndices, false); }
+  }catch(e){console.error(e);}
 
-    const cachedIdx = safeGetItem('tw_cached_indices', '');
-    if(cachedIdx) { 
-      cachedGlobalIndices = safeParseJSON(cachedIdx, []); 
-      if(cachedGlobalIndices.length > 0) renderGlobalIndices(cachedGlobalIndices, false); 
-    }
-  }catch(e){
-    console.error('loadState error:', e);
-    // 確保即使出錯也有預設值
-    tabCount = 3; currentTab = 0;
-    for(let i=0;i<5;i++){ tabStocks[i]=[]; tabRecords[i]=[]; }
-  }
-
-  const fkInput = document.getElementById('fugleKeyInput');
-  const sfkInput = document.getElementById('secondFugleKeyInput');
-  const tcSelect = document.getElementById('tabCountSelect');
-  if(fkInput) fkInput.value = fugleKey;
-  if(sfkInput) sfkInput.value = secondFugleKey;
-  if(tcSelect) tcSelect.value = tabCount;
-
+  document.getElementById('fugleKeyInput').value=fugleKey;
+  document.getElementById('secondFugleKeyInput').value=secondFugleKey;
+  document.getElementById('tabCountSelect').value=tabCount;
   updateKeyStatus(); 
   renderTabs();
   renderApiStats();
 }
 
 function applyThemeText(t){
-  const body = document.body; 
-  const themeBtn = document.getElementById('themeBtn'); 
-  const metaTheme = document.getElementById('themeColorMeta');
-  if(!body || !themeBtn || !metaTheme) return;
-
+  const body=document.body; const themeBtn=document.getElementById('themeBtn'); const metaTheme = document.getElementById('themeColorMeta');
   body.className = '';
-  if(t==='tech'){ body.classList.add('theme-tech'); themeBtn.textContent='🚀'; metaTheme.content='#2b303a'; }
-  else if(t==='blue-light'){ body.classList.add('theme-blue-light'); themeBtn.textContent='💎'; metaTheme.content='#e3edf7'; }
-  else if(t==='purple-light'){ body.classList.add('theme-purple-light'); themeBtn.textContent='🍇'; metaTheme.content='#ece8f3'; }
-  else if(t==='pink'){ body.classList.add('theme-pink'); themeBtn.textContent='🌸'; metaTheme.content='#f3e6e8'; }
-  else if(t==='cement'){ body.classList.add('theme-cement'); themeBtn.textContent='🏢'; metaTheme.content='#a3a8b0'; }
+  if(t==='tech'){ body.classList.add('tech'); themeBtn.textContent='🚀'; metaTheme.content='#2b303a'; }
+  else if(t==='blue-light'){ body.classList.add('blue-light'); themeBtn.textContent='💎'; metaTheme.content='#e3edf7'; }
+  else if(t==='purple-light'){ body.classList.add('purple-light'); themeBtn.textContent='🍇'; metaTheme.content='#ece8f3'; }
+  else if(t==='pink'){ body.classList.add('pink'); themeBtn.textContent='🌸'; metaTheme.content='#f3e6e8'; }
+  else if(t==='cement'){ body.classList.add('cement'); themeBtn.textContent='🏢'; metaTheme.content='#a3a8b0'; }
   else { themeBtn.textContent='🌙'; metaTheme.content='#e0e5ec'; }
 }
 
-function saveHoldings(){ try{ safeSetItem(getStockKey(currentTab), JSON.stringify(tabStocks[currentTab])); }catch(e){} }
+function saveHoldings(){try{localStorage.setItem(getStockKey(currentTab),JSON.stringify(tabStocks[currentTab]));}catch(e){}}
 function saveKeys(){ 
-  fugleKey = document.getElementById('fugleKeyInput')?.value?.trim() || ''; 
-  secondFugleKey = document.getElementById('secondFugleKeyInput')?.value?.trim() || ''; 
-  try{ safeSetItem(FK, fugleKey); safeSetItem(SFK, secondFugleKey); }catch(e){} 
+  fugleKey=document.getElementById('fugleKeyInput').value.trim(); 
+  secondFugleKey=document.getElementById('secondFugleKeyInput').value.trim(); 
+  try{localStorage.setItem(FK,fugleKey);localStorage.setItem(SFK,secondFugleKey);}catch(e){} 
   globalKeyRotator = null; 
   updateKeyStatus(); 
 }
-function saveRecords(){ try{ safeSetItem(getRecordKey(currentTab), JSON.stringify(tabRecords[currentTab])); }catch(e){} }
+function saveRecords(){try{localStorage.setItem(getRecordKey(currentTab),JSON.stringify(tabRecords[currentTab]));}catch(e){}}
 
 function saveTabCount(){ 
-  const tcSelect = document.getElementById('tabCountSelect');
-  if(!tcSelect) return;
-  const newCount = safeParseInt(tcSelect.value, 3);
+  const newCount = safeParseInt(document.getElementById('tabCountSelect').value, 3);
   if(newCount === tabCount) return;
   tabCount = newCount; 
-  try{ safeSetItem(TC_KEY, String(tabCount)); }catch(e){}
-  if(currentTab >= tabCount) { currentTab = 0; try{ safeSetItem(CUR_TAB_KEY, '0'); }catch(e){} }
+  try{localStorage.setItem(TC_KEY, tabCount);}catch(e){}
+  if(currentTab >= tabCount) { currentTab = 0; try{localStorage.setItem(CUR_TAB_KEY, currentTab);}catch(e){} }
   renderTabs(); renderAll(); renderHistory(); 
 }
 
 function toggleTheme(){
-  const body = document.body; 
-  if(!body) return;
-  let nextTheme = 'light';
-  if(body.classList.contains('theme-tech')) nextTheme = 'blue-light';
-  else if(body.classList.contains('theme-blue-light')) nextTheme = 'purple-light';
-  else if(body.classList.contains('theme-purple-light')) nextTheme = 'pink';
-  else if(body.classList.contains('theme-pink')) nextTheme = 'cement';
-  else if(body.classList.contains('theme-cement')) nextTheme = 'light';
+  const body=document.body; let nextTheme = 'light';
+  if(body.classList.contains('tech')) nextTheme = 'blue-light';
+  else if(body.classList.contains('blue-light')) nextTheme = 'purple-light';
+  else if(body.classList.contains('purple-light')) nextTheme = 'pink';
+  else if(body.classList.contains('pink')) nextTheme = 'cement';
+  else if(body.classList.contains('cement')) nextTheme = 'light';
   else nextTheme = 'tech';
-  applyThemeText(nextTheme); 
-  try{ safeSetItem(TK, nextTheme); }catch(e){}
+  applyThemeText(nextTheme); try{localStorage.setItem(TK, nextTheme);}catch(e){}
 }
 
 function switchTab(tabIndex){
   if(currentTab === tabIndex) return;
-  currentTab = tabIndex; 
-  try{ safeSetItem(CUR_TAB_KEY, String(currentTab)); }catch(e){}
+  currentTab = tabIndex; try{localStorage.setItem(CUR_TAB_KEY, currentTab);}catch(e){}
   renderTabs(); renderAll(); renderHistory(); refreshPrices();
 }
 
@@ -656,31 +599,25 @@ function renameTab(tabIndex) {
   if (newName !== null) {
     const finalName = newName.trim() === '' ? `分頁 ${tabIndex + 1}` : newName.trim();
     tabNames[tabIndex] = finalName;
-    try { safeSetItem(TN_KEY, JSON.stringify(tabNames)); } catch(e){}
+    try { localStorage.setItem(TN_KEY, JSON.stringify(tabNames)); } catch(e){}
     renderTabs(); showToast(`已更名為「${finalName}」`);
   }
 }
 
 function renderTabs() {
   const container = document.getElementById('tabsBarContainer');
-  if(!container) return;
   container.innerHTML = '';
-
-  // 確保 tabCount 有效
-  const effectiveCount = Math.max(1, Math.min(5, tabCount || 3));
-
-  for(let i=0; i<effectiveCount; i++){
+  for(let i=0; i<tabCount; i++){
     const btn = document.createElement('button');
     btn.type = 'button'; btn.className = 'tab-btn'; btn.id = `tab${i}`;
     btn.textContent = tabNames[i] || `分頁 ${i + 1}`;
-    btn.onclick = () => switchTab(i); 
-    btn.ondblclick = () => renameTab(i);
+    btn.onclick = () => switchTab(i); btn.ondblclick = () => renameTab(i);
     if(i === currentTab) btn.classList.add('active');
     container.appendChild(btn);
   }
   const btns = container.querySelectorAll('.tab-btn');
-  if(effectiveCount >= 4) { btns.forEach(b => b.style.fontSize = '14px'); } 
-  else if(effectiveCount === 3) { btns.forEach(b => b.style.fontSize = '16px'); } 
+  if(tabCount >= 4) { btns.forEach(b => b.style.fontSize = '14px'); } 
+  else if(tabCount === 3) { btns.forEach(b => b.style.fontSize = '16px'); } 
   else { btns.forEach(b => b.style.fontSize = '18px'); }
 }
 
@@ -697,11 +634,10 @@ function updateKeyStatus(){
 function renderGlobalIndices(indices, isOffline = false) {
   const container = document.getElementById('idxScrollContainer');
   if(!container) return;
-
-  // 保留臺灣加權指數卡片
-  const twCard = document.getElementById('twIndexCard');
-  container.innerHTML = '';
-  if(twCard) container.appendChild(twCard);
+  const boxes = container.querySelectorAll('.idx-card-box');
+  for(let i = 1; i < boxes.length; i++) {
+    if(boxes[i]) boxes[i].remove();
+  }
 
   const offlineTag = isOffline ? '<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>' : '';
 
@@ -726,8 +662,8 @@ function renderGlobalIndices(indices, isOffline = false) {
 async function fetchGlobalIndicesFromWorker() {
   if (!cfWorkerUrl || cfWorkerUrl === '') return;
   if (navigator.onLine === false) {
-    const cachedIdx = safeGetItem('tw_cached_indices', '');
-    if (cachedIdx) { try { renderGlobalIndices(safeParseJSON(cachedIdx, []), true); } catch(e) {} }
+    const cachedIdx = localStorage.getItem('tw_cached_indices');
+    if (cachedIdx) { try { renderGlobalIndices(JSON.parse(cachedIdx), true); } catch(e) {} }
     return;
   }
 
@@ -750,17 +686,18 @@ async function fetchGlobalIndicesFromWorker() {
         parsedIndices.sort((a, b) => activeForeignIndices.indexOf(a.symbol) - activeForeignIndices.indexOf(b.symbol));
         cachedGlobalIndices = parsedIndices;
         trackApiUsage('Yahoo');
-        try { safeSetItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
+        try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
         renderGlobalIndices(cachedGlobalIndices, false);
       }
     }
   } catch (e) {
     console.error("Worker Index Fetch Error:", e);
-    const cachedIdx = safeGetItem('tw_cached_indices', '');
-    if (cachedIdx) { try { renderGlobalIndices(safeParseJSON(cachedIdx, []), true); } catch(e2) {} }
+    const cachedIdx = localStorage.getItem('tw_cached_indices');
+    if (cachedIdx) { try { renderGlobalIndices(JSON.parse(cachedIdx), true); } catch(e2) {} }
   }
 }
 
+// 🛡️ 升級多欄位取值核心：徹底解決個股/ETF盤後與不定期 Null 的問題
 async function fetchFugle(symbol){
   if (navigator.onLine === false) return null;
   const kr = getKeyRotator();
@@ -775,6 +712,7 @@ async function fetchFugle(symbol){
       });
       if (resp.ok) {
         const d = await resp.json();
+        // 💎 強力防呆鏈：最新成交價 ?? 當日收盤價 ?? 昨收價 ?? 開盤參考價
         const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
         if (p != null) {
           trackApiUsage('Fugle');
@@ -814,6 +752,7 @@ async function fetchYahoo(symbol){
   return res;
 }
 
+// 🛡️ 升級加權指數防呆鏈
 async function fetchWeightedIndex(){
   if (navigator.onLine === false) return null;
   const kr = getKeyRotator();
@@ -849,38 +788,36 @@ function isAnyMarketOpen() {
 
 async function refreshPrices(){
   if (shouldPauseApi()) { console.log('API 暫停中，跳過本次更新'); return; }
-
+  
   const isOffline = navigator.onLine === false;
   if (isOffline) { 
     showToast('目前處於離線狀態，顯示快取資料'); 
-    const twNameBox = document.querySelector('#twIndexCard .idx-box-name');
+    const twNameBox = document.querySelector('#idxScrollContainer .idx-card-box:first-child .idx-box-name');
     if (twNameBox && !twNameBox.innerHTML.includes('(離線)')) {
       twNameBox.innerHTML = `臺灣加權指數<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>`;
     }
   } else {
-    const twNameBox = document.querySelector('#twIndexCard .idx-box-name');
-    if (twNameBox) twNameBox.textContent = `臺灣加權指數`;
+    const twNameBox = document.querySelector('#idxScrollContainer .idx-card-box:first-child .idx-box-name');
+    if (twNameBox) twNameBox.innerHTML = `臺灣加權指數`;
   }
 
   let apiErrorOccurred = false;
-
-  // 更新加權指數
-  try {
-    const idxR = await fetchWeightedIndex();
-    if(idxR) {
-      const idxEl = document.getElementById('idxPrice'); 
-      const idxChgEl = document.getElementById('idxChange');
-      const idxPctEl = document.getElementById('idxPct'); 
-      const idxSrcEl = document.getElementById('idxSource');
-      if(idxEl) idxEl.textContent = idxR.price.toLocaleString('en-US',{maximumFractionDigits:0});
-      if(idxChgEl) { idxChgEl.textContent = (idxR.change>=0?'+':'')+idxR.change.toFixed(2); idxChgEl.className = idxR.change>=0?'up':'down'; }
-      if(idxPctEl) { idxPctEl.textContent = '('+(idxR.changePercent>=0?'+':'')+idxR.changePercent.toFixed(2)+'%)'; idxPctEl.className = idxR.changePercent>=0?'up':'down'; }
-      if(idxSrcEl) idxSrcEl.textContent = 'via '+idxR.source+' '+new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'});
-    }
-  } catch(e) { console.error('Index fetch error:', e); }
-
+  const idxR = fetchWeightedIndex();
+  const idxEl = document.getElementById('idxPrice'); const idxChgEl = document.getElementById('idxChange');
+  const idxPctEl = document.getElementById('idxPct'); const idxSrcEl = document.getElementById('idxSource');
+  
+  if (idxR){
+    idxR.then(res => {
+      if(res) {
+        idxEl.textContent=res.price.toLocaleString('en-US',{maximumFractionDigits:0});
+        idxChgEl.textContent=(res.change>=0?'+':'')+res.change.toFixed(2); idxChgEl.className=(res.change>=0?'up':'down');
+        idxPctEl.textContent='('+(res.changePercent>=0?'+':'')+res.changePercent.toFixed(2)+'%)'; idxPctEl.className=(res.changePercent>=0?'up':'down');
+        idxSrcEl.textContent='via '+res.source+' '+new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'});
+      }
+    });
+  }
   fetchGlobalIndicesFromWorker();
-
+  
   const currentStocks = tabStocks[currentTab];
   if (currentStocks.length === 0) return;
   const uniqueSymbols = [...new Set(currentStocks.map(s => s.symbol))];
@@ -934,13 +871,13 @@ function renderRow(s){
     <div style="font-size:0.8em;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}">${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}</div>`;
   }
   const pEl=el.querySelector('.price');
-  if(p!=null && pEl){ pEl.textContent=formatPrice(p); pEl.className='price '+(chg>=0?'up':'down'); }
+  if(p!=null){ pEl.textContent=formatPrice(p); pEl.className='price '+(chg>=0?'up':'down'); }
   const cp=el.querySelector('.chgp');
-  if(s.changePercent!=null && cp){cp.textContent=(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%';cp.className='chgp '+(s.changePercent>=0?'up':'down');}
+  if(s.changePercent!=null){cp.textContent=(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%';cp.className='chgp '+(s.changePercent>=0?'up':'down');}
   const cg=el.querySelector('.chg');
-  if(s.change!=null && cg){cg.textContent=(chg>=0?'+':'')+chg.toFixed(2);cg.className='chg '+(chg>=0?'up':'down');}
+  if(s.change!=null){cg.textContent=(chg>=0?'+':'')+chg.toFixed(2);cg.className='chg '+(chg>=0?'up':'down');}
   const tp = el.querySelector('.today-pnl');
-  if(s.change!=null && tp){ const todayPnl = Math.round(shares * chg); tp.textContent = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString(); tp.className = 'today-pnl ' + (todayPnl >= 0 ? 'up' : 'down'); }
+  if(s.change!=null){ const todayPnl = Math.round(shares * chg); tp.textContent = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString(); tp.className = 'today-pnl ' + (todayPnl >= 0 ? 'up' : 'down'); }
   let totalHtml = '—'; let totalValForClass = 0;
   if (p != null) {
     const mktValue = Math.round(shares * p);
@@ -955,20 +892,14 @@ function renderRow(s){
       <div style="font-size:0.8em;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
     }
   }
-  const totalEl = el.querySelector('.total');
-  if(totalEl) { totalEl.innerHTML = totalHtml; totalEl.className = 'total ' + (totalValForClass !== 0 ? (totalValForClass >= 0 ? 'up' : 'down') : ''); }
+  el.querySelector('.total').innerHTML = totalHtml;
+  el.querySelector('.total').className = 'total ' + (totalValForClass !== 0 ? (totalValForClass >= 0 ? 'up' : 'down') : '');
 }
 
 function renderAll(){
-  const body=document.getElementById('listBody'); 
-  const empty=document.getElementById('emptyState');
-  const tableScroll=document.getElementById('tableScroll'); 
-  const sumArea = document.getElementById('summaryArea'); 
-  const saveArea = document.getElementById('saveArea');
-  if(!body || !empty || !tableScroll || !sumArea || !saveArea) return;
-
-  body.innerHTML=''; 
-  const currentStocks = tabStocks[currentTab];
+  const body=document.getElementById('listBody'); const empty=document.getElementById('emptyState');
+  const tableScroll=document.getElementById('tableScroll'); const sumArea = document.getElementById('summaryArea'); const saveArea = document.getElementById('saveArea');
+  body.innerHTML=''; const currentStocks = tabStocks[currentTab];
   if(currentStocks.length===0){ empty.style.display='block';tableScroll.style.display='none';sumArea.style.display='none';saveArea.style.display='none';return; }
   empty.style.display='none';tableScroll.style.display='block';sumArea.style.display='block';saveArea.style.display='block';
   for(const s of currentStocks){
@@ -1001,7 +932,7 @@ function renderAll(){
     '<div class="chg '+(s.change!=null?(chg>=0?'up':'down'):'')+'">'+cgStr+'</div>'+
     '<div class="today-pnl '+tpClass+'">'+tpStr+'</div>'+
     '<div class="total '+(totalValForClass!==0?(totalValForClass>=0?'up':'down'):'')+'">'+totalHtml+'</div>'+
-    '<div class="act"><button type="button" onclick="openEditModal(''+s.id+'')">✎</button><button type="button" class="del-btn" onclick="deleteStock(''+s.id+'')">✕</button></div>';
+    '<div class="act"><button type="button" onclick="openEditModal(\''+s.id+'\')">✎</button><button type="button" class="del-btn" onclick="deleteStock(\''+s.id+'\')">✕</button></div>';
     body.appendChild(div);
   }
   updateSummary();
@@ -1016,33 +947,26 @@ function updateSummary(){
     pnl += Math.round(sh * c); asset += Math.round(sh * p);
     if (s.buyPrice != null && s.price != null && s.buyPrice > 0) { totalUnPnl += Math.round((s.price - s.buyPrice) * sh); hasUnPnl = true; }
   }
-  const pe=document.getElementById('totalPnl');
-  if(pe) { pe.textContent=(pnl>=0?'+':'')+pnl.toLocaleString(); pe.className='val '+(pnl>=0?'up':'down'); }
-  const ae = document.getElementById('totalAsset');
-  if(ae) { ae.textContent = (asset>=0?'+':'')+asset.toLocaleString(); ae.className = 'val neutral'; }
+  const pe=document.getElementById('totalPnl');pe.textContent=(pnl>=0?'+':'')+pnl.toLocaleString();pe.className='val '+(pnl>=0?'up':'down');
+  const ae = document.getElementById('totalAsset');ae.textContent = (asset>=0?'+':'')+asset.toLocaleString();ae.className = 'val neutral';
   const ue = document.getElementById('totalUnrealized');
-  if(ue) {
-    if(hasUnPnl) { ue.textContent = (totalUnPnl >= 0 ? '+' : '') + totalUnPnl.toLocaleString(); ue.className = 'val ' + (totalUnPnl >= 0 ? 'up' : 'down'); }
-    else { ue.textContent = '—'; ue.className = 'val neutral'; }
-  }
+  if(hasUnPnl) { ue.textContent = (totalUnPnl >= 0 ? '+' : '') + totalUnPnl.toLocaleString(); ue.className = 'val ' + (totalUnPnl >= 0 ? 'up' : 'down'); }
+  else { ue.textContent = '—'; ue.className = 'val neutral'; }
 }
 
 function toggleSummary(e) {
   if(e) e.stopPropagation();
-  const details = document.getElementById('summaryDetails'); 
-  const toggleBtn = document.getElementById('sumToggleBtn');
-  if(!details || !toggleBtn) return;
+  const details = document.getElementById('summaryDetails'); const toggleBtn = document.getElementById('sumToggleBtn');
   if (details.style.display === 'none') { details.style.display = 'block'; toggleBtn.style.display = 'none'; }
   else { details.style.display = 'none'; toggleBtn.style.display = 'block'; }
 }
 
 function addStock(){
-  let sym=document.getElementById('symInput')?.value?.trim().toUpperCase() || '';
+  let sym=document.getElementById('symInput').value.trim().toUpperCase();
   sym = sym.replace(/[^A-Z0-9]/g, '');
-  const qty=parseInt(document.getElementById('qtyInput')?.value || '0');
-  const unit=document.getElementById('unitSelect')?.value || '張';
-  const bpRaw = document.getElementById('buyPriceInput')?.value || ''; 
-  const bp = parseFloat(bpRaw);
+  const qty=parseInt(document.getElementById('qtyInput').value);
+  const unit=document.getElementById('unitSelect').value;
+  const bpRaw = document.getElementById('buyPriceInput').value; const bp = parseFloat(bpRaw);
   const buyPrice = isNaN(bp) || bp <= 0 ? null : bp;
   if(!sym||!qty||qty<1){showToast('請輸入代號與數量');return}
   const currentStocks = tabStocks[currentTab];
@@ -1050,12 +974,7 @@ function addStock(){
   const id='s_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
   currentStocks.push({id,symbol:sym,displayQty:qty,displayUnit:unit,buyPrice:buyPrice,shares:unit==='張'?qty*1000:qty,price:null,change:null,changePercent:null});
   saveHoldings();renderAll();
-  const symInp = document.getElementById('symInput');
-  const qtyInp = document.getElementById('qtyInput');
-  const bpInp = document.getElementById('buyPriceInput');
-  if(symInp) symInp.value=''; 
-  if(qtyInp) qtyInp.value=''; 
-  if(bpInp) bpInp.value='';
+  document.getElementById('symInput').value=''; document.getElementById('qtyInput').value=''; document.getElementById('buyPriceInput').value='';
   showToast('已新增 '+sym);refreshPrices();
 }
 
@@ -1078,25 +997,23 @@ function openEditModal(id) {
 function closeEditModal() { document.getElementById('editModalOverlay').classList.remove('show'); }
 
 function saveEditStock() {
-  const id = document.getElementById('editId')?.value;
-  if(!id) return;
+  const id = document.getElementById('editId').value;
   const s = tabStocks[currentTab].find(x => x.id === id);
   if (!s) return;
-  const ns = (document.getElementById('editSymInput')?.value || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-  if (ns) { s.symbol = ns; s.price = null; s.change = null; s.changePercent = null; s.source = null; s.updateTime = null; }
-  const nq = parseInt(document.getElementById('editQtyInput')?.value || '0');
+  const ns = document.getElementById('editSymInput').value.trim().toUpperCase();
+  const cleanSym = ns.replace(/[^A-Z0-9]/g, '');
+  if (cleanSym) { s.symbol = cleanSym; s.price = null; s.change = null; s.changePercent = null; s.source = null; s.updateTime = null; }
+  const nq = parseInt(document.getElementById('editQtyInput').value);
   if (nq > 0) { s.displayQty = nq; s.shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty; }
-  s.displayUnit = document.getElementById('editUnitSelect')?.value || '張';
+  s.displayUnit = document.getElementById('editUnitSelect').value;
   s.shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
-  const nbp = document.getElementById('editBuyPriceInput')?.value || ''; 
-  const bpNum = parseFloat(nbp);
+  const nbp = document.getElementById('editBuyPriceInput').value; const bpNum = parseFloat(nbp);
   s.buyPrice = (isNaN(bpNum) || bpNum <= 0) ? null : bpNum;
   saveHoldings(); renderAll(); closeEditModal(); showToast('已修改'); refreshPrices();
 }
 
 function saveDailyPnl(){
-  let pnl=0,asset=0; 
-  const currentStocks = tabStocks[currentTab];
+  let pnl=0,asset=0; const currentStocks = tabStocks[currentTab];
   for(const s of currentStocks){
     const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
     let p=s.price??0, c=s.change??0; pnl += Math.round(sh * c); asset += Math.round(sh * p);
@@ -1117,24 +1034,17 @@ function deleteHistory(timestamp) {
 }
 
 function openModal(){
-  const fkInp = document.getElementById('fugleKeyInput');
-  const sfkInp = document.getElementById('secondFugleKeyInput');
-  const tcSel = document.getElementById('tabCountSelect');
-  if(fkInp) fkInp.value=fugleKey;
-  if(sfkInp) sfkInp.value=secondFugleKey;
-  if(tcSel) tcSel.value=tabCount;
-  updateKeyStatus(); renderApiStats(); 
-  document.getElementById('modalOverlay').classList.add('show');
+  document.getElementById('fugleKeyInput').value=fugleKey;
+  document.getElementById('secondFugleKeyInput').value=secondFugleKey;
+  document.getElementById('tabCountSelect').value=tabCount;
+  updateKeyStatus(); renderApiStats(); document.getElementById('modalOverlay').classList.add('show');
 }
 
-function closeModal() { 
-  const mo = document.getElementById('modalOverlay');
-  if(mo) mo.classList.remove('show'); 
-}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
 
 function saveAndCloseModal(){
   saveKeys(); saveTabCount(); globalKeyRotator = null; 
-  closeModal(); showToast('設定已儲存'); refreshPrices(); 
+  document.getElementById('modalOverlay').classList.remove('show'); showToast('設定已儲存'); refreshPrices(); 
 }
 
 function openManual() { document.getElementById('manualOverlay').classList.add('show'); }
@@ -1147,31 +1057,20 @@ function formatPrice(p){
 }
 
 let toastTimer=null;
-function showToast(msg){ 
-  const t=document.getElementById('toast');
-  if(!t) return;
-  t.textContent=msg; t.classList.add('show'); 
-  clearTimeout(toastTimer); 
-  toastTimer=setTimeout(()=>t.classList.remove('show'),2000); 
-}
+function showToast(msg){ const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show'); clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2000); }
 
 function exportData() {
   const dataToExport = {
-    tabStocks: [safeGetItem(getStockKey(0),''), safeGetItem(getStockKey(1),''), safeGetItem(getStockKey(2),''), safeGetItem(getStockKey(3),''), safeGetItem(getStockKey(4),'')],
-    tabRecords: [safeGetItem(getRecordKey(0),''), safeGetItem(getRecordKey(1),''), safeGetItem(getRecordKey(2),''), safeGetItem(getRecordKey(3),''), safeGetItem(getRecordKey(4),'')],
-    tabNames: safeGetItem(TN_KEY,''), fugleKey: safeGetItem(FK,''), secondFugleKey: safeGetItem(SFK,''), theme: safeGetItem(TK,''), tabCount: safeGetItem(TC_KEY,'')
+    tabStocks: [localStorage.getItem(getStockKey(0)), localStorage.getItem(getStockKey(1)), localStorage.getItem(getStockKey(2)), localStorage.getItem(getStockKey(3)), localStorage.getItem(getStockKey(4))],
+    tabRecords: [localStorage.getItem(getRecordKey(0)), localStorage.getItem(getRecordKey(1)), localStorage.getItem(getRecordKey(2)), localStorage.getItem(getRecordKey(3)), localStorage.getItem(getRecordKey(4))],
+    tabNames: localStorage.getItem(TN_KEY), fugleKey: localStorage.getItem(FK), secondFugleKey: localStorage.getItem(SFK), theme: localStorage.getItem(TK), tabCount: localStorage.getItem(TC_KEY)
   };
   const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const downloadAnchorElement = document.createElement('a');
-  const d = new Date(); 
-  const dateString = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
-  downloadAnchorElement.setAttribute("href", url); 
-  downloadAnchorElement.setAttribute("download", "stock_backup_" + dateString + ".json");
-  document.body.appendChild(downloadAnchorElement); 
-  downloadAnchorElement.click(); 
-  document.body.removeChild(downloadAnchorElement); 
-  URL.revokeObjectURL(url);
+  const d = new Date(); const dateString = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+  downloadAnchorElement.setAttribute("href", url); downloadAnchorElement.setAttribute("download", "stock_backup_" + dateString + ".json");
+  document.body.appendChild(downloadAnchorElement); downloadAnchorElement.click(); document.body.removeChild(downloadAnchorElement); URL.revokeObjectURL(url);
   showToast('✅ 備份檔案已成功下載');
 }
 
@@ -1184,89 +1083,35 @@ function importData(event) {
     try {
       const data = JSON.parse(e.target.result);
       if(confirm('⚠️ 警告：這將會覆蓋您目前的所有資料！\n確定要還原備份嗎？')) {
-        if (data.tabStocks) { data.tabStocks.forEach((val, i) => { if(val) safeSetItem(getStockKey(i), val); }); }
-        if (data.tabRecords) { data.tabRecords.forEach((val, i) => { if(val) safeSetItem(getRecordKey(i), val); }); }
-        if (data.tabNames) safeSetItem(TN_KEY, data.tabNames);
-        if (data.fugleKey) safeSetItem(FK, data.fugleKey);
-        if (data.secondFugleKey) safeSetItem(SFK, data.secondFugleKey);
-        if (data.theme) safeSetItem(TK, data.theme);
-        if (data.tabCount) safeSetItem(TC_KEY, data.tabCount);
+        if (data.tabStocks) { data.tabStocks.forEach((val, i) => { if(val) localStorage.setItem(getStockKey(i), val); }); }
+        if (data.tabRecords) { data.tabRecords.forEach((val, i) => { if(val) localStorage.setItem(getRecordKey(i), val); }); }
+        if (data.tabNames) localStorage.setItem(TN_KEY, data.tabNames);
+        if (data.fugleKey) localStorage.setItem(FK, data.fugleKey);
+        if (data.secondFugleKey) localStorage.setItem(SFK, data.secondFugleKey);
+        if (data.theme) localStorage.setItem(TK, data.theme);
+        if (data.tabCount) localStorage.setItem(TC_KEY, data.tabCount);
         alert('🎉 備份還原成功！'); location.reload();
       }
     } catch (err) { alert('❌ 檔案格式錯誤，無法還原資料。'); }
-    event.target.value = '';
+    document.getElementById('importFile').value = '';
   };
   reader.readAsText(file);
 }
 
 async function refresh(){await refreshPrices()}
 
-/* ========================================================= 🚀 安全初始化 ========================================================= */
+loadState();renderAll();renderHistory();
+setTimeout(refresh,300);
+pollTimer=setInterval(refresh, currentInterval);
 
-function safeInit() {
-  try {
-    loadState();
-    renderAll();
-    renderHistory();
-    setTimeout(refresh, 300);
-    pollTimer = setInterval(refresh, currentInterval);
-  } catch(e) {
-    console.error('Initialization error:', e);
-    showToast('初始化失敗，請重新整理頁面');
-  }
-}
+document.getElementById('symInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); } });
+document.getElementById('qtyInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('buyPriceInput').focus(); } });
+document.getElementById('buyPriceInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); addStock(); } });
+document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
+document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
+document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-// 綁定事件（安全檢查元素存在）
-function bindEvents() {
-  const bind = (id, event, handler) => {
-    const el = document.getElementById(id);
-    if(el) el.addEventListener(event, handler);
-  };
-
-  bind('addStockBtn', 'click', addStock);
-  bind('themeBtn', 'click', toggleTheme);
-  bind('advSettingsBtn', 'click', openModal);
-  bind('modalCloseBtn', 'click', closeModal);
-  bind('saveSettingsBtn', 'click', saveAndCloseModal);
-  bind('openManualBtn', 'click', openManual);
-  bind('closeManualBtn', 'click', closeManual);
-  bind('keyToggle1', 'click', () => toggleKeyVisibility('fugleKeyInput','keyToggle1'));
-  bind('keyToggle2', 'click', () => toggleKeyVisibility('secondFugleKeyInput','keyToggle2'));
-  bind('exportBtn', 'click', exportData);
-  bind('importBtn', 'click', triggerImport);
-  bind('importFile', 'change', importData);
-  bind('saveEditBtn', 'click', saveEditStock);
-  bind('cancelEditBtn', 'click', closeEditModal);
-  bind('saveArea', 'click', saveDailyPnl);
-
-  const summaryToggle = document.getElementById('summaryToggleArea');
-  if(summaryToggle) summaryToggle.addEventListener('click', toggleSummary);
-
-  const sumCollapse = document.getElementById('sumCollapseBtn');
-  if(sumCollapse) sumCollapse.addEventListener('click', (e) => { e.stopPropagation(); toggleSummary(); });
-
-  bind('symInput', 'keydown', (e) => { if(e.key==='Enter'){e.preventDefault();document.getElementById('qtyInput')?.focus();} });
-  bind('qtyInput', 'keydown', (e) => { if(e.key==='Enter'){e.preventDefault();document.getElementById('buyPriceInput')?.focus();} });
-  bind('buyPriceInput', 'keydown', (e) => { if(e.key==='Enter'){e.preventDefault();addStock();} });
-
-  const modalOverlay = document.getElementById('modalOverlay');
-  if(modalOverlay) modalOverlay.addEventListener('click', function(e){if(e.target===this)this.classList.remove('show')});
-
-  const manualOverlay = document.getElementById('manualOverlay');
-  if(manualOverlay) manualOverlay.addEventListener('click', function(e){if(e.target===this)this.classList.remove('show')});
-
-  const editModalOverlay = document.getElementById('editModalOverlay');
-  if(editModalOverlay) editModalOverlay.addEventListener('click', function(e){if(e.target===this)this.classList.remove('show')});
-}
-
-// DOM 就緒後初始化
-if(document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => { bindEvents(); safeInit(); });
-} else {
-  bindEvents(); safeInit();
-}
-
-console.log('股票庫存管理 V5.1.0 (修復版) 已啟動');
+console.log('股票庫存管理 V4.3.4 已啟動 (最終整合版)');
 </script>
 </body>
 </html>
