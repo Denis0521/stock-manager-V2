@@ -61,21 +61,20 @@ button:active, .tab-btn.active { transform: translateY(0); box-shadow: inset 4px
 /* 📊 明細列表優化：縮小代號寬度、縮小行高、調整字體大小 */
 .table-scroll { margin: 14px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; }
 .list-wrap { min-width: 710px; }
-.list-header, .srow { grid-template-columns: 100px 110px 90px 90px 80px 90px 120px 90px; } /* 代號欄位縮小至 100px */
+.list-header, .srow { grid-template-columns: 100px 110px 90px 90px 80px 90px 120px 90px; }
 .list-header { display: grid; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 17px; color: var(--t-muted); font-weight: 600; }
-.srow { display: grid; align-items: stretch; border-bottom: 1px solid var(--s-dark); font-size: 17px; } /* 明細主數字縮小一階至 17px */
+.srow { display: grid; align-items: stretch; border-bottom: 1px solid var(--s-dark); font-size: 17px; }
 .srow:last-child { border-bottom: none; }
-.list-header > div, .srow > div { padding: 6px 6px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; white-space: nowrap; } /* padding 縮小為 6px */
+.list-header > div, .srow > div { padding: 6px 6px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; white-space: nowrap; }
 .list-header > div:nth-child(1), .srow > div:nth-child(1) { align-items: flex-start; text-align: left; position: sticky; left: 0; z-index: 2; background: var(--bg); padding-left: 14px; }
 .list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after { content: ''; position: absolute; top: 0; bottom: 0; right: -6px; width: 6px; background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; }
 .list-header > div:nth-child(8) { align-items: center; justify-content: center; padding-left: 14px; }
 .srow > div:nth-child(8) { flex-direction: row; align-items: center; justify-content: center; gap: 6px; padding-left: 14px; }
-.sym-container { align-items: flex-start !important; line-height: 1.1 !important; width: 100%; max-width: 100px; } /* max-width 同步縮小 */
-.srow .sym { font-weight: 800; font-size: 17px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; } /* 代號字體縮小至 17px */
- /* max-width 同步縮小 */
+.sym-container { align-items: flex-start !important; line-height: 1.1 !important; width: 100%; max-width: 100px; }
+.srow .sym { font-weight: 800; font-size: 17px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; }
 .srow .qty-cell { font-weight: 600; color: var(--t-main); overflow: hidden; width: 100%; }
 .srow .price { font-weight: 700; }
-.srow .chgp { font-size: 17px; font-weight: 700; } /* 漲跌幅字體縮小至 17px */
+.srow .chgp { font-size: 17px; font-weight: 700; }
 .srow .chg, .srow .today-pnl { font-weight: 700; }
 .srow .total { font-weight: 700; overflow: hidden; width: 100%; }
 .srow .act button { padding: 6px 10px; font-size: 15px; border-radius: 6px; }
@@ -184,7 +183,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   height: 100vh !important;
   max-height: 100vh !important;
   border-radius: 0;
-  padding: 18px 20px 20px !important; /* 內容頂部與關閉按鈕對齊 */
+  padding: 18px 20px 20px !important;
   margin: 0 !important;
   border: none;
   box-sizing: border-box;
@@ -219,7 +218,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 @media (max-width: 767px) {
   body { max-width: 480px; margin: 0 auto; font-size: 15px; }
   input, select { font-size: 16px; }
-  /* 確保手機版數字也縮小一階，維持視覺比例 */
   .srow { font-size: 17px; }
   .srow .sym { font-size: 17px; }
   .srow .chgp { font-size: 17px; }
@@ -236,11 +234,10 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   .tab-btn { font-size: 18px; padding: 14px 10px; }
   .list-wrap { min-width: 100%; }
   .list-header, .srow { grid-template-columns: 1.5fr 1.5fr 1fr 1.2fr 1.2fr 1.5fr 1.5fr 1.5fr; }
-  .list-header { font-size: 18px; } /* 標題不變 */
-  .srow { font-size: 19px; } /* 平板數字縮小一階至 19px */
-  .srow .sym { font-size: 19px; } /* 平板代號縮小一階至 19px */
-  .srow .chgp { font-size: 19px; } /* 平板漲跌幅縮小一階至 19px */
-
+  .list-header { font-size: 18px; }
+  .srow { font-size: 19px; }
+  .srow .sym { font-size: 19px; }
+  .srow .chgp { font-size: 19px; }
   .srow .act button { padding: 8px 14px; font-size: 17px; }
   .sum-row .lab { font-size: 19px; }
   .sum-row .val { font-size: 24px; }
@@ -367,17 +364,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
       <div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:12px;box-shadow:inset 4px 4px 8px var(--s-dark),inset -4px -4px 8px var(--s-light);">
         <div style="font-size:13px;color:var(--t-muted);font-weight:600;margin-bottom:8px;text-align:center;">📊 今日 API 使用量</div>
-        <div id="apiStatsBox"><div style="display:flex;justify-content:space-around;text-align:center;font-size:13px;color:var(--t-muted);"><div><div style="font-size:18px;font-weight:800;color:var(--t-main);">0</div><div>Fugle</div></div><div><div style="font-size:18px;font-weight:800;color:var(--t-main);">0</div><div>Yahoo</div></div><div><div style="font-size:18px;font-weight:800;color:var(--t-main);">0</div><div>Google</div></div></div></div>
-      </div>
-    </div>
-
-        <div class="api-section" style="margin-top:20px;border-top:1px solid var(--s-dark);padding-top:20px;">
-      <div class="api-link-box" style="margin-bottom:12px;">
-        <span style="font-size:13px;color:var(--t-muted);font-weight:600;">☁️ 國際指數資料來源</span>
-      </div>
-      <div style="font-size:13px;color:var(--t-muted);line-height:1.6;padding:10px;background:var(--bg);border-radius:8px;box-shadow:inset 3px 3px 6px var(--s-dark),inset -3px -3px 6px var(--s-light);">
-        國際指數透過 Cloudflare Worker 代理 Yahoo Finance 即時資料，延遲約 5~13 秒。<br>
-        目前支援：道瓊、那斯達克、S&P 500、費城半導體、日經 225、韓國 KOSPI。
+        <div id="apiStatsBox"></div>
       </div>
     </div>
 
@@ -389,7 +376,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.1.0 (Worker 內建國際指數版)</div>
+    <div class="v-box">核心版本：V4.1.1 (Worker 內建國際指數版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -568,8 +555,7 @@ function getApiUsageStats() {
   const today = new Date().toISOString().split('T')[0];
   return {
     fugle: parseInt(localStorage.getItem(`api_usage_${today}_Fugle`) || '0'),
-    yahoo: parseInt(localStorage.getItem(`api_usage_${today}_Yahoo`) || '0'),
-    google: parseInt(localStorage.getItem(`api_usage_${today}_Google`) || '0')
+    yahoo: parseInt(localStorage.getItem(`api_usage_${today}_Yahoo`) || '0')
   };
 }
 
@@ -580,7 +566,6 @@ function renderApiStats() {
     el.innerHTML = `<div style="display:flex;justify-content:space-around;text-align:center;font-size:13px;color:var(--t-muted);">
       <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${stats.fugle}</div><div>Fugle</div></div>
       <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${stats.yahoo}</div><div>Yahoo</div></div>
-      <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${stats.google}</div><div>Google</div></div>
     </div>`;
   }
 }
@@ -623,7 +608,6 @@ function loadState(){
     const tc=localStorage.getItem(TC_KEY);if(tc) tabCount=parseInt(tc);
     const pauseUntil = localStorage.getItem('api_pause_until');
     if (pauseUntil) apiPauseUntil = parseInt(pauseUntil);
-    // cfWorkerUrl 已硬編碼，無需從 localStorage 載入
 
     for(let i=0; i<5; i++){
       const s=localStorage.getItem(getStockKey(i)); if(s) tabStocks[i]=JSON.parse(s);
@@ -810,9 +794,11 @@ async function fetchFugle(symbol){
       });
       if (resp.ok) {
         const d = await resp.json();
-        if (d && d.lastPrice != null) {
+        // 增強解析：ETF與指數可能回傳不同欄位，優先取最新價再往下取參考值
+        const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
+        if (p != null) {
           trackApiUsage('Fugle');
-          return {price: d.lastPrice, change: d.change, changePercent: d.changePercent, source: 'Fugle'};
+          return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle'};
         }
       } else if (resp.status === 429) {
         hasError = true; continue;
@@ -860,28 +846,17 @@ async function fetchWeightedIndex(){
         });
         if (resp.ok) {
           const d = await resp.json();
-          const p = d.lastPrice ?? d.closePrice ?? d.price;
+          // 支援盤後指數取值
+          const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
           if (p != null) {
             trackApiUsage('Fugle');
-            return {price: p, change: d.change, changePercent: d.changePercent, source: 'Fugle'};
+            return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle'};
           }
         }
       } catch(e) {}
     }
   }
-  try {
-    const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
-    const resp = await fetchWithProxy(yahooUrl);
-    if (resp) {
-      const text = await resp.text();
-      const lines = text.trim().split('\n');
-      const cols = lines[lines.length - 1].split(',');
-      const price = parseFloat(cols[4]);
-      const open = parseFloat(cols[1]);
-      trackApiUsage('Yahoo');
-      return {price, change: price - open, changePercent: ((price - open)/open)*100, source: 'Yahoo'};
-    }
-  } catch(e) {}
+  // 已依需求移除國內指數的 Yahoo Fallback，強制僅透過 Fugle 報價
   return null;
 }
 
@@ -903,10 +878,15 @@ async function refreshPrices(){
   const idxEl = document.getElementById('idxPrice'); const idxChgEl = document.getElementById('idxChange');
   const idxPctEl = document.getElementById('idxPct'); const idxSrcEl = document.getElementById('idxSource');
   if (idxR){
-    idxEl.textContent=idxR.price.toLocaleString('en-US',{maximumFractionDigits:0});
-    idxChgEl.textContent=(idxR.change>=0?'+':'')+idxR.change.toFixed(2); idxChgEl.className=(idxR.change>=0?'up':'down');
-    idxPctEl.textContent='('+(idxR.changePercent>=0?'+':'')+idxR.changePercent.toFixed(2)+'%)'; idxPctEl.className=(idxR.changePercent>=0?'up':'down');
-    idxSrcEl.textContent='via '+idxR.source+' '+new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'});
+    // 因為 fetchWeightedIndex 現在是 async，需加上 then 解析 (原先為直接調用但漏了await，這裡補充修正)
+    idxR.then(res => {
+      if(res) {
+        idxEl.textContent=res.price.toLocaleString('en-US',{maximumFractionDigits:0});
+        idxChgEl.textContent=(res.change>=0?'+':'')+res.change.toFixed(2); idxChgEl.className=(res.change>=0?'up':'down');
+        idxPctEl.textContent='('+(res.changePercent>=0?'+':'')+res.changePercent.toFixed(2)+'%)'; idxPctEl.className=(res.changePercent>=0?'up':'down');
+        idxSrcEl.textContent='via '+res.source+' '+new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'});
+      }
+    });
   }
   fetchGlobalIndicesFromWorker();
   const currentStocks = tabStocks[currentTab];
@@ -1173,7 +1153,6 @@ function openModal(){
   updateKeyStatus(); renderApiStats(); document.getElementById('modalOverlay').classList.add('show');
 }
 
-// 增加只負責關閉，不儲存變更的新函數
 function closeModal() {
   document.getElementById('modalOverlay').classList.remove('show');
 }
@@ -1181,7 +1160,7 @@ function closeModal() {
 function saveAndCloseModal(){
   saveKeys();
   saveTabCount();
-  globalKeyRotator = null; // 重置 key rotator
+  globalKeyRotator = null; 
   document.getElementById('modalOverlay').classList.remove('show');
   showToast('設定已儲存，API更新頻率將動態調整');
 }
@@ -1259,7 +1238,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.1.0 已啟動 (Worker 內建國際指數版)');
+console.log('股票庫存管理 V4.1.1 已啟動 (Worker 內建國際指數版)');
 </script>
 </body>
 </html>
