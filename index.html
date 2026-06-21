@@ -366,25 +366,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </div>
 
 <script>
-
-/* 🛡️ 安全工具函数 */
-function safeParseInt(val, fallback) {
-  var n = parseInt(val);
-  return (isNaN(n) || n < 0) ? fallback : n;
-}
-function safeParseJSON(str, fallback) {
-  try { return JSON.parse(str); } catch(e) { return fallback; }
-}
-function safeGetItem(key, fallback) {
-  try {
-    var val = localStorage.getItem(key);
-    return val !== null ? val : fallback;
-  } catch(e) { return fallback; }
-}
-function safeSetItem(key, val) {
-  try { localStorage.setItem(key, val); } catch(e) {}
-}
-
 /* ========================================================= 🔧 API 管理引擎 V4.3.4 ========================================================= */
 const PROXY_LIST = [
   'https://api.allorigins.win/raw?url=',
@@ -520,15 +501,15 @@ function loadState(){
   try{
     const f=localStorage.getItem(FK);if(f)fugleKey=f;
     const sf=localStorage.getItem(SFK);if(sf)secondFugleKey=sf;
-    const ct=localStorage.getItem(CUR_TAB_KEY);if(ct!=null)currentTab=safeParseInt(ct, 0);
-    const tn=localStorage.getItem(TN_KEY);if(tn) tabNames=safeParseJSON(tn, tabNames);
-    const tc=localStorage.getItem(TC_KEY);if(tc) tabCount=safeParseInt(tc, 3);
+    const ct=localStorage.getItem(CUR_TAB_KEY);if(ct!=null)currentTab=parseInt(ct);
+    const tn=localStorage.getItem(TN_KEY);if(tn) tabNames=JSON.parse(tn);
+    const tc=localStorage.getItem(TC_KEY);if(tc) tabCount=parseInt(tc);
     const pauseUntil = localStorage.getItem('api_pause_until');
     if (pauseUntil) apiPauseUntil = parseInt(pauseUntil);
 
     for(let i=0; i<5; i++){
-      const s=localStorage.getItem(getStockKey(i)); if(s) tabStocks[i]=safeParseJSON(s, []);
-      const r=localStorage.getItem(getRecordKey(i)); if(r) tabRecords[i]=safeParseJSON(r, []);
+      const s=localStorage.getItem(getStockKey(i)); if(s) tabStocks[i]=JSON.parse(s);
+      const r=localStorage.getItem(getRecordKey(i)); if(r) tabRecords[i]=JSON.parse(r);
     }
 
     if(currentTab >= tabCount) currentTab = 0;
@@ -568,7 +549,7 @@ function saveKeys(){
 function saveRecords(){try{localStorage.setItem(getRecordKey(currentTab),JSON.stringify(tabRecords[currentTab]));}catch(e){}}
 
 function saveTabCount(){ 
-  const newCount = safeParseInt(document.getElementById('tabCountSelect').value, 3);
+  const newCount = parseInt(document.getElementById('tabCountSelect').value);
   if(newCount === tabCount) return;
   tabCount = newCount; 
   try{localStorage.setItem(TC_KEY, tabCount);}catch(e){}
@@ -633,11 +614,8 @@ function updateKeyStatus(){
 
 function renderGlobalIndices(indices, isOffline = false) {
   const container = document.getElementById('idxScrollContainer');
-  if(!container) return;
   const boxes = container.querySelectorAll('.idx-card-box');
-  for(let i = 1; i < boxes.length; i++) {
-    if(boxes[i]) boxes[i].remove();
-  }
+  for(let i = 1; i < boxes.length; i++) boxes[i].remove();
 
   const offlineTag = isOffline ? '<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>' : '';
 
@@ -698,6 +676,21 @@ async function fetchGlobalIndicesFromWorker() {
 }
 
 // 🛡️ 升級多欄位取值核心：徹底解決個股/ETF盤後與不定期 Null 的問題
+// 🛡️ 上次已知價格緩存（盤後/異常時降級使用）
+const lastKnownPrices = {};
+
+function cacheLastPrice(symbol, price) {
+  if (price != null) lastKnownPrices[symbol] = { price, time: Date.now() };
+}
+
+function getCachedPrice(symbol) {
+  const cached = lastKnownPrices[symbol];
+  if (!cached) return null;
+  // 24 小時內的緩存視為有效
+  if (Date.now() - cached.time < 86400000) return cached.price;
+  return null;
+}
+
 async function fetchFugle(symbol){
   if (navigator.onLine === false) return null;
   const kr = getKeyRotator();
@@ -712,9 +705,12 @@ async function fetchFugle(symbol){
       });
       if (resp.ok) {
         const d = await resp.json();
-        // 💎 強力防呆鏈：最新成交價 ?? 當日收盤價 ?? 昨收價 ?? 開盤參考價
-        const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
+        // 💎 升級防呆鏈：最新成交價 ?? 當日收盤價 ?? 昨收價 ?? 開盤參考價 ?? 緩存價
+        let p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
+        // 如果所有字段都是 null，嘗試使用緩存價格
+        if (p == null) p = getCachedPrice(symbol);
         if (p != null) {
+          cacheLastPrice(symbol, p);
           trackApiUsage('Fugle');
           return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle'};
         }
@@ -753,8 +749,29 @@ async function fetchYahoo(symbol){
 }
 
 // 🛡️ 升級加權指數防呆鏈
+async function fetchYahooIndex(){
+  // 透過 Yahoo Finance 獲取台灣加權指數 (^TWII)
+  try {
+    const url = 'https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=' + (Math.floor(Date.now()/1000)-259200) + '&period2=' + (Math.floor(Date.now()/1000)) + '&interval=1d&events=history';
+    const resp = await fetchWithProxy(url);
+    if (!resp) return null;
+    const text = await resp.text();
+    const lines = text.trim().split('\n');
+    if (lines.length < 2) return null;
+    const cols = lines[lines.length - 1].split(',');
+    if (cols.length < 6 || cols[4] === 'null') return null;
+    const price = parseFloat(cols[4]);
+    const prevClose = parseFloat(cols[cols.length - 2].split(',')[4]) || price;
+    const chg = price - prevClose;
+    const pct = prevClose ? (chg / prevClose) * 100 : 0;
+    trackApiUsage('Yahoo');
+    return {price, change: +chg.toFixed(2), changePercent: +pct.toFixed(2), source: 'Yahoo'};
+  } catch(e) { return null; }
+}
+
 async function fetchWeightedIndex(){
   if (navigator.onLine === false) return null;
+  // 優先嘗試 Fugle
   const kr = getKeyRotator();
   if (kr.count > 0){
     for (let i = 0; i < kr.count; i++){
@@ -765,8 +782,10 @@ async function fetchWeightedIndex(){
         });
         if (resp.ok) {
           const d = await resp.json();
-          const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
+          let p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
+          if (p == null) p = getCachedPrice('IX0001');
           if (p != null) {
+            cacheLastPrice('IX0001', p);
             trackApiUsage('Fugle');
             return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle'};
           }
@@ -774,6 +793,15 @@ async function fetchWeightedIndex(){
       } catch(e) {}
     }
   }
+  // 🆕 Fugle 失敗時，fallback 到 Yahoo Finance
+  const yahooResult = await fetchYahooIndex();
+  if (yahooResult) {
+    cacheLastPrice('IX0001', yahooResult.price);
+    return yahooResult;
+  }
+  // 最後嘗試緩存
+  const cached = getCachedPrice('IX0001');
+  if (cached) return {price: cached, change: 0, changePercent: 0, source: 'Cache'};
   return null;
 }
 
@@ -837,6 +865,7 @@ async function refreshPrices(){
         if (r) {
           currentStocks.filter(s => s.symbol === sym).forEach(s => {
             s.price=r.price; s.change=r.change; s.changePercent=r.changePercent; s.source=r.source;
+            cacheLastPrice(s.symbol, r.price); // 🆕 緩存成功獲取的價格
             const now = new Date();
             s.updateTime = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
             renderRow(s);
@@ -1040,7 +1069,7 @@ function openModal(){
   updateKeyStatus(); renderApiStats(); document.getElementById('modalOverlay').classList.add('show');
 }
 
-function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('remove'); document.getElementById('modalOverlay').classList.remove('show'); }
 
 function saveAndCloseModal(){
   saveKeys(); saveTabCount(); globalKeyRotator = null; 
