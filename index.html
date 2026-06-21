@@ -290,26 +290,61 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.3.3 (國內指數多重容錯版)</div>
+    <div class="v-box">核心版本：V4.3.4 (最終整合版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
 
 <div class="modal-overlay" id="manualOverlay">
   <div class="modal">
-    <h2>📖 使用說明</h2>
+    <h2>📖 系統使用說明</h2>
     <div class="manual-content">
-      <h3>一、基本操作</h3>
+      <h3>一、主要功能簡介</h3>
       <ul>
-        <li><strong>新增持股：</strong>輸入股票代號、數量、單位（張/股），可選填買入均價以計算總損益。</li>
-        <li><strong>編輯持股：</strong>點擊列表中的「✎」按鈕，可修改股票資訊。</li>
-        <li><strong>刪除持股：</strong>點擊列表中的「✕」按鈕。</li>
-        <li><strong>分頁管理：</strong>支援 1~5 個自訂分頁，可在「進階設定」中調整數量。</li>
-        <li><strong>主題切換：</strong>點擊右上角圖示切換多種介面主題。</li>
+        <li><strong>庫存即時記帳：</strong>輸入股票代號、庫存張/股數、買入均價，系統即自動幫您計算現值、今日損益與未實現總損益（ROI）。</li>
+        <li><strong>資產歷史存儲：</strong>收盤後可點擊「存儲今日損益總計」，將當日的資產總額與盈虧永久記錄在手機本地，建立長期資產曲線。</li>
+        <li><strong>多主題切換：</strong>點擊右上角 🌙 顆粒按鈕，可在極簡科技風、擬物化灰灰、優雅紫羅蘭等多種 3D 視覺主題間切換。</li>
       </ul>
-      <h3>二、API 設定與防呆</h3>
-      <p>系統支援主要與備用共兩組 Fugle Key。針對國內高股息 ETF (如 00878) 或槓桿型 ETF (如 00631L)，本版本已升級盤後多重欄位取值機制，在休市或非交易時段會自動抓取當日收盤價或參考價墊檔，絕不輕易斷價。</p>
-    </div><button type="button" class="modal-close" onclick="closeManual()">關閉說明</button>
+
+      <h3>二、分頁（組合）的靈活妙用 💡</h3>
+      <p>分頁數量可在進階設定中自訂（1~5 個），雙擊分頁標籤即可重新命名。您可以這樣規劃：</p>
+      <ul>
+        <li><strong>家人資產代管：</strong>將分頁命名為「我的庫存」、「老婆帳戶」、「小孩教育基金」，全家人的股票資產在同一台手機就能輕鬆分開管理、互不干擾。</li>
+        <li><strong>投資策略分流：</strong>建立「長期存股（領息）」與「波段短線（價差）」分頁，將不同核心邏輯的股票分開追蹤，避免績效混淆。</li>
+        <li><strong>市場動態觀察：</strong>建立一個「純觀察名單」分頁，只輸入代號、數量填 0 或不填均價，當作純看盤的即時自選股清單。</li>
+      </ul>
+
+      <h3>三、Fugle Key 報價更新原則與建議</h3>
+      <p>為避免觸發 Fugle API 的每分鐘速率限制，系統會根據您的金鑰數量與市場狀態<strong>自動進行智慧分流與調頻</strong>：</p>
+      <ul>
+        <li><strong>僅填一組 API Key：</strong>
+          <ul>
+            <li>盤中正常時段：每 <strong>20 秒</strong> 刷新一次。</li>
+            <li>若偶遇網路不穩或 429 限制：自動放緩至 <strong>30 秒</strong>。</li>
+          </ul>
+        </li>
+        <li><strong>填寫兩組 API Key（推薦 🌟）：</strong>
+          <ul>
+            <li>盤中正常時段：更新頻率提速至每 <strong>10 秒</strong> 一次！系統會採「輪流機制」調用主要與備用 Key，完美分散限額風險。</li>
+            <li>若偶遇錯誤：自動安全回退至 <strong>15 秒</strong>。</li>
+          </ul>
+        </li>
+      </ul>
+
+      <h3>四、Yahoo Finance 國外指數報價原則</h3>
+      <ul>
+        <li><strong>多層容錯防呆：</strong>全球國際指數直接透過高效能的邊緣代理網道（Cloudflare Worker）介接 Yahoo 數據。</li>
+        <li><strong>全時段不化白（—）：</strong>新版程式碼內建強大的防呆鏈，就算國際市場遇到盤後或清晨資料清洗，系統也會自動抓取昨收價或常規市場參考價補位，保證畫面不壞死。</li>
+      </ul>
+
+      <h3>五、補充注意事項與日常維護</h3>
+      <ul>
+        <li><strong>綠色本地儲存：</strong>本軟體不使用任何雲端資料庫，所有庫存與歷史損益均安全地儲存在您手機瀏覽器的本地空間中。</li>
+        <li><strong>定期匯出備份：</strong>當瀏覽器清除快取（或手機重置）時資料可能會遺失。建議每週或在有重大庫存變更後，至進階設定中點擊「📥 匯出備份」下載 json 檔案至電腦或雲端硬碟。</li>
+        <li><strong>智慧降頻省電：</strong>當系統偵測到全球市場皆處於休市時段（如台灣半夜且週末），輪詢計時器會自動放慢至 <strong>60 秒</strong>，以節省您的手機電力與流量。</li>
+      </ul>
+    </div>
+    <button type="button" class="modal-close" onclick="closeManual()">關閉說明</button>
   </div>
 </div>
 
@@ -323,7 +358,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <input type="number" id="editQtyInput" placeholder="數量" min="1" step="1" inputmode="numeric">
     <label>單位</label>
     <select id="editUnitSelect"><option value="張">張</option><option value="股">股</option></select>
-    <label>買入均價</label>
+    <label>買入均價 (留空或不填則不計算總損益)</label>
     <input type="number" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal">
     <button type="button" class="modal-close" onclick="saveEditStock()" style="background:var(--accent); color:#fff; text-shadow:none;">確認儲存</button>
     <button type="button" class="modal-close" onclick="closeEditModal()" style="margin-top:10px;">取消</button>
@@ -331,7 +366,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </div>
 
 <script>
-/* ========================================================= 🔧 API 管理引擎 V4.3.3 ========================================================= */
+/* ========================================================= 🔧 API 管理引擎 V4.3.4 ========================================================= */
 const PROXY_LIST = [
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
@@ -1054,7 +1089,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.3.3 已啟動 (國內指數多重容錯版)');
+console.log('股票庫存管理 V4.3.4 已啟動 (最終整合版)');
 </script>
 </body>
 </html>
