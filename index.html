@@ -354,11 +354,21 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <a class="btn-link" href="https://developer.fugle.tw/docs/key/" target="_blank">🔗 申請 Fugle API Key</a>
       </div>
       <label>Fugle API Key（主要）</label>
-      <input type="text" id="fugleKeyInput" placeholder="輸入第一組 Key" autocomplete="off">
+      <div style="display:flex;gap:8px;align-items:stretch;">
+        <input type="password" id="fugleKeyInput" placeholder="輸入第一組 Key" autocomplete="off" style="flex:1;">
+        <button type="button" onclick="toggleKeyVisibility('fugleKeyInput','keyToggle1')" id="keyToggle1" style="flex:0 0 44px;font-size:16px;">👁</button>
+      </div>
       <div><span class="key-status none" id="fugleKeyStatus">未設定</span></div>
       <label>Fugle API Key 2（備用）</label>
-      <input type="text" id="secondFugleKeyInput" placeholder="輸入第二組 Key（選填）" autocomplete="off">
+      <div style="display:flex;gap:8px;align-items:stretch;">
+        <input type="password" id="secondFugleKeyInput" placeholder="輸入第二組 Key（選填）" autocomplete="off" style="flex:1;">
+        <button type="button" onclick="toggleKeyVisibility('secondFugleKeyInput','keyToggle2')" id="keyToggle2" style="flex:0 0 44px;font-size:16px;">👁</button>
+      </div>
       <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
+      <div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:12px;box-shadow:inset 4px 4px 8px var(--s-dark),inset -4px -4px 8px var(--s-light);">
+        <div style="font-size:13px;color:var(--t-muted);font-weight:600;margin-bottom:8px;text-align:center;">📊 今日 API 使用量</div>
+        <div id="apiStatsBox"><div style="display:flex;justify-content:space-around;text-align:center;font-size:13px;color:var(--t-muted);"><div><div style="font-size:18px;font-weight:800;color:var(--t-main);">0</div><div>Fugle</div></div><div><div style="font-size:18px;font-weight:800;color:var(--t-main);">0</div><div>Yahoo</div></div><div><div style="font-size:18px;font-weight:800;color:var(--t-main);">0</div><div>Google</div></div></div></div>
+      </div>
     </div>
 
     <div class="backup-box">
@@ -369,7 +379,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V3.9.5 (列表數字縮小與防遮蔽優化版)</div>
+    <div class="v-box">核心版本：V4.0.0 (API 管理引擎整合版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -446,6 +456,114 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </div>
 
 <script>
+
+/* ========================================================= 🔧 API 管理引擎 V4.0 ========================================================= */
+const PROXY_LIST = [
+  'https://api.allorigins.win/raw?url=',
+  'https://corsproxy.io/?',
+  'https://api.codetabs.com/v1/proxy?quest=',
+  'https://thingproxy.freeboard.io/fetch/'
+];
+const API_TIMEOUT = 5000;
+const MAX_CONCURRENT_REQUESTS = 3;
+const MAX_CONSECUTIVE_ERRORS = 5;
+const PAUSE_DURATION_MS = 300000;
+
+class KeyRotator {
+  constructor(keys) { this.keys = keys.filter(k => k && k.trim() !== ''); this.index = 0; }
+  next() { if (this.keys.length === 0) return null; const k = this.keys[this.index % this.keys.length]; this.index++; return k; }
+  get count() { return this.keys.length; }
+}
+
+let globalKeyRotator = null;
+function getKeyRotator() {
+  const keys = [fugleKey, secondFugleKey].filter(k => k && k.trim() !== '');
+  if (!globalKeyRotator || globalKeyRotator.count !== keys.length) {
+    globalKeyRotator = new KeyRotator(keys);
+  }
+  return globalKeyRotator;
+}
+
+async function fetchWithProxy(targetUrl, proxyIndex = 0) {
+  if (proxyIndex >= PROXY_LIST.length) return null;
+  try {
+    const proxyUrl = PROXY_LIST[proxyIndex] + encodeURIComponent(targetUrl);
+    const resp = await fetch(proxyUrl, { signal: AbortSignal.timeout(API_TIMEOUT) });
+    if (!resp.ok) throw new Error('Proxy error');
+    return resp;
+  } catch (e) {
+    return fetchWithProxy(targetUrl, proxyIndex + 1);
+  }
+}
+
+let consecutiveErrors = 0;
+let apiPauseUntil = 0;
+
+function shouldPauseApi() {
+  if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+    if (Date.now() < apiPauseUntil) return true;
+    consecutiveErrors = 0;
+  }
+  return false;
+}
+
+function recordApiError() {
+  consecutiveErrors++;
+  if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+    apiPauseUntil = Date.now() + PAUSE_DURATION_MS;
+    try { localStorage.setItem('api_pause_until', String(apiPauseUntil)); } catch(e){}
+    showToast('API 連續失敗，暫停更新 5 分鐘');
+  }
+}
+
+function recordApiSuccess() {
+  if (consecutiveErrors > 0) {
+    consecutiveErrors = 0;
+    apiPauseUntil = 0;
+    try { localStorage.removeItem('api_pause_until'); } catch(e){}
+  }
+}
+
+function trackApiUsage(source) {
+  const today = new Date().toISOString().split('T')[0];
+  const key = `api_usage_${today}_${source}`;
+  const count = (parseInt(localStorage.getItem(key) || '0')) + 1;
+  try { localStorage.setItem(key, String(count)); } catch(e){}
+  return count;
+}
+
+function getApiUsageStats() {
+  const today = new Date().toISOString().split('T')[0];
+  return {
+    fugle: parseInt(localStorage.getItem(`api_usage_${today}_Fugle`) || '0'),
+    yahoo: parseInt(localStorage.getItem(`api_usage_${today}_Yahoo`) || '0'),
+    google: parseInt(localStorage.getItem(`api_usage_${today}_Google`) || '0')
+  };
+}
+
+function renderApiStats() {
+  const stats = getApiUsageStats();
+  const el = document.getElementById('apiStatsBox');
+  if (el) {
+    el.innerHTML = `<div style="display:flex;justify-content:space-around;text-align:center;font-size:13px;color:var(--t-muted);">
+      <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${stats.fugle}</div><div>Fugle</div></div>
+      <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${stats.yahoo}</div><div>Yahoo</div></div>
+      <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${stats.google}</div><div>Google</div></div>
+    </div>`;
+  }
+}
+
+function toggleKeyVisibility(inputId, btnId) {
+  const input = document.getElementById(inputId);
+  const btn = document.getElementById(btnId);
+  if (input.type === 'password') {
+    input.type = 'text'; btn.textContent = '🙈';
+  } else {
+    input.type = 'password'; btn.textContent = '👁';
+  }
+}
+
+
 let googleCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR65VYw1-a-i-uKJqR-SiC9XQ4O1IokgVoWCP35eH6rHLqNgk_A9ZFDDT8nniO5dzVLfPhS8m_9IfaA/pub?gid=0&single=true&output=csv';
 let currentTab = 0;
 let tabStocks = [[], [], [], [], []];
@@ -470,24 +588,27 @@ function loadState(){
     const ct=localStorage.getItem(CUR_TAB_KEY);if(ct!=null)currentTab=parseInt(ct);
     const tn=localStorage.getItem(TN_KEY);if(tn) tabNames=JSON.parse(tn);
     const tc=localStorage.getItem(TC_KEY);if(tc) tabCount=parseInt(tc);
-    
+    const pauseUntil = localStorage.getItem('api_pause_until');
+    if (pauseUntil) apiPauseUntil = parseInt(pauseUntil);
+
     for(let i=0; i<5; i++){
       const s=localStorage.getItem(getStockKey(i)); if(s) tabStocks[i]=JSON.parse(s);
       const r=localStorage.getItem(getRecordKey(i)); if(r) tabRecords[i]=JSON.parse(r);
     }
-    
+
     if(currentTab >= tabCount) currentTab = 0;
-    
+
     const t=localStorage.getItem(TK); applyThemeText(t);
     const cachedIdx = localStorage.getItem('tw_cached_indices');
     if(cachedIdx) { cachedGlobalIndices = JSON.parse(cachedIdx); if(cachedGlobalIndices.length > 0) renderGlobalIndices(cachedGlobalIndices); }
   }catch(e){console.error(e);}
-  
+
   document.getElementById('fugleKeyInput').value=fugleKey;
   document.getElementById('secondFugleKeyInput').value=secondFugleKey;
   document.getElementById('tabCountSelect').value=tabCount;
   updateKeyStatus(); 
   renderTabs();
+  renderApiStats();
 }
 
 function applyThemeText(t){
@@ -506,6 +627,7 @@ function saveKeys(){
   fugleKey=document.getElementById('fugleKeyInput').value.trim(); 
   secondFugleKey=document.getElementById('secondFugleKeyInput').value.trim(); 
   try{localStorage.setItem(FK,fugleKey);localStorage.setItem(SFK,secondFugleKey);}catch(e){} 
+  globalKeyRotator = null; // 重置 key rotator
   updateKeyStatus(); 
 }
 function saveRecords(){try{localStorage.setItem(getRecordKey(currentTab),JSON.stringify(tabRecords[currentTab]));}catch(e){}}
@@ -589,6 +711,7 @@ function updateKeyStatus(){
     if(val){el.textContent='✓ 已設定';el.className='key-status ok';}
     else{el.textContent='未設定';el.className='key-status none';}
   });
+  renderApiStats();
 }
 
 function renderGlobalIndices(indices) {
@@ -611,12 +734,14 @@ function renderGlobalIndices(indices) {
 
 async function fetchGlobalIndicesFromGoogle() {
   if (!googleCsvUrl || googleCsvUrl.includes('2PACX-xxxxxxxxx')) return;
+  if (navigator.onLine === false) return;
   try {
-    const response = await fetch(googleCsvUrl + '&cachebust=' + Date.now(), { signal: AbortSignal.timeout(5000) });
-    if (!response.ok) return; const text = await response.text();
+    const response = await fetch(googleCsvUrl + '&cachebust=' + Date.now(), { signal: AbortSignal.timeout(API_TIMEOUT) });
+    if (!response.ok) throw new Error('Network error');
+    const text = await response.text();
     const rows = text.split('\n').map(row => row.trim()).filter(row => row.length > 0);
     const parsedIndices = [];
-    for(let i = 1; i < rows.length; i++) {
+    for (let i = 1; i < rows.length; i++) {
       const columns = rows[i].split(','); if (columns.length < 3) continue;
       const name = columns[0].replace(/"/g, '').trim(); const price = parseFloat(columns[1]);
       let rawPctStr = columns[2].replace(/"/g, '').trim(); let pct = 0;
@@ -627,65 +752,103 @@ async function fetchGlobalIndicesFromGoogle() {
     }
     if (parsedIndices.length > 0) {
       cachedGlobalIndices = parsedIndices;
-      try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
+      trackApiUsage('Google');
+      try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); localStorage.setItem('tw_indices_cache_time', String(Date.now())); } catch(e){}
       renderGlobalIndices(cachedGlobalIndices);
     }
-  } catch (e) { console.error("Google Index Fetch Error:", e); }
+  } catch (e) {
+    console.error("Google Index Fetch Error:", e);
+    const cachedIdx = localStorage.getItem('tw_cached_indices');
+    if (cachedIdx) { try { renderGlobalIndices(JSON.parse(cachedIdx)); } catch(e2) {} }
+  }
 }
 
 async function fetchFugle(symbol){
-  const keys = [fugleKey, secondFugleKey].filter(k => k && k.trim() !== '');
-  if(keys.length === 0) return null;
-  const startIndex = fugleKeyIndex % keys.length; fugleKeyIndex++;
+  if (navigator.onLine === false) return null;
+  const kr = getKeyRotator();
+  if (kr.count === 0) return null;
   let hasError = false;
-  for(let i = 0; i < keys.length; i++){
-    const attemptIndex = (startIndex + i) % keys.length; const currentKey = keys[attemptIndex];
+  for (let i = 0; i < kr.count; i++){
+    const currentKey = kr.next();
     try {
-      const resp = await fetch(FUGLE + encodeURIComponent(symbol), { headers: {'X-API-KEY': currentKey}, signal: AbortSignal.timeout(4000) });
-      if(resp.ok){ const d = await resp.json(); if(d && d.lastPrice != null) return {price: d.lastPrice, change: d.change, changePercent: d.changePercent, source: 'Fugle'}; }
-      else if (resp.status === 429) { hasError = true; continue; }
+      const resp = await fetch(FUGLE + encodeURIComponent(symbol), {
+        headers: {'X-API-KEY': currentKey, 'X-Requested-With': 'StockPortfolioApp'},
+        signal: AbortSignal.timeout(API_TIMEOUT)
+      });
+      if (resp.ok) {
+        const d = await resp.json();
+        if (d && d.lastPrice != null) {
+          trackApiUsage('Fugle');
+          return {price: d.lastPrice, change: d.change, changePercent: d.changePercent, source: 'Fugle'};
+        }
+      } else if (resp.status === 429) {
+        hasError = true; continue;
+      }
     } catch(e) { hasError = true; continue; }
   }
-  if(hasError) return { error: true };
+  if (hasError) return { error: true };
   return null;
 }
 
 async function fetchYahoo(symbol){
+  if (navigator.onLine === false) return null;
   const tryFetch = async (suffix) => {
     try {
       const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}${suffix}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
-      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`;
-      const resp = await fetch(proxyUrl, { signal: AbortSignal.timeout(5000) });
-      if(!resp.ok) return null; const text = await resp.text(); const lines = text.trim().split('\n');
-      if(lines.length < 2) return null; const cols = lines[lines.length - 1].split(',');
-      if(cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
-      const price = parseFloat(cols[4]); const open = parseFloat(cols[1]);
-      const chg = +(price - open).toFixed(2); const pct = +((chg / open) * 100).toFixed(2);
+      const resp = await fetchWithProxy(yahooUrl);
+      if (!resp) return null;
+      const text = await resp.text();
+      const lines = text.trim().split('\n');
+      if (lines.length < 2) return null;
+      const cols = lines[lines.length - 1].split(',');
+      if (cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
+      const price = parseFloat(cols[4]);
+      const open = parseFloat(cols[1]);
+      const chg = +(price - open).toFixed(2);
+      const pct = +((chg / open) * 100).toFixed(2);
+      trackApiUsage('Yahoo');
       return {price, change: chg, changePercent: pct, source: 'Yahoo'};
     } catch(e) { return null; }
   };
-  let res = await tryFetch('.TW'); if(!res) res = await tryFetch('.TWO');
+  let res = await tryFetch('.TW');
+  if (!res) res = await tryFetch('.TWO');
   return res;
 }
 
 async function fetchWeightedIndex(){
-  const keys = [fugleKey, secondFugleKey].filter(k => k && k.trim() !== '');
-  if(keys.length > 0){
-    const startIndex = fugleKeyIndex % keys.length; fugleKeyIndex++;
-    for(let i = 0; i < keys.length; i++){
-      const attemptIndex = (startIndex + i) % keys.length;
-      try{
-        const resp = await fetch(FUGLE + 'IX0001', {headers: {'X-API-KEY': keys[attemptIndex]}, signal: AbortSignal.timeout(4000)});
-        if(resp.ok){ const d = await resp.json(); const p = d.lastPrice ?? d.closePrice ?? d.price; if(p != null) return {price: p, change: d.change, changePercent: d.changePercent, source: 'Fugle'}; }
-      }catch(e){}
+  if (navigator.onLine === false) return null;
+  const kr = getKeyRotator();
+  if (kr.count > 0){
+    for (let i = 0; i < kr.count; i++){
+      try {
+        const resp = await fetch(FUGLE + 'IX0001', {
+          headers: {'X-API-KEY': kr.next(), 'X-Requested-With': 'StockPortfolioApp'},
+          signal: AbortSignal.timeout(API_TIMEOUT)
+        });
+        if (resp.ok) {
+          const d = await resp.json();
+          const p = d.lastPrice ?? d.closePrice ?? d.price;
+          if (p != null) {
+            trackApiUsage('Fugle');
+            return {price: p, change: d.change, changePercent: d.changePercent, source: 'Fugle'};
+          }
+        }
+      } catch(e) {}
     }
   }
   try {
     const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`;
-    const resp = await fetch(proxyUrl);
-    if(resp.ok){ const text = await resp.text(); const lines = text.trim().split('\n'); const cols = lines[lines.length - 1].split(','); const price = parseFloat(cols[4]); const open = parseFloat(cols[1]); return {price, change: price - open, changePercent: ((price - open)/open)*100, source: 'Yahoo'}; }
-  }catch(e){}
+    const resp = await fetchWithProxy(yahooUrl);
+    if (resp) {
+      const text = await resp.text();
+      const lines = text.trim().split('\n');
+      const cols = lines[lines.length - 1].split(',');
+      const price = parseFloat(cols[4]);
+      const open = parseFloat(cols[1]);
+      trackApiUsage('Yahoo');
+      return {price, change: price - open, changePercent: ((price - open)/open)*100, source: 'Yahoo'};
+    }
+  } catch(e) {}
   return null;
 }
 
@@ -700,44 +863,59 @@ function isMarketClosed() {
 }
 
 async function refreshPrices(){
+  if (shouldPauseApi()) { console.log('API 暫停中，跳過本次更新'); return; }
+  if (navigator.onLine === false) { showToast('目前處於離線狀態'); return; }
   let apiErrorOccurred = false;
-  const idxR = await fetchWeightedIndex();
+  const idxR = fetchWeightedIndex();
   const idxEl = document.getElementById('idxPrice'); const idxChgEl = document.getElementById('idxChange');
   const idxPctEl = document.getElementById('idxPct'); const idxSrcEl = document.getElementById('idxSource');
-  if(idxR){
+  if (idxR){
     idxEl.textContent=idxR.price.toLocaleString('en-US',{maximumFractionDigits:0});
     idxChgEl.textContent=(idxR.change>=0?'+':'')+idxR.change.toFixed(2); idxChgEl.className=(idxR.change>=0?'up':'down');
     idxPctEl.textContent='('+(idxR.changePercent>=0?'+':'')+idxR.changePercent.toFixed(2)+'%)'; idxPctEl.className=(idxR.changePercent>=0?'up':'down');
     idxSrcEl.textContent='via '+idxR.source+' '+new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'});
   }
   fetchGlobalIndicesFromGoogle();
-  
   const currentStocks = tabStocks[currentTab];
-  const results = await Promise.all(currentStocks.map(async (s)=>{
-    let r = await fetchFugle(s.symbol);
-    if(r && r.error) { apiErrorOccurred = true; r = null; }
-    if(!r) r = await fetchYahoo(s.symbol);
-    return {s,r};
-  }));
-  
-  for(const {s,r} of results){
-    if(r){
-      s.price=r.price; s.change=r.change; s.changePercent=r.changePercent; s.source=r.source;
-      s.updateTime=new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'});
-      renderRow(s);
-    }
+  if (currentStocks.length === 0) return;
+  const uniqueSymbols = [...new Set(currentStocks.map(s => s.symbol))];
+  const batchSize = MAX_CONCURRENT_REQUESTS;
+  for (let i = 0; i < uniqueSymbols.length; i += batchSize) {
+    const batch = uniqueSymbols.slice(i, i + batchSize);
+    const promises = batch.map(async (sym) => {
+      let r = await fetchFugle(sym);
+      if (r && r.error) { apiErrorOccurred = true; r = null; }
+      if (!r) r = await fetchYahoo(sym);
+      return { sym, r };
+    });
+    const results = await Promise.allSettled(promises);
+    results.forEach((result) => {
+      if (result.status === 'fulfilled') {
+        const { sym, r } = result.value;
+        if (r) {
+          currentStocks.filter(s => s.symbol === sym).forEach(s => {
+            s.price=r.price; s.change=r.change; s.changePercent=r.changePercent; s.source=r.source;
+            s.updateTime=new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'});
+            renderRow(s);
+          });
+        }
+      }
+    });
   }
   updateSummary();
+  if (apiErrorOccurred) recordApiError(); else recordApiSuccess();
   adjustPollingInterval(apiErrorOccurred);
+  renderApiStats();
 }
 
 function adjustPollingInterval(hasError) {
-  const keys = [fugleKey, secondFugleKey].filter(k => k && k.trim() !== '');
-  const keyCount = keys.length;
+  const kr = getKeyRotator();
+  const keyCount = kr.count;
   let newInterval = currentInterval;
-
   if (isMarketClosed()) {
     newInterval = 60000;
+  } else if (shouldPauseApi()) {
+    newInterval = 300000;
   } else {
     if (hasError) {
       newInterval = keyCount === 2 ? 15000 : 30000;
@@ -745,7 +923,6 @@ function adjustPollingInterval(hasError) {
       newInterval = keyCount === 2 ? 10000 : 20000;
     }
   }
-
   if (newInterval !== currentInterval) {
     currentInterval = newInterval;
     clearInterval(pollTimer);
@@ -962,7 +1139,7 @@ function openModal(){
   document.getElementById('fugleKeyInput').value=fugleKey;
   document.getElementById('secondFugleKeyInput').value=secondFugleKey;
   document.getElementById('tabCountSelect').value=tabCount;
-  updateKeyStatus();document.getElementById('modalOverlay').classList.add('show');
+  updateKeyStatus(); renderApiStats(); document.getElementById('modalOverlay').classList.add('show');
 }
 
 // 增加只負責關閉，不儲存變更的新函數
@@ -973,6 +1150,7 @@ function closeModal() {
 function saveAndCloseModal(){
   saveKeys();
   saveTabCount();
+  globalKeyRotator = null; // 重置 key rotator
   document.getElementById('modalOverlay').classList.remove('show');
   showToast('設定已儲存，API更新頻率將動態調整');
 }
@@ -1050,7 +1228,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V3.9.5 已啟動 (列表數字縮小與防遮蔽優化版)');
+console.log('股票庫存管理 V4.0.0 已啟動 (API 管理引擎整合版)');
 </script>
 </body>
 </html>
