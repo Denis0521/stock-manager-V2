@@ -290,7 +290,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.3.4 (最終整合版)</div>
+    <div class="v-box">核心版本：V4.3.5 (盤後價格修復版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -391,6 +391,20 @@ function getKeyRotator() {
     globalKeyRotator = new KeyRotator(keys);
   }
   return globalKeyRotator;
+}
+
+
+/* ========================================================= 💾 價格緩存工具（盤後/異常降級用） ========================================================= */
+const lastKnownPrices = {};
+function cacheLastPrice(symbol, price) {
+  if (price != null) lastKnownPrices[symbol] = { price: price, time: Date.now() };
+}
+function getCachedPrice(symbol) {
+  const cached = lastKnownPrices[symbol];
+  if (!cached) return null;
+  // 24 小時內的緩存視為有效
+  if (Date.now() - cached.time < 86400000) return cached.price;
+  return null;
 }
 
 async function fetchWithProxy(targetUrl, proxyIndex = 0) {
@@ -676,21 +690,6 @@ async function fetchGlobalIndicesFromWorker() {
 }
 
 // 🛡️ 升級多欄位取值核心：徹底解決個股/ETF盤後與不定期 Null 的問題
-// 🛡️ 上次已知價格緩存（盤後/異常時降級使用）
-const lastKnownPrices = {};
-
-function cacheLastPrice(symbol, price) {
-  if (price != null) lastKnownPrices[symbol] = { price, time: Date.now() };
-}
-
-function getCachedPrice(symbol) {
-  const cached = lastKnownPrices[symbol];
-  if (!cached) return null;
-  // 24 小時內的緩存視為有效
-  if (Date.now() - cached.time < 86400000) return cached.price;
-  return null;
-}
-
 async function fetchFugle(symbol){
   if (navigator.onLine === false) return null;
   const kr = getKeyRotator();
@@ -707,8 +706,7 @@ async function fetchFugle(symbol){
         const d = await resp.json();
         // 💎 升級防呆鏈：最新成交價 ?? 當日收盤價 ?? 昨收價 ?? 開盤參考價 ?? 緩存價
         let p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
-        // 如果所有字段都是 null，嘗試使用緩存價格
-        if (p == null) p = getCachedPrice(symbol);
+        if (p == null) p = getCachedPrice(symbol); // 盤後所有字段為 null 時使用緩存
         if (p != null) {
           cacheLastPrice(symbol, p);
           trackApiUsage('Fugle');
@@ -865,7 +863,7 @@ async function refreshPrices(){
         if (r) {
           currentStocks.filter(s => s.symbol === sym).forEach(s => {
             s.price=r.price; s.change=r.change; s.changePercent=r.changePercent; s.source=r.source;
-            cacheLastPrice(s.symbol, r.price); // 🆕 緩存成功獲取的價格
+            cacheLastPrice(s.symbol, r.price); // 🆕 緩存成功價格供盤後使用
             const now = new Date();
             s.updateTime = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
             renderRow(s);
@@ -1140,7 +1138,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.3.4 已啟動 (最終整合版)');
+console.log('股票庫存管理 V4.3.5 已啟動 (盤後價格修復版)');
 </script>
 </body>
 </html>
