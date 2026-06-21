@@ -122,97 +122,28 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 .manual-content li { margin-bottom: 6px; }
 
 /* 進階設定：功能列並排樣式 */
-.settings-row { 
-  display: flex; 
-  gap: 12px; 
-  margin-bottom: 20px; 
-  align-items: stretch; 
-}
-.btn-manual-row { 
-  flex: 0 0 45%; 
-  padding: 12px 10px; 
-  font-size: 15px; 
-  color: var(--accent); 
-  margin: 0; 
-  white-space: nowrap;
-}
-.tab-count-wrapper { 
-  flex: 1; 
-  display: flex; 
-  flex-direction: column; 
-  justify-content: center; 
-  background: var(--bg); 
-  border-radius: 8px; 
-  box-shadow: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light); 
-  padding: 4px 12px; 
-}
-.tab-count-label { 
-  font-size: 12px; 
-  color: var(--t-muted); 
-  font-weight: 600; 
-  margin-bottom: 2px; 
-  text-align: left; 
-}
-.tab-count-wrapper select { 
-  width: 100%; 
-  box-shadow: none; 
-  padding: 4px 0; 
-  background: transparent; 
-  font-size: 15px; 
-}
+.settings-row { display: flex; gap: 12px; margin-bottom: 20px; align-items: stretch; }
+.btn-manual-row { flex: 0 0 45%; padding: 12px 10px; font-size: 15px; color: var(--accent); margin: 0; white-space: nowrap; }
+.tab-count-wrapper { flex: 1; display: flex; flex-direction: column; justify-content: center; background: var(--bg); border-radius: 8px; box-shadow: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light); padding: 4px 12px; }
+.tab-count-label { font-size: 12px; color: var(--t-muted); font-weight: 600; margin-bottom: 2px; text-align: left; }
+.tab-count-wrapper select { width: 100%; box-shadow: none; padding: 4px 0; background: transparent; font-size: 15px; }
 
 /* API 設定區塊樣式 */
-.api-section {
-  margin-bottom: 20px;
-  padding-top: 10px;
-  border-top: 1px solid var(--s-dark);
-}
-.api-link-box {
-  text-align: center; 
-  margin-bottom: 16px; 
-  padding: 10px;
-  background: var(--bg);
-  border-radius: 8px;
-  box-shadow: 3px 3px 6px var(--s-dark), -3px -3px 6px var(--s-light);
-}
+.api-section { margin-bottom: 20px; padding-top: 10px; border-top: 1px solid var(--s-dark); }
+.api-link-box { text-align: center; margin-bottom: 16px; padding: 10px; background: var(--bg); border-radius: 8px; box-shadow: 3px 3px 6px var(--s-dark), -3px -3px 6px var(--s-light); }
+
+/* 勾選清單樣式 (國際指數) */
+.checkbox-group { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; padding: 12px; background: var(--bg); border-radius: 8px; box-shadow: inset 3px 3px 6px var(--s-dark), inset -3px -3px 6px var(--s-light); }
+.checkbox-label { display: flex; align-items: center; gap: 6px; font-size: 15px; color: var(--t-main); font-weight: 600; cursor: pointer; width: calc(50% - 6px); }
+.checkbox-label input[type="checkbox"] { width: 18px; height: 18px; margin: 0; box-shadow: none; accent-color: var(--accent); }
+@media (min-width: 768px) { .checkbox-label { width: calc(33.33% - 8px); } }
 
 /* ========================================================= 🆕 進階設定全畫面樣式 ========================================================= */
-.modal.fullscreen-modal {
-  width: 100vw !important;
-  max-width: 100vw !important;
-  height: 100vh !important;
-  max-height: 100vh !important;
-  border-radius: 0;
-  padding: 18px 20px 20px !important;
-  margin: 0 !important;
-  border: none;
-  box-sizing: border-box;
-}
+.modal.fullscreen-modal { width: 100vw !important; max-width: 100vw !important; height: 100vh !important; max-height: 100vh !important; border-radius: 0; padding: 18px 20px 20px !important; margin: 0 !important; border: none; box-sizing: border-box; }
 
 /* 右上角關閉按鈕 (X) 樣式 */
-.btn-close-icon {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: transparent !important;
-  box-shadow: none !important;
-  color: var(--t-muted);
-  font-size: 24px;
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 50%;
-  text-shadow: none !important;
-  cursor: pointer;
-}
-
-.btn-close-icon:hover {
-  color: var(--t-main);
-  transform: scale(1.1);
-}
+.btn-close-icon { position: absolute; top: 15px; right: 15px; background: transparent !important; box-shadow: none !important; color: var(--t-muted); font-size: 24px; width: 40px; height: 40px; padding: 0; display: flex; justify-content: center; align-items: center; border-radius: 50%; text-shadow: none !important; cursor: pointer; }
+.btn-close-icon:hover { color: var(--t-main); transform: scale(1.1); }
 
 /* 📱 手機版限制最大寬度 (<= 767px) */
 @media (max-width: 767px) {
@@ -362,10 +293,16 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <button type="button" onclick="toggleKeyVisibility('secondFugleKeyInput','keyToggle2')" id="keyToggle2" style="flex:0 0 44px;font-size:16px;">👁</button>
       </div>
       <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
+      
       <div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:12px;box-shadow:inset 4px 4px 8px var(--s-dark),inset -4px -4px 8px var(--s-light);">
         <div style="font-size:13px;color:var(--t-muted);font-weight:600;margin-bottom:8px;text-align:center;">📊 今日 API 使用量</div>
         <div id="apiStatsBox"></div>
       </div>
+    </div>
+
+    <div class="api-section">
+      <div style="font-size:15px; color:var(--t-muted); font-weight:700; margin-bottom:4px; margin-left:4px;">🌍 國際指數顯示設定</div>
+      <div class="checkbox-group" id="foreignIndicesToggles"></div>
     </div>
 
     <div class="backup-box">
@@ -376,7 +313,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.1.1 (Worker 內建國際指數版)</div>
+    <div class="v-box">核心版本：V4.2.0 (多國市場智能輪詢版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -394,65 +331,19 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <li><strong>主題切換：</strong>點擊右上角圖示切換多種介面主題。</li>
       </ul>
 
-      <h3>二、分頁應用建議 💡</h3>
-      <p>分頁功能不僅可以分類不同類型的股票，還有許多實用的應用場景：</p>
+      <h3>二、API 設定與動態頻率</h3>
+      <p>為了避免超過 API 速率限制，系統會根據您輸入的 Key 數量以及<strong>全球股市開盤狀態</strong>自動調整頻率：</p>
       <ul>
-        <li><strong>家庭成員庫存：</strong>為每位家庭成員建立獨立分頁，例如「爸爸持股」、「媽媽持股」、「配偶帳戶」，方便統一管理全家資產。</li>
-        <li><strong>投資策略分類：</strong>將「長期存股」、「短線交易」、「ETF 配置」分開記錄，各自追蹤不同策略的績效。</li>
-        <li><strong>帳戶區隔：</strong>若您有多個券商帳戶，可分頁記錄「A 券商現股」、「B 券商當沖」，避免混淆。</li>
-        <li><strong>模擬倉位：</strong>建立一個「觀察名單」分頁，只輸入代號不設均價，追蹤有興趣但尚未買進的股票。</li>
-        <li><strong>歷史記錄獨立：</strong>每個分頁的歷史損益記錄完全獨立，方便分別檢視各個投資組合的長期績效。</li>
+        <li><strong>一組 API Key：</strong>正常情況下每 20 秒更新一次。</li>
+        <li><strong>兩組 API Key（推薦）：</strong>正常情況下每 10 秒更新一次，由兩組 Key 輪流請求。</li>
+        <li><strong>智能休市降頻：</strong>系統會自動判斷亞股（08:00-14:00）與美股（21:30-05:00）時段。若所有主要市場皆休市，將自動放緩至每分鐘更新一次，省電又省流量。</li>
       </ul>
 
-      <h3>三、API 設定與限制</h3>
-      <p>本軟體支援 <strong>Fugle API</strong> 以獲取即時股價。您可以在上方「進階設定」中輸入 API Key。</p>
+      <h3>三、國際指數報價</h3>
+      <p>除了台股加權指數外，國際股市透過 Cloudflare Worker 代理直接抓取 Yahoo Finance 即時資料，延遲極低。您可以在「進階設定」中勾選欲顯示的國際指數（支援道瓊、那斯達克、S&P 500、費半、日經、韓國）。</p>
 
-      <h3>四、一組 Key 與兩組 Key 的差異</h3>
-      <p>為了避免超過 API 速率限制而被禁用，系統會根據您輸入的 Key 數量<strong>動態調整</strong>更新頻率：</p>
-      <ul>
-        <li><strong>一組 API Key：</strong>
-          <ul>
-            <li>正常情況：每 <strong>20 秒</strong>更新一次。</li>
-            <li>發生錯誤時：降至每 <strong>30 秒</strong>更新一次。</li>
-          </ul>
-        </li>
-        <li><strong>兩組 API Key（主要 + 備用）：</strong>
-          <ul>
-            <li>正常情況：每 <strong>10 秒</strong>更新一次，請求會在兩組 Key 間輪詢。</li>
-            <li>發生錯誤時：降至每 <strong>15 秒</strong>更新一次。</li>
-          </ul>
-        </li>
-        <li><strong>收盤時間：</strong>
-          <ul>
-            <li>系統偵測到收盤（13:30 後或週末）時，自動調整為每 <strong>60 秒</strong>更新一次，以節省 API 額度。</li>
-          </ul>
-        </li>
-        <li><strong>連續錯誤保護：</strong>
-          <ul>
-            <li>若 API 連續 <strong>5 次</strong>請求失敗，系統會自動<strong>暫停更新 5 分鐘</strong>，避免帳號被臨時封鎖。</li>
-          </ul>
-        </li>
-      </ul>
-      <p>💡 <strong>建議：</strong>若需追蹤較多股票（超過 10 支），建議申請兩組 Key 以獲得更快的更新頻率並分散風險。</p>
-
-      <h3>五、資料備份</h3>
-      <p>您可以在進階設定中將庫存與歷史記錄匯出為 JSON 檔案，或從備份檔還原。建議定期備份，尤其在使用多個分頁管理大量資料時。</p>
-
-      <h3>六、國際指數報價說明</h3>
-      <p>除了台股加權指數外，國際股市指數透過內建的 <strong>Cloudflare Worker 代理</strong> 直接抓取 Yahoo Finance 即時資料。</p>
-      <ul>
-        <li><strong>為什麼不用 Fugle API？</strong> Fugle 的方案主要針對台股資料，國際指數需企業方案。使用 Cloudflare Worker 代理 Yahoo Finance 作為免費替代方案。</li>
-        <li><strong>延遲有多低？</strong> Cloudflare Worker 在全球邊緣節點執行，延遲僅 <strong>50~200 毫秒</strong>。搭配快取機制，實際資料延遲約 <strong>5~13 秒</strong>。</li>
-        <li><strong>更新頻率：</strong> 每 <strong>10 秒</strong>更新一次，達到接近即時的效果。</li>
-        <li><strong>支援指數：</strong> 道瓊工業指數（^DJI）、那斯達克指數（^IXIC）、S&P 500（^GSPC）、費城半導體指數（^SOX）、日經 225（^N225）、韓國 KOSPI（^KS11）。</li>
-      </ul>
-
-      <h3>七、常見問題</h3>
-      <ul>
-        <li><strong>為什麼時間戳顯示有時不更新？</strong> 若價格沒有變動，Fugle API 可能不會回傳新時間戳。這不代表系統故障，而是市場暫無成交。</li>
-        <li><strong>可以同時開啟多個分頁看不同投資組合嗎？</strong> 可以，但請注意每個分頁的股票都會獨立計算 API 請求次數，建議兩組 Key 以上再這樣使用。</li>
-        <li><strong>手機加入主畫面後可以離線使用嗎？</strong> 可以查看上次更新的價格與歷史記錄，但無法取得即時報價。離線時系統會自動暫停 API 更新。</li>
-      </ul>
+      <h3>四、離線使用與快取</h3>
+      <p>遇到斷網時，系統會自動讀取最後一次的快取報價，並在名稱旁標示 <code>(離線)</code>，待網路恢復後會自動重新連線。</p>
     </div><button type="button" class="modal-close" onclick="closeManual()">關閉說明</button>
   </div>
 </div>
@@ -475,8 +366,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </div>
 
 <script>
-
-/* ========================================================= 🔧 API 管理引擎 V4.0 ========================================================= */
+/* ========================================================= 🔧 API 管理引擎 V4.2 ========================================================= */
 const PROXY_LIST = [
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
@@ -581,8 +471,17 @@ function toggleKeyVisibility(inputId, btnId) {
 }
 
 
-let cfWorkerUrl = 'https://yahoo-index-proxy.denis0521.workers.dev'; // Cloudflare Worker 已內建
-let cfWorkerIndices = '^DJI,^IXIC,^GSPC,^SOX,^N225,^KS11'; // 道瓊/那斯達克/S&P500/費半/日經/韓國
+let cfWorkerUrl = 'https://yahoo-index-proxy.denis0521.workers.dev';
+const AVAILABLE_INDICES = [
+  { symbol: '^DJI', name: '道瓊工業' },
+  { symbol: '^IXIC', name: '那斯達克' },
+  { symbol: '^GSPC', name: 'S&P 500' },
+  { symbol: '^SOX', name: '費城半導體' },
+  { symbol: '^N225', name: '日經 225' },
+  { symbol: '^KS11', name: '韓國 KOSPI' }
+];
+let selectedForeignIndices = ['^DJI','^IXIC','^GSPC','^SOX','^N225','^KS11']; // 預設全開
+
 let currentTab = 0;
 let tabStocks = [[], [], [], [], []];
 let tabRecords = [[], [], [], [], []];
@@ -609,6 +508,9 @@ function loadState(){
     const pauseUntil = localStorage.getItem('api_pause_until');
     if (pauseUntil) apiPauseUntil = parseInt(pauseUntil);
 
+    const storedIndices = localStorage.getItem('tw_foreign_indices');
+    if (storedIndices) selectedForeignIndices = JSON.parse(storedIndices);
+
     for(let i=0; i<5; i++){
       const s=localStorage.getItem(getStockKey(i)); if(s) tabStocks[i]=JSON.parse(s);
       const r=localStorage.getItem(getRecordKey(i)); if(r) tabRecords[i]=JSON.parse(r);
@@ -618,7 +520,7 @@ function loadState(){
 
     const t=localStorage.getItem(TK); applyThemeText(t);
     const cachedIdx = localStorage.getItem('tw_cached_indices');
-    if(cachedIdx) { cachedGlobalIndices = JSON.parse(cachedIdx); if(cachedGlobalIndices.length > 0) renderGlobalIndices(cachedGlobalIndices); }
+    if(cachedIdx) { cachedGlobalIndices = JSON.parse(cachedIdx); if(cachedGlobalIndices.length > 0) renderGlobalIndices(cachedGlobalIndices, false); }
   }catch(e){console.error(e);}
 
   document.getElementById('fugleKeyInput').value=fugleKey;
@@ -645,7 +547,7 @@ function saveKeys(){
   fugleKey=document.getElementById('fugleKeyInput').value.trim(); 
   secondFugleKey=document.getElementById('secondFugleKeyInput').value.trim(); 
   try{localStorage.setItem(FK,fugleKey);localStorage.setItem(SFK,secondFugleKey);}catch(e){} 
-  globalKeyRotator = null; // 重置 key rotator
+  globalKeyRotator = null; 
   updateKeyStatus(); 
 }
 function saveRecords(){try{localStorage.setItem(getRecordKey(currentTab),JSON.stringify(tabRecords[currentTab]));}catch(e){}}
@@ -653,19 +555,10 @@ function saveRecords(){try{localStorage.setItem(getRecordKey(currentTab),JSON.st
 function saveTabCount(){ 
   const newCount = parseInt(document.getElementById('tabCountSelect').value);
   if(newCount === tabCount) return;
-  
   tabCount = newCount; 
   try{localStorage.setItem(TC_KEY, tabCount);}catch(e){}
-  
-  if(currentTab >= tabCount) { 
-    currentTab = 0; 
-    try{localStorage.setItem(CUR_TAB_KEY, currentTab);}catch(e){} 
-  }
-  
-  renderTabs(); 
-  renderAll();  
-  renderHistory(); 
-  refreshPrices(); 
+  if(currentTab >= tabCount) { currentTab = 0; try{localStorage.setItem(CUR_TAB_KEY, currentTab);}catch(e){} }
+  renderTabs(); renderAll(); renderHistory(); 
 }
 
 function toggleTheme(){
@@ -713,13 +606,9 @@ function renderTabs() {
   }
   
   const btns = container.querySelectorAll('.tab-btn');
-  if(tabCount >= 4) {
-    btns.forEach(b => b.style.fontSize = '14px');
-  } else if(tabCount === 3) {
-    btns.forEach(b => b.style.fontSize = '16px');
-  } else {
-    btns.forEach(b => b.style.fontSize = '18px');
-  }
+  if(tabCount >= 4) { btns.forEach(b => b.style.fontSize = '14px'); } 
+  else if(tabCount === 3) { btns.forEach(b => b.style.fontSize = '16px'); } 
+  else { btns.forEach(b => b.style.fontSize = '18px'); }
 }
 
 function updateKeyStatus(){
@@ -732,29 +621,44 @@ function updateKeyStatus(){
   renderApiStats();
 }
 
-function renderGlobalIndices(indices) {
+// 渲染國際指數清單 (Opt 1, Opt 4)
+function renderGlobalIndices(indices, isOffline = false) {
   const container = document.getElementById('idxScrollContainer');
   const boxes = container.querySelectorAll('.idx-card-box');
-  for(let i = 1; i < boxes.length; i++) boxes[i].remove();
+  for(let i = 1; i < boxes.length; i++) boxes[i].remove(); // 保留第一個(台股)
+
+  const offlineTag = isOffline ? '<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>' : '';
+
   indices.forEach(item => {
+    // 過濾未勾選的指數
+    if (!selectedForeignIndices.includes(item.symbol)) return;
+
     const card = document.createElement('div'); card.className = 'idx-card-box';
     const sign = item.pct >= 0 ? '+' : ''; const cls = item.pct >= 0 ? 'up' : 'down';
-    card.innerHTML = `<div class="idx-box-name">${item.name}</div>
+    card.innerHTML = `<div class="idx-box-name">${item.name}${offlineTag}</div>
       <div class="idx-box-price">${item.price.toLocaleString('en-US', {maximumFractionDigits:2})}</div>
       <div class="idx-box-change-row ${cls}">
         <span>${sign}${item.changeAmt.toFixed(2)}</span>
         <span>(${sign}${item.pct.toFixed(2)}%)</span>
       </div>
-      <div class="idx-box-src">via Yahoo</div>`;
+      <div class="idx-box-src">via Yahoo ${isOffline ? 'Cache' : ''}</div>`;
     container.appendChild(card);
   });
 }
 
 async function fetchGlobalIndicesFromWorker() {
   if (!cfWorkerUrl || cfWorkerUrl === '') return;
-  if (navigator.onLine === false) return;
+  if (selectedForeignIndices.length === 0) { renderGlobalIndices([], false); return; } // 若全沒勾選直接清空
+  
+  if (navigator.onLine === false) {
+    const cachedIdx = localStorage.getItem('tw_cached_indices');
+    if (cachedIdx) { try { renderGlobalIndices(JSON.parse(cachedIdx), true); } catch(e) {} }
+    return;
+  }
+  
   try {
-    const response = await fetch(`${cfWorkerUrl}/indices?symbols=${encodeURIComponent(cfWorkerIndices)}&_=${Date.now()}`, { 
+    const symbolsStr = selectedForeignIndices.join(',');
+    const response = await fetch(`${cfWorkerUrl}/indices?symbols=${encodeURIComponent(symbolsStr)}&_=${Date.now()}`, { 
       signal: AbortSignal.timeout(API_TIMEOUT),
       headers: { 'Accept': 'application/json' }
     });
@@ -762,21 +666,22 @@ async function fetchGlobalIndicesFromWorker() {
     const data = await response.json();
     if (data.indices && data.indices.length > 0) {
       const parsedIndices = data.indices.map(item => {
-        const price = item.price;
-        const changeAmt = item.change || 0;
-        const pct = item.changePercent || 0;
+        // 多層容錯防呆機制 (Opt 3)
+        const price = item.price ?? item.regularMarketPrice ?? item.previousClose ?? 0;
+        const changeAmt = item.change ?? item.regularMarketChange ?? 0;
+        const pct = item.changePercent ?? item.regularMarketChangePercent ?? 0;
         const name = item.name || item.symbol;
-        return { name, price, pct, changeAmt };
+        return { symbol: item.symbol, name, price, pct, changeAmt };
       });
       cachedGlobalIndices = parsedIndices;
       trackApiUsage('Yahoo');
-      try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); localStorage.setItem('tw_indices_cache_time', String(Date.now())); } catch(e){}
-      renderGlobalIndices(cachedGlobalIndices);
+      try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
+      renderGlobalIndices(cachedGlobalIndices, false);
     }
   } catch (e) {
     console.error("Worker Index Fetch Error:", e);
     const cachedIdx = localStorage.getItem('tw_cached_indices');
-    if (cachedIdx) { try { renderGlobalIndices(JSON.parse(cachedIdx)); } catch(e2) {} }
+    if (cachedIdx) { try { renderGlobalIndices(JSON.parse(cachedIdx), true); } catch(e2) {} }
   }
 }
 
@@ -794,7 +699,6 @@ async function fetchFugle(symbol){
       });
       if (resp.ok) {
         const d = await resp.json();
-        // 增強解析：ETF與指數可能回傳不同欄位，優先取最新價再往下取參考值
         const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
         if (p != null) {
           trackApiUsage('Fugle');
@@ -835,7 +739,7 @@ async function fetchYahoo(symbol){
 }
 
 async function fetchWeightedIndex(){
-  if (navigator.onLine === false) return null;
+  if (navigator.onLine === false) return null; // 離線直接不呼叫
   const kr = getKeyRotator();
   if (kr.count > 0){
     for (let i = 0; i < kr.count; i++){
@@ -846,7 +750,6 @@ async function fetchWeightedIndex(){
         });
         if (resp.ok) {
           const d = await resp.json();
-          // 支援盤後指數取值
           const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
           if (p != null) {
             trackApiUsage('Fugle');
@@ -856,29 +759,50 @@ async function fetchWeightedIndex(){
       } catch(e) {}
     }
   }
-  // 已依需求移除國內指數的 Yahoo Fallback，強制僅透過 Fugle 報價
   return null;
 }
 
-function isMarketClosed() {
+// 智能判定是否有任一主力市場正在開盤 (Opt 2)
+function isAnyMarketOpen() {
   const now = new Date();
   const day = now.getDay();
   const hour = now.getHours();
   const min = now.getMinutes();
-  if (day === 0 || day === 6) return true;
-  if (hour > 13 || (hour === 13 && min >= 30)) return true;
+
+  if (day === 0 || day === 6) return false; // 週末休市
+
+  const time = hour + min / 60;
+  // 台股與亞股活躍期: 08:00 ~ 14:00 (時間值 8 ~ 14)
+  if (time >= 8 && time <= 14) return true;
+  // 美股活躍期 (以夏令時間概算為準): 21:30 ~ 05:00 (時間值大於 21.5 或 小於 5)
+  if (time >= 21.5 || time <= 5) return true;
+
   return false;
 }
 
 async function refreshPrices(){
   if (shouldPauseApi()) { console.log('API 暫停中，跳過本次更新'); return; }
-  if (navigator.onLine === false) { showToast('目前處於離線狀態'); return; }
+  
+  const isOffline = navigator.onLine === false;
+  if (isOffline) { 
+    showToast('目前處於離線狀態，顯示快取資料'); 
+    // 為台股加上離線標籤
+    const twNameBox = document.querySelector('#idxScrollContainer .idx-card-box:first-child .idx-box-name');
+    if (twNameBox && !twNameBox.innerHTML.includes('(離線)')) {
+      twNameBox.innerHTML = `臺灣加權指數<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>`;
+    }
+  } else {
+    // 恢復台股名稱
+    const twNameBox = document.querySelector('#idxScrollContainer .idx-card-box:first-child .idx-box-name');
+    if (twNameBox) twNameBox.innerHTML = `臺灣加權指數`;
+  }
+
   let apiErrorOccurred = false;
   const idxR = fetchWeightedIndex();
   const idxEl = document.getElementById('idxPrice'); const idxChgEl = document.getElementById('idxChange');
   const idxPctEl = document.getElementById('idxPct'); const idxSrcEl = document.getElementById('idxSource');
+  
   if (idxR){
-    // 因為 fetchWeightedIndex 現在是 async，需加上 then 解析 (原先為直接調用但漏了await，這裡補充修正)
     idxR.then(res => {
       if(res) {
         idxEl.textContent=res.price.toLocaleString('en-US',{maximumFractionDigits:0});
@@ -889,6 +813,7 @@ async function refreshPrices(){
     });
   }
   fetchGlobalIndicesFromWorker();
+  
   const currentStocks = tabStocks[currentTab];
   if (currentStocks.length === 0) return;
   const uniqueSymbols = [...new Set(currentStocks.map(s => s.symbol))];
@@ -926,10 +851,11 @@ function adjustPollingInterval(hasError) {
   const kr = getKeyRotator();
   const keyCount = kr.count;
   let newInterval = currentInterval;
-  if (isMarketClosed()) {
-    newInterval = 60000;
-  } else if (shouldPauseApi()) {
+  
+  if (shouldPauseApi()) {
     newInterval = 300000;
+  } else if (!isAnyMarketOpen()) {
+    newInterval = 60000; // 所有主力市場都收盤時降頻
   } else {
     if (hasError) {
       newInterval = keyCount === 2 ? 15000 : 30000;
@@ -950,10 +876,7 @@ function renderRow(s){
   const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
   let p = s.price; let chg = s.change ?? 0;
   const symCont = el.querySelector('.sym-container');
-  if(symCont){
-    symCont.querySelector('.sym').textContent=s.symbol;
-    
-  }
+  if(symCont){ symCont.querySelector('.sym').textContent=s.symbol; }
   const qn=el.querySelector('.qty-cell');
   if(qn){
     qn.innerHTML=`<div style="line-height:1.2;font-size:inherit;">${s.displayQty} ${s.displayUnit}</div>
@@ -1083,9 +1006,7 @@ function openEditModal(id) {
   document.getElementById('editModalOverlay').classList.add('show');
 }
 
-function closeEditModal() {
-  document.getElementById('editModalOverlay').classList.remove('show');
-}
+function closeEditModal() { document.getElementById('editModalOverlay').classList.remove('show'); }
 
 function saveEditStock() {
   const id = document.getElementById('editId').value;
@@ -1146,11 +1067,26 @@ function renderHistory(){
   }
 }
 
+// 渲染進階設定對話框內的勾選清單
+function renderForeignIndicesToggles() {
+  const container = document.getElementById('foreignIndicesToggles');
+  if (!container) return;
+  container.innerHTML = AVAILABLE_INDICES.map(idx => `
+    <label class="checkbox-label">
+      <input type="checkbox" value="${idx.symbol}" ${selectedForeignIndices.includes(idx.symbol) ? 'checked' : ''}>
+      ${idx.name}
+    </label>
+  `).join('');
+}
+
 function openModal(){
   document.getElementById('fugleKeyInput').value=fugleKey;
   document.getElementById('secondFugleKeyInput').value=secondFugleKey;
   document.getElementById('tabCountSelect').value=tabCount;
-  updateKeyStatus(); renderApiStats(); document.getElementById('modalOverlay').classList.add('show');
+  updateKeyStatus(); 
+  renderApiStats(); 
+  renderForeignIndicesToggles(); // 載入勾選清單
+  document.getElementById('modalOverlay').classList.add('show');
 }
 
 function closeModal() {
@@ -1160,18 +1096,21 @@ function closeModal() {
 function saveAndCloseModal(){
   saveKeys();
   saveTabCount();
+  
+  // 儲存國際指數勾選狀態
+  const checkboxes = document.querySelectorAll('#foreignIndicesToggles input[type="checkbox"]');
+  selectedForeignIndices = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+  try { localStorage.setItem('tw_foreign_indices', JSON.stringify(selectedForeignIndices)); } catch(e){}
+
   globalKeyRotator = null; 
   document.getElementById('modalOverlay').classList.remove('show');
-  showToast('設定已儲存，API更新頻率將動態調整');
+  showToast('設定已儲存，更新頻率將智能調整');
+  
+  refreshPrices(); // 立即刷新顯示剛設定的指數
 }
 
-function openManual() {
-  document.getElementById('manualOverlay').classList.add('show');
-}
-
-function closeManual() {
-  document.getElementById('manualOverlay').classList.remove('show');
-}
+function openManual() { document.getElementById('manualOverlay').classList.add('show'); }
+function closeManual() { document.getElementById('manualOverlay').classList.remove('show'); }
 
 function formatPrice(p){
   if(p==null)return '—';
@@ -1186,7 +1125,8 @@ function exportData() {
   const dataToExport = {
     tabStocks: [localStorage.getItem(getStockKey(0)), localStorage.getItem(getStockKey(1)), localStorage.getItem(getStockKey(2)), localStorage.getItem(getStockKey(3)), localStorage.getItem(getStockKey(4))],
     tabRecords: [localStorage.getItem(getRecordKey(0)), localStorage.getItem(getRecordKey(1)), localStorage.getItem(getRecordKey(2)), localStorage.getItem(getRecordKey(3)), localStorage.getItem(getRecordKey(4))],
-    tabNames: localStorage.getItem(TN_KEY), fugleKey: localStorage.getItem(FK), secondFugleKey: localStorage.getItem(SFK), theme: localStorage.getItem(TK), tabCount: localStorage.getItem(TC_KEY)
+    tabNames: localStorage.getItem(TN_KEY), fugleKey: localStorage.getItem(FK), secondFugleKey: localStorage.getItem(SFK), theme: localStorage.getItem(TK), tabCount: localStorage.getItem(TC_KEY),
+    foreignIndices: localStorage.getItem('tw_foreign_indices') // 備份勾選狀態
   };
   const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -1216,6 +1156,7 @@ function importData(event) {
         if (data.secondFugleKey) localStorage.setItem(SFK, data.secondFugleKey);
         if (data.theme) localStorage.setItem(TK, data.theme);
         if (data.tabCount) localStorage.setItem(TC_KEY, data.tabCount);
+        if (data.foreignIndices) localStorage.setItem('tw_foreign_indices', data.foreignIndices);
         alert('🎉 備份還原成功！系統將為您重新載入頁面。');
         location.reload();
       }
@@ -1238,7 +1179,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.1.1 已啟動 (Worker 內建國際指數版)');
+console.log('股票庫存管理 V4.2.0 已啟動 (多國市場智能輪詢版)');
 </script>
 </body>
 </html>
