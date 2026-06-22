@@ -11,7 +11,8 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = '4.12.2';
+// 強制版本號升級，觸發清空舊的瀏覽器快取，確保吃到修復檔
+const APP_VER = '4.12.3';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -36,7 +37,6 @@ body.cement { --bg: #a3a8b0; --s-light: #c0c5cd; --s-dark: #868b93; --t-main: #2
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif; background:var(--bg); color:var(--t-main); padding:0 0 60px; min-height:100vh; font-size:15px; overflow-x:hidden; transition:background-color 0.4s ease, color 0.4s ease}
 input,select,button{font-family:inherit;font-size:inherit;outline:none;text-align:center}
 
-/* 方案 A 立體微光外框線 */
 .header, .tabs-bar, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .backup-box { 
   background: var(--bg); 
   box-shadow: 6px 6px 12px var(--s-dark), -6px -6px 12px var(--s-light); 
@@ -133,7 +133,6 @@ button:active, .tab-btn.active {
 .del-hist-btn { padding: 6px 12px; font-size: 14px; border-radius: 8px; }
 .hist-empty { color: var(--t-muted); font-size: 15px; text-align: center; padding: 20px; font-weight: 600; }
 
-/* 燈箱浮蓋層級設定 */
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
 .modal-overlay.show { display: flex; }
 .modal { 
@@ -302,6 +301,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </div>
 <div class="toast" id="toast"></div>
 
+<!-- 進階設定燈箱 -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal fullscreen-modal">
     <button type="button" class="btn-close-icon" onclick="closeModal()">✕</button>
@@ -351,11 +351,12 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.12.2 (核心除蟲版)</div>
+    <div class="v-box">核心版本：V4.12.3 (全面防呆修正崩潰版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
 
+<!-- 獨立二級燈箱結構節點群 -->
 <div class="modal-overlay" id="foreignIdxOverlay">
   <div class="modal">
     <h2>⚙️ 國外指數自選設定</h2>
@@ -452,7 +453,6 @@ function trackApiUsage(source) {
   return count;
 }
 
-// 修正點：補回原本漏載入的 api 歷史數據計數器防呆機制
 function getApiUsageStats() {
   const today = new Date().toISOString().split('T')[0];
   return {
@@ -623,52 +623,88 @@ async function refreshPrices(){
   saveHoldings(); updateSummary(); renderApiStats();
 }
 
+// 💡 核心除錯重點：加上 Number() 強制轉型安全鎖，防止遇到 localStorage 舊字串導致崩潰
 function renderRow(s){
   const el=document.querySelector('.srow[data-id="'+s.id+'"]');if(!el)return;
-  const isFund = s.symbol.length >= 5; const shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
-  let p = s.price, chg = s.change ?? 0;
-  const pEl=el.querySelector('.price'); if(p!=null){ pEl.textContent = formatPrice(p, isFund); pEl.className='price '+(chg>=0?'up':'down'); }
-  const cp=el.querySelector('.chgp'); if(s.changePercent!=null){cp.textContent=(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%';cp.className='chgp '+(s.changePercent>=0?'up':'down');}
-  const cg=el.querySelector('.chg'); if(s.change!=null){cg.textContent=(chg>=0?'+':'')+formatPrice(chg, isFund);cg.className='chg '+(chg>=0?'up':'down');}
-  const tp = el.querySelector('.today-pnl'); if(s.change!=null){ const todayPnl = Math.round(shares * chg); tp.textContent = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString(); tp.className = 'today-pnl ' + (todayPnl >= 0 ? 'up' : 'down'); }
+  const isFund = s.symbol.length >= 5; 
+  const safeQty = Number(s.displayQty || 0);
+  const shares = s.displayUnit === '張' ? safeQty * 1000 : safeQty;
+  const safeBp = Number(s.buyPrice || 0);
+  const hasBp = (s.buyPrice != null && safeBp > 0);
+  
+  let p = s.price != null ? Number(s.price) : null;
+  let chg = s.change != null ? Number(s.change) : 0;
+  
+  const pEl=el.querySelector('.price'); 
+  if(p!=null){ pEl.textContent = formatPrice(p, isFund); pEl.className='price '+(chg>=0?'up':'down'); }
+  const cp=el.querySelector('.chgp'); 
+  if(s.changePercent!=null){cp.textContent=(Number(s.changePercent)>=0?'+':'')+Number(s.changePercent).toFixed(2)+'%';cp.className='chgp '+(Number(s.changePercent)>=0?'up':'down');}
+  const cg=el.querySelector('.chg'); 
+  if(s.change!=null){cg.textContent=(chg>=0?'+':'')+formatPrice(chg, isFund);cg.className='chg '+(chg>=0?'up':'down');}
+  
+  const tp = el.querySelector('.today-pnl'); 
+  if(s.change!=null){ const todayPnl = Math.round(shares * chg); tp.textContent = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString(); tp.className = 'today-pnl ' + (todayPnl >= 0 ? 'up' : 'down'); }
+  
   let totalHtml = '—'; let totalValForClass = 0;
   if (p != null) {
     const mktValue = Math.round(shares * p);
-    if (s.buyPrice != null && s.buyPrice > 0) {
-      const cost = s.buyPrice * shares; const unPnl = Math.round(mktValue - cost); const roi = ((mktValue - cost) / cost) * 100;
+    if (hasBp) {
+      const cost = safeBp * shares; const unPnl = Math.round(mktValue - cost); const roi = ((mktValue - cost) / cost) * 100;
       totalValForClass = unPnl; totalHtml = `<div style="line-height:1.2;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div><div style="font-size:0.8em;opacity:0.85;margin-top:2px;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`;
     } else { totalHtml = `<div style="line-height:1.2;" class="neutral">—</div><div style="font-size:0.8em;opacity:0.6;margin-top:2px;" class="neutral">✎ 設均價</div>`; }
   }
   el.querySelector('.total').innerHTML = totalHtml; el.querySelector('.total').className = 'total ' + (totalValForClass >= 0 ? 'up' : 'down');
+  
+  const qn=el.querySelector('.qty-cell');
+  if(qn){
+    const qtyDisplayStr = isFund ? safeQty.toFixed(3) : safeQty;
+    const priceDisplayLabel = isFund ? '淨值 ' + (hasBp ? safeBp.toFixed(4) : '—') : '均價 ' + (hasBp ? safeBp : '—');
+    qn.innerHTML=`<div style="line-height:1.2;">${qtyDisplayStr} ${s.displayUnit}</div><div style="font-size:0.8em;color:var(--t-muted);margin-top:2px;">${priceDisplayLabel}</div>`;
+  }
 }
 
+// 💡 核心除錯重點：加上 Number() 強制轉型安全鎖
 function renderAll(){
   const body=document.getElementById('listBody'); const empty=document.getElementById('emptyState');
   const tableScroll=document.getElementById('tableScroll'); const sumArea = document.getElementById('summaryArea'); const saveArea = document.getElementById('saveArea');
   body.innerHTML=''; const currentStocks = tabStocks[currentTab];
   if(currentStocks.length===0){ empty.style.display='block';tableScroll.style.display='none';sumArea.style.display='none';saveArea.style.display='none';return; }
   empty.style.display='none';tableScroll.style.display='block';sumArea.style.display='block';saveArea.style.display='block';
+  
   for(const s of currentStocks){
     const div=document.createElement('div');div.className='srow';div.dataset.id=s.id; const isFund = s.symbol.length >= 5;
-    const shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty; let p = s.price, chg = s.change ?? 0;
-    let pStr = p!=null ? formatPrice(p, isFund) : '—'; const cgp = s.changePercent!=null ? (s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%' : '—';
-    let cgStr = s.change!=null ? (chg>=0?'+':'') + formatPrice(chg, isFund) : '—'; let tpStr = '—', tpClass = '';
+    const safeQty = Number(s.displayQty || 0);
+    const shares = s.displayUnit === '張' ? safeQty * 1000 : safeQty; 
+    const safeBp = Number(s.buyPrice || 0);
+    const hasBp = (s.buyPrice != null && safeBp > 0);
+    
+    let p = s.price != null ? Number(s.price) : null;
+    let chg = s.change != null ? Number(s.change) : 0;
+    
+    let pStr = p!=null ? formatPrice(p, isFund) : '—'; 
+    const cgp = s.changePercent!=null ? (Number(s.changePercent)>=0?'+':'')+Number(s.changePercent).toFixed(2)+'%' : '—';
+    let cgStr = s.change!=null ? (chg>=0?'+':'') + formatPrice(chg, isFund) : '—'; 
+    let tpStr = '—', tpClass = '';
+    
     if (s.change != null) { const todayPnl = Math.round(shares * chg); tpStr = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString(); tpClass = todayPnl >= 0 ? 'up' : 'down'; }
+    
     let totalHtml = '—'; let totalValForClass = 0;
     if (p != null) {
       const mktValue = Math.round(shares * p);
-      if (s.buyPrice != null && s.buyPrice > 0) {
-        const cost = s.buyPrice * shares; const unPnl = Math.round(mktValue - cost); const roi = ((mktValue - cost) / cost) * 100;
+      if (hasBp) {
+        const cost = safeBp * shares; const unPnl = Math.round(mktValue - cost); const roi = ((mktValue - cost) / cost) * 100;
         totalValForClass = unPnl; totalHtml = `<div style="line-height:1.2;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div><div style="font-size:0.8em;opacity:0.85;margin-top:2px;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`;
       } else { totalHtml = `<div style="line-height:1.2;" class="neutral">—</div><div style="font-size:0.8em;opacity:0.6;margin-top:2px;" class="neutral">✎ 設均價</div>`; }
     }
-    const qtyDisplayStr = isFund ? s.displayQty.toFixed(3) : s.displayQty;
-    const priceDisplayLabel = isFund ? '淨值 ' + (s.buyPrice||'—') : '均價 ' + (s.buyPrice||'—');
+    
+    const qtyDisplayStr = isFund ? safeQty.toFixed(3) : safeQty;
+    const priceDisplayLabel = isFund ? '淨值 ' + (hasBp ? safeBp.toFixed(4) : '—') : '均價 ' + (hasBp ? safeBp : '—');
     const nameSubTag = s.name ? `<div style="font-size:11px;color:var(--t-muted);margin-top:2px;max-width:100px;overflow:hidden;text-overflow:ellipsis;">${s.name}</div>` : '';
+    
     div.innerHTML= '<div class="sym-container"><div class="sym">'+s.symbol+'</div>'+nameSubTag+'</div>'+
     '<div class="qty-cell"><div style="line-height:1.2;">'+qtyDisplayStr+' '+s.displayUnit+'</div><div style="font-size:0.8em;color:var(--t-muted);margin-top:2px;">'+priceDisplayLabel+'</div></div>'+
     '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+
-    '<div class="chgp '+(s.changePercent!=null?(s.changePercent>=0?'up':'down'):'')+'">'+cgp+'</div>'+
+    '<div class="chgp '+(s.changePercent!=null?(Number(s.changePercent)>=0?'up':'down'):'')+'">'+cgp+'</div>'+
     '<div class="chg '+(s.change!=null?(chg>=0?'up':'down'):'')+'">'+cgStr+'</div>'+
     '<div class="today-pnl '+tpClass+'">'+tpStr+'</div>'+
     '<div class="total '+(totalValForClass>=0?'up':'down')+'">'+totalHtml+'</div>'+
@@ -681,8 +717,12 @@ function renderAll(){
 function updateSummary(){
   let pnl=0, asset=0, totalUnPnl=0; let hasUnPnl = false; const currentStocks = tabStocks[currentTab];
   for(const s of currentStocks){
-    const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty; let p=s.price??0, c=s.change??0; pnl += Math.round(sh * c); asset += Math.round(sh * p);
-    if (s.buyPrice != null && s.price != null && s.buyPrice > 0) { totalUnPnl += Math.round((s.price - s.buyPrice) * sh); hasUnPnl = true; }
+    const safeQty = Number(s.displayQty || 0);
+    const sh = s.displayUnit === '張' ? safeQty * 1000 : safeQty; 
+    let p = Number(s.price || 0), c = Number(s.change || 0); 
+    const safeBp = Number(s.buyPrice || 0);
+    pnl += Math.round(sh * c); asset += Math.round(sh * p);
+    if (s.buyPrice != null && s.price != null && safeBp > 0) { totalUnPnl += Math.round((Number(s.price) - safeBp) * sh); hasUnPnl = true; }
   }
   document.getElementById('totalPnl').textContent=(pnl>=0?'+':'')+pnl.toLocaleString(); document.getElementById('totalPnl').className='val '+(pnl>=0?'up':'down');
   document.getElementById('totalAsset').textContent = asset.toLocaleString(); const ue = document.getElementById('totalUnrealized');
@@ -695,9 +735,9 @@ function addStock(){
   let qty=parseFloat(document.getElementById('qtyInput').value);
   const unit=document.getElementById('unitSelect').value;
   let bp=parseFloat(document.getElementById('buyPriceInput').value);
+  
   if(!sym||isNaN(qty)||qty<=0){showToast('請輸入正確代號與數量/金額');return}
   
-  // 💡 金額換算與儲存 Bug 徹底修復：宣告一個變數儲存最終「推入 LocalStorage 陣列」的真實股數
   let finalQty = qty;
   if (sym.length >= 5 && currentInputIsAmountMode) {
     if (isNaN(bp) || bp <= 0) { showToast('金額申購模式下，申購淨值為必填項目！'); return; }
@@ -705,7 +745,6 @@ function addStock(){
   }
   const currentStocks = tabStocks[currentTab]; if(currentStocks.some(s=>s.symbol===sym)){showToast('此項目已存在');return}
   const id='s_'+Date.now();
-  // 💡 修正：確實將變數 finalQty 推入陣列中，這時不論是股票還是基金，明細表就會立刻列出來了！
   currentStocks.push({id, symbol:sym, displayQty:finalQty, displayUnit:unit, buyPrice:isNaN(bp)?null:bp, price:null, change:null, changePercent:null, name:''});
   saveHoldings(); renderAll();
   
@@ -750,7 +789,6 @@ function renderGlobalIndices(indices, isOffline = false) {
   });
 }
 
-// 🚀 核心修復點：補回您原始碼中被漏掉的 saveTabCount() 函式，分頁切換與數量調整現在完全正常復活了！
 function saveTabCount(){ 
   const newCount = parseInt(document.getElementById('tabCountSelect').value);
   if(newCount === tabCount) return;
@@ -761,7 +799,8 @@ function saveTabCount(){
 }
 
 function saveDailyPnl(){
-  let pnl=0,asset=0; const currentStocks = tabStocks[currentTab]; for(const s of currentStocks){ const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty; pnl += Math.round(sh * (s.change??0)); asset += Math.round(sh * (s.price??0)); }
+  let pnl=0,asset=0; const currentStocks = tabStocks[currentTab]; 
+  for(const s of currentStocks){ const safeQty = Number(s.displayQty || 0); const sh = s.displayUnit==='張' ? safeQty*1000 : safeQty; pnl += Math.round(sh * Number(s.change||0)); asset += Math.round(sh * Number(s.price||0)); }
   const n=new Date(); const ds=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0'); const ts=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
   tabRecords[currentTab].unshift({date:ds,time:ts,totalPnl:pnl,totalAsset:asset,timestamp:n.getTime()}); saveRecords(); renderHistory(); showToast('歷史存檔儲作成功');
 }
@@ -800,7 +839,7 @@ function renderForeignIdxConfigList() {
     row.innerHTML = `<div><div style="font-weight:700;">${idx.name}</div><div style="font-size:12px;color:var(--t-muted);">${idx.symbol}</div></div><button type="button" onclick="deleteForeignIdx(${index})" style="padding:4px 8px; border-radius:4px; box-shadow:2px 2px 4px var(--s-dark);">✕</button>`; container.appendChild(row);
   });
 }
-function formatPrice(p, isFund = false){ if(p==null) return '—'; return isFund ? p.toFixed(4) : p.toFixed(2); }
+function formatPrice(p, isFund = false){ if(p==null) return '—'; return isFund ? Number(p).toFixed(4) : Number(p).toFixed(2); }
 let toastTimer=null; function showToast(msg){ const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2000); }
 function exportData() {
   const out = { tabStocks: tabStocks, tabRecords: tabRecords, tabNames: tabNames, tabCount: tabCount, fugleKey: fugleKey };
@@ -821,7 +860,6 @@ function forceRefresh() { refresh(); } async function refresh() { await refreshP
 loadState(); renderAll(); renderHistory();
 heartbeatWorker.postMessage({ action: 'start', interval: currentInterval });
 
-/* 🚀 核心修復點：重置平級獨立燈箱節點遮罩層點擊關閉事件，全面解除分頁與彈窗失效衝突 */
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)closeManual();});
 document.getElementById('foreignIdxOverlay').addEventListener('click',function(e){if(e.target===this)closeForeignIdxModal();});
