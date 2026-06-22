@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stock-portfolio-v4.3.4'; // ⚠️ 版本號已升至 4.3.4，與 HTML 同步
+const CACHE_NAME = 'stock-portfolio-v4.5.0'; // ⚠️ 版本升級至 4.5.0
 const urlsToCache = [
   './',
   './index.html',
@@ -7,13 +7,9 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', event => {
-  self.skipWaiting(); // 強制立即啟用新版的 Service Worker
+  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Opened cache v4.1.0');
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
   );
 });
 
@@ -24,7 +20,7 @@ self.addEventListener('activate', event => {
         cacheNames.map(cacheName => {
           if (cacheName !== CACHE_NAME) {
             console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName); // 清除舊版快取
+            return caches.delete(cacheName);
           }
         })
       );
@@ -35,8 +31,6 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   const requestUrl = new URL(event.request.url);
-
-  // 絕對不快取 API 動態請求
   const isApiRequest = requestUrl.hostname.includes('api.fugle.tw') || 
                        requestUrl.hostname.includes('finance.yahoo.com') || 
                        requestUrl.hostname.includes('allorigins.win') || 
@@ -46,13 +40,10 @@ self.addEventListener('fetch', event => {
     event.respondWith(fetch(event.request));
     return;
   }
-
-  // 靜態檔案使用快取優先
   event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) return response;
-        return fetch(event.request);
-      })
+    caches.match(event.request).then(response => {
+      if (response) return response;
+      return fetch(event.request);
+    })
   );
 });

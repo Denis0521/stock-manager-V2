@@ -10,6 +10,15 @@
 <meta name="theme-color" id="themeColorMeta" content="#e0e5ec">
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
+<script>
+// 🚨 終極快取殺手：確保 PWA 絕對讀取最新版 V4.5.0
+const APP_VER = '4.5.0';
+if(localStorage.getItem('tw_app_version') !== APP_VER) {
+  localStorage.setItem('tw_app_version', APP_VER);
+  if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
+  setTimeout(() => location.reload(true), 200);
+}
+</script>
 <style>
 /* ========================================================= 🚀 核心變數引擎 ========================================================= */
 :root {
@@ -290,7 +299,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.3.4 (最終整合版)</div>
+    <div class="v-box">核心版本：V4.5.0 (全域觸控電擊喚醒版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -340,8 +349,8 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       <h3>五、補充注意事項與日常維護</h3>
       <ul>
         <li><strong>綠色本地儲存：</strong>本軟體不使用任何雲端資料庫，所有庫存與歷史損益均安全地儲存在您手機瀏覽器的本地空間中。</li>
+        <li><strong>強烈建議加入主畫面：</strong>為了避免在通訊軟體內建瀏覽器或無痕模式中流失庫存，請將本網頁「加入主畫面」當作獨立 APP 使用。</li>
         <li><strong>定期匯出備份：</strong>當瀏覽器清除快取（或手機重置）時資料可能會遺失。建議每週或在有重大庫存變更後，至進階設定中點擊「📥 匯出備份」下載 json 檔案至電腦或雲端硬碟。</li>
-        <li><strong>智慧降頻省電：</strong>當系統偵測到全球市場皆處於休市時段（如台灣半夜且週末），輪詢計時器會自動放慢至 <strong>60 秒</strong>，以節省您的手機電力與流量。</li>
       </ul>
     </div>
     <button type="button" class="modal-close" onclick="closeManual()">關閉說明</button>
@@ -366,7 +375,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </div>
 
 <script>
-/* ========================================================= 🔧 API 管理引擎 V4.3.4 ========================================================= */
+/* ========================================================= 🔧 API 管理引擎 V4.5.0 ========================================================= */
 const PROXY_LIST = [
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
@@ -487,7 +496,6 @@ let tabRecords = [[], [], [], [], []];
 let tabNames = ['分頁 1', '分頁 2', '分頁 3', '分頁 4', '分頁 5'];
 let tabCount = 3;
 let fugleKey='',secondFugleKey='';
-let fugleKeyIndex = 0;
 let pollTimer = null;
 let currentInterval = 30000;
 
@@ -515,8 +523,22 @@ function loadState(){
     if(currentTab >= tabCount) currentTab = 0;
 
     const t=localStorage.getItem(TK); applyThemeText(t);
+    
     const cachedIdx = localStorage.getItem('tw_cached_indices');
     if(cachedIdx) { cachedGlobalIndices = JSON.parse(cachedIdx); if(cachedGlobalIndices.length > 0) renderGlobalIndices(cachedGlobalIndices, false); }
+    
+    const cachedTwiiStr = localStorage.getItem('tw_cached_twii');
+    if (cachedTwiiStr) {
+      const res = JSON.parse(cachedTwiiStr);
+      const idxEl = document.getElementById('idxPrice');
+      const idxChgEl = document.getElementById('idxChange');
+      const idxPctEl = document.getElementById('idxPct');
+      const idxSrcEl = document.getElementById('idxSource');
+      if(idxEl) idxEl.textContent = res.price.toLocaleString('en-US',{maximumFractionDigits:0});
+      if(idxChgEl) { idxChgEl.textContent = (res.change>=0?'+':'')+res.change.toFixed(2); idxChgEl.className = (res.change>=0?'up':'down'); }
+      if(idxPctEl) { idxPctEl.textContent = '('+(res.changePercent>=0?'+':'')+res.changePercent.toFixed(2)+'%)'; idxPctEl.className = (res.changePercent>=0?'up':'down'); }
+      if(idxSrcEl) { idxSrcEl.textContent = 'via ' + res.source + ' (快取)'; }
+    }
   }catch(e){console.error(e);}
 
   document.getElementById('fugleKeyInput').value=fugleKey;
@@ -571,7 +593,10 @@ function toggleTheme(){
 function switchTab(tabIndex){
   if(currentTab === tabIndex) return;
   currentTab = tabIndex; try{localStorage.setItem(CUR_TAB_KEY, currentTab);}catch(e){}
-  renderTabs(); renderAll(); renderHistory(); refreshPrices();
+  renderTabs(); renderAll(); renderHistory(); 
+  
+  // 💡 聽你的！每次翻分頁，自動在背景做一次無痕強制解鎖與刷新
+  forceRefresh(); 
 }
 
 function renameTab(tabIndex) {
@@ -669,7 +694,6 @@ async function fetchGlobalIndicesFromWorker() {
       }
     }
   } catch (e) {
-    console.error("Worker Index Fetch Error:", e);
     const cachedIdx = localStorage.getItem('tw_cached_indices');
     if (cachedIdx) { try { renderGlobalIndices(JSON.parse(cachedIdx), true); } catch(e2) {} }
   }
@@ -746,6 +770,27 @@ async function fetchWeightedIndex(){
       } catch(e) {}
     }
   }
+  
+  try {
+    const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
+    const resp = await fetchWithProxy(yahooUrl);
+    if (resp) {
+      const text = await resp.text();
+      const lines = text.trim().split('\n');
+      if (lines.length >= 2) {
+        const cols = lines[lines.length - 1].split(',');
+        if (cols.length >= 6 && cols[4] !== 'null' && cols[1] !== 'null') {
+          const price = parseFloat(cols[4]);
+          const open = parseFloat(cols[1]);
+          const chg = +(price - open).toFixed(2);
+          const pct = +((chg / open) * 100).toFixed(2);
+          trackApiUsage('Yahoo');
+          return {price, change: chg, changePercent: pct, source: 'Yahoo'};
+        }
+      }
+    }
+  } catch(e) {}
+
   return null;
 }
 
@@ -759,8 +804,6 @@ function isAnyMarketOpen() {
 }
 
 async function refreshPrices(){
-  if (shouldPauseApi()) { console.log('API 暫停中，跳過本次更新'); return; }
-  
   const isOffline = navigator.onLine === false;
   if (isOffline) { 
     showToast('目前處於離線狀態，顯示快取資料'); 
@@ -785,6 +828,7 @@ async function refreshPrices(){
         idxChgEl.textContent=(res.change>=0?'+':'')+res.change.toFixed(2); idxChgEl.className=(res.change>=0?'up':'down');
         idxPctEl.textContent='('+(res.changePercent>=0?'+':'')+res.changePercent.toFixed(2)+'%)'; idxPctEl.className=(res.changePercent>=0?'up':'down');
         idxSrcEl.textContent='via '+res.source+' '+new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'});
+        try { localStorage.setItem('tw_cached_twii', JSON.stringify(res)); } catch(e){}
       }
     });
   }
@@ -803,7 +847,6 @@ async function refreshPrices(){
       return { sym, r };
     });
     
-    // 💡 修正 1：掃描所有分頁 (0~4)，同步更新所有出現過該代號的持股報價
     const results = await Promise.allSettled(promises);
     results.forEach((result) => {
       if (result.status === 'fulfilled') {
@@ -952,7 +995,7 @@ function addStock(){
   currentStocks.push({id,symbol:sym,displayQty:qty,displayUnit:unit,buyPrice:buyPrice,shares:unit==='張'?qty*1000:qty,price:null,change:null,changePercent:null});
   saveHoldings();renderAll();
   document.getElementById('symInput').value=''; document.getElementById('qtyInput').value=''; document.getElementById('buyPriceInput').value='';
-  showToast('已新增 '+sym);refreshPrices();
+  showToast('已新增 '+sym); forceRefresh();
 }
 
 function deleteStock(id){
@@ -986,7 +1029,7 @@ function saveEditStock() {
   s.shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
   const nbp = document.getElementById('editBuyPriceInput').value; const bpNum = parseFloat(nbp);
   s.buyPrice = (isNaN(bpNum) || bpNum <= 0) ? null : bpNum;
-  saveHoldings(); renderAll(); closeEditModal(); showToast('已修改'); refreshPrices();
+  saveHoldings(); renderAll(); closeEditModal(); showToast('已修改'); forceRefresh();
 }
 
 function saveDailyPnl(){
@@ -1020,8 +1063,10 @@ function openModal(){
 function closeModal() { document.getElementById('modalOverlay').classList.remove('remove'); document.getElementById('modalOverlay').classList.remove('show'); }
 
 function saveAndCloseModal(){
-  saveKeys(); saveTabCount(); globalKeyRotator = null; 
-  document.getElementById('modalOverlay').classList.remove('show'); showToast('設定已儲存'); refreshPrices(); 
+  saveKeys(); saveTabCount(); 
+  document.getElementById('modalOverlay').classList.remove('show'); 
+  showToast('設定已儲存'); 
+  forceRefresh(); 
 }
 
 function openManual() { document.getElementById('manualOverlay').classList.add('show'); }
@@ -1075,29 +1120,64 @@ function importData(event) {
   reader.readAsText(file);
 }
 
-// 💡 修正 2：加入執行鎖定機制與可見度變化偵測
+// ==========================================
+// 💣 核心引擎與全域觸控電擊喚醒機制 (V4.5.0)
+// ==========================================
+let lastRefreshTime = 0;
+let lastSuccessTime = 0;
 let isRefreshing = false;
-async function refresh() {
-  if (isRefreshing) return;
-  isRefreshing = true;
-  try {
-    await refreshPrices();
-  } finally {
-    isRefreshing = false;
-  }
+
+// 完全依照你的建議：在背景偷偷執行重置解鎖與刷新
+function forceRefresh() {
+  globalKeyRotator = null; // 暴力重置金鑰鎖定
+  lastRefreshTime = 0;
+  isRefreshing = false;
+  consecutiveErrors = 0;
+  apiPauseUntil = 0;
+  refresh();
 }
 
+async function refresh() {
+  const now = Date.now();
+  if (isRefreshing && now - lastRefreshTime > 8000) { isRefreshing = false; }
+  if (isRefreshing || now - lastRefreshTime < 2000) return;
+  
+  isRefreshing = true;
+  lastRefreshTime = now;
+  try { 
+    await refreshPrices(); 
+    lastSuccessTime = Date.now(); // 記錄最後成功抓取報價的時間
+  } 
+  catch(e) { console.error('Refresh Error:', e); } 
+  finally { isRefreshing = false; }
+}
+
+// 💡 終極大絕招：全域觸控電擊 (Global Touch Defibrillator)
+// 只要你滑動螢幕、點擊分頁、或觸碰任何地方，只要超過 15 秒沒更新，系統就偷偷在背景「電擊心臟」強迫更新
+function handleTouchWakeup() {
+  const now = Date.now();
+  if (now - lastSuccessTime > 15000 && !isRefreshing) {
+    forceRefresh();
+  }
+}
+document.addEventListener('touchstart', handleTouchWakeup, { passive: true });
+document.addEventListener('click', handleTouchWakeup, { passive: true });
+
+
+// 初始化載入
 loadState(); renderAll(); renderHistory();
-setTimeout(refresh, 300);
+
+// 1. 開機時強制無痕刷新
+setTimeout(forceRefresh, 500);  
+
 pollTimer = setInterval(refresh, currentInterval);
 
-// 💡 手機切換回前景時，自動強迫刷新
+// 2. 切換回畫面時強制無痕刷新
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') {
-    refresh();
-  }
+  if (document.visibilityState === 'visible') { forceRefresh(); }
 });
 
+// 監聽鍵盤輸入與彈窗關閉
 document.getElementById('symInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); } });
 document.getElementById('qtyInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('buyPriceInput').focus(); } });
 document.getElementById('buyPriceInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); addStock(); } });
@@ -1105,7 +1185,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.3.4 已啟動 (包含跨頁同步與喚醒修正版)');
+console.log('股票庫存管理 V4.5.0 已啟動 (加入全域觸控電擊解鎖版)');
 </script>
 </body>
 </html>
