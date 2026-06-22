@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-// 確保讀取最新版 V4.10.0
-const APP_VER = '4.10.0';
+// 確保讀取最新版 V4.11.0
+const APP_VER = '4.11.0';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -299,7 +299,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.10.0 (台積電ADR與詳細說明版)</div>
+    <div class="v-box">核心版本：V4.11.0 (歷史紀錄修復版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -367,7 +367,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </div>
 
 <script>
-/* ========================================================= 🔧 API 管理引擎 V4.10.0 ========================================================= */
+/* ========================================================= 🔧 API 管理引擎 V4.11.0 ========================================================= */
 const PROXY_LIST = [
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
@@ -440,7 +440,6 @@ function toggleKeyVisibility(inputId, btnId) {
 
 let cfWorkerUrl = 'https://yahoo-index-proxy.denis0521.workers.dev';
 
-// 💡 增加 TSM (台積電ADR) 於費城半導體指數右邊
 const AVAILABLE_INDICES = [
   { symbol: '^DJI', name: '道瓊工業指數' },
   { symbol: '^IXIC', name: '那斯達克指數' },
@@ -792,7 +791,7 @@ async function refreshPrices(){
   const currentStocks = tabStocks[currentTab];
   if (currentStocks.length === 0) return;
   const uniqueSymbols = [...new Set(currentStocks.map(s => s.symbol))];
-  const batchSize = 3;
+  const batchSize = MAX_CONCURRENT_REQUESTS;
   
   let hasUpdates = false; 
   
@@ -1022,6 +1021,32 @@ function deleteHistory(timestamp) {
   saveRecords();renderHistory();showToast('記錄已刪除');
 }
 
+// 💡 補回的畫出歷史紀錄函式
+function renderHistory(){
+  const hb = document.getElementById('historyBody');
+  if(!hb) return;
+  hb.innerHTML = '';
+  const currentRecords = tabRecords[currentTab];
+  if(currentRecords.length === 0){
+    hb.innerHTML = '<div class="hist-empty">尚無記錄</div>';
+    return;
+  }
+  for(const r of currentRecords){
+    const div = document.createElement('div');
+    div.className = 'hist-item';
+    const pnlStr = (r.totalPnl >= 0 ? '+' : '') + r.totalPnl.toLocaleString();
+    const pnlClass = r.totalPnl >= 0 ? 'up' : 'down';
+    div.innerHTML = `
+      <div class="hist-item-left">
+        <span class="hdate">${r.date} ${r.time}</span>
+        <span class="hval ${pnlClass}">${pnlStr}</span>
+      </div>
+      <button type="button" class="del-hist-btn" onclick="deleteHistory(${r.timestamp})">刪除</button>
+    `;
+    hb.appendChild(div);
+  }
+}
+
 function openModal(){
   document.getElementById('fugleKeyInput').value=fugleKey;
   document.getElementById('secondFugleKeyInput').value=secondFugleKey;
@@ -1090,7 +1115,7 @@ function importData(event) {
 }
 
 // ==========================================
-// 💡 V4.10.0 獨立背景心跳引擎 (Web Worker)
+// 💡 V4.11.0 獨立背景心跳引擎 (Web Worker)
 // ==========================================
 let lastRefreshTime = 0;
 let lastSuccessTime = 0;
@@ -1169,7 +1194,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.10.0 已啟動 (包含豐富說明書與台積電ADR)');
+console.log('股票庫存管理 V4.11.0 已啟動 (修復歷史紀錄儲存顯示錯誤)');
 </script>
 </body>
 </html>
