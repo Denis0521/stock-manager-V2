@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-// 確保讀取最新版 V4.9.0
-const APP_VER = '4.9.0';
+// 確保讀取最新版 V4.10.0
+const APP_VER = '4.10.0';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -39,7 +39,6 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .header, .tabs-bar, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .backup-box { background: var(--bg); border: none; box-shadow: 6px 6px 12px var(--s-dark), -6px -6px 12px var(--s-light); border-radius: 12px; transition: background-color 0.4s ease, box-shadow 0.4s ease; }
 .header { border-radius: 0 0 16px 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
 .header h1 { font-size: 22px; font-weight: 700; color: var(--t-main); user-select: none; }
-.header h1:active { opacity: 0.6; }
 .header .hdr-right { display: flex; gap: 8px; }
 
 .tabs-bar { padding: 6px 10px; margin: 8px 10px; gap: 8px; display: flex; }
@@ -192,7 +191,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </head>
 <body>
 <div class="header">
-  <h1 onclick="forceRefresh()" style="cursor:pointer;" title="點擊強制更新報價">股票庫存管理</h1>
+  <h1>股票庫存管理</h1>
   <div class="hdr-right">
     <button type="button" class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙</button>
     <button type="button" class="btn-adv" onclick="openModal()">進階</button>
@@ -300,7 +299,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.9.0 (獨立心跳引擎版)</div>
+    <div class="v-box">核心版本：V4.10.0 (台積電ADR與詳細說明版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -309,13 +308,42 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   <div class="modal">
     <h2>📖 系統使用說明</h2>
     <div class="manual-content">
-      <h3>一、主要功能簡介</h3>
+      <h3>一、基本操作與介面</h3>
       <ul>
-        <li><strong>庫存即時記帳：</strong>輸入股票代號、庫存張/股數、買入均價，系統即自動幫您計算現值、今日損益與未實現總損益。</li>
+        <li><strong>記帳與損益：</strong>輸入股票代號、張/股數及買入均價。系統會自動計算目前總現值、今日損益與總未實現損益（ROI）。</li>
+        <li><strong>資產歷史存檔：</strong>每日收盤後，可點擊「存儲今日損益總計」，系統會將當日的資產結算記錄永久存放在手機內，幫您建立長期的資產變化曲線。</li>
+        <li><strong>佈景主題：</strong>點擊右上角「🌙」圖示，即可在極簡科技風、優雅紫羅蘭等多種 3D 擬物化色彩間隨心切換。</li>
+      </ul>
+
+      <h3>二、分頁（組合）的靈活妙用 💡</h3>
+      <p>進階設定中最多可開啟 5 個分頁，雙擊標籤即可重新命名。強烈建議這樣規劃：</p>
+      <ul>
+        <li><strong>家人資產代管：</strong>將分頁命名為「我的庫存」、「老婆帳戶」、「小孩教育金」，一台手機就能輕鬆分開管理全家資產、互不干擾。</li>
+        <li><strong>投資策略分流：</strong>建立「長期存股」與「短線波段」分頁，將不同核心邏輯的股票分開追蹤，避免被短期波動影響長期領息心態。</li>
+        <li><strong>純觀察看盤：</strong>建立一個「自選觀察」分頁，只要輸入代號，數量填 0 或不填均價，它就會變成一個極簡純粹的即時報價面板。</li>
+      </ul>
+
+      <h3>三、Fugle API Key 報價引擎原則</h3>
+      <p>為避免觸發免費 API 每分鐘的流量限制，本系統具備智慧防呆與雙金鑰輪替引擎：</p>
+      <ul>
+        <li><strong>單組 Key 模式：</strong>盤中正常時每 <strong>20 秒</strong> 刷新一次；若遇到 API 限制，系統會自動切換至 Yahoo 備援並放慢至 30 秒。</li>
+        <li><strong>雙組 Key 模式（強烈推薦 🌟）：</strong>只要填入兩組 Key，更新頻率將直接提速至每 <strong>10 秒</strong>！系統會完美「左右開弓」輪流調用兩組金鑰，徹底分散限額風險，讓報價如流水般順暢。</li>
+      </ul>
+
+      <h3>四、國際指數報價原則 (Yahoo 備援)</h3>
+      <ul>
+        <li><strong>無懼休市斷線：</strong>國際大盤（含道瓊、那斯達克、費半及台積電 ADR 等）與台股備援，均採用高效邊緣節點（Cloudflare Worker）介接 Yahoo 報價。</li>
+        <li><strong>強效防呆快取：</strong>當全球市場進入盤後或清晨資料清洗期，系統會自動抓取「昨收價」或「常規市場參考價」補位。即便網路斷線，也會優先顯示手機內最新的暫存檔，確保畫面永遠有數據。</li>
+      </ul>
+
+      <h3>五、綠色本地儲存與備份重要性 ⚠️</h3>
+      <ul>
+        <li><strong>絕對隱私：</strong>本軟體不使用任何雲端資料庫，您的庫存、損益與歷史紀錄 100% 存放在您手機瀏覽器的「本地儲存空間 (Local Storage)」中。</li>
+        <li><strong>防止資料遺失（非常重要）：</strong>因為資料存在本地，如果您的手機清除了瀏覽器快取、開啟了無痕模式，或是更換了新手機，資料就會歸零。<strong>請務必將本網頁「加入主畫面」當作獨立 APP 使用</strong>，並養成每週點擊「📥 匯出備份」的習慣，將 JSON 檔妥善保存！</li>
       </ul>
       
-      <h3>二、如何強制更新報價？</h3>
-      <p>如果發現系統剛打開時因為網路延遲而沒跳數字，請直接在<strong>螢幕空白處滑動或點擊</strong>，系統就會瞬間在背景強制抓取最新資料！</p>
+      <h3>六、強制喚醒技巧</h3>
+      <p>手機系統常會將背景程式休眠。若打開 APP 時報價未即時跳動，只要<strong>手指輕觸螢幕滑動或點擊任意空白處</strong>，系統內部的「心跳引擎」便會被瞬間喚醒，強迫於背景更新最新報價！</p>
     </div>
     <button type="button" class="modal-close" onclick="closeManual()">關閉說明</button>
   </div>
@@ -339,7 +367,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </div>
 
 <script>
-/* ========================================================= 🔧 API 管理引擎 V4.9.0 ========================================================= */
+/* ========================================================= 🔧 API 管理引擎 V4.10.0 ========================================================= */
 const PROXY_LIST = [
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
@@ -411,11 +439,14 @@ function toggleKeyVisibility(inputId, btnId) {
 }
 
 let cfWorkerUrl = 'https://yahoo-index-proxy.denis0521.workers.dev';
+
+// 💡 增加 TSM (台積電ADR) 於費城半導體指數右邊
 const AVAILABLE_INDICES = [
   { symbol: '^DJI', name: '道瓊工業指數' },
   { symbol: '^IXIC', name: '那斯達克指數' },
   { symbol: '^GSPC', name: '標普500指數' },
   { symbol: '^SOX', name: '費城半導體指數' },
+  { symbol: 'TSM', name: '台積電 ADR' },
   { symbol: '^N225', name: '日經225指數' },
   { symbol: '^KS11', name: '韓國綜合指數' }
 ];
@@ -761,7 +792,7 @@ async function refreshPrices(){
   const currentStocks = tabStocks[currentTab];
   if (currentStocks.length === 0) return;
   const uniqueSymbols = [...new Set(currentStocks.map(s => s.symbol))];
-  const batchSize = MAX_CONCURRENT_REQUESTS;
+  const batchSize = 3;
   
   let hasUpdates = false; 
   
@@ -813,7 +844,6 @@ function adjustPollingInterval() {
   
   if (newInterval !== currentInterval) { 
     currentInterval = newInterval; 
-    // 通知心跳引擎更新頻率
     if(window.heartbeatWorker) heartbeatWorker.postMessage({ action: 'start', interval: currentInterval });
   }
 }
@@ -1060,14 +1090,12 @@ function importData(event) {
 }
 
 // ==========================================
-// 💡 V4.9.0 獨立背景心跳引擎 (Web Worker)
-// 徹底突破手機瀏覽器對閒置網頁的計時器休眠鎖死
+// 💡 V4.10.0 獨立背景心跳引擎 (Web Worker)
 // ==========================================
 let lastRefreshTime = 0;
 let lastSuccessTime = 0;
 let isRefreshing = false;
 
-// 建立 Web Worker 負責獨立跳動時間，不受主畫面休眠影響
 const workerCode = `
   let timer = null;
   self.onmessage = function(e) {
@@ -1082,7 +1110,6 @@ const workerCode = `
 const workerBlob = new Blob([workerCode], { type: 'application/javascript' });
 window.heartbeatWorker = new Worker(URL.createObjectURL(workerBlob));
 
-// 接收到心跳，強制更新畫面
 heartbeatWorker.onmessage = function(e) {
   if (e.data === 'tick') {
     refresh();
@@ -1142,7 +1169,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.9.0 已啟動 (加入 Web Worker 獨立背景心跳引擎)');
+console.log('股票庫存管理 V4.10.0 已啟動 (包含豐富說明書與台積電ADR)');
 </script>
 </body>
 </html>
