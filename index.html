@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-// 確保讀取最新版 V4.8.0
-const APP_VER = '4.8.0';
+// 確保讀取最新版 V4.9.0
+const APP_VER = '4.9.0';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -192,7 +192,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </head>
 <body>
 <div class="header">
-  <h1 onclick="forceRefresh()" style="cursor:pointer;" title="點擊強制更新報價">股票庫存管理 ↻</h1>
+  <h1 onclick="forceRefresh()" style="cursor:pointer;" title="點擊強制更新報價">股票庫存管理</h1>
   <div class="hdr-right">
     <button type="button" class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙</button>
     <button type="button" class="btn-adv" onclick="openModal()">進階</button>
@@ -203,11 +203,11 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   <div class="card-title">新增持股</div>
   <div class="form-row">
     <input type="text" class="sym-inp" id="symInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase">
-    <input type="number" id="qtyInput" placeholder="數量" min="1" step="1" inputmode="numeric">
+    <input type="number" id="qtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" autocomplete="off">
     <select id="unitSelect"><option value="張">張</option><option value="股">股</option></select>
   </div>
   <div class="form-row">
-    <input type="number" id="buyPriceInput" placeholder="買入均價 (選填計算損益)" step="0.01" min="0" inputmode="decimal">
+    <input type="number" id="buyPriceInput" placeholder="買入均價 (選填計算損益)" step="0.01" min="0" inputmode="decimal" autocomplete="off">
     <button type="button" onclick="addStock()" style="flex:0 0 80px;">新增</button>
   </div>
 </div>
@@ -300,7 +300,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.8.0 (移除錯誤鎖定 + 觸控喚醒版)</div>
+    <div class="v-box">核心版本：V4.9.0 (獨立心跳引擎版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -315,7 +315,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       </ul>
       
       <h3>二、如何強制更新報價？</h3>
-      <p>如果發現系統剛打開時因為網路延遲而沒跳數字，請直接<strong>點擊左上角的「股票庫存管理 ↻」標題，或是在螢幕空白處滑動、點擊</strong>，系統就會瞬間在背景強制抓取最新資料！</p>
+      <p>如果發現系統剛打開時因為網路延遲而沒跳數字，請直接在<strong>螢幕空白處滑動或點擊</strong>，系統就會瞬間在背景強制抓取最新資料！</p>
     </div>
     <button type="button" class="modal-close" onclick="closeManual()">關閉說明</button>
   </div>
@@ -328,18 +328,18 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <label>股票代號</label>
     <input type="text" id="editSymInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase">
     <label>數量</label>
-    <input type="number" id="editQtyInput" placeholder="數量" min="1" step="1" inputmode="numeric">
+    <input type="number" id="editQtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" autocomplete="off">
     <label>單位</label>
     <select id="editUnitSelect"><option value="張">張</option><option value="股">股</option></select>
     <label>買入均價 (留空或不填則不計算總損益)</label>
-    <input type="number" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal">
+    <input type="number" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="off">
     <button type="button" class="modal-close" onclick="saveEditStock()" style="background:var(--accent); color:#fff; text-shadow:none;">確認儲存</button>
     <button type="button" class="modal-close" onclick="closeEditModal()" style="margin-top:10px;">取消</button>
   </div>
 </div>
 
 <script>
-/* ========================================================= 🔧 API 管理引擎 V4.8.0 ========================================================= */
+/* ========================================================= 🔧 API 管理引擎 V4.9.0 ========================================================= */
 const PROXY_LIST = [
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
@@ -427,7 +427,6 @@ let tabRecords = [[], [], [], [], []];
 let tabNames = ['分頁 1', '分頁 2', '分頁 3', '分頁 4', '分頁 5'];
 let tabCount = 3;
 let fugleKey='',secondFugleKey='';
-let pollTimer = null;
 let currentInterval = 20000;
 
 const FK='tw_fugle_key',SFK='tw_second_fugle_key',TK='tw_theme', CUR_TAB_KEY='tw_current_tab', TN_KEY='tw_tab_names', TC_KEY='tw_tab_count';
@@ -645,10 +644,9 @@ async function fetchFugle(symbol){
           return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle'};
         }
       }
-      // 💡 拔除 429 錯誤紀錄，直接換 key 或直接 fallback 給 Yahoo
     } catch(e) {}
   }
-  return null; // 全部失敗就默默 return null，不要引發系統封鎖
+  return null; 
 }
 
 async function fetchYahoo(symbol){
@@ -737,7 +735,7 @@ async function refreshPrices(){
     if (twNameBox && !twNameBox.innerHTML.includes('(離線)')) {
       twNameBox.innerHTML = `臺灣加權指數<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>`;
     }
-    return; // 離線直接中斷
+    return;
   } else {
     const twNameBox = document.querySelector('#idxScrollContainer .idx-card-box:first-child .idx-box-name');
     if (twNameBox) twNameBox.innerHTML = `臺灣加權指數`;
@@ -802,7 +800,7 @@ async function refreshPrices(){
   }
   
   updateSummary();
-  adjustPollingInterval(); // 💡 調整頻率
+  adjustPollingInterval();
   renderApiStats();
 }
 
@@ -810,15 +808,13 @@ function adjustPollingInterval() {
   const kr = getKeyRotator(); const keyCount = kr.count; 
   let newInterval = 20000;
   
-  // 如果非盤中時間，60秒抓一次就好
   if (!isAnyMarketOpen()) { newInterval = 60000; } 
-  // 如果有雙 Key，可以大膽 10 秒抓一次
   else if (keyCount === 2) { newInterval = 10000; }
   
   if (newInterval !== currentInterval) { 
     currentInterval = newInterval; 
-    clearInterval(pollTimer); 
-    pollTimer = setInterval(refresh, currentInterval); 
+    // 通知心跳引擎更新頻率
+    if(window.heartbeatWorker) heartbeatWorker.postMessage({ action: 'start', interval: currentInterval });
   }
 }
 
@@ -1064,13 +1060,35 @@ function importData(event) {
 }
 
 // ==========================================
-// 💡 V4.8.0 無鎖定清爽引擎 & 觸控喚醒
+// 💡 V4.9.0 獨立背景心跳引擎 (Web Worker)
+// 徹底突破手機瀏覽器對閒置網頁的計時器休眠鎖死
 // ==========================================
 let lastRefreshTime = 0;
 let lastSuccessTime = 0;
 let isRefreshing = false;
 
-// 🧨 一鍵暴力強啟 
+// 建立 Web Worker 負責獨立跳動時間，不受主畫面休眠影響
+const workerCode = `
+  let timer = null;
+  self.onmessage = function(e) {
+    if (e.data.action === 'start') {
+      if (timer) clearInterval(timer);
+      timer = setInterval(() => { self.postMessage('tick'); }, e.data.interval);
+    } else if (e.data.action === 'stop') {
+      if (timer) clearInterval(timer);
+    }
+  };
+`;
+const workerBlob = new Blob([workerCode], { type: 'application/javascript' });
+window.heartbeatWorker = new Worker(URL.createObjectURL(workerBlob));
+
+// 接收到心跳，強制更新畫面
+heartbeatWorker.onmessage = function(e) {
+  if (e.data === 'tick') {
+    refresh();
+  }
+};
+
 function forceRefresh() {
   globalKeyRotator = null; 
   lastRefreshTime = 0;     
@@ -1087,16 +1105,14 @@ async function refresh() {
   lastRefreshTime = now;
   try { 
     await refreshPrices(); 
-    lastSuccessTime = Date.now(); // 記錄成功抓取時間
+    lastSuccessTime = Date.now(); 
   } 
   catch(e) { console.error('Refresh Error:', e); } 
   finally { isRefreshing = false; }
 }
 
-// 💡 觸控電擊喚醒機制 (使用者指定加回)
 function handleTouchWakeup() {
   const now = Date.now();
-  // 距離上次成功更新超過 15 秒，只要一碰到螢幕就背景強迫更新
   if (now - lastSuccessTime > 15000 && !isRefreshing) {
     forceRefresh();
   }
@@ -1104,13 +1120,13 @@ function handleTouchWakeup() {
 document.addEventListener('touchstart', handleTouchWakeup, { passive: true });
 document.addEventListener('click', handleTouchWakeup, { passive: true });
 
-
 // 初始化載入
 loadState(); renderAll(); renderHistory();
 
 setTimeout(forceRefresh, 500);  
 
-pollTimer = setInterval(refresh, currentInterval);
+// 啟動心跳引擎
+heartbeatWorker.postMessage({ action: 'start', interval: currentInterval });
 
 window.addEventListener('focus', forceRefresh);
 window.addEventListener('pageshow', forceRefresh);
@@ -1126,7 +1142,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.8.0 已啟動 (拔除API錯誤鎖定 + 觸碰自動喚醒)');
+console.log('股票庫存管理 V4.9.0 已啟動 (加入 Web Worker 獨立背景心跳引擎)');
 </script>
 </body>
 </html>
