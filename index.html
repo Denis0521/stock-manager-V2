@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = '4.12.0';
+const APP_VER = '4.12.1';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -132,7 +132,7 @@ button:active, .tab-btn.active {
 .del-hist-btn { padding: 6px 12px; font-size: 14px; border-radius: 8px; }
 .hist-empty { color: var(--t-muted); font-size: 15px; text-align: center; padding: 20px; font-weight: 600; }
 
-/* 燈箱與層級宣告 */
+/* 燈箱定位宣告 */
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; }
 .modal-overlay.show { display: flex; }
 .modal { 
@@ -249,7 +249,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   </div>
   <div class="form-row">
     <input type="text" class="sym-inp" id="symInput" placeholder="代號" maxlength="12" autocomplete="off" style="text-transform:uppercase" oninput="checkSymbolType(this.value)">
-    
     <input type="number" id="qtyInput" placeholder="數量" min="0.001" step="any" inputmode="decimal" autocomplete="off">
     <select id="unitSelect" onchange="handleUnitChange()"><option value="張">張</option><option value="股">股</option><option value="單位" style="display:none;">單位</option></select>
   </div>
@@ -351,7 +350,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.12.0 (基金金額換算版)</div>
+    <div class="v-box">核心版本：V4.12.1 (子彈窗與分頁修復版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -377,16 +376,16 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   <div class="modal">
     <h2>📖 系統使用說明</h2>
     <div class="manual-content">
-      <h3>一、全新：基金金額申購自動換算 💰</h3>
+      <h3>一、基金金額申購自動換算 💰</h3>
       <ul>
-        <li>當你在代號欄位輸入長度 5 碼以上的「集保基金代號」時，系統右上角會自動亮起<strong>「💰 改用金額申購」</strong>按鈕。</li>
-        <li>點擊切換後，原本的數量欄位會直接變成<strong>「投資總金額 (元)」</strong>，買入均價則變為<strong>「申購淨值」</strong>。</li>
-        <li>填入後點擊新增，App 內部會自動運用公式：<code>投資金額 ÷ 申購淨值</code>，幫你無縫精算出小數點後多位的基金總單位數，省去手動拿計算機換算的麻煩！</li>
+        <li>當代號長度大於等於 5 碼時，系統右上角會亮起<strong>「💰 改用金額申購」</strong>按鈕。</li>
+        <li>切換後，數量欄位將直接視為<strong>「投資總金額」</strong>，均價欄位視為<strong>「申購淨值」</strong>。</li>
+        <li>點擊新增時，App 會自動換算：<code>金額 ÷ 申購淨值</code>，幫你算出小數點後三位的精準股數並儲存於明細表中。</li>
       </ul>
       <h3>二、基本操作與分頁妙用</h3>
       <ul>
-        <li><strong>記帳損益：</strong>完美整合共同基金、台股與美股國際大盤，一台手機輕鬆代管多個資產組合。</li>
-        <li><strong>資產歷史曲線：</strong>收盤後點擊「存儲今日損益總計」，可記錄每日的淨值、總資產變化曲線。</li>
+        <li><strong>分頁策略分流：</strong>進階設定中可開啟多個獨立分頁，雙擊標籤即可自訂更名。</li>
+        <li><strong>隱私保護：</strong>所有數據 100% 存放在手機瀏覽器的本地快取（LocalStorage）中，絕不上傳任何雲端。</li>
       </ul>
     </div>
     <button type="button" class="modal-close" onclick="closeManual()">關閉說明</button>
@@ -411,7 +410,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </div>
 
 <script>
-/* ========================================================= 🔧 API 管理與智慧代理引擎 ========================================================= */
+/* ========================================================= 🔧 API 核心核心代理模組 ========================================================= */
 const PROXY_LIST = [
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
@@ -480,7 +479,7 @@ function toggleKeyVisibility(inputId, btnId) {
 }
 
 let cfWorkerUrl = 'https://yahoo-index-proxy.denis0521.workers.dev';
-let cfFundWorkerUrl = 'https://tdcc-fund-proxy.denis0521.workers.dev'; // 💡 集保基金 Cloudflare Worker 端點
+let cfFundWorkerUrl = 'https://tdcc-fund-proxy.denis0521.workers.dev';
 
 const DEFAULT_INDICES = [
   { symbol: '^TWII', name: '加權指數' },
@@ -491,7 +490,7 @@ const DEFAULT_INDICES = [
 ];
 
 let AVAILABLE_INDICES = []; let activeForeignIndices = [];
-let currentInputIsAmountMode = false; // 💡 控制基金是否啟用金額申購模式
+let currentInputIsAmountMode = false;
 
 function loadForeignIndicesConfig() {
   const stored = localStorage.getItem('tw_custom_foreign_indices');
@@ -537,10 +536,7 @@ function loadState(){
 }
 
 function checkSymbolType(val) {
-  const sym = val.trim();
-  const btn = document.getElementById('btnSwitchMode');
-  const unitSelect = document.getElementById('unitSelect');
-  
+  const sym = val.trim(); const btn = document.getElementById('btnSwitchMode'); const unitSelect = document.getElementById('unitSelect');
   if (sym.length >= 5) {
     btn.style.display = 'block';
     if (!unitSelect.querySelector('option[value="單位"]')) {
@@ -548,11 +544,8 @@ function checkSymbolType(val) {
     }
     if(!currentInputIsAmountMode) { unitSelect.value = '單位'; }
   } else {
-    btn.style.display = 'none';
-    currentInputIsAmountMode = false;
-    btn.textContent = '💰 改用金額申購';
-    document.getElementById('qtyInput').placeholder = '數量';
-    document.getElementById('buyPriceInput').placeholder = '買入均價 (選填)';
+    btn.style.display = 'none'; currentInputIsAmountMode = false; btn.textContent = '💰 改用金額申購';
+    document.getElementById('qtyInput').placeholder = '數量'; document.getElementById('buyPriceInput').placeholder = '買入均價 (選填)';
     document.getElementById('cardInputTitle').textContent = '新增持股';
     if (unitSelect.querySelector('option[value="單位"]')) { unitSelect.querySelector('option[value="單位"]').remove(); }
     if(unitSelect.value === '單位') unitSelect.value = '張';
@@ -560,25 +553,16 @@ function checkSymbolType(val) {
 }
 
 function toggleInputMode() {
-  const btn = document.getElementById('btnSwitchMode');
-  const qtyInp = document.getElementById('qtyInput');
-  const priceInp = document.getElementById('buyPriceInput');
-  const title = document.getElementById('cardInputTitle');
+  const btn = document.getElementById('btnSwitchMode'); const qtyInp = document.getElementById('qtyInput');
+  const priceInp = document.getElementById('buyPriceInput'); const title = document.getElementById('cardInputTitle');
   const unitSelect = document.getElementById('unitSelect');
-  
   currentInputIsAmountMode = !currentInputIsAmountMode;
   if(currentInputIsAmountMode) {
-    btn.textContent = '✏️ 改用數量申購';
-    qtyInp.placeholder = '投資總金額 (台幣)';
-    priceInp.placeholder = '申購淨值 (必填)';
-    title.textContent = '新增基金資產 (金額模式)';
-    unitSelect.value = '單位';
+    btn.textContent = '✏️ 改用數量申購'; qtyInp.placeholder = '投資總金額 (台幣)'; priceInp.placeholder = '申購淨值 (必填)';
+    title.textContent = '新增基金資產 (金額模式)'; unitSelect.value = '單位';
   } else {
-    btn.textContent = '💰 改用金額申購';
-    qtyInp.placeholder = '數量';
-    priceInp.placeholder = '買入均價 / 申購淨值';
-    title.textContent = '新增基金資產 (數量模式)';
-    unitSelect.value = '單位';
+    btn.textContent = '💰 改用金額申購'; qtyInp.placeholder = '數量'; priceInp.placeholder = '買入均價 / 申購淨值';
+    title.textContent = '新增基金資產 (數量模式)'; unitSelect.value = '單位';
   }
 }
 
@@ -588,10 +572,7 @@ async function fetchFundFromTDCCWorker(symbol) {
     const response = await fetch(`${cfFundWorkerUrl}?symbol=${encodeURIComponent(symbol)}&_=${Date.now()}`);
     if (response.ok) {
       const data = await response.json();
-      if (data && data.price) {
-        trackApiUsage('TDCC');
-        return { price: data.price, change: data.change, changePercent: data.changePercent, source: '集保', name: data.name };
-      }
+      if (data && data.price) { trackApiUsage('TDCC'); return { price: data.price, change: data.change, changePercent: data.changePercent, source: '集保', name: data.name }; }
     }
   } catch(e) {}
   return null;
@@ -602,12 +583,10 @@ async function fetchFugle(symbol){
   for (let i = 0; i < kr.count; i++){
     try {
       const resp = await fetch(FUGLE + encodeURIComponent(symbol), {
-        headers: {'X-API-KEY': kr.next(), 'X-Requested-With': 'StockPortfolioApp'},
-        signal: AbortSignal.timeout(API_TIMEOUT)
+        headers: {'X-API-KEY': kr.next(), 'X-Requested-With': 'StockPortfolioApp'}, signal: AbortSignal.timeout(API_TIMEOUT)
       });
       if (resp.ok) {
-        const d = await resp.json();
-        const p = d.lastPrice ?? d.closePrice ?? d.referencePrice;
+        const d = await resp.json(); const p = d.lastPrice ?? d.closePrice ?? d.referencePrice;
         if (p != null) { trackApiUsage('Fugle'); return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle'}; }
       }
     } catch(e) {}
@@ -630,18 +609,13 @@ async function refreshPrices(){
   if (navigator.onLine === false) return;
   fetchGlobalIndicesFromWorker();
   const currentStocks = tabStocks[currentTab]; if (currentStocks.length === 0) return;
-  
   for (const s of currentStocks) {
     let r = null;
-    if (s.symbol.length >= 5) {
-      r = await fetchFundFromTDCCWorker(s.symbol);
-    } else {
-      r = await fetchFugle(s.symbol); if (!r) r = await fetchYahoo(s.symbol);
-    }
+    if (s.symbol.length >= 5) { r = await fetchFundFromTDCCWorker(s.symbol); } 
+    else { r = await fetchFugle(s.symbol); if (!r) r = await fetchYahoo(s.symbol); }
     if (r) {
       s.price = r.price; s.change = r.change; s.changePercent = r.changePercent; s.source = r.source;
-      if (r.name && !s.customName) s.name = r.name;
-      renderRow(s);
+      if (r.name && !s.customName) s.name = r.name; renderRow(s);
     }
   }
   saveHoldings(); updateSummary(); renderApiStats();
@@ -649,30 +623,19 @@ async function refreshPrices(){
 
 function renderRow(s){
   const el=document.querySelector('.srow[data-id="'+s.id+'"]');if(!el)return;
-  const isFund = s.symbol.length >= 5;
-  const shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
+  const isFund = s.symbol.length >= 5; const shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
   let p = s.price, chg = s.change ?? 0;
-  
-  const pEl=el.querySelector('.price');
-  if(p!=null){ pEl.textContent = formatPrice(p, isFund); pEl.className='price '+(chg>=0?'up':'down'); }
-  const cp=el.querySelector('.chgp');
-  if(s.changePercent!=null){cp.textContent=(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%';cp.className='chgp '+(s.changePercent>=0?'up':'down');}
-  const cg=el.querySelector('.chg');
-  if(s.change!=null){cg.textContent=(chg>=0?'+':'')+formatPrice(chg, isFund);cg.className='chg '+(chg>=0?'up':'down');}
-  
-  const tp = el.querySelector('.today-pnl');
-  if(s.change!=null){ const todayPnl = Math.round(shares * chg); tp.textContent = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString(); tp.className = 'today-pnl ' + (todayPnl >= 0 ? 'up' : 'down'); }
-  
+  const pEl=el.querySelector('.price'); if(p!=null){ pEl.textContent = formatPrice(p, isFund); pEl.className='price '+(chg>=0?'up':'down'); }
+  const cp=el.querySelector('.chgp'); if(s.changePercent!=null){cp.textContent=(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%';cp.className='chgp '+(s.changePercent>=0?'up':'down');}
+  const cg=el.querySelector('.chg'); if(s.change!=null){cg.textContent=(chg>=0?'+':'')+formatPrice(chg, isFund);cg.className='chg '+(chg>=0?'up':'down');}
+  const tp = el.querySelector('.today-pnl'); if(s.change!=null){ const todayPnl = Math.round(shares * chg); tp.textContent = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString(); tp.className = 'today-pnl ' + (todayPnl >= 0 ? 'up' : 'down'); }
   let totalHtml = '—'; let totalValForClass = 0;
   if (p != null) {
     const mktValue = Math.round(shares * p);
     if (s.buyPrice != null && s.buyPrice > 0) {
       const cost = s.buyPrice * shares; const unPnl = Math.round(mktValue - cost); const roi = ((mktValue - cost) / cost) * 100;
-      totalValForClass = unPnl;
-      totalHtml = `<div style="line-height:1.2;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div><div style="font-size:0.8em;opacity:0.85;margin-top:2px;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`;
-    } else {
-      totalHtml = `<div style="line-height:1.2;" class="neutral">—</div><div style="font-size:0.8em;opacity:0.6;margin-top:2px;" class="neutral">點擊 ✎ 設均價</div>`;
-    }
+      totalValForClass = unPnl; totalHtml = `<div style="line-height:1.2;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div><div style="font-size:0.8em;opacity:0.85;margin-top:2px;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`;
+    } else { totalHtml = `<div style="line-height:1.2;" class="neutral">—</div><div style="font-size:0.8em;opacity:0.6;margin-top:2px;" class="neutral">✎ 設均價</div>`; }
   }
   el.querySelector('.total').innerHTML = totalHtml; el.querySelector('.total').className = 'total ' + (totalValForClass >= 0 ? 'up' : 'down');
 }
@@ -683,35 +646,23 @@ function renderAll(){
   body.innerHTML=''; const currentStocks = tabStocks[currentTab];
   if(currentStocks.length===0){ empty.style.display='block';tableScroll.style.display='none';sumArea.style.display='none';saveArea.style.display='none';return; }
   empty.style.display='none';tableScroll.style.display='block';sumArea.style.display='block';saveArea.style.display='block';
-  
   for(const s of currentStocks){
-    const div=document.createElement('div');div.className='srow';div.dataset.id=s.id;
-    const isFund = s.symbol.length >= 5;
-    const shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
-    let p = s.price, chg = s.change ?? 0;
-    let pStr = p!=null ? formatPrice(p, isFund) : '—';
-    const cgp = s.changePercent!=null ? (s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%' : '—';
-    let cgStr = s.change!=null ? (chg>=0?'+':'') + formatPrice(chg, isFund) : '—';
-    let tpStr = '—', tpClass = '';
+    const div=document.createElement('div');div.className='srow';div.dataset.id=s.id; const isFund = s.symbol.length >= 5;
+    const shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty; let p = s.price, chg = s.change ?? 0;
+    let pStr = p!=null ? formatPrice(p, isFund) : '—'; const cgp = s.changePercent!=null ? (s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%' : '—';
+    let cgStr = s.change!=null ? (chg>=0?'+':'') + formatPrice(chg, isFund) : '—'; let tpStr = '—', tpClass = '';
     if (s.change != null) { const todayPnl = Math.round(shares * chg); tpStr = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString(); tpClass = todayPnl >= 0 ? 'up' : 'down'; }
-    
     let totalHtml = '—'; let totalValForClass = 0;
     if (p != null) {
       const mktValue = Math.round(shares * p);
       if (s.buyPrice != null && s.buyPrice > 0) {
         const cost = s.buyPrice * shares; const unPnl = Math.round(mktValue - cost); const roi = ((mktValue - cost) / cost) * 100;
-        totalValForClass = unPnl;
-        totalHtml = `<div style="line-height:1.2;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div><div style="font-size:0.8em;opacity:0.85;margin-top:2px;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`;
-      } else {
-        totalHtml = `<div style="line-height:1.2;" class="neutral">—</div><div style="font-size:0.8em;opacity:0.6;margin-top:2px;" class="neutral">點擊 ✎ 設均價</div>`;
-      }
+        totalValForClass = unPnl; totalHtml = `<div style="line-height:1.2;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div><div style="font-size:0.8em;opacity:0.85;margin-top:2px;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`;
+      } else { totalHtml = `<div style="line-height:1.2;" class="neutral">—</div><div style="font-size:0.8em;opacity:0.6;margin-top:2px;" class="neutral">✎ 設均價</div>`; }
     }
-    
-    // 💡 基金細緻化渲染：名稱如果存在會優雅並列在代號下方，股數會保留小數點後三位（滿足申購金額換算需求）
     const qtyDisplayStr = isFund ? s.displayQty.toFixed(3) : s.displayQty;
     const priceDisplayLabel = isFund ? '淨值 ' + (s.buyPrice||'—') : '均價 ' + (s.buyPrice||'—');
     const nameSubTag = s.name ? `<div style="font-size:11px;color:var(--t-muted);margin-top:2px;max-width:100px;overflow:hidden;text-overflow:ellipsis;">${s.name}</div>` : '';
-
     div.innerHTML= '<div class="sym-container"><div class="sym">'+s.symbol+'</div>'+nameSubTag+'</div>'+
     '<div class="qty-cell"><div style="line-height:1.2;">'+qtyDisplayStr+' '+s.displayUnit+'</div><div style="font-size:0.8em;color:var(--t-muted);margin-top:2px;">'+priceDisplayLabel+'</div></div>'+
     '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+
@@ -726,17 +677,13 @@ function renderAll(){
 }
 
 function updateSummary(){
-  let pnl=0, asset=0, totalUnPnl=0; let hasUnPnl = false;
-  const currentStocks = tabStocks[currentTab];
+  let pnl=0, asset=0, totalUnPnl=0; let hasUnPnl = false; const currentStocks = tabStocks[currentTab];
   for(const s of currentStocks){
-    const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
-    let p=s.price??0, c=s.change??0; pnl += Math.round(sh * c); asset += Math.round(sh * p);
+    const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty; let p=s.price??0, c=s.change??0; pnl += Math.round(sh * c); asset += Math.round(sh * p);
     if (s.buyPrice != null && s.price != null && s.buyPrice > 0) { totalUnPnl += Math.round((s.price - s.buyPrice) * sh); hasUnPnl = true; }
   }
-  document.getElementById('totalPnl').textContent=(pnl>=0?'+':'')+pnl.toLocaleString();
-  document.getElementById('totalPnl').className='val '+(pnl>=0?'up':'down');
-  document.getElementById('totalAsset').textContent = asset.toLocaleString();
-  const ue = document.getElementById('totalUnrealized');
+  document.getElementById('totalPnl').textContent=(pnl>=0?'+':'')+pnl.toLocaleString(); document.getElementById('totalPnl').className='val '+(pnl>=0?'up':'down');
+  document.getElementById('totalAsset').textContent = asset.toLocaleString(); const ue = document.getElementById('totalUnrealized');
   if(hasUnPnl) { ue.textContent = (totalUnPnl >= 0 ? '+' : '') + totalUnPnl.toLocaleString(); ue.className = 'val ' + (totalUnPnl >= 0 ? 'up' : 'down'); }
   else { ue.textContent = '—'; ue.className = 'val neutral'; }
 }
@@ -746,42 +693,29 @@ function addStock(){
   let qty=parseFloat(document.getElementById('qtyInput').value);
   const unit=document.getElementById('unitSelect').value;
   let bp=parseFloat(document.getElementById('buyPriceInput').value);
-  
   if(!sym||isNaN(qty)||qty<=0){showToast('請輸入正確代號與數量/金額');return}
   
-  // 💡 核心金額模式自動轉換機制
+  // 💡 Bug 核心修復點：宣告一個變數單獨紀錄寫入庫存用的真實「最終股數/單位數」
+  let finalQty = qty;
   if (sym.length >= 5 && currentInputIsAmountMode) {
     if (isNaN(bp) || bp <= 0) { showToast('金額申購模式下，申購淨值為必填項目！'); return; }
-    // 智慧換算：申購金額 ÷ 申購淨值 = 基金總單位數 (股數)
-    qty = qty / bp;
+    // 智慧換算：投資總金額 ÷ 申購淨值 = 最終獲得基金單位數
+    finalQty = qty / bp;
   }
-
-  const currentStocks = tabStocks[currentTab];
-  if(currentStocks.some(s=>s.symbol===sym)){showToast('此資產項目已存在');return}
+  const currentStocks = tabStocks[currentTab]; if(currentStocks.some(s=>s.symbol===sym)){showToast('此項目已存在');return}
   const id='s_'+Date.now();
-  currentStocks.push({id,symbol:sym,displayQty:qty,displayUnit:unit,buyPrice:isNaN(bp)?null:bp,price:null,change:null,changePercent:null,name:''});
-  saveHoldings();renderAll();
+  // 修正：將變數正確推入 displayQty 欄位，確保資料能順利儲存不落空，明細表就能完美列出了！
+  currentStocks.push({id, symbol:sym, displayQty:finalQty, displayUnit:unit, buyPrice:isNaN(bp)?null:bp, price:null, change:null, changePercent:null, name:''});
+  saveHoldings(); renderAll();
   
   document.getElementById('symInput').value=''; document.getElementById('qtyInput').value=''; document.getElementById('buyPriceInput').value='';
-  // 新增後防呆重置模式
   if(currentInputIsAmountMode) toggleInputMode();
-  document.getElementById('btnSwitchMode').style.display = 'none';
-  showToast('已新增資產 '+sym); forceRefresh();
+  document.getElementById('btnSwitchMode').style.display = 'none'; showToast('已新增資產 '+sym); forceRefresh();
 }
 
-function saveEditStock() {
-  const id = document.getElementById('editId').value; const s = tabStocks[currentTab].find(x => x.id === id); if (!s) return;
-  s.symbol = document.getElementById('editSymInput').value.trim().toUpperCase();
-  s.displayQty = parseFloat(document.getElementById('editQtyInput').value);
-  s.displayUnit = document.getElementById('editUnitSelect').value;
-  const bp = parseFloat(document.getElementById('editBuyPriceInput').value); s.buyPrice = isNaN(bp) ? null : bp;
-  saveHoldings(); renderAll(); closeEditModal(); forceRefresh();
-}
-
-/* ========================================================= 🌐 歷史與系統核心函式群 ========================================================= */
+/* ========================================================= 🌐 歷史紀錄與設定函式 ========================================================= */
 function applyThemeText(t){
-  const body=document.body; const themeBtn=document.getElementById('themeBtn'); const metaTheme = document.getElementById('themeColorMeta');
-  body.className = '';
+  const body=document.body; const themeBtn=document.getElementById('themeBtn'); const metaTheme = document.getElementById('themeColorMeta'); body.className = '';
   if(t==='tech'){ body.classList.add('tech'); themeBtn.textContent='🚀'; metaTheme.content='#2b303a'; }
   else if(t==='blue-light'){ body.classList.add('blue-light'); themeBtn.textContent='💎'; metaTheme.content='#e3edf7'; }
   else if(t==='purple-light'){ body.classList.add('purple-light'); themeBtn.textContent='🍇'; metaTheme.content='#ece8f3'; }
@@ -789,27 +723,21 @@ function applyThemeText(t){
   else if(t==='cement'){ body.classList.add('cement'); themeBtn.textContent='🏢'; metaTheme.content='#a3a8b0'; }
   else { themeBtn.textContent='🌙'; metaTheme.content='#e0e5ec'; }
 }
-
 function renderTabs() {
   const container = document.getElementById('tabsBarContainer'); container.innerHTML = '';
   for(let i=0; i<tabCount; i++){
-    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'tab-btn'; btn.id = `tab${i}`;
-    btn.textContent = tabNames[i] || `分頁 ${i + 1}`; btn.onclick = () => switchTab(i); btn.ondblclick = () => renameTab(i);
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'tab-btn'; btn.id = `tab${i}`; btn.textContent = tabNames[i] || `分頁 ${i + 1}`; btn.onclick = () => switchTab(i); btn.ondblclick = () => renameTab(i);
     if(i === currentTab) btn.classList.add('active'); container.appendChild(btn);
   }
 }
-
 function updateKeyStatus(){
   ['fugleKey','secondFugleKey'].forEach((id,i)=>{
-    const el=document.getElementById(id+'Status');if(!el)return;
-    const val=i===0?fugleKey:secondFugleKey;
+    const el=document.getElementById(id+'Status');if(!el)return; const val=i===0?fugleKey:secondFugleKey;
     if(val){el.textContent='✓ 已設定';el.className='key-status ok';} else {el.textContent='未設定';el.className='key-status none';}
   });
 }
-
 function renderGlobalIndices(indices, isOffline = false) {
-  const container = document.getElementById('idxScrollContainer'); const boxes = container.querySelectorAll('.idx-card-box');
-  for(let i = 1; i < boxes.length; i++) boxes[i].remove();
+  const container = document.getElementById('idxScrollContainer'); const boxes = container.querySelectorAll('.idx-card-box'); for(let i = 1; i < boxes.length; i++) boxes[i].remove();
   indices.forEach(item => {
     let displayIndexName = item.name; const matchedIndex = AVAILABLE_INDICES.find(idx => idx.symbol === item.symbol); if (matchedIndex) displayIndexName = matchedIndex.name;
     const card = document.createElement('div'); card.className = 'idx-card-box'; const sign = item.pct >= 0 ? '+' : '';
@@ -817,38 +745,29 @@ function renderGlobalIndices(indices, isOffline = false) {
     container.appendChild(card);
   });
 }
-
-function toggleSummary() {
-  const details = document.getElementById('summaryDetails'); const toggleBtn = document.getElementById('sumToggleBtn');
-  if (details.style.display === 'none') { details.style.display = 'block'; toggleBtn.style.display = 'none'; }
-  else { details.style.display = 'none'; toggleBtn.style.display = 'block'; }
-}
-
 function saveDailyPnl(){
-  let pnl=0,asset=0; const currentStocks = tabStocks[currentTab];
-  for(const s of currentStocks){ const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty; pnl += Math.round(sh * (s.change??0)); asset += Math.round(sh * (s.price??0)); }
+  let pnl=0,asset=0; const currentStocks = tabStocks[currentTab]; for(const s of currentStocks){ const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty; pnl += Math.round(sh * (s.change??0)); asset += Math.round(sh * (s.price??0)); }
   const n=new Date(); const ds=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0'); const ts=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
-  tabRecords[currentTab].unshift({date:ds,time:ts,totalPnl:pnl,totalAsset:asset,timestamp:n.getTime()});
-  saveRecords(); renderHistory(); showToast('歷史存檔儲作成功');
+  tabRecords[currentTab].unshift({date:ds,time:ts,totalPnl:pnl,totalAsset:asset,timestamp:n.getTime()}); saveRecords(); renderHistory(); showToast('歷史存檔儲作成功');
 }
-
-function deleteHistory(timestamp) { if(!confirm('確定刪除？')) return; tabRecords[currentTab] = tabRecords[currentTab].filter(r => r.timestamp !== timestamp); saveRecords(); renderHistory(); }
-
 function renderHistory(){
   const hb = document.getElementById('historyBody'); if(!hb) return; hb.innerHTML = ''; const rcs = tabRecords[currentTab]; if(rcs.length===0){ hb.innerHTML='<div class="hist-empty">尚無記錄</div>'; return; }
   rcs.forEach(r => {
     const div = document.createElement('div'); div.className='hist-item'; div.style.cssText = "border:1px solid var(--protrude-d); border-top:1px solid var(--protrude-l); border-left:1px solid var(--protrude-l);";
-    div.innerHTML=`<div class="hist-item-left"><span class="hdate">${r.date} ${r.time}</span><span class="hval ${r.totalPnl>=0?'up':'down'}">${r.totalPnl>=0?'+':''}${r.totalPnl.toLocaleString()}</span></div><button type="button" class="del-hist-btn" onclick="deleteHistory(${r.timestamp})">刪除</button>`;
-    hb.appendChild(div);
+    div.innerHTML=`<div class="hist-item-left"><span class="hdate">${r.date} ${r.time}</span><span class="hval ${r.totalPnl>=0?'up':'down'}">${r.totalPnl>=0?'+':''}${r.totalPnl.toLocaleString()}</span></div><button type="button" class="del-hist-btn" onclick="deleteHistory(${r.timestamp})">刪除</button>`; hb.appendChild(div);
   });
 }
-
 function openEditModal(id) {
   const s = tabStocks[currentTab].find(x => x.id === id); if (!s) return;
   document.getElementById('editId').value = s.id; document.getElementById('editSymInput').value = s.symbol; document.getElementById('editQtyInput').value = s.displayQty; document.getElementById('editUnitSelect').value = s.displayUnit; document.getElementById('editBuyPriceInput').value = s.buyPrice || '';
   document.getElementById('editModalOverlay').classList.add('show');
 }
 function closeEditModal() { document.getElementById('editModalOverlay').classList.remove('show'); }
+function saveEditStock() {
+  const id = document.getElementById('editId').value; const s = tabStocks[currentTab].find(x => x.id === id); if (!s) return;
+  s.symbol = document.getElementById('editSymInput').value.trim().toUpperCase(); s.displayQty = parseFloat(document.getElementById('editQtyInput').value); s.displayUnit = document.getElementById('editUnitSelect').value;
+  const bp = parseFloat(document.getElementById('editBuyPriceInput').value); s.buyPrice = isNaN(bp) ? null : bp; saveHoldings(); renderAll(); closeEditModal(); forceRefresh();
+}
 function deleteStock(id){ if(!confirm('確定刪除？'))return; tabStocks[currentTab]=tabStocks[currentTab].filter(s=>s.id!==id); saveHoldings(); renderAll(); }
 function openModal(){ document.getElementById('modalOverlay').classList.add('show'); }
 function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
@@ -856,32 +775,16 @@ function saveAndCloseModal(){ saveKeys(); saveTabCount(); closeModal(); forceRef
 function openManual() { document.getElementById('manualOverlay').classList.add('show'); }
 function closeManual() { document.getElementById('manualOverlay').classList.remove('show'); }
 function openForeignIdxModal() { renderForeignIdxConfigList(); document.getElementById('foreignIdxOverlay').classList.add('show'); }
-// 修正點：關閉指數燈箱時，呼叫修復後的隱藏方法
 function closeForeignIdxModal() { document.getElementById('foreignIdxOverlay').classList.remove('show'); loadForeignIndicesConfig(); fetchGlobalIndicesFromWorker(); }
-
 function renderForeignIdxConfigList() {
   const container = document.getElementById('foreignIdxListContainer'); if (!container) return; container.innerHTML = '';
   AVAILABLE_INDICES.forEach((idx, index) => {
     const row = document.createElement('div'); row.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:10px; margin-bottom:8px; background:var(--bg); box-shadow:3px 3px 6px var(--s-dark); border-radius:8px; border:1px solid var(--protrude-d); border-top:1px solid var(--protrude-l); border-left:1px solid var(--protrude-l);";
-    row.innerHTML = `<div><div style="font-weight:700;">${idx.name}</div><div style="font-size:12px;color:var(--t-muted);">${idx.symbol}</div></div><button type="button" onclick="deleteForeignIdx(${index})" style="padding:4px 8px; border-radius:4px; box-shadow:2px 2px 4px var(--s-dark);">✕</button>`;
-    container.appendChild(row);
+    row.innerHTML = `<div><div style="font-weight:700;">${idx.name}</div><div style="font-size:12px;color:var(--t-muted);">${idx.symbol}</div></div><button type="button" onclick="deleteForeignIdx(${index})" style="padding:4px 8px; border-radius:4px; box-shadow:2px 2px 4px var(--s-dark);">✕</button>`; container.appendChild(row);
   });
 }
-
-function addForeignIdx() {
-  let sym = document.getElementById('newIdxSymbol').value.trim().toUpperCase(); const name = document.getElementById('newIdxName').value.trim(); if(!sym || !name) return;
-  if(['DJI','IXIC','GSPC','SOX'].includes(sym)) sym = '^' + sym; AVAILABLE_INDICES.push({symbol: sym, name}); localStorage.setItem('tw_custom_foreign_indices', JSON.stringify(AVAILABLE_INDICES));
-  renderForeignIdxConfigList(); document.getElementById('newIdxSymbol').value=''; document.getElementById('newIdxName').value='';
-}
-function deleteForeignIdx(index) { AVAILABLE_INDICES.splice(index,1); localStorage.setItem('tw_custom_foreign_indices', JSON.stringify(AVAILABLE_INDICES)); renderForeignIdxConfigList(); }
-
-function formatPrice(p, isFund = false){ 
-  if(p==null) return '—';
-  // 💡 基金淨值一般保留小數點後四位更為精準
-  return isFund ? p.toFixed(4) : p.toFixed(2); 
-}
+function formatPrice(p, isFund = false){ if(p==null) return '—'; return isFund ? p.toFixed(4) : p.toFixed(2); }
 let toastTimer=null; function showToast(msg){ const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2000); }
-
 function exportData() {
   const out = { tabStocks: tabStocks, tabRecords: tabRecords, tabNames: tabNames, tabCount: tabCount, fugleKey: fugleKey };
   const blob = new Blob([JSON.stringify(out, null, 2)], { type: "application/json" });
@@ -890,9 +793,7 @@ function exportData() {
 function triggerImport() { document.getElementById('importFile').click(); }
 function importData(e) {
   const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
-  reader.onload = function(evt) {
-    try { const data = JSON.parse(evt.target.result); if(data.tabStocks) { tabStocks = data.tabStocks; saveHoldings(); alert('還原成功！'); location.reload(); } } catch(err){ alert('還原失敗'); }
-  }; reader.readAsText(file);
+  reader.onload = function(evt) { try { const data = JSON.parse(evt.target.result); if(data.tabStocks) { tabStocks = data.tabStocks; saveHoldings(); alert('還原成功！'); location.reload(); } } catch(err){} }; reader.readAsText(file);
 }
 
 const workerCode = `let timer = null; self.onmessage = function(e) { if(e.data.action==='start'){ timer=setInterval(()=>{self.postMessage('tick')}, e.data.interval); } };`;
@@ -903,9 +804,11 @@ function forceRefresh() { refresh(); } async function refresh() { await refreshP
 loadState(); renderAll(); renderHistory();
 heartbeatWorker.postMessage({ action: 'start', interval: currentInterval });
 
+/* 🚀 核心修復點：補回平級子燈箱外層 Overlay 的點擊關閉監聽，確保新增、更名、調整分頁等事件在手機上完全恢復靈敏運作 */
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)closeManual();});
 document.getElementById('foreignIdxOverlay').addEventListener('click',function(e){if(e.target===this)closeForeignIdxModal();});
+document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)closeEditModal();});
 
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js'); }); }
 </script>
