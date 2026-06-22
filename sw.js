@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stock-portfolio-v4.5.0'; // ⚠️ 版本升級至 4.5.0
+const CACHE_NAME = 'stock-portfolio-v4.6.0'; 
 const urlsToCache = [
   './',
   './index.html',
@@ -40,10 +40,17 @@ self.addEventListener('fetch', event => {
     event.respondWith(fetch(event.request));
     return;
   }
+
+  // 💡 底層修正：改用「網路優先 (Network-First)」策略。
+  // 有網路時絕對抓取最新版檔案，沒網路時才使用舊快取，避免永遠卡在舊版本。
   event.respondWith(
-    caches.match(event.request).then(response => {
-      if (response) return response;
-      return fetch(event.request);
+    fetch(event.request).then(response => {
+      return caches.open(CACHE_NAME).then(cache => {
+        cache.put(event.request, response.clone());
+        return response;
+      });
+    }).catch(() => {
+      return caches.match(event.request);
     })
   );
 });
