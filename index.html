@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-// 確保讀取最新版 V4.11.0
-const APP_VER = '4.11.0';
+// 確保讀取最新版 V4.11.1 (修正密碼自動填入干擾)
+const APP_VER = '4.11.1';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -140,7 +140,6 @@ button:active, .tab-btn.active {
   border: 1px solid var(--protrude-d); border-top: 1px solid var(--protrude-l); border-left: 1px solid var(--protrude-l);
 }
 
-/* 🚀 核心修復點：將次級/獨立彈窗的 z-index 提升至 1050 / 1100，確保點開時絕對不會被全螢幕的進階彈窗（z-index: 999）壓在下方 */
 #manualOverlay, #editModalOverlay, #foreignIdxOverlay { z-index: 1100; }
 
 .modal h2 { font-size: 20px; margin-bottom: 16px; text-align: center; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
@@ -244,12 +243,12 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 <div class="card">
   <div class="card-title">新增持股</div>
   <div class="form-row">
-    <input type="text" class="sym-inp" id="symInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase">
-    <input type="number" id="qtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" autocomplete="off">
+    <input type="text" class="sym-inp" id="symInput" placeholder="代號" maxlength="10" autocomplete="nope" style="text-transform:uppercase">
+    <input type="number" id="qtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" autocomplete="nope">
     <select id="unitSelect"><option value="張">張</option><option value="股">股</option></select>
   </div>
   <div class="form-row">
-    <input type="number" id="buyPriceInput" placeholder="買入均價 (選填計算損益)" step="0.01" min="0" inputmode="decimal" autocomplete="off">
+    <input type="number" id="buyPriceInput" placeholder="買入均價 (選填計算損益)" step="0.01" min="0" inputmode="decimal" autocomplete="nope">
     <button type="button" onclick="addStock()" style="flex:0 0 80px;">新增</button>
   </div>
 </div>
@@ -321,13 +320,13 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       </div>
       <label>Fugle API Key（主要）</label>
       <div style="display:flex;gap:8px;align-items:stretch;">
-        <input type="password" id="fugleKeyInput" placeholder="輸入第一組 Key" autocomplete="off" style="flex:1;">
+        <input type="password" id="fugleKeyInput" placeholder="輸入第一組 Key" autocomplete="new-password" style="flex:1;">
         <button type="button" onclick="toggleKeyVisibility('fugleKeyInput','keyToggle1')" id="keyToggle1" style="flex:0 0 44px;font-size:16px;">👁</button>
       </div>
       <div><span class="key-status none" id="fugleKeyStatus">未設定</span></div>
       <label>Fugle API Key 2（備用）</label>
       <div style="display:flex;gap:8px;align-items:stretch;">
-        <input type="password" id="secondFugleKeyInput" placeholder="輸入第二組 Key（選填）" autocomplete="off" style="flex:1;">
+        <input type="password" id="secondFugleKeyInput" placeholder="輸入第二組 Key（選填）" autocomplete="new-password" style="flex:1;">
         <button type="button" onclick="toggleKeyVisibility('secondFugleKeyInput','keyToggle2')" id="keyToggle2" style="flex:0 0 44px;font-size:16px;">👁</button>
       </div>
       <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
@@ -347,7 +346,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.11.0 (歷史紀錄修復版)</div>
+    <div class="v-box">核心版本：V4.11.1 (防密碼自動填入干擾版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -422,20 +421,20 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <h2>編輯持股</h2>
     <input type="hidden" id="editId">
     <label>股票代號</label>
-    <input type="text" id="editSymInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase">
+    <input type="text" id="editSymInput" placeholder="代號" maxlength="10" autocomplete="nope" style="text-transform:uppercase">
     <label>數量</label>
-    <input type="number" id="editQtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" autocomplete="off">
+    <input type="number" id="editQtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" autocomplete="nope">
     <label>單位</label>
     <select id="editUnitSelect"><option value="張">張</option><option value="股">股</option></select>
     <label>買入均價 (留空或不填則不計算總損益)</label>
-    <input type="number" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="off">
+    <input type="number" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="nope">
     <button type="button" class="modal-close" onclick="saveEditStock()" style="background:var(--accent); color:#fff; text-shadow:none;">確認儲存</button>
     <button type="button" class="modal-close" onclick="closeEditModal()" style="margin-top:10px;">取消</button>
   </div>
 </div>
 
 <script>
-/* ========================================================= 🔧 API 管理引擎 V4.11.0 ========================================================= */
+/* ========================================================= 🔧 API 管理引擎 V4.11.1 ========================================================= */
 const PROXY_LIST = [
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
@@ -1294,7 +1293,7 @@ function importData(event) {
 }
 
 // ==========================================
-// 💡 V4.11.0 獨立背景心跳引擎 (Web Worker)
+// 💡 V4.11.1 獨立背景心跳引擎 (Web Worker)
 // ==========================================
 let lastRefreshTime = 0;
 let lastSuccessTime = 0;
@@ -1382,7 +1381,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-console.log('股票庫存管理 V4.11.0 已啟動 (修復歷史紀錄儲存顯示錯誤)');
+console.log('股票庫存管理 V4.11.1 已啟動 (修復密碼自動填入干擾)');
 </script>
 </body>
 </html>

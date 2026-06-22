@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stock-portfolio-v4.11.0'; 
+const CACHE_NAME = 'stock-portfolio-v4.11.1'; // 已同步更新為 v4.11.1
 const urlsToCache = [
   './',
   './index.html',
@@ -30,6 +30,7 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   const requestUrl = new URL(event.request.url);
+  // 這些 API 請求不進快取，直接抓取最新資料
   const isApiRequest = requestUrl.hostname.includes('api.fugle.tw') || 
                        requestUrl.hostname.includes('finance.yahoo.com') || 
                        requestUrl.hostname.includes('allorigins.win') || 
@@ -44,6 +45,7 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // 網頁靜態資源優先透過網路抓取，抓不到才退回使用快取
   event.respondWith(
     fetch(event.request).then(response => {
       return caches.open(CACHE_NAME).then(cache => {
