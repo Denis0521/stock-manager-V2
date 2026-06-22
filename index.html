@@ -10,6 +10,15 @@
 <meta name="theme-color" id="themeColorMeta" content="#e0e5ec">
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
+<script>
+// 確保讀取最新版 V4.8.0
+const APP_VER = '4.8.0';
+if(localStorage.getItem('tw_app_version') !== APP_VER) {
+  localStorage.setItem('tw_app_version', APP_VER);
+  if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
+  setTimeout(() => location.reload(true), 200);
+}
+</script>
 <style>
 /* ========================================================= 🚀 核心變數引擎 ========================================================= */
 :root {
@@ -23,13 +32,14 @@ body.purple-light { --bg: #ece8f3; --s-light: #ffffff; --s-dark: #cfc7df; --t-ma
 body.pink { --bg: #f3e6e8; --s-light: #ffffff; --s-dark: #d5c3c6; --t-main: #4a123a; --t-muted: #9b2c2c; --up: #e53e3e; --down: #38a169; --engrave-l: rgba(255,255,255,0.7); --engrave-d: rgba(0,0,0,0.1); --protrude-l: rgba(255,255,255,0.7); --protrude-d: rgba(0,0,0,0.15); --accent: #d63384; }
 body.cement { --bg: #a3a8b0; --s-light: #c0c5cd; --s-dark: #868b93; --t-main: #22252a; --t-muted: #4a5059; --up: #c62828; --down: #1b5e20; --engrave-l: rgba(255,255,255,0.6); --engrave-d: rgba(0,0,0,0.3); --protrude-l: rgba(255,255,255,0.5); --protrude-d: rgba(0,0,0,0.4); --accent: #111111; }
 
-/* ========================================================= 🌐 基礎排版與緊湊化間距 ========================================================= */
+/* ========================================================= 🌐 基礎排版 ========================================================= */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif; background:var(--bg); color:var(--t-main); padding:0 0 60px; min-height:100vh; font-size:15px; overflow-x:hidden; transition:background-color 0.4s ease, color 0.4s ease}
 input,select,button{font-family:inherit;font-size:inherit;outline:none;text-align:center}
 .header, .tabs-bar, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .backup-box { background: var(--bg); border: none; box-shadow: 6px 6px 12px var(--s-dark), -6px -6px 12px var(--s-light); border-radius: 12px; transition: background-color 0.4s ease, box-shadow 0.4s ease; }
 .header { border-radius: 0 0 16px 16px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-.header h1 { font-size: 22px; font-weight: 700; color: var(--t-main); }
+.header h1 { font-size: 22px; font-weight: 700; color: var(--t-main); user-select: none; }
+.header h1:active { opacity: 0.6; }
 .header .hdr-right { display: flex; gap: 8px; }
 
 .tabs-bar { padding: 6px 10px; margin: 8px 10px; gap: 8px; display: flex; }
@@ -182,7 +192,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </head>
 <body>
 <div class="header">
-  <h1>股票庫存管理</h1>
+  <h1 onclick="forceRefresh()" style="cursor:pointer;" title="點擊強制更新報價">股票庫存管理 ↻</h1>
   <div class="hdr-right">
     <button type="button" class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙</button>
     <button type="button" class="btn-adv" onclick="openModal()">進階</button>
@@ -290,7 +300,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.6.0 (底層真實儲存版)</div>
+    <div class="v-box">核心版本：V4.8.0 (移除錯誤鎖定 + 觸控喚醒版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -301,48 +311,11 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <div class="manual-content">
       <h3>一、主要功能簡介</h3>
       <ul>
-        <li><strong>庫存即時記帳：</strong>輸入股票代號、庫存張/股數、買入均價，系統即自動幫您計算現值、今日損益與未實現總損益（ROI）。</li>
-        <li><strong>資產歷史存儲：</strong>收盤後可點擊「存儲今日損益總計」，將當日的資產總額與盈虧永久記錄在手機本地，建立長期資產曲線。</li>
-        <li><strong>多主題切換：</strong>點擊右上角 🌙 顆粒按鈕，可在極簡科技風、擬物化灰灰、優雅紫羅蘭等多種 3D 視覺主題間切換。</li>
+        <li><strong>庫存即時記帳：</strong>輸入股票代號、庫存張/股數、買入均價，系統即自動幫您計算現值、今日損益與未實現總損益。</li>
       </ul>
-
-      <h3>二、分頁（組合）的靈活妙用 💡</h3>
-      <p>分頁數量可在進階設定中自訂（1~5 個），雙擊分頁標籤即可重新命名。您可以這樣規劃：</p>
-      <ul>
-        <li><strong>家人資產代管：</strong>將分頁命名為「我的庫存」、「老婆帳戶」、「小孩教育基金」，全家人的股票資產在同一台手機就能輕鬆分開管理、互不干擾。</li>
-        <li><strong>投資策略分流：</strong>建立「長期存股（領息）」與「波段短線（價差）」分頁，將不同核心邏輯的股票分開追蹤，避免績效混淆。</li>
-        <li><strong>市場動態觀察：</strong>建立一個「純觀察名單」分頁，只輸入代號、數量填 0 或不填均價，當作純看盤的即時自選股清單。</li>
-      </ul>
-
-      <h3>三、Fugle Key 報價更新原則與建議</h3>
-      <p>為避免觸發 Fugle API 的每分鐘速率限制，系統會根據您的金鑰數量與市場狀態<strong>自動進行智慧分流與調頻</strong>：</p>
-      <ul>
-        <li><strong>僅填一組 API Key：</strong>
-          <ul>
-            <li>盤中正常時段：每 <strong>20 秒</strong> 刷新一次。</li>
-            <li>若偶遇網路不穩或 429 限制：自動放緩至 <strong>30 秒</strong>。</li>
-          </ul>
-        </li>
-        <li><strong>填寫兩組 API Key（推薦 🌟）：</strong>
-          <ul>
-            <li>盤中正常時段：更新頻率提速至每 <strong>10 秒</strong> 一次！系統會採「輪流機制」調用主要與備用 Key，完美分散限額風險。</li>
-            <li>若偶遇錯誤：自動安全回退至 <strong>15 秒</strong>。</li>
-          </ul>
-        </li>
-      </ul>
-
-      <h3>四、Yahoo Finance 國外指數報價原則</h3>
-      <ul>
-        <li><strong>多層容錯防呆：</strong>全球國際指數直接透過高效能的邊緣代理網道（Cloudflare Worker）介接 Yahoo 數據。</li>
-        <li><strong>全時段不化白（—）：</strong>新版程式碼內建強大的防呆鏈，就算國際市場遇到盤後或清晨資料清洗，系統也會自動抓取昨收價或常規市場參考價補位，保證畫面不壞死。</li>
-      </ul>
-
-      <h3>五、補充注意事項與日常維護</h3>
-      <ul>
-        <li><strong>綠色本地儲存：</strong>本軟體不使用任何雲端資料庫，所有庫存與歷史損益均安全地儲存在您手機瀏覽器的本地空間中。</li>
-        <li><strong>強烈建議加入主畫面：</strong>為了避免在通訊軟體內建瀏覽器或無痕模式中流失庫存，請將本網頁「加入主畫面」當作獨立 APP 使用。</li>
-        <li><strong>定期匯出備份：</strong>當瀏覽器清除快取（或手機重置）時資料可能會遺失。建議每週或在有重大庫存變更後，至進階設定中點擊「📥 匯出備份」下載 json 檔案至電腦或雲端硬碟。</li>
-      </ul>
+      
+      <h3>二、如何強制更新報價？</h3>
+      <p>如果發現系統剛打開時因為網路延遲而沒跳數字，請直接<strong>點擊左上角的「股票庫存管理 ↻」標題，或是在螢幕空白處滑動、點擊</strong>，系統就會瞬間在背景強制抓取最新資料！</p>
     </div>
     <button type="button" class="modal-close" onclick="closeManual()">關閉說明</button>
   </div>
@@ -366,7 +339,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </div>
 
 <script>
-/* ========================================================= 🔧 API 管理引擎 V4.6.0 ========================================================= */
+/* ========================================================= 🔧 API 管理引擎 V4.8.0 ========================================================= */
 const PROXY_LIST = [
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
@@ -375,8 +348,6 @@ const PROXY_LIST = [
 ];
 const API_TIMEOUT = 5000;
 const MAX_CONCURRENT_REQUESTS = 3;
-const MAX_CONSECUTIVE_ERRORS = 5;
-const PAUSE_DURATION_MS = 300000;
 
 class KeyRotator {
   constructor(keys) { this.keys = keys.filter(k => k && k.trim() !== ''); this.index = 0; }
@@ -397,39 +368,11 @@ async function fetchWithProxy(targetUrl, proxyIndex = 0) {
   if (proxyIndex >= PROXY_LIST.length) return null;
   try {
     const proxyUrl = PROXY_LIST[proxyIndex] + encodeURIComponent(targetUrl);
-    const resp = await fetch(proxyUrl, { signal: AbortSignal.timeout(API_TIMEOUT) });
+    const resp = await fetch(proxyUrl, { signal: AbortSignal.timeout(API_TIMEOUT), cache: 'no-store' });
     if (!resp.ok) throw new Error('Proxy error');
     return resp;
   } catch (e) {
     return fetchWithProxy(targetUrl, proxyIndex + 1);
-  }
-}
-
-let consecutiveErrors = 0;
-let apiPauseUntil = 0;
-
-function shouldPauseApi() {
-  if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
-    if (Date.now() < apiPauseUntil) return true;
-    consecutiveErrors = 0;
-  }
-  return false;
-}
-
-function recordApiError() {
-  consecutiveErrors++;
-  if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
-    apiPauseUntil = Date.now() + PAUSE_DURATION_MS;
-    try { localStorage.setItem('api_pause_until', String(apiPauseUntil)); } catch(e){}
-    showToast('API 連續失敗，暫停更新 5 分鐘');
-  }
-}
-
-function recordApiSuccess() {
-  if (consecutiveErrors > 0) {
-    consecutiveErrors = 0;
-    apiPauseUntil = 0;
-    try { localStorage.removeItem('api_pause_until'); } catch(e){}
   }
 }
 
@@ -463,11 +406,8 @@ function renderApiStats() {
 function toggleKeyVisibility(inputId, btnId) {
   const input = document.getElementById(inputId);
   const btn = document.getElementById(btnId);
-  if (input.type === 'password') {
-    input.type = 'text'; btn.textContent = '🙈';
-  } else {
-    input.type = 'password'; btn.textContent = '👁';
-  }
+  if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; } 
+  else { input.type = 'password'; btn.textContent = '👁'; }
 }
 
 let cfWorkerUrl = 'https://yahoo-index-proxy.denis0521.workers.dev';
@@ -488,7 +428,7 @@ let tabNames = ['分頁 1', '分頁 2', '分頁 3', '分頁 4', '分頁 5'];
 let tabCount = 3;
 let fugleKey='',secondFugleKey='';
 let pollTimer = null;
-let currentInterval = 30000;
+let currentInterval = 20000;
 
 const FK='tw_fugle_key',SFK='tw_second_fugle_key',TK='tw_theme', CUR_TAB_KEY='tw_current_tab', TN_KEY='tw_tab_names', TC_KEY='tw_tab_count';
 const getStockKey = (idx) => `tw_stock_portfolio_tab_${idx}`;
@@ -503,8 +443,6 @@ function loadState(){
     const ct=localStorage.getItem(CUR_TAB_KEY);if(ct!=null)currentTab=parseInt(ct);
     const tn=localStorage.getItem(TN_KEY);if(tn) tabNames=JSON.parse(tn);
     const tc=localStorage.getItem(TC_KEY);if(tc) tabCount=parseInt(tc);
-    const pauseUntil = localStorage.getItem('api_pause_until');
-    if (pauseUntil) apiPauseUntil = parseInt(pauseUntil);
 
     for(let i=0; i<5; i++){
       const s=localStorage.getItem(getStockKey(i)); if(s) tabStocks[i]=JSON.parse(s);
@@ -551,12 +489,7 @@ function applyThemeText(t){
   else { themeBtn.textContent='🌙'; metaTheme.content='#e0e5ec'; }
 }
 
-function saveHoldings(){
-  try{
-    localStorage.setItem(getStockKey(currentTab),JSON.stringify(tabStocks[currentTab]));
-  }catch(e){}
-}
-
+function saveHoldings(){try{localStorage.setItem(getStockKey(currentTab),JSON.stringify(tabStocks[currentTab]));}catch(e){}}
 function saveKeys(){ 
   fugleKey=document.getElementById('fugleKeyInput').value.trim(); 
   secondFugleKey=document.getElementById('secondFugleKeyInput').value.trim(); 
@@ -589,8 +522,7 @@ function toggleTheme(){
 function switchTab(tabIndex){
   if(currentTab === tabIndex) return;
   currentTab = tabIndex; try{localStorage.setItem(CUR_TAB_KEY, currentTab);}catch(e){}
-  renderTabs(); renderAll(); renderHistory(); 
-  refresh(); // 切換分頁時正常刷新一次
+  renderTabs(); renderAll(); renderHistory(); forceRefresh();
 }
 
 function renameTab(tabIndex) {
@@ -668,7 +600,8 @@ async function fetchGlobalIndicesFromWorker() {
     const workerSymbols = activeForeignIndices.join(',');
     const response = await fetch(`${cfWorkerUrl}/indices?symbols=${encodeURIComponent(workerSymbols)}&_=${Date.now()}`, { 
       signal: AbortSignal.timeout(API_TIMEOUT),
-      headers: { 'Accept': 'application/json' }
+      headers: { 'Accept': 'application/json' },
+      cache: 'no-store'
     });
     if (response.ok) {
       const data = await response.json();
@@ -696,13 +629,13 @@ async function fetchGlobalIndicesFromWorker() {
 async function fetchFugle(symbol){
   const kr = getKeyRotator();
   if (kr.count === 0) return null;
-  let hasError = false;
   for (let i = 0; i < kr.count; i++){
     const currentKey = kr.next();
     try {
       const resp = await fetch(FUGLE + encodeURIComponent(symbol), {
-        headers: {'X-API-KEY': currentKey, 'X-Requested-With': 'StockPortfolioApp'},
-        signal: AbortSignal.timeout(API_TIMEOUT)
+        headers: {'X-API-KEY': currentKey, 'X-Requested-With': 'StockPortfolioApp', 'Cache-Control': 'no-cache'},
+        signal: AbortSignal.timeout(API_TIMEOUT),
+        cache: 'no-store'
       });
       if (resp.ok) {
         const d = await resp.json();
@@ -711,13 +644,11 @@ async function fetchFugle(symbol){
           trackApiUsage('Fugle');
           return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle'};
         }
-      } else if (resp.status === 429) {
-        hasError = true; continue;
       }
-    } catch(e) { hasError = true; continue; }
+      // 💡 拔除 429 錯誤紀錄，直接換 key 或直接 fallback 給 Yahoo
+    } catch(e) {}
   }
-  if (hasError) return { error: true };
-  return null;
+  return null; // 全部失敗就默默 return null，不要引發系統封鎖
 }
 
 async function fetchYahoo(symbol){
@@ -750,8 +681,9 @@ async function fetchWeightedIndex(){
     for (let i = 0; i < kr.count; i++){
       try {
         const resp = await fetch(FUGLE + 'IX0001', {
-          headers: {'X-API-KEY': kr.next(), 'X-Requested-With': 'StockPortfolioApp'},
-          signal: AbortSignal.timeout(API_TIMEOUT)
+          headers: {'X-API-KEY': kr.next(), 'X-Requested-With': 'StockPortfolioApp', 'Cache-Control': 'no-cache'},
+          signal: AbortSignal.timeout(API_TIMEOUT),
+          cache: 'no-store'
         });
         if (resp.ok) {
           const d = await resp.json();
@@ -805,12 +737,12 @@ async function refreshPrices(){
     if (twNameBox && !twNameBox.innerHTML.includes('(離線)')) {
       twNameBox.innerHTML = `臺灣加權指數<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>`;
     }
+    return; // 離線直接中斷
   } else {
     const twNameBox = document.querySelector('#idxScrollContainer .idx-card-box:first-child .idx-box-name');
     if (twNameBox) twNameBox.innerHTML = `臺灣加權指數`;
   }
 
-  let apiErrorOccurred = false;
   const idxR = fetchWeightedIndex();
   const idxEl = document.getElementById('idxPrice'); const idxChgEl = document.getElementById('idxChange');
   const idxPctEl = document.getElementById('idxPct'); const idxSrcEl = document.getElementById('idxSource');
@@ -833,13 +765,12 @@ async function refreshPrices(){
   const uniqueSymbols = [...new Set(currentStocks.map(s => s.symbol))];
   const batchSize = MAX_CONCURRENT_REQUESTS;
   
-  let hasUpdates = false; // 💡 追蹤是否有成功抓到任何新報價
+  let hasUpdates = false; 
   
   for (let i = 0; i < uniqueSymbols.length; i += batchSize) {
     const batch = uniqueSymbols.slice(i, i + batchSize);
     const promises = batch.map(async (sym) => {
       let r = await fetchFugle(sym);
-      if (r && r.error) { apiErrorOccurred = true; r = null; }
       if (!r) r = await fetchYahoo(sym);
       return { sym, r };
     });
@@ -864,9 +795,6 @@ async function refreshPrices(){
     });
   }
   
-  // 💡 【最核心的底層修復】
-  // 如果剛剛有成功抓到任何新報價，立刻強制寫入本地硬碟 (localStorage)！
-  // 這樣你下次關掉重開時，讀取的才會是「剛剛抓到的最新價格」，而不是很久以前的老暫存。
   if (hasUpdates) {
     for (let i = 0; i < 5; i++) {
       try { localStorage.setItem(getStockKey(i), JSON.stringify(tabStocks[i])); } catch(e) {}
@@ -874,17 +802,24 @@ async function refreshPrices(){
   }
   
   updateSummary();
-  if (apiErrorOccurred) recordApiError(); else recordApiSuccess();
-  adjustPollingInterval(apiErrorOccurred);
+  adjustPollingInterval(); // 💡 調整頻率
   renderApiStats();
 }
 
-function adjustPollingInterval(hasError) {
-  const kr = getKeyRotator(); const keyCount = kr.count; let newInterval = currentInterval;
-  if (shouldPauseApi()) { newInterval = 300000; } 
-  else if (!isAnyMarketOpen()) { newInterval = 60000; } 
-  else { if (hasError) { newInterval = keyCount === 2 ? 15000 : 30000; } else { newInterval = keyCount === 2 ? 10000 : 20000; } }
-  if (newInterval !== currentInterval) { currentInterval = newInterval; clearInterval(pollTimer); pollTimer = setInterval(refresh, currentInterval); }
+function adjustPollingInterval() {
+  const kr = getKeyRotator(); const keyCount = kr.count; 
+  let newInterval = 20000;
+  
+  // 如果非盤中時間，60秒抓一次就好
+  if (!isAnyMarketOpen()) { newInterval = 60000; } 
+  // 如果有雙 Key，可以大膽 10 秒抓一次
+  else if (keyCount === 2) { newInterval = 10000; }
+  
+  if (newInterval !== currentInterval) { 
+    currentInterval = newInterval; 
+    clearInterval(pollTimer); 
+    pollTimer = setInterval(refresh, currentInterval); 
+  }
 }
 
 function renderRow(s){
@@ -1003,7 +938,7 @@ function addStock(){
   currentStocks.push({id,symbol:sym,displayQty:qty,displayUnit:unit,buyPrice:buyPrice,shares:unit==='張'?qty*1000:qty,price:null,change:null,changePercent:null});
   saveHoldings();renderAll();
   document.getElementById('symInput').value=''; document.getElementById('qtyInput').value=''; document.getElementById('buyPriceInput').value='';
-  showToast('已新增 '+sym); refresh();
+  showToast('已新增 '+sym); forceRefresh();
 }
 
 function deleteStock(id){
@@ -1037,7 +972,7 @@ function saveEditStock() {
   s.shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
   const nbp = document.getElementById('editBuyPriceInput').value; const bpNum = parseFloat(nbp);
   s.buyPrice = (isNaN(bpNum) || bpNum <= 0) ? null : bpNum;
-  saveHoldings(); renderAll(); closeEditModal(); showToast('已修改'); refresh();
+  saveHoldings(); renderAll(); closeEditModal(); showToast('已修改'); forceRefresh();
 }
 
 function saveDailyPnl(){
@@ -1074,7 +1009,7 @@ function saveAndCloseModal(){
   saveKeys(); saveTabCount(); 
   document.getElementById('modalOverlay').classList.remove('show'); 
   showToast('設定已儲存'); 
-  refresh(); // 正常儲存並刷新
+  forceRefresh(); 
 }
 
 function openManual() { document.getElementById('manualOverlay').classList.add('show'); }
@@ -1129,11 +1064,19 @@ function importData(event) {
 }
 
 // ==========================================
-// 💡 乾淨的系統引擎 (V4.6.0) 
-// 摒棄所有外掛手段，使用正規的防連點刷新機制
+// 💡 V4.8.0 無鎖定清爽引擎 & 觸控喚醒
 // ==========================================
 let lastRefreshTime = 0;
+let lastSuccessTime = 0;
 let isRefreshing = false;
+
+// 🧨 一鍵暴力強啟 
+function forceRefresh() {
+  globalKeyRotator = null; 
+  lastRefreshTime = 0;     
+  isRefreshing = false;    
+  refresh();
+}
 
 async function refresh() {
   const now = Date.now();
@@ -1144,23 +1087,35 @@ async function refresh() {
   lastRefreshTime = now;
   try { 
     await refreshPrices(); 
+    lastSuccessTime = Date.now(); // 記錄成功抓取時間
   } 
   catch(e) { console.error('Refresh Error:', e); } 
   finally { isRefreshing = false; }
 }
 
+// 💡 觸控電擊喚醒機制 (使用者指定加回)
+function handleTouchWakeup() {
+  const now = Date.now();
+  // 距離上次成功更新超過 15 秒，只要一碰到螢幕就背景強迫更新
+  if (now - lastSuccessTime > 15000 && !isRefreshing) {
+    forceRefresh();
+  }
+}
+document.addEventListener('touchstart', handleTouchWakeup, { passive: true });
+document.addEventListener('click', handleTouchWakeup, { passive: true });
+
+
 // 初始化載入
 loadState(); renderAll(); renderHistory();
 
-// 啟動刷新迴圈
-setTimeout(refresh, 500);  
+setTimeout(forceRefresh, 500);  
+
 pollTimer = setInterval(refresh, currentInterval);
 
-// 手機從背景切換回畫面時，乾淨地觸發一次更新
+window.addEventListener('focus', forceRefresh);
+window.addEventListener('pageshow', forceRefresh);
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') {
-    refresh();
-  }
+  if (document.visibilityState === 'visible') forceRefresh();
 });
 
 // 監聽鍵盤輸入與彈窗關閉
@@ -1171,7 +1126,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 
-console.log('股票庫存管理 V4.6.0 已啟動 (底層真實儲存與網路優先機制)');
+console.log('股票庫存管理 V4.8.0 已啟動 (拔除API錯誤鎖定 + 觸碰自動喚醒)');
 </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stock-portfolio-v4.6.0'; 
+const CACHE_NAME = 'stock-portfolio-v4.8.0'; 
 const urlsToCache = [
   './',
   './index.html',
@@ -19,7 +19,6 @@ self.addEventListener('activate', event => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -41,8 +40,6 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // 💡 底層修正：改用「網路優先 (Network-First)」策略。
-  // 有網路時絕對抓取最新版檔案，沒網路時才使用舊快取，避免永遠卡在舊版本。
   event.respondWith(
     fetch(event.request).then(response => {
       return caches.open(CACHE_NAME).then(cache => {
