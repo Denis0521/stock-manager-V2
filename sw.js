@@ -30,10 +30,11 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   const requestUrl = new URL(event.request.url);
+  // 核心網路請求判斷：以下所有金融報價端點或 CORS 公開代理服務一律跳過靜態快取，確保報價不卡死
   const isApiRequest = requestUrl.hostname.includes('api.fugle.tw') || 
                        requestUrl.hostname.includes('finance.yahoo.com') || 
                        requestUrl.hostname.includes('allorigins.win') || 
-                       requestUrl.hostname.includes('denis0521.workers.dev') || // 確保您的 Cloudflare Worker 請求不被快取攔截
+                       requestUrl.hostname.includes('denis0521.workers.dev') || 
                        requestUrl.hostname.includes('corsproxy.io') ||
                        requestUrl.hostname.includes('codetabs.com') ||
                        requestUrl.hostname.includes('thingproxy.freeboard.io') ||
