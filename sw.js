@@ -33,6 +33,10 @@ self.addEventListener('fetch', event => {
   const isApiRequest = requestUrl.hostname.includes('api.fugle.tw') || 
                        requestUrl.hostname.includes('finance.yahoo.com') || 
                        requestUrl.hostname.includes('allorigins.win') || 
+                       requestUrl.hostname.includes('denis0521.workers.dev') || // 確保您的 Cloudflare Worker 請求不被快取攔截
+                       requestUrl.hostname.includes('corsproxy.io') ||
+                       requestUrl.hostname.includes('codetabs.com') ||
+                       requestUrl.hostname.includes('thingproxy.freeboard.io') ||
                        requestUrl.hostname.includes('docs.google.com');
 
   if (isApiRequest) {

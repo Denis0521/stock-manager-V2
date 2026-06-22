@@ -287,7 +287,10 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       </div>
       <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
       <div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:12px;box-shadow:inset 4px 4px 8px var(--s-dark),inset -4px -4px 8px var(--s-light);">
-        <div style="font-size:13px;color:var(--t-muted);font-weight:600;margin-bottom:8px;text-align:center;">📊 今日 API 使用量</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--t-muted); margin-bottom:8px; padding:0 4px;">
+          <span>📊 今日 API 使用量</span>
+          <button type="button" onclick="openForeignIdxModal()" style="padding:4px 8px; font-size:12px; box-shadow:2px 2px 4px var(--s-dark), -2px -2px 4px var(--s-light); border-radius:6px; color:var(--accent);">⚙️ 設定國外指數</button>
+        </div>
         <div id="apiStatsBox"></div>
       </div>
     </div>
@@ -301,6 +304,26 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     </div>
     <div class="v-box">核心版本：V4.11.0 (歷史紀錄修復版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="foreignIdxOverlay">
+  <div class="modal">
+    <h2>⚙️ 國外指數自選設定</h2>
+    <div class="card" style="margin: 0 0 16px 0; padding: 10px; box-shadow: inset 3px 3px 6px var(--s-dark), inset -3px -3px 6px var(--s-light);">
+      <div class="card-title" style="font-size:14px; margin-bottom:6px;">新增自選指數</div>
+      <div class="form-row">
+        <input type="text" id="newIdxSymbol" placeholder="代號 (如: ^SOX, TSLA)" style="font-size:14px; padding:8px;">
+        <input type="text" id="newIdxName" placeholder="自訂名稱 (如: 費半)" style="font-size:14px; padding:8px;">
+        <button type="button" onclick="addForeignIdx()" style="flex:0 0 44px; padding:0; font-size:20px; color:var(--accent); font-weight:bold;">＋</button>
+      </div>
+      <div style="font-size:11px; color:var(--t-muted); margin-top:6px; text-align:left; line-height:1.4;">
+        * 提示：美股大盤指數開頭通常為 ^ (例如 ^DJI, ^IXIC, ^GSPC)，個股或 ADR 直接輸入代號即可。
+      </div>
+    </div>
+    <label>目前自選列表</label>
+    <div id="foreignIdxListContainer" style="max-height: 250px; overflow-y: auto; margin-bottom: 16px; padding-right: 4px;"></div>
+    <button type="button" class="modal-close" onclick="closeForeignIdxModal()">關閉並重新整理</button>
   </div>
 </div>
 
@@ -326,7 +349,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       <h3>三、Fugle API Key 報價引擎原則</h3>
       <p>為避免觸發免費 API 每分鐘的流量限制，本系統具備智慧防呆與雙金鑰輪替引擎：</p>
       <ul>
-        <li><strong>單組 Key 模式：</strong>盤中正常時每 <strong>20 秒</strong> 刷新一次；若遇到 API 限制，系統會自動切換至 Yahoo 備援並放慢至 30 秒。</li>
+        <li><strong>單組 Key 模式：</strong>盤中正常時每 <strong>20 秒</strong> 刷新一次；若遇到 API 限制，系統會自動切換至 Yahoo 備援並放慢至 30秒。</li>
         <li><strong>雙組 Key 模式（強烈推薦 🌟）：</strong>只要填入兩組 Key，更新頻率將直接提速至每 <strong>10 秒</strong>！系統會完美「左右開弓」輪流調用兩組金鑰，徹底分散限額風險，讓報價如流水般順暢。</li>
       </ul>
 
@@ -440,7 +463,8 @@ function toggleKeyVisibility(inputId, btnId) {
 
 let cfWorkerUrl = 'https://yahoo-index-proxy.denis0521.workers.dev';
 
-const AVAILABLE_INDICES = [
+// 國外指數動態管理與配置
+const DEFAULT_INDICES = [
   { symbol: '^DJI', name: '道瓊工業指數' },
   { symbol: '^IXIC', name: '那斯達克指數' },
   { symbol: '^GSPC', name: '標普500指數' },
@@ -449,7 +473,24 @@ const AVAILABLE_INDICES = [
   { symbol: '^N225', name: '日經225指數' },
   { symbol: '^KS11', name: '韓國綜合指數' }
 ];
-const activeForeignIndices = AVAILABLE_INDICES.map(idx => idx.symbol);
+
+let AVAILABLE_INDICES = [];
+let activeForeignIndices = [];
+
+function loadForeignIndicesConfig() {
+  const stored = localStorage.getItem('tw_custom_foreign_indices');
+  if (stored) {
+    try {
+      AVAILABLE_INDICES = JSON.parse(stored);
+    } catch(e) {
+      AVAILABLE_INDICES = [...DEFAULT_INDICES];
+    }
+  } else {
+    AVAILABLE_INDICES = [...DEFAULT_INDICES];
+    localStorage.setItem('tw_custom_foreign_indices', JSON.stringify(AVAILABLE_INDICES));
+  }
+  activeForeignIndices = AVAILABLE_INDICES.map(idx => idx.symbol);
+}
 
 let currentTab = 0;
 let tabStocks = [[], [], [], [], []];
@@ -466,6 +507,7 @@ let cachedGlobalIndices = [];
 const FUGLE='https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
 
 function loadState(){
+  loadForeignIndicesConfig();
   try{
     const f=localStorage.getItem(FK);if(f)fugleKey=f;
     const sf=localStorage.getItem(SFK);if(sf)secondFugleKey=sf;
@@ -627,6 +669,10 @@ async function fetchGlobalIndicesFromWorker() {
 
   try {
     const workerSymbols = activeForeignIndices.join(',');
+    if (!workerSymbols) {
+      renderGlobalIndices([]);
+      return;
+    }
     const response = await fetch(`${cfWorkerUrl}/indices?symbols=${encodeURIComponent(workerSymbols)}&_=${Date.now()}`, { 
       signal: AbortSignal.timeout(API_TIMEOUT),
       headers: { 'Accept': 'application/json' },
@@ -1021,7 +1067,6 @@ function deleteHistory(timestamp) {
   saveRecords();renderHistory();showToast('記錄已刪除');
 }
 
-// 💡 補回的畫出歷史紀錄函式
 function renderHistory(){
   const hb = document.getElementById('historyBody');
   if(!hb) return;
@@ -1054,7 +1099,7 @@ function openModal(){
   updateKeyStatus(); renderApiStats(); document.getElementById('modalOverlay').classList.add('show');
 }
 
-function closeModal() { document.getElementById('modalOverlay').classList.remove('remove'); document.getElementById('modalOverlay').classList.remove('show'); }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
 
 function saveAndCloseModal(){
   saveKeys(); saveTabCount(); 
@@ -1065,6 +1110,80 @@ function saveAndCloseModal(){
 
 function openManual() { document.getElementById('manualOverlay').classList.add('show'); }
 function closeManual() { document.getElementById('manualOverlay').classList.remove('show'); }
+
+// ⚙️ 國外指數燈箱管理函數群
+function openForeignIdxModal() {
+  renderForeignIdxConfigList();
+  document.getElementById('foreignIdxOverlay').classList.add('show');
+}
+
+function closeForeignIdxModal() {
+  document.getElementById('foreignIdxOverlay').classList.remove('show');
+  loadForeignIndicesConfig();
+  fetchGlobalIndicesFromWorker();
+}
+
+function renderForeignIdxConfigList() {
+  const container = document.getElementById('foreignIdxListContainer');
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (AVAILABLE_INDICES.length === 0) {
+    container.innerHTML = '<div style="text-align:center; color:var(--t-muted); font-weight:600; padding:20px; font-size:14px;">目前無自選指數，請由上方新增</div>';
+    return;
+  }
+
+  AVAILABLE_INDICES.forEach((idx, index) => {
+    const row = document.createElement('div');
+    row.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:10px 14px; margin-bottom:8px; background:var(--bg); box-shadow:3px 3px 6px var(--s-dark), -3px -3px 6px var(--s-light); border-radius:8px;";
+    
+    row.innerHTML = `
+      <div style="text-align:left; flex:1; min-width:0; padding-right:8px;">
+        <div style="font-weight:700; color:var(--t-main); font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${idx.name}</div>
+        <div style="font-size:12px; color:var(--t-muted); font-weight:600;">${idx.symbol}</div>
+      </div>
+      <button type="button" onclick="deleteForeignIdx(${index})" style="padding:6px 10px; font-size:12px; color:var(--up); box-shadow:2px 2px 4px var(--s-dark), -2px -2px 4px var(--s-light); border-radius:6px;">✕</button>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function addForeignIdx() {
+  const symInp = document.getElementById('newIdxSymbol');
+  const nameInp = document.getElementById('newIdxName');
+  const symbol = symInp.value.trim().toUpperCase();
+  const name = nameInp.value.trim();
+
+  if (!symbol || !name) {
+    showToast('請輸入代號與自訂名稱');
+    return;
+  }
+
+  if (AVAILABLE_INDICES.some(idx => idx.symbol === symbol)) {
+    showToast('此指數代號已存在於清單中');
+    return;
+  }
+
+  AVAILABLE_INDICES.push({ symbol, name });
+  localStorage.setItem('tw_custom_foreign_indices', JSON.stringify(AVAILABLE_INDICES));
+  
+  symInp.value = '';
+  nameInp.value = '';
+  renderForeignIdxConfigList();
+  showToast(`已新增 ${name}`);
+}
+
+function deleteForeignIdx(index) {
+  const target = AVAILABLE_INDICES[index];
+  if (!target) return;
+  
+  if (confirm(`確定要刪除「${target.name} (${target.symbol})」嗎？`)) {
+    AVAILABLE_INDICES.splice(index, 1);
+    localStorage.setItem('tw_custom_foreign_indices', JSON.stringify(AVAILABLE_INDICES));
+    renderForeignIdxConfigList();
+    showToast('已刪除該自選項目');
+  }
+}
 
 function formatPrice(p){
   if(p==null)return '—';
@@ -1079,7 +1198,8 @@ function exportData() {
   const dataToExport = {
     tabStocks: [localStorage.getItem(getStockKey(0)), localStorage.getItem(getStockKey(1)), localStorage.getItem(getStockKey(2)), localStorage.getItem(getStockKey(3)), localStorage.getItem(getStockKey(4))],
     tabRecords: [localStorage.getItem(getRecordKey(0)), localStorage.getItem(getRecordKey(1)), localStorage.getItem(getRecordKey(2)), localStorage.getItem(getRecordKey(3)), localStorage.getItem(getRecordKey(4))],
-    tabNames: localStorage.getItem(TN_KEY), fugleKey: localStorage.getItem(FK), secondFugleKey: localStorage.getItem(SFK), theme: localStorage.getItem(TK), tabCount: localStorage.getItem(TC_KEY)
+    tabNames: localStorage.getItem(TN_KEY), fugleKey: localStorage.getItem(FK), secondFugleKey: localStorage.getItem(SFK), theme: localStorage.getItem(TK), tabCount: localStorage.getItem(TC_KEY),
+    customForeignIndices: localStorage.getItem('tw_custom_foreign_indices')
   };
   const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -1106,6 +1226,7 @@ function importData(event) {
         if (data.secondFugleKey) localStorage.setItem(SFK, data.secondFugleKey);
         if (data.theme) localStorage.setItem(TK, data.theme);
         if (data.tabCount) localStorage.setItem(TC_KEY, data.tabCount);
+        if (data.customForeignIndices) localStorage.setItem('tw_custom_foreign_indices', data.customForeignIndices);
         alert('🎉 備份還原成功！'); location.reload();
       }
     } catch (err) { alert('❌ 檔案格式錯誤，無法還原資料。'); }
@@ -1193,6 +1314,16 @@ document.getElementById('buyPriceInput').addEventListener('keydown',e=>{ if(e.ke
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
+document.getElementById('foreignIdxOverlay').addEventListener('click',function(e){if(e.target===this)closeForeignIdxModal();});
+
+// ⚡ 真正註冊 PWA Service Worker 核心引擎，啟用離線快取功能
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('Service Worker 註冊成功，範疇為:', reg.scope))
+      .catch(err => console.error('Service Worker 註冊失敗:', err));
+  });
+}
 
 console.log('股票庫存管理 V4.11.0 已啟動 (修復歷史紀錄儲存顯示錯誤)');
 </script>
