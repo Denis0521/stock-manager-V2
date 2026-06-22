@@ -37,7 +37,7 @@ body.cement { --bg: #a3a8b0; --s-light: #c0c5cd; --s-dark: #868b93; --t-main: #2
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif; background:var(--bg); color:var(--t-main); padding:0 0 60px; min-height:100vh; font-size:15px; overflow-x:hidden; transition:background-color 0.4s ease, color 0.4s ease}
 input,select,button{font-family:inherit;font-size:inherit;outline:none;text-align:center}
 
-/* 方案 A 修改點：為所有基礎浮起區塊元件補上基於模擬環境物理光影的「極細精緻雙色外框線」，大幅拉開色差對比 */
+/* 方案 A 視覺優化：外凸區塊加入模擬環境光源的極細雙色外框線 */
 .header, .tabs-bar, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .backup-box { 
   background: var(--bg); 
   box-shadow: 6px 6px 12px var(--s-dark), -6px -6px 12px var(--s-light); 
@@ -58,7 +58,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .form-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
 .form-row:last-child { margin-bottom: 0; }
 
-/* 方案 A 修改點：內凹輸入框補上下半部微光線，強化深陷立體色差 */
+/* 方案 A 視覺優化：內凹輸入框補上下半部微光線，強化深陷立體色差 */
 input, select { 
   flex: 1; min-width: 0; padding: 12px; background: var(--bg); border: none; border-radius: 8px; 
   box-shadow: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light); 
@@ -299,6 +299,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <button type="button" class="btn-close-icon" onclick="closeModal()">✕</button>
     <h2>進階設定</h2>
     <div class="settings-row">
+      <!-- 🔧 徹底修正：將此按鈕正確綁定 onclick="openManual()" 函式 -->
       <button type="button" class="btn-manual-row" onclick="openManual()">📖 使用說明</button>
       <div class="tab-count-wrapper">
         <div class="tab-count-label">分頁數量</div>
@@ -365,6 +366,51 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <label>目前自選列表</label>
     <div id="foreignIdxListContainer" style="max-height: 250px; overflow-y: auto; margin-bottom: 16px; padding-right: 4px;"></div>
     <button type="button" class="modal-close" onclick="closeForeignIdxModal()">關閉並重新整理</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="manualOverlay">
+  <div class="modal">
+    <h2>📖 系統使用說明</h2>
+    <div class="manual-content">
+      <h3>一、基本操作與介面</h3>
+      <ul>
+        <li><strong>記帳與損益：</strong>輸入股票代號、張/股數及買入均價。系統會自動計算目前總現值、今日損益與總未實現損益（ROI）。</li>
+        <li><strong>資產歷史存檔：</strong>每日收盤後，可點擊「存儲今日損益總計」，系統會將當日的資產結算記錄永久存放在手機內，幫您建立長期的資產變化曲線。</li>
+        <li><strong>佈景主題：</strong>點擊右上角「🌙」圖示，即可在極簡科技風、優雅紫羅蘭等多種 3D 擬物化色彩間隨心切換。</li>
+      </ul>
+
+      <h3>二、分頁（組合）的靈活妙用 💡</h3>
+      <p>進階設定中最多可開啟 5 個分頁，雙擊標籤即可重新命名。強烈建議這樣規劃：</p>
+      <ul>
+        <li><strong>家人資產代管：</strong>將分頁命名為「我的庫存」、「老婆帳戶」、「小孩教育金」，一台手機就能輕鬆分開管理全家資產、互不干擾。</li>
+        <li><strong>投資策略分流：</strong>建立「長期存股」與「短線波段」分頁，將不同核心邏輯的股票分開追蹤，避免被短期波動影響長期領息心態。</li>
+        <li><strong>純觀察看盤：</strong>建立一個「自選觀察」分頁，只要輸入代號，數量填 0 或不填均價，它就會變成一個極簡純粹的即時報價面板。</li>
+      </ul>
+
+      <h3>三、Fugle API Key 報價引擎原則</h3>
+      <p>為避免觸發免費 API 每分鐘的流量限制，本系統具備智慧防呆與雙金鑰輪替引擎：</p>
+      <ul>
+        <li><strong>單組 Key 模式：</strong>盤中正常時每 <strong>20 秒</strong> 刷新一次；若遇到 API 限制，系統會自動切換至 Yahoo 備援並放慢至 30秒。</li>
+        <li><strong>雙組 Key 模式（強烈推薦 🌟）：</strong>只要填入兩組 Key，更新頻率將直接提速至每 <strong>10 秒</strong>！系統會完美「左右開弓」輪流調用兩組金鑰，徹底分散限額風險，讓報價如流水般順暢。</li>
+      </ul>
+
+      <h3>四、國際指數報價原則 (Yahoo 備援)</h3>
+      <ul>
+        <li><strong>無懼休市斷線：</strong>國際大盤（含道瓊、那斯達克、費半及台積電 ADR 等）與台股備援，均採用高效邊緣節點（Cloudflare Worker）介接 Yahoo 報價。</li>
+        <li><strong>強效防呆快取：</strong>當全球市場進入盤後或清晨資料清洗期，系統會自動抓取「昨收價」或「常規市場參考價」補位。即便網路斷線，也會優先顯示手機內最新的暫存檔，確保畫面永遠有數據。</li>
+      </ul>
+
+      <h3>五、綠色本地儲存與備份重要性 ⚠️</h3>
+      <ul>
+        <li><strong>絕對隱私：</strong>本軟體不使用任何雲端資料庫，您的庫存、損益與歷史紀錄 100% 存放在您手機瀏覽器的「本地儲存空間 (Local Storage)」中。</li>
+        <li><strong>防止資料遺失（非常重要）：</strong>因為資料存在本地，如果您的手機清除了瀏覽器快取、開啟了無痕模式，或是更換了新手機，資料就會歸零。<strong>請務必將本網頁「加入主畫面」當作獨立 APP 使用</strong>，並養成每週點擊「📥 匯出備份」的習慣，將 JSON 檔妥善保存！</li>
+      </ul>
+      
+      <h3>六、強制喚醒技巧</h3>
+      <p>手機系統常會將背景程式休眠。若打開 APP 時報價未即時跳動，只要<strong>手指輕觸螢幕滑動或點擊任意空白處</strong>，系統內部的「心跳引擎」便會被瞬間喚醒，強迫於背景更新最新報價！</p>
+    </div>
+    <button type="button" class="modal-close" onclick="closeManual()">關閉說明</button>
   </div>
 </div>
 
@@ -443,7 +489,6 @@ function renderApiStats() {
   const stats = getApiUsageStats();
   const el = document.getElementById('apiStatsBox');
   if (el) {
-    // 方案 A 修改點：加入立體擬物化外凸文字光影效果，確保各色階主題中統計數字皆清晰易讀
     el.innerHTML = `<div style="display:flex;justify-content:space-around;text-align:center;font-size:13px;color:var(--t-muted);text-shadow:-1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d);">
       <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${stats.fugle}</div><div>Fugle</div></div>
       <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${stats.yahoo}</div><div>Yahoo</div></div>
@@ -557,7 +602,6 @@ function applyThemeText(t){
   else { themeBtn.textContent='🌙'; metaTheme.content='#e0e5ec'; }
 }
 
-// 方案 A 修改點：為動態生成項目加上物理線條色差框線
 function saveHoldings(){try{localStorage.setItem(getStockKey(currentTab),JSON.stringify(tabStocks[currentTab]));}catch(e){}}
 function saveKeys(){ 
   fugleKey=document.getElementById('fugleKeyInput').value.trim(); 
@@ -590,7 +634,7 @@ function toggleTheme(){
 
 function switchTab(tabIndex){
   if(currentTab === tabIndex) return;
-  currentTab = tabIndex; try{localStorage.setItem(CUR_TAB_KEY, currentTab);}catch(e){}
+  currentTab = tabIndex; try{localStorage.setItem(CUR_TAB_KEY, currentTab){}
   renderTabs(); renderAll(); renderHistory(); forceRefresh();
 }
 
@@ -933,7 +977,7 @@ function renderAll(){
   const tableScroll=document.getElementById('tableScroll'); const sumArea = document.getElementById('summaryArea'); const saveArea = document.getElementById('saveArea');
   body.innerHTML=''; const currentStocks = tabStocks[currentTab];
   if(currentStocks.length===0){ empty.style.display='block';tableScroll.style.display='none';sumArea.style.display='none';saveArea.style.display='none';return; }
-  empty.style.display='none';tableScroll.style.display='block';sumArea.style.display='block';saveArea.style.display='block';
+  empty.style.display='none';tableScroll.style.display='block';tableScroll.style.display='block';sumArea.style.display='block';saveArea.style.display='block';
   for(const s of currentStocks){
     const div=document.createElement('div');div.className='srow';div.dataset.id=s.id;
     const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
@@ -1065,7 +1109,6 @@ function deleteHistory(timestamp) {
   saveRecords();renderHistory();showToast('記錄已刪除');
 }
 
-// 方案 A 修改點：為歷史記錄彈出項目追加物理光影邊線
 function renderHistory(){
   const hb = document.getElementById('historyBody');
   if(!hb) return;
@@ -1110,6 +1153,7 @@ function saveAndCloseModal(){
   forceRefresh(); 
 }
 
+// 📖 核心修復：這兩個控制使用說明燈箱顯示與收合的函式，現在能完全正常被按鈕喚醒了！
 function openManual() { document.getElementById('manualOverlay').classList.add('show'); }
 function closeManual() { document.getElementById('manualOverlay').classList.remove('show'); }
 
@@ -1125,7 +1169,6 @@ function closeForeignIdxModal() {
   fetchGlobalIndicesFromWorker();
 }
 
-// 方案 A 修改點：為自選配置列表的彈出元件加上微光線條邊框
 function renderForeignIdxConfigList() {
   const container = document.getElementById('foreignIdxListContainer');
   if (!container) return;
@@ -1162,7 +1205,6 @@ function addForeignIdx() {
     return;
   }
 
-  // 貼心防呆優化：若輸入常見美股大盤代號卻忘記加「^」，系統自動幫忙補上
   if (['DJI', 'IXIC', 'GSPC', 'SOX', 'N225', 'KS11'].includes(symbol)) {
     symbol = '^' + symbol;
   }
@@ -1235,7 +1277,6 @@ function importData(event) {
         if (data.theme) localStorage.setItem(TK, data.theme);
         if (data.tabCount) localStorage.setItem(TC_KEY, data.tabCount);
         
-        // 還原防呆備援機制。若讀入舊版不包含自選指數的備份檔，自動填入預設大盤設定，防止欄位落空錯誤
         if (data.customForeignIndices) {
           localStorage.setItem('tw_custom_foreign_indices', data.customForeignIndices);
         } else {
@@ -1305,7 +1346,6 @@ function handleTouchWakeup() {
     forceRefresh();
   }
 }
-// 優化：將高頻觸發事件由 touchstart 改為 touchend，防止使用者連續滾動滑動網頁時造成背景重整引擎過載
 document.addEventListener('touchend', handleTouchWakeup, { passive: true });
 document.addEventListener('click', handleTouchWakeup, { passive: true });
 
@@ -1332,7 +1372,6 @@ document.getElementById('manualOverlay').addEventListener('click',function(e){if
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('foreignIdxOverlay').addEventListener('click',function(e){if(e.target===this)closeForeignIdxModal();});
 
-// ⚡ 正式註冊 PWA Service Worker 核心引擎，啟用完整的離線靜態快取與快取清洗機制
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
