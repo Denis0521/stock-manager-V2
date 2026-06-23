@@ -12,7 +12,7 @@
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
 // 確保讀取最新版 V4.11.1 (修正密碼自動填入干擾)
-const APP_VER = '5.0.0';
+const APP_VER = '4.11.1';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -1383,22 +1383,5 @@ if ('serviceWorker' in navigator) {
 
 console.log('股票庫存管理 V4.11.1 已啟動 (修復密碼自動填入干擾)');
 </script>
-
-<script>
-window.stockNameCache=JSON.parse(localStorage.getItem('stockNameCache')||'{}');
-window.dividendData=JSON.parse(localStorage.getItem('dividendData')||'{}');
-
-function saveDividend(stock,shares,dividend){
- dividendData[stock]={shares:+shares||0,dividend:+dividend||0};
- localStorage.setItem('dividendData',JSON.stringify(dividendData));
-}
-
-function getAnnualDividend(){
- return Object.values(dividendData).reduce((s,v)=>s+(v.shares*v.dividend),0);
-}
-
-console.log('V5.0 升級功能已載入：股票名稱快取、股利追蹤中心');
-</script>
-
 </body>
 </html>
