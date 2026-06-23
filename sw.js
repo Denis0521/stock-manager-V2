@@ -1,59 +1,11 @@
-const CACHE_NAME = 'stock-portfolio-v4.11.1'; // 已同步更新為 v4.11.1
-const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-512.png'
-];
+const CACHE_NAME='stock-portfolio-v5.0.0';
+const urlsToCache=['./','./index.html','./manifest.json','./icon-512.png'];
 
-self.addEventListener('install', event => {
-  self.skipWaiting();
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
-  );
+self.addEventListener('install',e=>{
+ self.skipWaiting();
+ e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(urlsToCache)));
 });
 
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  );
-  self.clients.claim();
-});
-
-self.addEventListener('fetch', event => {
-  const requestUrl = new URL(event.request.url);
-  // 這些 API 請求不進快取，直接抓取最新資料
-  const isApiRequest = requestUrl.hostname.includes('api.fugle.tw') || 
-                       requestUrl.hostname.includes('finance.yahoo.com') || 
-                       requestUrl.hostname.includes('allorigins.win') || 
-                       requestUrl.hostname.includes('denis0521.workers.dev') || 
-                       requestUrl.hostname.includes('corsproxy.io') ||
-                       requestUrl.hostname.includes('codetabs.com') ||
-                       requestUrl.hostname.includes('thingproxy.freeboard.io') ||
-                       requestUrl.hostname.includes('docs.google.com');
-
-  if (isApiRequest) {
-    event.respondWith(fetch(event.request));
-    return;
-  }
-
-  // 網頁靜態資源優先透過網路抓取，抓不到才退回使用快取
-  event.respondWith(
-    fetch(event.request).then(response => {
-      return caches.open(CACHE_NAME).then(cache => {
-        cache.put(event.request, response.clone());
-        return response;
-      });
-    }).catch(() => {
-      return caches.match(event.request);
-    })
-  );
+self.addEventListener('fetch',e=>{
+ e.respondWith(fetch(e.request).catch(()=>caches.match(e.request).then(r=>r||caches.match('./index.html'))));
 });
