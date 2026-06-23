@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-// 強制刷新快取：升級至 V4.13.0 (簡化主界面，新增持股改為按鈕與彈窗)
-const APP_VER = '4.13.0';
+// 強制刷新快取：升級至 V4.13.1 (修復 Android Chrome 誤判 API Key 為密碼並觸發儲存提示的問題)
+const APP_VER = '4.13.1';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -185,6 +185,12 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 .btn-close-icon { position: absolute; top: 15px; right: 15px; background: transparent !important; box-shadow: none !important; color: var(--t-muted); font-size: 24px; width: 40px; height: 40px; padding: 0; display: flex; justify-content: center; align-items: center; border-radius: 50%; text-shadow: none !important; cursor: pointer; border: none !important; }
 .btn-close-icon:hover { color: var(--t-main); transform: scale(1.1); }
 
+/* 🛡️ 防密碼管理員遮罩樣式 */
+.pwd-mask {
+  -webkit-text-security: disc;
+  text-security: disc;
+}
+
 @media (max-width: 767px) {
   body { max-width: 480px; margin: 0 auto; font-size: 15px; }
   input, select { font-size: 16px; }
@@ -241,6 +247,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </div>
 <div class="tabs-bar" id="tabsBarContainer"></div>
 
+<!-- 簡化後的「新增持股」按鈕 -->
 <button type="button" class="btn-save" onclick="openAddModal()" style="color: var(--accent); margin-bottom: 0;">＋ 新增持股</button>
 
 <div class="idx-scroll-container" id="idxScrollContainer">
@@ -288,23 +295,24 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </div>
 <div class="toast" id="toast"></div>
 
+<!-- 🆕 新增的「新增持股」燈箱 -->
 <div class="modal-overlay" id="addModalOverlay">
   <div class="modal">
     <h2>新增持股</h2>
     <label>股票代號</label>
-    <input type="text" id="symInput" placeholder="代號" maxlength="10" autocomplete="nope" style="text-transform:uppercase; margin-bottom: 10px;">
+    <input type="text" id="symInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase; margin-bottom: 10px;">
     
     <label>數量</label>
     <div style="display:flex; gap:10px; margin-bottom: 10px;">
-      <input type="number" id="qtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" autocomplete="nope" style="flex:1;">
+      <input type="number" id="qtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" autocomplete="off" style="flex:1;">
       <select id="unitSelect" style="flex:0 0 80px;"><option value="張">張</option><option value="股">股</option></select>
     </div>
     
     <label>買入均價 (選填計算損益)</label>
-    <input type="number" id="buyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="nope" style="margin-bottom: 20px;">
+    <input type="number" id="buyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="off" style="margin-bottom: 20px;">
     
     <button type="button" class="modal-close" onclick="addStock()" style="background:var(--accent); color:#fff; text-shadow:none; margin-top:0;">確認新增</button>
-    <button type="button" class="modal-close" onclick="closeAddModal()" style="margin-top:10px;">取消</button>
+    <button type="button" class="modal-close" onclick="closeAddModal()" style="margin-bottom:10px;">取消</button>
   </div>
 </div>
 
@@ -331,13 +339,15 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       </div>
       <label>Fugle API Key（主要）</label>
       <div style="display:flex;gap:8px;align-items:stretch;">
-        <input type="password" id="fugleKeyInput" placeholder="輸入第一組 Key" autocomplete="new-password" style="flex:1;">
+        <!-- 改為 type="text" 搭配 .pwd-mask，徹底騙過密碼管理員 -->
+        <input type="text" id="fugleKeyInput" class="pwd-mask" placeholder="輸入第一組 Key" autocomplete="off" spellcheck="false" style="flex:1;">
         <button type="button" onclick="toggleKeyVisibility('fugleKeyInput','keyToggle1')" id="keyToggle1" style="flex:0 0 44px;font-size:16px;">👁</button>
       </div>
       <div><span class="key-status none" id="fugleKeyStatus">未設定</span></div>
       <label>Fugle API Key 2（備用）</label>
       <div style="display:flex;gap:8px;align-items:stretch;">
-        <input type="password" id="secondFugleKeyInput" placeholder="輸入第二組 Key（選填）" autocomplete="new-password" style="flex:1;">
+        <!-- 改為 type="text" 搭配 .pwd-mask，徹底騙過密碼管理員 -->
+        <input type="text" id="secondFugleKeyInput" class="pwd-mask" placeholder="輸入第二組 Key（選填）" autocomplete="off" spellcheck="false" style="flex:1;">
         <button type="button" onclick="toggleKeyVisibility('secondFugleKeyInput','keyToggle2')" id="keyToggle2" style="flex:0 0 44px;font-size:16px;">👁</button>
       </div>
       <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
@@ -357,7 +367,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.13.0 (新增持股彈窗化)</div>
+    <div class="v-box">核心版本：V4.13.1 (已修復密碼管理員彈窗問題)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -423,17 +433,17 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <h2>編輯持股</h2>
     <input type="hidden" id="editId">
     <label>股票代號</label>
-    <input type="text" id="editSymInput" placeholder="代號" maxlength="10" autocomplete="nope" style="text-transform:uppercase">
+    <input type="text" id="editSymInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase">
     
     <label>股票簡稱 (選填)</label>
-    <input type="text" id="editNameInput" placeholder="自訂簡稱 (如: 台積電)" autocomplete="nope">
+    <input type="text" id="editNameInput" placeholder="自訂簡稱 (如: 台積電)" autocomplete="off">
 
     <label>數量</label>
-    <input type="number" id="editQtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" autocomplete="nope">
+    <input type="number" id="editQtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" autocomplete="off">
     <label>單位</label>
     <select id="editUnitSelect"><option value="張">張</option><option value="股">股</option></select>
     <label>買入均價 (留空或不填則不計算總損益)</label>
-    <input type="number" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="nope">
+    <input type="number" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="off">
     <button type="button" class="modal-close" onclick="saveEditStock()" style="background:var(--accent); color:#fff; text-shadow:none;">確認儲存</button>
     <button type="button" class="modal-close" onclick="closeEditModal()" style="margin-top:10px;">取消</button>
   </div>
@@ -517,8 +527,13 @@ function renderApiStats() {
 function toggleKeyVisibility(inputId, btnId) {
   const input = document.getElementById(inputId);
   const btn = document.getElementById(btnId);
-  if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; } 
-  else { input.type = 'password'; btn.textContent = '👁'; }
+  if (input.classList.contains('pwd-mask')) {
+    input.classList.remove('pwd-mask');
+    btn.textContent = '🙈';
+  } else {
+    input.classList.add('pwd-mask');
+    btn.textContent = '👁';
+  }
 }
 
 let cfWorkerUrl = 'https://yahoo-index-proxy.denis0521.workers.dev';
@@ -1346,7 +1361,7 @@ function importData(event) {
 }
 
 // ==========================================
-// 💡 V4.13.0 獨立背景心跳引擎 (Web Worker)
+// 💡 V4.13.1 獨立背景心跳引擎 (Web Worker)
 // ==========================================
 let lastRefreshTime = 0;
 let lastSuccessTime = 0;
@@ -1437,7 +1452,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-console.log('股票庫存管理 V4.13.0 已啟動');
+console.log('股票庫存管理 V4.13.1 已啟動');
 </script>
 </body>
 </html>
