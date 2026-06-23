@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-// 強制刷新快取：升級至 V4.13.4 (修復手機小鍵盤遮擋彈窗的問題，改為頂部對齊與自適應高度)
-const APP_VER = '4.13.4';
+// 強制刷新快取：升級至 V4.13.5 (加大頂部按鈕與字體)
+const APP_VER = '4.13.5';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -87,9 +87,9 @@ button:active, .tab-btn.active {
 }
 .tab-btn { flex: 1; padding: 10px 6px; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* 頂部按鈕樣式 */
-.btn-theme, .btn-adv, .btn-add-hdr { padding: 8px 10px; font-size: 14px; white-space: nowrap; }
-.btn-add-hdr { color: var(--up); font-weight: 800; text-shadow: none; } /* 紅字新增持股 */
+/* 💡 加大頂部按鈕樣式 */
+.btn-theme, .btn-adv, .btn-add-hdr { padding: 10px 14px; font-size: 16px; white-space: nowrap; font-weight: 700; }
+.btn-add-hdr { color: var(--up); text-shadow: none; } /* 紅字新增持股 */
 
 .form-row button { font-size: 16px; letter-spacing: 2px; padding-left: 18px; }
 .btn-save { width: calc(100% - 20px); padding: 14px; font-size: 17px; margin: 8px 10px; }
@@ -137,10 +137,8 @@ button:active, .tab-btn.active {
 .del-hist-btn { padding: 6px 12px; font-size: 14px; border-radius: 8px; }
 .hist-empty { color: var(--t-muted); font-size: 15px; text-align: center; padding: 20px; font-weight: 600; }
 
-/* 💡 修正手機鍵盤遮擋：將 overlay 對齊頂部 */
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 999; align-items: flex-start; justify-content: center; }
 .modal-overlay.show { display: flex; }
-/* 💡 Modal 高度改為自適應視窗扣除 margin，且加入頂部 margin 讓它靠近上方 */
 .modal { 
   position: relative; border-radius: 20px; padding: 24px 20px; width: calc(100% - 28px); max-width: 400px; 
   max-height: calc(100% - 40px); overflow-y: auto; background: var(--bg); 
@@ -201,8 +199,8 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 }
 
 @media (max-width: 360px) {
-  .header h1 { font-size: 17px; margin-left: 2px; }
-  .btn-theme, .btn-adv, .btn-add-hdr { padding: 6px 8px; font-size: 13px; }
+  .header h1 { font-size: 16px; margin-left: 2px; }
+  .btn-theme, .btn-adv, .btn-add-hdr { padding: 8px 10px; font-size: 15px; }
   .header .hdr-right { gap: 4px; }
 }
 
@@ -218,8 +216,8 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 
 @media (min-width: 768px) {
   body { font-size: 16px; }
-  .header h1 { font-size: 24px; margin-left: 10px; }
-  .header .btn-theme, .header .btn-adv, .header .btn-add-hdr { font-size: 16px; padding: 10px 16px; }
+  .header h1 { font-size: 26px; margin-left: 10px; }
+  .header .btn-theme, .header .btn-adv, .header .btn-add-hdr { font-size: 18px; padding: 12px 20px; }
   .card-title { font-size: 18px; }
   .tab-btn { font-size: 18px; padding: 14px 10px; }
   .list-wrap { min-width: 100%; }
@@ -256,7 +254,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 <div class="header">
   <h1>股票庫存管理</h1>
   <div class="hdr-right">
-    <!-- 新增持股按鈕移至此處 -->
     <button type="button" class="btn-add-hdr" onclick="openAddModal()">新增持股</button>
     <button type="button" class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙</button>
     <button type="button" class="btn-adv" onclick="openModal()">進階</button>
@@ -309,7 +306,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </div>
 <div class="toast" id="toast"></div>
 
-<!-- 🆕 新增的「新增持股」燈箱 -->
 <div class="modal-overlay" id="addModalOverlay">
   <div class="modal">
     <h2>新增持股</h2>
@@ -353,14 +349,12 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       </div>
       <label>Fugle API Key（主要）</label>
       <div style="display:flex;gap:8px;align-items:stretch;">
-        <!-- 改為 type="text" 搭配 .pwd-mask，徹底騙過密碼管理員 -->
         <input type="text" id="fugleKeyInput" class="pwd-mask" placeholder="輸入第一組 Key" autocomplete="off" spellcheck="false" style="flex:1;">
         <button type="button" onclick="toggleKeyVisibility('fugleKeyInput','keyToggle1')" id="keyToggle1" style="flex:0 0 44px;font-size:16px;">👁</button>
       </div>
       <div><span class="key-status none" id="fugleKeyStatus">未設定</span></div>
       <label>Fugle API Key 2（備用）</label>
       <div style="display:flex;gap:8px;align-items:stretch;">
-        <!-- 改為 type="text" 搭配 .pwd-mask，徹底騙過密碼管理員 -->
         <input type="text" id="secondFugleKeyInput" class="pwd-mask" placeholder="輸入第二組 Key（選填）" autocomplete="off" spellcheck="false" style="flex:1;">
         <button type="button" onclick="toggleKeyVisibility('secondFugleKeyInput','keyToggle2')" id="keyToggle2" style="flex:0 0 44px;font-size:16px;">👁</button>
       </div>
@@ -381,7 +375,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.13.4 (頂部新增按鈕防遮擋版)</div>
+    <div class="v-box">核心版本：V4.13.5 (頂部按鈕全面加大)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -1375,7 +1369,7 @@ function importData(event) {
 }
 
 // ==========================================
-// 💡 V4.13.4 獨立背景心跳引擎 (Web Worker)
+// 💡 V4.13.5 獨立背景心跳引擎 (Web Worker)
 // ==========================================
 let lastRefreshTime = 0;
 let lastSuccessTime = 0;
@@ -1466,7 +1460,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-console.log('股票庫存管理 V4.13.4 已啟動');
+console.log('股票庫存管理 V4.13.5 已啟動');
 </script>
 </body>
 </html>
