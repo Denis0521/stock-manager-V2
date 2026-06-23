@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stock-portfolio-v4.13.1'; // 升級至 V4.13.1
+const CACHE_NAME = 'stock-portfolio-v4.13.3'; // 同步升級至 V4.13.3
 const urlsToCache = [
   './',
   './index.html',
@@ -30,6 +30,7 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   const requestUrl = new URL(event.request.url);
+  
   // 這些 API 請求不進快取，直接抓取最新資料
   const isApiRequest = requestUrl.hostname.includes('api.fugle.tw') || 
                        requestUrl.hostname.includes('finance.yahoo.com') || 
