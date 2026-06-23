@@ -7,47 +7,184 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="股票庫存管理">
-<meta name="theme-color" id="themeColorMeta" content="#e0e5ec">
+<meta name="theme-color" id="themeColorMeta" content="#f4f6f9">
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-// 強制刷新快取：升級至 V4.13.5 (加大頂部按鈕與字體)
-const APP_VER = '4.13.5';
+// 強制刷新快取：升級至 V4.14.0 (UI 大改造、新主題、等寬數字)
+const APP_VER = '4.14.0';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
-  setTimeout(() => location.reload(true), 200);
+  setTimeout(() => location.reload(true), 300);
 }
 </script>
 <style>
-/* ========================================================= 🚀 核心變數引擎 ========================================================= */
+/* ========================================================= 🚀 核心變數引擎 (V4.14.0 全面進化) ========================================================= */
 :root {
-  --bg: #e0e5ec; --s-light: #ffffff; --s-dark: #a3b1c6; --t-main: #2d3436; --t-muted: #6b7280;
-  --up: #d93025; --down: #188038; --engrave-l: rgba(255,255,255,0.8); --engrave-d: rgba(0,0,0,0.15);
-  --protrude-l: rgba(255,255,255,0.9); --protrude-d: rgba(0,0,0,0.06); --accent: #1a73e8;
+  /* 🌟 基礎配色 - 提升對比度 */
+  --bg: #f4f6f9;
+  --s-light: #ffffff;
+  --s-dark: #d1d9e6;
+  --t-main: #1e293b;
+  --t-muted: #64748b;
+  
+  /* 🌟 漲跌色 - 柔和且專業 */
+  --up: #e8544a;
+  --down: #2b8c5e;
+  
+  /* 🌟 功能色 */
+  --accent: #3b82f6;
+  
+  /* 🌟 陰影系統 (Elevation) */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lg: 0 20px 60px rgba(0,0,0,0.18);
+  --shadow-inset: inset 0 1px 4px rgba(0,0,0,0.04);
+  
+  /* 🌟 邊框輔助 */
+  --border-light: 1px solid rgba(0,0,0,0.04);
+  
+  /* 保留舊變數以相容元件，但賦予新值 */
+  --engrave-l: rgba(255,255,255,0.8);
+  --engrave-d: rgba(0,0,0,0.04);
+  --protrude-l: rgba(255,255,255,1);
+  --protrude-d: rgba(0,0,0,0.02);
 }
-body.tech { --bg: #2b303a; --s-light: #363c48; --s-dark: #20242c; --t-main: #e2e8f0; --t-muted: #a0aec0; --up: #ff6b6b; --down: #51cf66; --engrave-l: rgba(255,255,255,0.05); --engrave-d: rgba(0,0,0,0.5); --protrude-l: rgba(255,255,255,0.12); --protrude-d: rgba(0,0,0,0.3); --accent: #58a6ff; }
-body.blue-light { --bg: #e3edf7; --s-light: #ffffff; --s-dark: #b8c6d6; --t-main: #102a43; --t-muted: #486581; --up: #e53e3e; --down: #2f855a; --engrave-l: rgba(255,255,255,0.8); --engrave-d: rgba(0,0,0,0.15); --protrude-l: rgba(255,255,255,0.9); --protrude-d: rgba(0,0,0,0.06); --accent: #2b6cb0; }
-body.purple-light { --bg: #ece8f3; --s-light: #ffffff; --s-dark: #cfc7df; --t-main: #322659; --t-muted: #6b5b8e; --up: #d53f8c; --down: #2f855a; --engrave-l: rgba(255,255,255,0.8); --engrave-d: rgba(0,0,0,0.15); --protrude-l: rgba(255,255,255,0.9); --protrude-d: rgba(0,0,0,0.06); --accent: #6b46c1; }
-body.pink { --bg: #f3e6e8; --s-light: #ffffff; --s-dark: #d5c3c6; --t-main: #4a123a; --t-muted: #9b2c2c; --up: #e53e3e; --down: #38a169; --engrave-l: rgba(255,255,255,0.7); --engrave-d: rgba(0,0,0,0.1); --protrude-l: rgba(255,255,255,0.8); --protrude-d: rgba(0,0,0,0.05); --accent: #d63384; }
-body.cement { --bg: #a3a8b0; --s-light: #c0c5cd; --s-dark: #868b93; --t-main: #22252a; --t-muted: #4a5059; --up: #c62828; --down: #1b5e20; --engrave-l: rgba(255,255,255,0.6); --engrave-d: rgba(0,0,0,0.3); --protrude-l: rgba(255,255,255,0.6); --protrude-d: rgba(0,0,0,0.15); --accent: #111111; }
+
+/* ========================================================= 🌓 主題系統 ========================================================= */
+body.tech {
+  --bg: #1a1e26;
+  --s-light: #252b36;
+  --s-dark: #0f1218;
+  --t-main: #e2e8f0;
+  --t-muted: #94a3b8;
+  --up: #ff6b6b;
+  --down: #51cf66;
+  --accent: #58a6ff;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
+  --shadow-lg: 0 20px 60px rgba(0,0,0,0.6);
+  --border-light: 1px solid rgba(255,255,255,0.05);
+}
+body.blue-light {
+  --bg: #e3edf7;
+  --s-light: #ffffff;
+  --s-dark: #cbd5e1;
+  --t-main: #102a43;
+  --t-muted: #486581;
+  --up: #e8544a;
+  --down: #2b8c5e;
+  --accent: #2b6cb0;
+}
+body.purple-light {
+  --bg: #ece8f3;
+  --s-light: #ffffff;
+  --s-dark: #d8d0e6;
+  --t-main: #322659;
+  --t-muted: #6b5b8e;
+  --up: #e8544a;
+  --down: #2b8c5e;
+  --accent: #6b46c1;
+}
+body.pink {
+  --bg: #f3e6e8;
+  --s-light: #ffffff;
+  --s-dark: #dcc8cb;
+  --t-main: #4a123a;
+  --t-muted: #9b2c2c;
+  --up: #e8544a;
+  --down: #2b8c5e;
+  --accent: #d63384;
+}
+body.cement {
+  --bg: #a3a8b0;
+  --s-light: #c0c5cd;
+  --s-dark: #868b93;
+  --t-main: #1e2227;
+  --t-muted: #3a3f47;
+  --up: #c62828;
+  --down: #1b5e20;
+  --accent: #111111;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+}
+body.minimal-white {
+  --bg: #f8fafc;
+  --s-light: #ffffff;
+  --s-dark: #e2e8f0;
+  --t-main: #0f172a;
+  --t-muted: #475569;
+  --up: #ef4444;
+  --down: #22c55e;
+  --accent: #3b82f6;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+}
+body.obsidian-black {
+  --bg: #0b0e14;
+  --s-light: #1a202c;
+  --s-dark: #06080b;
+  --t-main: #e8edf5;
+  --t-muted: #8892a8;
+  --up: #ff6b6b;
+  --down: #69db7c;
+  --accent: #74c0fc;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.6);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.7);
+  --shadow-lg: 0 20px 60px rgba(0,0,0,0.8);
+  --border-light: 1px solid rgba(255,255,255,0.06);
+}
 
 /* ========================================================= 🌐 基礎排版 ========================================================= */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif; background:var(--bg); color:var(--t-main); padding:0 0 60px; min-height:100vh; font-size:15px; overflow-x:hidden; transition:background-color 0.4s ease, color 0.4s ease}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif;
+  background:var(--bg);
+  color:var(--t-main);
+  padding:0 0 60px;
+  min-height:100vh;
+  font-size:15px;
+  overflow-x:hidden;
+  transition:background-color 0.3s ease, color 0.3s ease;
+}
 input,select,button{font-family:inherit;font-size:inherit;outline:none;text-align:center}
-
-.header, .tabs-bar, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .backup-box { 
-  background: var(--bg); 
-  box-shadow: 6px 6px 12px var(--s-dark), -6px -6px 12px var(--s-light); 
-  border-radius: 12px; 
-  transition: background-color 0.4s ease, box-shadow 0.4s ease;
-  border: 1px solid var(--protrude-d);
-  border-top: 1px solid var(--protrude-l);
-  border-left: 1px solid var(--protrude-l);
+/* 等寬數字設定 (數字不抖動) */
+.price, .chg, .chgp, .today-pnl, .total, .val, .idx-box-price, .idx-box-change-row {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
-.header { border-radius: 0 0 16px 16px; padding: 12px 10px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+/* ========================================================= 🧩 元件海拔系統 (取代舊有陰影) ========================================================= */
+.header, .tabs-bar, .card, .idx-scroll-container, .summary, .hist-item, .backup-box {
+  background: var(--s-light);
+  box-shadow: var(--shadow-sm);
+  border-radius: 12px;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  border: var(--border-light);
+}
+.modal {
+  background: var(--s-light);
+  box-shadow: var(--shadow-lg);
+  border: var(--border-light);
+}
+.list-header, .srow {
+  background: transparent;
+  box-shadow: none;
+}
+
+/* ========================================================= 📐 佈局元件 ========================================================= */
+.header {
+  border-radius: 0 0 16px 16px;
+  padding: 12px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--s-light);
+}
 .header h1 { font-size: 20px; font-weight: 700; color: var(--t-main); user-select: none; margin-left: 6px; }
 .header .hdr-right { display: flex; gap: 6px; }
 
@@ -57,116 +194,176 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .form-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
 .form-row:last-child { margin-bottom: 0; }
 
-input, select { 
-  flex: 1; min-width: 0; padding: 12px; background: var(--bg); border: none; border-radius: 8px; 
-  box-shadow: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light); 
-  color: var(--t-main); font-weight: 600; text-align: left; 
-  text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); 
-  transition: background-color 0.4s ease, box-shadow 0.4s ease;
-  border-bottom: 1px solid var(--protrude-l);
-  border-right: 1px solid var(--protrude-l);
+input, select {
+  flex: 1; min-width: 0; padding: 12px; background: var(--bg); border: none; border-radius: 8px;
+  box-shadow: var(--shadow-inset);
+  color: var(--t-main); font-weight: 600; text-align: left;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  border: var(--border-light);
 }
-input::placeholder { color: var(--t-muted); text-shadow: none; font-weight: normal; }
+input::placeholder { color: var(--t-muted); font-weight: normal; }
 .form-row select { flex: 0 0 68px; padding: 12px 4px; text-align: center; }
 .form-row .sym-inp { flex: 0 0 90px; }
 
-button, .tab-btn { 
-  background: var(--bg); border: none; border-radius: 8px; padding: 10px 16px; 
-  box-shadow: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light); 
-  color: var(--t-main); font-weight: 600; cursor: pointer; transition: all 0.25s ease; 
-  text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); 
-  display: flex; align-items: center; justify-content: center;
-  border: 1px solid var(--protrude-d);
-  border-top: 1px solid var(--protrude-l);
-  border-left: 1px solid var(--protrude-l);
+button, .tab-btn {
+  background: var(--s-light);
+  border: var(--border-light);
+  border-radius: 8px;
+  padding: 10px 16px;
+  box-shadow: var(--shadow-sm);
+  color: var(--t-main);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px; /* 提升觸控區域 */
 }
-button:hover, .tab-btn:hover { transform: translateY(-1px); box-shadow: 6px 6px 12px var(--s-dark), -6px -6px 12px var(--s-light); }
-button:active, .tab-btn.active { 
-  transform: translateY(0); box-shadow: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light); color: var(--accent); 
-  border: none; border-bottom: 1px solid var(--protrude-l); border-right: 1px solid var(--protrude-l);
+button:hover, .tab-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+button:active, .tab-btn.active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-inset);
+  color: var(--accent);
+  border-color: var(--accent);
 }
 .tab-btn { flex: 1; padding: 10px 6px; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tab-btn.active { border-bottom: 3px solid var(--accent); border-radius: 8px 8px 0 0; background: var(--bg); }
 
-/* 💡 加大頂部按鈕樣式 */
 .btn-theme, .btn-adv, .btn-add-hdr { padding: 10px 14px; font-size: 16px; white-space: nowrap; font-weight: 700; }
-.btn-add-hdr { color: var(--up); text-shadow: none; } /* 紅字新增持股 */
-
-.form-row button { font-size: 16px; letter-spacing: 2px; padding-left: 18px; }
+.btn-add-hdr { color: var(--up); }
 .btn-save { width: calc(100% - 20px); padding: 14px; font-size: 17px; margin: 8px 10px; }
 
-.idx-scroll-container { margin: 8px 10px; overflow-x: auto; display: flex; gap: 0; padding: 2px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+.idx-scroll-container {
+  margin: 8px 10px;
+  overflow-x: auto;
+  display: flex;
+  gap: 0;
+  padding: 4px 0;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
-.idx-card-box { flex: 0 0 auto; min-width: 160px; padding: 2px 16px; scroll-snap-align: start; border-right: 1px solid var(--s-dark); text-align: left; }
+.idx-card-box {
+  flex: 0 0 auto;
+  min-width: 160px;
+  padding: 12px 16px;
+  scroll-snap-align: start;
+  border-right: 1px solid var(--s-dark);
+  text-align: left;
+}
 .idx-card-box:last-child { border-right: none; }
-.idx-box-name { font-size: 16px; color: var(--t-muted); font-weight: 600; margin-top: 2px; }
-.idx-box-price { font-size: 18px; font-weight: 700; margin: 1px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
-.idx-box-change-row { display: flex; align-items: center; justify-content: flex-start; gap: 6px; font-size: 16px; font-weight: 600; white-space: nowrap; }
-.idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 0; opacity: 0.7; }
+.idx-box-name { font-size: 14px; color: var(--t-muted); font-weight: 600; margin-top: 2px; }
+.idx-box-price { font-size: 18px; font-weight: 700; margin: 2px 0; color: var(--t-main); }
+.idx-box-change-row { display: flex; align-items: center; justify-content: flex-start; gap: 6px; font-size: 15px; font-weight: 600; white-space: nowrap; }
+.idx-box-src { font-size: 10px; color: var(--t-muted); text-align: right; margin-top: 2px; opacity: 0.6; }
 
-.table-scroll { margin: 8px 10px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; }
+.table-scroll { margin: 8px 10px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; background: var(--s-light); border-radius: 12px; box-shadow: var(--shadow-sm); border: var(--border-light); }
 .list-wrap { min-width: 727px; }
-.list-header, .srow { grid-template-columns: 112px 110px 90px 90px 80px 90px 120px 90px; }
-.list-header { display: grid; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 17px; color: var(--t-muted); font-weight: 600; }
-.srow { display: grid; align-items: stretch; border-bottom: 1px solid var(--s-dark); font-size: 17px; }
+.list-header, .srow {
+  display: grid;
+  grid-template-columns: 112px 110px 90px 90px 80px 90px 120px 90px;
+  align-items: stretch;
+  border-bottom: 1px solid var(--s-dark);
+}
+.list-header { font-size: 15px; color: var(--t-muted); font-weight: 700; background: var(--bg); border-radius: 12px 12px 0 0; padding: 0 4px; }
+.srow { font-size: 16px; padding: 0 4px; transition: background-color 0.1s; }
 .srow:last-child { border-bottom: none; }
-.list-header > div, .srow > div { padding: 6px 6px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; white-space: nowrap; }
-.list-header > div:nth-child(1), .srow > div:nth-child(1) { align-items: flex-start; text-align: left; position: sticky; left: 0; z-index: 2; background: var(--bg); padding-left: 8px; }
-.list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after { content: ''; position: absolute; top: 0; bottom: 0; right: -6px; width: 6px; background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; }
+.srow:hover { background: var(--bg); }
+
+.list-header > div, .srow > div {
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  text-align: right;
+  white-space: nowrap;
+  min-height: 44px;
+}
+.list-header > div:nth-child(1), .srow > div:nth-child(1) {
+  align-items: flex-start;
+  text-align: left;
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: inherit;
+  padding-left: 8px;
+}
 .list-header > div:nth-child(8) { align-items: center; justify-content: center; padding-left: 14px; }
 .srow > div:nth-child(8) { flex-direction: row; align-items: center; justify-content: center; gap: 6px; padding-left: 14px; }
+
 .sym-container { align-items: flex-start !important; line-height: 1.1 !important; width: 100%; max-width: 112px; display: flex; flex-direction: column; justify-content: center; }
-.srow .sym { font-weight: 800; font-size: 17px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; }
-.srow .qty-cell { font-weight: 600; color: var(--t-main); overflow: hidden; width: 100%; }
-.srow .price { font-weight: 700; }
-.srow .chgp { font-size: 17px; font-weight: 700; }
-.srow .chg, .srow .today-pnl { font-weight: 700; }
-.srow .total { font-weight: 700; overflow: hidden; width: 100%; }
-.srow .act button { padding: 6px 10px; font-size: 15px; border-radius: 6px; }
+.srow .sym { font-weight: 800; font-size: 17px; color: var(--t-main); cursor: pointer; }
+.srow .qty-cell { font-weight: 600; color: var(--t-main); overflow: hidden; width: 100%; font-size: 14px; }
+.srow .price { font-weight: 700; font-size: 16px; }
+.srow .chgp { font-size: 15px; font-weight: 700; }
+.srow .chg, .srow .today-pnl { font-weight: 700; font-size: 15px; }
+.srow .total { font-weight: 700; overflow: hidden; width: 100%; font-size: 14px; }
+.srow .act button { padding: 4px 10px; font-size: 15px; border-radius: 6px; min-height: 32px; }
 
 .summary { padding: 12px 16px; margin: 8px 10px; }
 .sum-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
-.sum-row .lab { color: var(--t-muted); font-size: 17px; font-weight: 600; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
-.sum-row .val { font-size: 20px; font-weight: 800; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
-.sum-divider { height: 2px; background: var(--s-dark); opacity: 0.5; margin: 6px 0; border-radius: 2px; }
-.sum-toggle-btn { text-align: center; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 6px; padding-top: 4px; color: var(--t-muted); text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
+.sum-row .lab { color: var(--t-muted); font-size: 16px; font-weight: 600; }
+.sum-row .val { font-size: 20px; font-weight: 800; }
+.sum-divider { height: 1px; background: var(--s-dark); opacity: 0.5; margin: 6px 0; border-radius: 2px; }
+.sum-toggle-btn { text-align: center; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 6px; padding-top: 4px; color: var(--t-muted); }
+
 .history { margin: 8px 10px; }
 .hist-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; margin-top: 8px; }
 .hist-item-left { display: flex; align-items: baseline; gap: 12px; }
-.hist-item .hdate { color: var(--t-muted); font-size: 14px; font-weight: 600; }
-.hist-item .hval { font-weight: 800; font-size: 17px; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
-.del-hist-btn { padding: 6px 12px; font-size: 14px; border-radius: 8px; }
+.hist-item .hdate { color: var(--t-muted); font-size: 13px; font-weight: 600; }
+.hist-item .hval { font-weight: 800; font-size: 17px; }
+.del-hist-btn { padding: 6px 12px; font-size: 13px; border-radius: 8px; min-height: 36px; }
 .hist-empty { color: var(--t-muted); font-size: 15px; text-align: center; padding: 20px; font-weight: 600; }
 
-.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 999; align-items: flex-start; justify-content: center; }
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 999; align-items: flex-start; justify-content: center; }
 .modal-overlay.show { display: flex; }
-.modal { 
-  position: relative; border-radius: 20px; padding: 24px 20px; width: calc(100% - 28px); max-width: 400px; 
-  max-height: calc(100% - 40px); overflow-y: auto; background: var(--bg); 
-  box-shadow: 0 25px 50px rgba(0,0,0,0.5), 6px 6px 12px var(--s-dark), -6px -6px 12px var(--s-light); 
-  border: 1px solid var(--protrude-d); border-top: 1px solid var(--protrude-l); border-left: 1px solid var(--protrude-l);
+.modal {
+  position: relative;
+  border-radius: 20px;
+  padding: 24px 20px;
+  width: calc(100% - 28px);
+  max-width: 400px;
+  max-height: calc(100% - 40px);
+  overflow-y: auto;
   margin-top: 20px;
+  animation: modalSlideUp 0.25s ease;
 }
-
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
 #manualOverlay, #editModalOverlay, #foreignIdxOverlay, #addModalOverlay { z-index: 1100; }
 
-.modal h2 { font-size: 20px; margin-bottom: 16px; text-align: center; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
-.modal label { display: block; font-size: 15px; color: var(--t-muted); margin: 12px 0 6px; font-weight: 600; text-align: left; }
-.modal-close { margin-top: 20px; width: 100%; padding: 14px; font-size: 17px; }
-.key-status { font-size: 12px; padding: 4px 10px; border-radius: 12px; display: inline-block; margin-top: 6px; font-weight: 600; }
-.key-status.ok { background: var(--bg); box-shadow: inset 2px 2px 4px var(--s-dark), inset -2px -2px 4px var(--s-light); color: var(--up); border: 1px solid var(--protrude-l); }
-.key-status.none { background: var(--bg); box-shadow: inset 2px 2px 4px var(--s-dark), inset -2px -2px 4px var(--s-light); color: var(--t-muted); border: 1px solid var(--protrude-l); }
-.info-box { padding: 12px 14px; font-size: 13px; line-height: 1.6; margin-bottom: 16px; font-weight: 600; color: var(--accent); background: var(--bg); box-shadow: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light); border-radius: 12px; }
-.toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--t-main); color: var(--bg); padding: 12px 24px; border-radius: 30px; font-size: 15px; font-weight: bold; z-index: 9999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
-.toast.show { opacity: 1; }
-a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
+.modal h2 { font-size: 20px; margin-bottom: 16px; text-align: center; color: var(--t-main); }
+.modal label { display: block; font-size: 14px; color: var(--t-muted); margin: 12px 0 6px; font-weight: 600; text-align: left; }
+.modal-close { margin-top: 20px; width: 100%; padding: 14px; font-size: 17px; min-height: 50px; }
+.modal-close.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.key-status { font-size: 12px; padding: 4px 12px; border-radius: 20px; display: inline-block; margin-top: 6px; font-weight: 600; background: var(--bg); border: var(--border-light); }
+.key-status.ok { color: var(--down); }
+.key-status.none { color: var(--t-muted); }
+
+.info-box { padding: 12px 14px; font-size: 13px; line-height: 1.6; margin-bottom: 16px; font-weight: 600; color: var(--accent); background: var(--bg); border-radius: 12px; border: var(--border-light); }
+.toast {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--t-main); color: var(--bg); padding: 12px 24px; border-radius: 30px;
+  font-size: 15px; font-weight: bold; z-index: 9999; opacity: 0; transition: all 0.3s ease;
+  pointer-events: none; box-shadow: var(--shadow-lg);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; }
 .backup-box { padding: 16px; margin: 8px 0 0; }
-.backup-title { font-size: 16px; font-weight: 700; color: var(--t-muted); margin-bottom: 12px; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); text-align: left; }
+.backup-title { font-size: 16px; font-weight: 700; color: var(--t-muted); margin-bottom: 12px; text-align: left; }
 .backup-btns { display: flex; gap: 12px; }
-.btn-backup { flex: 1; padding: 12px; font-size: 15px; }
-.v-box { text-align: center; font-size: 13px; color: var(--t-muted); margin-top: 24px; font-weight: 600; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
-.up { color: var(--up) !important; text-shadow: none !important; }
-.down { color: var(--down) !important; text-shadow: none !important; }
-.neutral { color: var(--t-main) !important; text-shadow: none !important; }
+.btn-backup { flex: 1; padding: 12px; font-size: 15px; min-height: 48px; }
+.v-box { text-align: center; font-size: 13px; color: var(--t-muted); margin-top: 24px; font-weight: 600; }
+
+.up { color: var(--up) !important; }
+.down { color: var(--down) !important; }
+.neutral { color: var(--t-main) !important; }
 
 .btn-manual { width: 100%; padding: 12px; font-size: 16px; margin-bottom: 16px; color: var(--accent); }
 .manual-content { text-align: left; font-size: 16px; line-height: 1.8; color: var(--t-main); }
@@ -176,44 +373,47 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 .manual-content li { margin-bottom: 6px; }
 
 .settings-row { display: flex; gap: 12px; margin-bottom: 20px; align-items: stretch; }
-.btn-manual-row { flex: 0 0 45%; padding: 12px 10px; font-size: 15px; color: var(--accent); margin: 0; white-space: nowrap; }
-.tab-count-wrapper { 
-  flex: 1; display: flex; flex-direction: column; justify-content: center; background: var(--bg); border-radius: 8px; 
-  box-shadow: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light); padding: 4px 12px;
-  border-bottom: 1px solid var(--protrude-l); border-right: 1px solid var(--protrude-l);
+.btn-manual-row { flex: 0 0 45%; padding: 12px 10px; font-size: 15px; color: var(--accent); margin: 0; white-space: nowrap; min-height: 50px; }
+.tab-count-wrapper {
+  flex: 1; display: flex; flex-direction: column; justify-content: center; background: var(--bg); border-radius: 8px;
+  box-shadow: var(--shadow-inset); padding: 4px 12px; border: var(--border-light);
 }
 .tab-count-label { font-size: 12px; color: var(--t-muted); font-weight: 600; margin-bottom: 2px; text-align: left; }
 .tab-count-wrapper select { width: 100%; box-shadow: none; padding: 4px 0; background: transparent; font-size: 15px; border: none; }
 
 .api-section { margin-bottom: 20px; padding-top: 10px; border-top: 1px solid var(--s-dark); }
-.api-link-box { text-align: center; margin-bottom: 16px; padding: 10px; background: var(--bg); border-radius: 8px; box-shadow: 3px 3px 6px var(--s-dark), -3px -3px 6px var(--s-light); }
+.api-link-box { text-align: center; margin-bottom: 16px; padding: 12px; background: var(--bg); border-radius: 8px; border: var(--border-light); }
 
 .modal.fullscreen-modal { width: 100vw !important; max-width: 100vw !important; height: 100vh !important; max-height: 100vh !important; border-radius: 0; padding: 18px 20px 20px !important; margin: 0 !important; border: none; box-sizing: border-box; z-index: 999; }
-.btn-close-icon { position: absolute; top: 15px; right: 15px; background: transparent !important; box-shadow: none !important; color: var(--t-muted); font-size: 24px; width: 40px; height: 40px; padding: 0; display: flex; justify-content: center; align-items: center; border-radius: 50%; text-shadow: none !important; cursor: pointer; border: none !important; }
+.btn-close-icon { position: absolute; top: 15px; right: 15px; background: transparent !important; box-shadow: none !important; color: var(--t-muted); font-size: 24px; width: 44px; height: 44px; padding: 0; display: flex; justify-content: center; align-items: center; border-radius: 50%; cursor: pointer; border: none !important; }
 .btn-close-icon:hover { color: var(--t-main); transform: scale(1.1); }
 
-/* 🛡️ 防密碼管理員遮罩樣式 */
-.pwd-mask {
-  -webkit-text-security: disc;
-  text-security: disc;
+.pwd-mask { -webkit-text-security: disc; text-security: disc; }
+
+/* ✨ 價格更新閃爍動畫 */
+@keyframes price-flash {
+  0% { background-color: rgba(59, 130, 246, 0.15); }
+  100% { background-color: transparent; }
+}
+.price.flash-update, .chg.flash-update, .today-pnl.flash-update {
+  animation: price-flash 0.6s ease-out;
 }
 
+/* ========================================================= 📱 響應式 ========================================================= */
 @media (max-width: 360px) {
   .header h1 { font-size: 16px; margin-left: 2px; }
-  .btn-theme, .btn-adv, .btn-add-hdr { padding: 8px 10px; font-size: 15px; }
+  .btn-theme, .btn-adv, .btn-add-hdr { padding: 8px 10px; font-size: 14px; }
   .header .hdr-right { gap: 4px; }
 }
-
 @media (max-width: 767px) {
   body { max-width: 480px; margin: 0 auto; font-size: 15px; }
   input, select { font-size: 16px; }
-  .srow { font-size: 17px; }
-  .srow .sym { font-size: 17px; }
-  .srow .chgp { font-size: 17px; }
-  .tab-btn { font-size: 15px; padding: 8px 4px; }
+  .srow { font-size: 15px; }
+  .srow .sym { font-size: 16px; }
+  .srow .chgp { font-size: 14px; }
+  .tab-btn { font-size: 14px; padding: 8px 4px; }
   .btn-manual-row { font-size: 14px; padding: 10px 6px; }
 }
-
 @media (min-width: 768px) {
   body { font-size: 16px; }
   .header h1 { font-size: 26px; margin-left: 10px; }
@@ -222,27 +422,27 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   .tab-btn { font-size: 18px; padding: 14px 10px; }
   .list-wrap { min-width: 100%; }
   .list-header, .srow { grid-template-columns: 1.6fr 1.5fr 1fr 1.2fr 1.2fr 1.5fr 1.5fr 1.5fr; }
-  .list-header { font-size: 18px; }
-  .srow { font-size: 19px; }
-  .srow .sym { font-size: 19px; }
-  .srow .chgp { font-size: 19px; }
-  .srow .act button { padding: 8px 14px; font-size: 17px; }
-  .sum-row .lab { font-size: 19px; }
+  .list-header { font-size: 17px; }
+  .srow { font-size: 18px; }
+  .srow .sym { font-size: 18px; }
+  .srow .chgp { font-size: 17px; }
+  .srow .act button { padding: 6px 14px; font-size: 16px; }
+  .sum-row .lab { font-size: 18px; }
   .sum-row .val { font-size: 24px; }
-  .sum-toggle-btn { font-size: 17px; }
-  .hist-item .hdate { font-size: 16px; }
+  .sum-toggle-btn { font-size: 16px; }
+  .hist-item .hdate { font-size: 15px; }
   .hist-item .hval { font-size: 19px; }
-  .del-hist-btn { font-size: 16px; padding: 8px 16px; }
+  .del-hist-btn { font-size: 15px; padding: 8px 16px; }
   .modal { max-width: 560px; padding: 32px; }
   .modal h2 { font-size: 24px; }
-  .modal label { font-size: 17px; }
+  .modal label { font-size: 16px; }
   .modal-close { font-size: 19px; padding: 16px; }
   .btn-backup { font-size: 17px; padding: 14px; }
   .v-box { font-size: 15px; }
-  .idx-card-box { min-width: 200px; padding: 8px 20px; }
-  .idx-box-name { font-size: 18px; }
+  .idx-card-box { min-width: 200px; padding: 12px 20px; }
+  .idx-box-name { font-size: 16px; }
   .idx-box-price { font-size: 20px; }
-  .idx-box-change-row { font-size: 18px; }
+  .idx-box-change-row { font-size: 17px; }
   .manual-content { font-size: 18px; }
   .manual-content h3 { font-size: 20px; }
   .btn-manual-row { font-size: 17px; padding: 12px 10px; }
@@ -252,18 +452,18 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </head>
 <body>
 <div class="header">
-  <h1>股票庫存管理</h1>
+  <h1>📈 庫存管理</h1>
   <div class="hdr-right">
-    <button type="button" class="btn-add-hdr" onclick="openAddModal()">新增持股</button>
+    <button type="button" class="btn-add-hdr" onclick="openAddModal()">＋ 新增</button>
     <button type="button" class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙</button>
-    <button type="button" class="btn-adv" onclick="openModal()">進階</button>
+    <button type="button" class="btn-adv" onclick="openModal()">⚙️</button>
   </div>
 </div>
 <div class="tabs-bar" id="tabsBarContainer"></div>
 
 <div class="idx-scroll-container" id="idxScrollContainer">
   <div class="idx-card-box">
-    <div class="idx-box-name">臺灣加權指數</div>
+    <div class="idx-box-name">🇹🇼 加權指數</div>
     <div class="idx-box-price" id="idxPrice">—</div>
     <div class="idx-box-change-row">
       <span id="idxChange"></span>
@@ -275,190 +475,178 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 <div class="table-scroll" id="tableScroll" style="display:none;">
   <div class="list-wrap" id="listContainer">
     <div class="list-header">
-      <div>代號</div><div>庫存/均價</div><div>現價</div><div>今日幅度</div><div>今日漲跌</div><div>今日損益</div><div>總損益</div><div>動作</div>
+      <div>代號</div><div>庫存 / 均價</div><div>現價</div><div>幅度</div><div>漲跌</div><div>今損益</div><div>總損益</div><div>動作</div>
     </div>
     <div id="listBody"></div>
   </div>
 </div>
-<div id="emptyState" style="display:none;margin:8px 10px;padding:24px 14px;text-align:center;color:var(--t-muted);font-weight:600;font-size:16px">尚無持股，請點擊上方「新增持股」</div>
+<div id="emptyState" style="display:none;margin:8px 10px;padding:24px 14px;text-align:center;color:var(--t-muted);font-weight:600;font-size:16px;background:var(--s-light);border-radius:12px;box-shadow:var(--shadow-sm);border:var(--border-light);">尚無持股，請點擊上方「新增」</div>
 <div class="summary" id="summaryArea" style="display:none;">
   <div onclick="toggleSummary()" style="cursor:pointer;">
     <div class="sum-row" style="padding-bottom:0;">
-      <span class="lab">今日損益總計</span>
+      <span class="lab">📊 今日損益總計</span>
       <span class="val" id="totalPnl">+0</span>
     </div>
-    <div class="sum-toggle-btn" id="sumToggleBtn">▼ 下拉選單</div>
+    <div class="sum-toggle-btn" id="sumToggleBtn">▼ 展開明細</div>
   </div>
   <div id="summaryDetails" style="display:none;">
     <div class="sum-divider" style="margin-top:10px;"></div>
-    <div class="sum-row"><span class="lab">總未實現損益 (ROI)</span><span class="val" id="totalUnrealized">—</span></div>
+    <div class="sum-row"><span class="lab">未實現損益 (ROI)</span><span class="val" id="totalUnrealized">—</span></div>
     <div class="sum-divider"></div>
     <div class="sum-row" style="padding-bottom:0;"><span class="lab">持股資產總計</span><span class="val" id="totalAsset">0</span></div>
-    <div class="sum-toggle-btn" style="margin-top:10px;" onclick="toggleSummary(event)">▲ 收起選單</div>
+    <div class="sum-toggle-btn" style="margin-top:10px;" onclick="toggleSummary(event)">▲ 收起明細</div>
   </div>
 </div>
 <div class="summary-btn-box">
-  <button type="button" class="btn-save" id="saveArea" style="display:none;" onclick="saveDailyPnl()">存儲今日損益總計</button>
+  <button type="button" class="btn-save" id="saveArea" style="display:none;" onclick="saveDailyPnl()">💾 儲存今日損益</button>
 </div>
 <div class="history">
-  <div class="card-title" style="margin:0 0 4px">歷史記錄</div>
+  <div class="card-title" style="margin:0 0 4px;padding:0 10px;">📜 歷史記錄</div>
   <div id="historyBody"><div class="hist-empty">尚無記錄</div></div>
 </div>
 <div class="toast" id="toast"></div>
 
+<!-- 新增持股 Modal -->
 <div class="modal-overlay" id="addModalOverlay">
   <div class="modal">
     <h2>新增持股</h2>
     <label>股票代號</label>
-    <input type="text" id="symInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase; margin-bottom: 10px;">
-    
+    <input type="text" id="symInput" placeholder="例如 2330" maxlength="10" autocomplete="off" style="text-transform:uppercase; margin-bottom: 10px;">
     <label>數量</label>
     <div style="display:flex; gap:10px; margin-bottom: 10px;">
       <input type="number" id="qtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" autocomplete="off" style="flex:1;">
       <select id="unitSelect" style="flex:0 0 80px;"><option value="張">張</option><option value="股">股</option></select>
     </div>
-    
-    <label>買入均價 (選填計算損益)</label>
-    <input type="number" id="buyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="off" style="margin-bottom: 20px;">
-    
-    <button type="button" class="modal-close" onclick="addStock()" style="background:var(--accent); color:#fff; text-shadow:none; margin-top:0;">確認新增</button>
-    <button type="button" class="modal-close" onclick="closeAddModal()" style="margin-bottom:10px;">取消</button>
+    <label>買入均價 (選填)</label>
+    <input type="number" id="buyPriceInput" placeholder="例如 150.5" step="0.01" min="0" inputmode="decimal" autocomplete="off" style="margin-bottom: 20px;">
+    <button type="button" class="modal-close primary" onclick="addStock()">確認新增</button>
+    <button type="button" class="modal-close" onclick="closeAddModal()">取消</button>
   </div>
 </div>
 
+<!-- 進階設定 Modal -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal fullscreen-modal">
     <button type="button" class="btn-close-icon" onclick="closeModal()">✕</button>
-    <h2>進階設定</h2>
+    <h2>⚙️ 進階設定</h2>
     <div class="settings-row">
       <button type="button" class="btn-manual-row" onclick="openManual()">📖 使用說明</button>
       <div class="tab-count-wrapper">
         <div class="tab-count-label">分頁數量</div>
         <select id="tabCountSelect">
-          <option value="1">1 個分頁</option>
-          <option value="2">2 個分頁</option>
-          <option value="3">3 個分頁</option>
-          <option value="4">4 個分頁</option>
-          <option value="5">5 個分頁</option>
+          <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>
         </select>
       </div>
     </div>
     <div class="api-section">
-      <div class="api-link-box">
-        <a class="btn-link" href="https://developer.fugle.tw/docs/key/" target="_blank">🔗 申請 Fugle API Key</a>
-      </div>
-      <label>Fugle API Key（主要）</label>
+      <div class="api-link-box"><a class="btn-link" href="https://developer.fugle.tw/docs/key/" target="_blank">🔑 申請 Fugle API Key</a></div>
+      <label>Fugle API Key 1 (主要)</label>
       <div style="display:flex;gap:8px;align-items:stretch;">
-        <input type="text" id="fugleKeyInput" class="pwd-mask" placeholder="輸入第一組 Key" autocomplete="off" spellcheck="false" style="flex:1;">
+        <input type="text" id="fugleKeyInput" class="pwd-mask" placeholder="輸入 Key" autocomplete="off" spellcheck="false" style="flex:1;">
         <button type="button" onclick="toggleKeyVisibility('fugleKeyInput','keyToggle1')" id="keyToggle1" style="flex:0 0 44px;font-size:16px;">👁</button>
       </div>
       <div><span class="key-status none" id="fugleKeyStatus">未設定</span></div>
-      <label>Fugle API Key 2（備用）</label>
+      <label>Fugle API Key 2 (備用)</label>
       <div style="display:flex;gap:8px;align-items:stretch;">
-        <input type="text" id="secondFugleKeyInput" class="pwd-mask" placeholder="輸入第二組 Key（選填）" autocomplete="off" spellcheck="false" style="flex:1;">
+        <input type="text" id="secondFugleKeyInput" class="pwd-mask" placeholder="輸入 Key (選填)" autocomplete="off" spellcheck="false" style="flex:1;">
         <button type="button" onclick="toggleKeyVisibility('secondFugleKeyInput','keyToggle2')" id="keyToggle2" style="flex:0 0 44px;font-size:16px;">👁</button>
       </div>
       <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
-      <div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:12px;box-shadow:inset 4px 4px 8px var(--s-dark),inset -4px -4px 8px var(--s-light); border-bottom:1px solid var(--protrude-l); border-right:1px solid var(--protrude-l);">
+      <div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:12px;border:var(--border-light);box-shadow:var(--shadow-inset);">
         <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--t-muted); margin-bottom:8px; padding:0 4px;">
-          <span>📊 今日 API 使用量</span>
-          <button type="button" onclick="openForeignIdxModal()" style="padding:4px 8px; font-size:12px; box-shadow:2px 2px 4px var(--s-dark), -2px -2px 4px var(--s-light); border-radius:6px; color:var(--accent);">⚙️ 設定國外指數</button>
+          <span>📊 今日 API 用量</span>
+          <button type="button" onclick="openForeignIdxModal()" style="padding:4px 8px; font-size:12px; box-shadow:var(--shadow-sm); border-radius:6px; color:var(--accent); min-height:32px;">⚙️ 國外指數</button>
         </div>
         <div id="apiStatsBox"></div>
       </div>
     </div>
     <div class="backup-box">
-      <div class="backup-title">資料備份與還原</div>
+      <div class="backup-title">💾 備份與還原</div>
       <div class="backup-btns">
-        <button type="button" class="btn-backup" onclick="exportData()">📥 匯出備份</button>
-        <button type="button" class="btn-backup" onclick="triggerImport()">📤 匯入還原</button>
+        <button type="button" class="btn-backup" onclick="exportData()">📥 匯出</button>
+        <button type="button" class="btn-backup" onclick="triggerImport()">📤 匯入</button>
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.13.5 (頂部按鈕全面加大)</div>
-    <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
+    <div class="v-box">核心版本 V4.14.0 (全新 UI 升級)</div>
+    <button type="button" class="modal-close primary" onclick="saveAndCloseModal()">儲存並關閉</button>
   </div>
 </div>
 
+<!-- 國外指數 Modal -->
 <div class="modal-overlay" id="foreignIdxOverlay">
   <div class="modal">
-    <h2>⚙️ 國外指數自選設定</h2>
-    <div class="card" style="margin: 0 0 16px 0; padding: 10px; box-shadow: inset 3px 3px 6px var(--s-dark), inset -3px -3px 6px var(--s-light); border-bottom:1px solid var(--protrude-l); border-right:1px solid var(--protrude-l);">
-      <div class="card-title" style="font-size:14px; margin-bottom:6px;">新增自選指數</div>
+    <h2>🌍 國外指數自選</h2>
+    <div class="card" style="margin: 0 0 16px 0; padding: 12px; box-shadow:var(--shadow-inset);">
+      <div class="card-title" style="font-size:14px; margin-bottom:6px;">新增自選</div>
       <div class="form-row">
-        <input type="text" id="newIdxSymbol" placeholder="代號 (如: ^SOX, TSLA)" style="font-size:14px; padding:8px;">
-        <input type="text" id="newIdxName" placeholder="自訂名稱 (如: 費半)" style="font-size:14px; padding:8px;">
-        <button type="button" onclick="addForeignIdx()" style="flex:0 0 44px; padding:0; font-size:20px; color:var(--accent); font-weight:bold;">＋</button>
+        <input type="text" id="newIdxSymbol" placeholder="代號 (如 ^SOX)" style="font-size:14px; padding:8px;">
+        <input type="text" id="newIdxName" placeholder="名稱 (如 費半)" style="font-size:14px; padding:8px;">
+        <button type="button" onclick="addForeignIdx()" style="flex:0 0 44px; padding:0; font-size:22px; color:var(--accent); font-weight:bold; min-height:44px;">＋</button>
       </div>
-      <div style="font-size:11px; color:var(--t-muted); margin-top:6px; text-align:left; line-height:1.4;">
-        * 提示：美股大盤指數開頭通常為 ^ (例如 ^DJI, ^IXIC, ^GSPC)，個股或 ADR 直接輸入代號即可。
-      </div>
+      <div style="font-size:11px; color:var(--t-muted); margin-top:6px; text-align:left; line-height:1.4;">* 美股大盤指數開頭為 ^ (如 ^DJI, ^IXIC)，個股直接輸入代號。</div>
     </div>
-    <label>目前自選列表</label>
+    <label>目前清單</label>
     <div id="foreignIdxListContainer" style="max-height: 250px; overflow-y: auto; margin-bottom: 16px; padding-right: 4px;"></div>
-    <button type="button" class="modal-close" onclick="closeForeignIdxModal()">關閉並重新整理</button>
+    <button type="button" class="modal-close primary" onclick="closeForeignIdxModal()">關閉並重整</button>
   </div>
 </div>
 
+<!-- 使用說明 Modal -->
 <div class="modal-overlay" id="manualOverlay">
   <div class="modal">
-    <h2>📖 系統使用說明</h2>
+    <h2>📖 使用說明</h2>
     <div class="manual-content">
-      <h3>一、基本操作與股票簡稱</h3>
+      <h3>一、基本操作</h3>
       <ul>
-        <li><strong>記帳與損益：</strong>輸入股票代號、張/股數及買入均價。系統會自動計算目前總現值、今日損益與總未實現損益（ROI）。</li>
-        <li><strong>自帶ETF字典：</strong>系統內建台灣熱門 ETF 與權值股字典（如 0050, 00878 等），新增時會自動帶入簡稱。若查無簡稱或想自訂，可隨時點擊列表右側「✎」按鈕手動編輯「股票簡稱」。</li>
+        <li><strong>記帳與損益：</strong>輸入代號、張/股數及買入均價。系統自動計算總現值、今日損益與未實現損益（ROI）。</li>
+        <li><strong>自帶字典：</strong>內建台灣熱門 ETF 與權值股簡稱（如 0050, 2330）。若無簡稱，可點擊列表右側「✎」手動編輯。</li>
       </ul>
-
-      <h3>二、分頁（組合）的靈活妙用 💡</h3>
-      <p>進階設定中最多可開啟 5 個分頁，雙擊標籤即可重新命名。強烈建議這樣規劃：</p>
+      <h3>二、分頁妙用</h3>
+      <p>進階設定最多可開啟 5 個分頁，雙擊標籤重新命名：</p>
       <ul>
-        <li><strong>家人資產代管：</strong>將分頁命名為「我的庫存」、「老婆帳戶」、「小孩教育金」，一台手機就能輕鬆分開管理全家資產、互不干擾。</li>
-        <li><strong>投資策略分流：</strong>建立「長期存股」與「短線波段」分頁，將不同核心邏輯的股票分開追蹤，避免被短期波動影響長期領息心態。</li>
-        <li><strong>純觀察看盤：</strong>建立一個「自選觀察」分頁，只要輸入代號，數量填 0 或不填均價，它就會變成一個極簡純粹的即時報價面板。</li>
+        <li><strong>家人資產代管：</strong>「我的」、「老婆」、「小孩」分開管理。</li>
+        <li><strong>策略分流：</strong>「長期存股」與「短線波段」獨立追蹤。</li>
+        <li><strong>純觀察看盤：</strong>數量填 0 或不填均價，即為報價面板。</li>
       </ul>
-
-      <h3>三、API 報價引擎原則</h3>
+      <h3>三、報價引擎</h3>
       <ul>
-        <li><strong>雙組 Key 模式（強烈推薦 🌟）：</strong>填入兩組 Fugle API Key，更新頻率將直接提速至每 <strong>10 秒</strong>！系統會輪流調用兩組金鑰，徹底分散限額風險，讓報價如流水般順暢。</li>
-        <li><strong>防呆快取：</strong>當全球市場進入盤後或斷線，會自動抓取手機內最新的暫存檔，確保畫面永遠有數據。</li>
+        <li><strong>雙 Key 模式：</strong>填入兩組 Fugle Key，更新頻率提速至 <strong>10 秒</strong>！輪流調用分散限額風險。</li>
+        <li><strong>防呆快取：</strong>盤後或斷線時，自動抓取手機內最新暫存檔。</li>
       </ul>
-
-      <h3>四、慢速本地儲存與備份重要性 ⚠️</h3>
+      <h3>四、備份重要性 ⚠️</h3>
       <ul>
-        <li>本軟體不使用雲端資料庫，您的庫存 100% 存放在手機內。如果清除快取或換手機，資料就會歸零。<strong>請務必養成每週點擊「📥 匯出備份」的習慣！</strong></li>
+        <li>資料 100% 存放在手機內。換手機或清除快取將遺失，<strong>請務必定期「📥 匯出」備份！</strong></li>
       </ul>
-      
-      <h3>五、強制喚醒技巧</h3>
-      <p>若打開 APP 時報價未即時跳動，只要<strong>手指輕觸螢幕滑動或點擊任意空白處</strong>，系統內部的「心跳引擎」便會被瞬間喚醒，強迫更新最新報價！</p>
+      <h3>五、喚醒技巧</h3>
+      <p>若報價未跳動，<strong>輕觸螢幕滑動或點擊空白處</strong>，心跳引擎將強迫更新！</p>
     </div>
-    <button type="button" class="modal-close" onclick="closeManual()">關閉說明</button>
+    <button type="button" class="modal-close primary" onclick="closeManual()">關閉</button>
   </div>
 </div>
 
+<!-- 編輯持股 Modal -->
 <div class="modal-overlay" id="editModalOverlay">
   <div class="modal">
-    <h2>編輯持股</h2>
+    <h2>✎ 編輯持股</h2>
     <input type="hidden" id="editId">
     <label>股票代號</label>
     <input type="text" id="editSymInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase">
-    
     <label>股票簡稱 (選填)</label>
-    <input type="text" id="editNameInput" placeholder="自訂簡稱 (如: 台積電)" autocomplete="off">
-
+    <input type="text" id="editNameInput" placeholder="自訂簡稱" autocomplete="off">
     <label>數量</label>
     <input type="number" id="editQtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" autocomplete="off">
     <label>單位</label>
     <select id="editUnitSelect"><option value="張">張</option><option value="股">股</option></select>
-    <label>買入均價 (留空或不填則不計算總損益)</label>
-    <input type="number" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="off">
-    <button type="button" class="modal-close" onclick="saveEditStock()" style="background:var(--accent); color:#fff; text-shadow:none;">確認儲存</button>
-    <button type="button" class="modal-close" onclick="closeEditModal()" style="margin-top:10px;">取消</button>
+    <label>買入均價 (留空不計算)</label>
+    <input type="number" id="editBuyPriceInput" placeholder="均價" step="0.01" min="0" inputmode="decimal" autocomplete="off">
+    <button type="button" class="modal-close primary" onclick="saveEditStock()">儲存</button>
+    <button type="button" class="modal-close" onclick="closeEditModal()">取消</button>
   </div>
 </div>
 
 <script>
-/* ========================================================= 🔧 熱門股票與ETF簡稱字典 ========================================================= */
+/* ========================================================= 📦 核心引擎 V4.14.0 ========================================================= */
 const STOCK_DICT = {
   '0050': '元大台灣50', '0056': '元大高股息', '00878': '國泰永續高股息', '00929': '復華台灣科技優息',
   '00919': '群益台灣精選高息', '00713': '元大台灣高息低波', '006208': '富邦台50', '00940': '元大台灣價值高息',
@@ -468,7 +656,6 @@ const STOCK_DICT = {
   '2330': '台積電', '2317': '鴻海', '2454': '聯發科', '2308': '台達電', '2382': '廣達', '2881': '富邦金', '2882': '國泰金'
 };
 
-/* ========================================================= 🔧 API 管理引擎 ========================================================= */
 const PROXY_LIST = [
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
@@ -477,14 +664,27 @@ const PROXY_LIST = [
 ];
 const API_TIMEOUT = 5000;
 const MAX_CONCURRENT_REQUESTS = 3;
+const FUGLE = 'https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
 
+let fugleKey='', secondFugleKey='', currentTab=0, tabCount=3, currentInterval=20000;
+let tabStocks = [[], [], [], [], []];
+let tabRecords = [[], [], [], [], []];
+let tabNames = ['分頁 1', '分頁 2', '分頁 3', '分頁 4', '分頁 5'];
+let cachedGlobalIndices = [];
+let globalKeyRotator = null;
+let cfWorkerUrl = 'https://yahoo-index-proxy.denis0521.workers.dev';
+let lastRefreshTime = 0, lastSuccessTime = 0, isRefreshing = false;
+
+const FK='tw_fugle_key', SFK='tw_second_fugle_key', TK='tw_theme', CUR_TAB_KEY='tw_current_tab', TN_KEY='tw_tab_names', TC_KEY='tw_tab_count';
+const getStockKey = (idx) => `tw_stock_portfolio_tab_${idx}`;
+const getRecordKey = (idx) => `tw_records_tab_${idx}`;
+
+// ========================================================= 🔑 Key 輪詢器 =========================================================
 class KeyRotator {
   constructor(keys) { this.keys = keys.filter(k => k && k.trim() !== ''); this.index = 0; }
   next() { if (this.keys.length === 0) return null; const k = this.keys[this.index % this.keys.length]; this.index++; return k; }
   get count() { return this.keys.length; }
 }
-
-let globalKeyRotator = null;
 function getKeyRotator() {
   const keys = [fugleKey, secondFugleKey].filter(k => k && k.trim() !== '');
   if (!globalKeyRotator || globalKeyRotator.count !== keys.length) {
@@ -493,18 +693,17 @@ function getKeyRotator() {
   return globalKeyRotator;
 }
 
+// ========================================================= 🌐 網路請求 =========================================================
 async function fetchWithProxy(targetUrl, proxyIndex = 0) {
   if (proxyIndex >= PROXY_LIST.length) return null;
   try {
-    const proxyUrl = PROXY_LIST[proxyIndex] + encodeURIComponent(targetUrl);
-    const resp = await fetch(proxyUrl, { signal: AbortSignal.timeout(API_TIMEOUT), cache: 'no-store' });
+    const resp = await fetch(PROXY_LIST[proxyIndex] + encodeURIComponent(targetUrl), { signal: AbortSignal.timeout(API_TIMEOUT), cache: 'no-store' });
     if (!resp.ok) throw new Error('Proxy error');
     return resp;
   } catch (e) {
     return fetchWithProxy(targetUrl, proxyIndex + 1);
   }
 }
-
 function trackApiUsage(source) {
   const today = new Date().toISOString().split('T')[0];
   const key = `api_usage_${today}_${source}`;
@@ -512,7 +711,6 @@ function trackApiUsage(source) {
   try { localStorage.setItem(key, String(count)); } catch(e){}
   return count;
 }
-
 function getApiUsageStats() {
   const today = new Date().toISOString().split('T')[0];
   return {
@@ -520,555 +718,243 @@ function getApiUsageStats() {
     yahoo: parseInt(localStorage.getItem(`api_usage_${today}_Yahoo`) || '0')
   };
 }
-
 function renderApiStats() {
   const stats = getApiUsageStats();
   const el = document.getElementById('apiStatsBox');
   if (el) {
-    el.innerHTML = `<div style="display:flex;justify-content:space-around;text-align:center;font-size:13px;color:var(--t-muted);text-shadow:-1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d);">
+    el.innerHTML = `<div style="display:flex;justify-content:space-around;text-align:center;font-size:13px;color:var(--t-muted);">
       <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${stats.fugle}</div><div>Fugle</div></div>
       <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${stats.yahoo}</div><div>Yahoo</div></div>
     </div>`;
   }
 }
 
-function toggleKeyVisibility(inputId, btnId) {
-  const input = document.getElementById(inputId);
-  const btn = document.getElementById(btnId);
-  if (input.classList.contains('pwd-mask')) {
-    input.classList.remove('pwd-mask');
-    btn.textContent = '🙈';
-  } else {
-    input.classList.add('pwd-mask');
-    btn.textContent = '👁';
-  }
-}
-
-let cfWorkerUrl = 'https://yahoo-index-proxy.denis0521.workers.dev';
-
-// 國外指數動態管理與初始配置設定
+// ========================================================= 🗄️ 國外指數管理 =========================================================
 const DEFAULT_INDICES = [
-  { symbol: '^DJI', name: '道瓊工業指數' },
-  { symbol: '^IXIC', name: '那斯達克指數' },
-  { symbol: '^GSPC', name: '標普500指數' },
-  { symbol: '^SOX', name: '費城半導體指數' },
-  { symbol: 'TSM', name: '台積電 ADR' },
-  { symbol: '^N225', name: '日經225指數' },
-  { symbol: '^KS11', name: '韓國綜合指數' }
+  { symbol: '^DJI', name: '道瓊工業' }, { symbol: '^IXIC', name: '那斯達克' },
+  { symbol: '^GSPC', name: '標普500' }, { symbol: '^SOX', name: '費城半導體' },
+  { symbol: 'TSM', name: '台積電 ADR' }, { symbol: '^N225', name: '日經225' },
+  { symbol: '^KS11', name: '韓國綜合' }
 ];
-
-let AVAILABLE_INDICES = [];
-let activeForeignIndices = [];
+let AVAILABLE_INDICES = [], activeForeignIndices = [];
 
 function loadForeignIndicesConfig() {
   const stored = localStorage.getItem('tw_custom_foreign_indices');
-  if (stored) {
-    try {
-      AVAILABLE_INDICES = JSON.parse(stored);
-    } catch(e) {
-      AVAILABLE_INDICES = [...DEFAULT_INDICES];
-    }
-  } else {
-    AVAILABLE_INDICES = [...DEFAULT_INDICES];
-    localStorage.setItem('tw_custom_foreign_indices', JSON.stringify(AVAILABLE_INDICES));
-  }
+  if (stored) { try { AVAILABLE_INDICES = JSON.parse(stored); } catch(e) { AVAILABLE_INDICES = [...DEFAULT_INDICES]; } } 
+  else { AVAILABLE_INDICES = [...DEFAULT_INDICES]; localStorage.setItem('tw_custom_foreign_indices', JSON.stringify(AVAILABLE_INDICES)); }
   activeForeignIndices = AVAILABLE_INDICES.map(idx => idx.symbol);
 }
 
-let currentTab = 0;
-let tabStocks = [[], [], [], [], []];
-let tabRecords = [[], [], [], [], []];
-let tabNames = ['分頁 1', '分頁 2', '分頁 3', '分頁 4', '分頁 5'];
-let tabCount = 3;
-let fugleKey='',secondFugleKey='';
-let currentInterval = 20000;
-
-const FK='tw_fugle_key',SFK='tw_second_fugle_key',TK='tw_theme', CUR_TAB_KEY='tw_current_tab', TN_KEY='tw_tab_names', TC_KEY='tw_tab_count';
-const getStockKey = (idx) => `tw_stock_portfolio_tab_${idx}`;
-const getRecordKey = (idx) => `tw_records_tab_${idx}`;
-let cachedGlobalIndices = [];
-const FUGLE='https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
-
-function loadState(){
-  loadForeignIndicesConfig();
-  try{
-    const f=localStorage.getItem(FK);if(f)fugleKey=f;
-    const sf=localStorage.getItem(SFK);if(sf)secondFugleKey=sf;
-    const ct=localStorage.getItem(CUR_TAB_KEY);if(ct!=null)currentTab=parseInt(ct);
-    const tn=localStorage.getItem(TN_KEY);if(tn) tabNames=JSON.parse(tn);
-    const tc=localStorage.getItem(TC_KEY);if(tc) tabCount=parseInt(tc);
-
-    for(let i=0; i<5; i++){
-      const s=localStorage.getItem(getStockKey(i)); if(s) tabStocks[i]=JSON.parse(s);
-      const r=localStorage.getItem(getRecordKey(i)); if(r) tabRecords[i]=JSON.parse(r);
-    }
-
-    if(currentTab >= tabCount) currentTab = 0;
-
-    const t=localStorage.getItem(TK); applyThemeText(t);
-    
-    const cachedIdx = localStorage.getItem('tw_cached_indices');
-    if(cachedIdx) { cachedGlobalIndices = JSON.parse(cachedIdx); if(cachedGlobalIndices.length > 0) renderGlobalIndices(cachedGlobalIndices, false); }
-    
-    const cachedTwiiStr = localStorage.getItem('tw_cached_twii');
-    if (cachedTwiiStr) {
-      const res = JSON.parse(cachedTwiiStr);
-      const idxEl = document.getElementById('idxPrice');
-      const idxChgEl = document.getElementById('idxChange');
-      const idxPctEl = document.getElementById('idxPct');
-      const idxSrcEl = document.getElementById('idxSource');
-      if(idxEl) idxEl.textContent = res.price.toLocaleString('en-US',{maximumFractionDigits:0});
-      if(idxChgEl) { idxChgEl.textContent = (res.change>=0?'+':'')+res.change.toFixed(2); idxChgEl.className = (res.change>=0?'up':'down'); }
-      if(idxPctEl) { idxPctEl.textContent = '('+(res.changePercent>=0?'+':'')+res.changePercent.toFixed(2)+'%)'; idxPctEl.className = (res.changePercent>=0?'up':'down'); }
-      if(idxSrcEl) { idxSrcEl.textContent = 'via ' + res.source + ' (快取)'; }
-    }
-  }catch(e){console.error(e);}
-
-  document.getElementById('fugleKeyInput').value=fugleKey;
-  document.getElementById('secondFugleKeyInput').value=secondFugleKey;
-  document.getElementById('tabCountSelect').value=tabCount;
-  updateKeyStatus(); 
-  renderTabs();
-  renderApiStats();
-}
-
-function applyThemeText(t){
-  const body=document.body; const themeBtn=document.getElementById('themeBtn'); const metaTheme = document.getElementById('themeColorMeta');
-  body.className = '';
-  if(t==='tech'){ body.classList.add('tech'); themeBtn.textContent='🚀'; metaTheme.content='#2b303a'; }
-  else if(t==='blue-light'){ body.classList.add('blue-light'); themeBtn.textContent='💎'; metaTheme.content='#e3edf7'; }
-  else if(t==='purple-light'){ body.classList.add('purple-light'); themeBtn.textContent='🍇'; metaTheme.content='#ece8f3'; }
-  else if(t==='pink'){ body.classList.add('pink'); themeBtn.textContent='🌸'; metaTheme.content='#f3e6e8'; }
-  else if(t==='cement'){ body.classList.add('cement'); themeBtn.textContent='🏢'; metaTheme.content='#a3a8b0'; }
-  else { themeBtn.textContent='🌙'; metaTheme.content='#e0e5ec'; }
-}
-
-function saveHoldings(){try{localStorage.setItem(getStockKey(currentTab),JSON.stringify(tabStocks[currentTab]));}catch(e){}}
+// ========================================================= 📊 資料持久化 =========================================================
+function saveHoldings(){ try { localStorage.setItem(getStockKey(currentTab), JSON.stringify(tabStocks[currentTab])); } catch(e){} }
+function saveRecords(){ try { localStorage.setItem(getRecordKey(currentTab), JSON.stringify(tabRecords[currentTab])); } catch(e){} }
 function saveKeys(){ 
-  fugleKey=document.getElementById('fugleKeyInput').value.trim(); 
-  secondFugleKey=document.getElementById('secondFugleKeyInput').value.trim(); 
-  try{localStorage.setItem(FK,fugleKey);localStorage.setItem(SFK,secondFugleKey);}catch(e){} 
-  globalKeyRotator = null; 
-  updateKeyStatus(); 
+  fugleKey = document.getElementById('fugleKeyInput').value.trim(); 
+  secondFugleKey = document.getElementById('secondFugleKeyInput').value.trim(); 
+  try { localStorage.setItem(FK, fugleKey); localStorage.setItem(SFK, secondFugleKey); } catch(e){} 
+  globalKeyRotator = null; updateKeyStatus(); 
 }
-function saveRecords(){try{localStorage.setItem(getRecordKey(currentTab),JSON.stringify(tabRecords[currentTab]));}catch(e){}}
-
 function saveTabCount(){ 
   const newCount = parseInt(document.getElementById('tabCountSelect').value);
   if(newCount === tabCount) return;
   tabCount = newCount; 
-  try{localStorage.setItem(TC_KEY, tabCount);}catch(e){}
-  if(currentTab >= tabCount) { currentTab = 0; try{localStorage.setItem(CUR_TAB_KEY, currentTab);}catch(e){} }
+  try { localStorage.setItem(TC_KEY, tabCount); } catch(e){}
+  if(currentTab >= tabCount) { currentTab = 0; try { localStorage.setItem(CUR_TAB_KEY, currentTab); } catch(e){} }
   renderTabs(); renderAll(); renderHistory(); 
 }
 
-function toggleTheme(){
-  const body=document.body; let nextTheme = 'light';
-  if(body.classList.contains('tech')) nextTheme = 'blue-light';
-  else if(body.classList.contains('blue-light')) nextTheme = 'purple-light';
-  else if(body.classList.contains('purple-light')) nextTheme = 'pink';
-  else if(body.classList.contains('pink')) nextTheme = 'cement';
-  else if(body.classList.contains('cement')) nextTheme = 'light';
-  else nextTheme = 'tech';
-  applyThemeText(nextTheme); try{localStorage.setItem(TK, nextTheme);}catch(e){}
+function loadState(){
+  loadForeignIndicesConfig();
+  try {
+    const f = localStorage.getItem(FK); if(f) fugleKey=f;
+    const sf = localStorage.getItem(SFK); if(sf) secondFugleKey=sf;
+    const ct = localStorage.getItem(CUR_TAB_KEY); if(ct!=null) currentTab=parseInt(ct);
+    const tn = localStorage.getItem(TN_KEY); if(tn) tabNames=JSON.parse(tn);
+    const tc = localStorage.getItem(TC_KEY); if(tc) tabCount=parseInt(tc);
+    for(let i=0; i<5; i++){
+      const s = localStorage.getItem(getStockKey(i)); if(s) tabStocks[i] = JSON.parse(s);
+      const r = localStorage.getItem(getRecordKey(i)); if(r) tabRecords[i] = JSON.parse(r);
+    }
+    if(currentTab >= tabCount) currentTab = 0;
+    const t = localStorage.getItem(TK); applyThemeText(t);
+    const cachedIdx = localStorage.getItem('tw_cached_indices');
+    if(cachedIdx) { cachedGlobalIndices = JSON.parse(cachedIdx); if(cachedGlobalIndices.length > 0) renderGlobalIndices(cachedGlobalIndices, true); }
+    const cachedTwiiStr = localStorage.getItem('tw_cached_twii');
+    if (cachedTwiiStr) {
+      const res = JSON.parse(cachedTwiiStr);
+      document.getElementById('idxPrice').textContent = res.price.toLocaleString('en-US',{maximumFractionDigits:0});
+      const chgEl = document.getElementById('idxChange'); chgEl.textContent = (res.change>=0?'+':'')+res.change.toFixed(2); chgEl.className = (res.change>=0?'up':'down');
+      const pctEl = document.getElementById('idxPct'); pctEl.textContent = '('+(res.changePercent>=0?'+':'')+res.changePercent.toFixed(2)+'%)'; pctEl.className = (res.changePercent>=0?'up':'down');
+      document.getElementById('idxSource').textContent = 'via ' + res.source + ' (快取)';
+    }
+  } catch(e){ console.error(e); }
+  document.getElementById('fugleKeyInput').value = fugleKey;
+  document.getElementById('secondFugleKeyInput').value = secondFugleKey;
+  document.getElementById('tabCountSelect').value = tabCount;
+  updateKeyStatus(); renderTabs(); renderApiStats();
 }
 
-function switchTab(tabIndex){
-  if(currentTab === tabIndex) return;
-  currentTab = tabIndex; try{localStorage.setItem(CUR_TAB_KEY, currentTab);}catch(e){}
-  renderTabs(); renderAll(); renderHistory(); forceRefresh();
-}
-
-function renameTab(tabIndex) {
-  const oldName = tabNames[tabIndex] || `分頁 ${tabIndex + 1}`;
-  const newName = prompt('請輸入此分頁的新名稱：', oldName);
-  if (newName !== null) {
-    const finalName = newName.trim() === '' ? `分頁 ${tabIndex + 1}` : newName.trim();
-    tabNames[tabIndex] = finalName;
-    try { localStorage.setItem(TN_KEY, JSON.stringify(tabNames)); } catch(e){}
-    renderTabs(); showToast(`已更名為「${finalName}」`);
+function applyThemeText(t){
+  const body = document.body; const themeBtn = document.getElementById('themeBtn'); const metaTheme = document.getElementById('themeColorMeta');
+  body.className = '';
+  const themes = {
+    'tech': { btn: '🚀', meta: '#1a1e26' },
+    'blue-light': { btn: '💎', meta: '#e3edf7' },
+    'purple-light': { btn: '🍇', meta: '#ece8f3' },
+    'pink': { btn: '🌸', meta: '#f3e6e8' },
+    'cement': { btn: '🏢', meta: '#a3a8b0' },
+    'minimal-white': { btn: '☀️', meta: '#f8fafc' },
+    'obsidian-black': { btn: '🌑', meta: '#0b0e14' }
+  };
+  if (t && themes[t]) {
+    body.classList.add(t);
+    themeBtn.textContent = themes[t].btn;
+    metaTheme.content = themes[t].meta;
+  } else {
+    themeBtn.textContent = '🌙';
+    metaTheme.content = '#f4f6f9';
   }
 }
 
+function toggleTheme(){
+  const order = ['light', 'tech', 'blue-light', 'purple-light', 'pink', 'cement', 'minimal-white', 'obsidian-black'];
+  const current = document.body.className || 'light';
+  let idx = order.indexOf(current);
+  if (idx === -1) idx = 0;
+  const next = order[(idx + 1) % order.length];
+  const themeName = next === 'light' ? '' : next;
+  applyThemeText(themeName); 
+  try { localStorage.setItem(TK, themeName); } catch(e){}
+}
+
+// ========================================================= 🖌️ 渲染引擎 =========================================================
 function renderTabs() {
   const container = document.getElementById('tabsBarContainer');
   container.innerHTML = '';
   for(let i=0; i<tabCount; i++){
     const btn = document.createElement('button');
     btn.type = 'button'; btn.className = 'tab-btn'; btn.id = `tab${i}`;
-    btn.textContent = tabNames[i] || `分頁 ${i + 1}`;
+    btn.textContent = tabNames[i] || `分頁 ${i+1}`;
     btn.onclick = () => switchTab(i); btn.ondblclick = () => renameTab(i);
     if(i === currentTab) btn.classList.add('active');
     container.appendChild(btn);
   }
-  const btns = container.querySelectorAll('.tab-btn');
-  if(tabCount >= 4) { btns.forEach(b => b.style.fontSize = '14px'); } 
-  else if(tabCount === 3) { btns.forEach(b => b.style.fontSize = '16px'); } 
-  else { btns.forEach(b => b.style.fontSize = '18px'); }
 }
-
-function updateKeyStatus(){
-  ['fugleKey','secondFugleKey'].forEach((id,i)=>{
-    const el=document.getElementById(id+'Status');if(!el)return;
-    const val=i===0?fugleKey:secondFugleKey;
-    if(val){el.textContent='✓ 已設定';el.className='key-status ok';}
-    else{el.textContent='未設定';el.className='key-status none';}
-  });
-  renderApiStats();
+function switchTab(tabIndex){
+  if(currentTab === tabIndex) return;
+  currentTab = tabIndex; try { localStorage.setItem(CUR_TAB_KEY, currentTab); } catch(e){}
+  renderTabs(); renderAll(); renderHistory(); forceRefresh();
 }
-
-function renderGlobalIndices(indices, isOffline = false) {
-  const container = document.getElementById('idxScrollContainer');
-  const boxes = container.querySelectorAll('.idx-card-box');
-  for(let i = 1; i < boxes.length; i++) boxes[i].remove();
-
-  const offlineTag = isOffline ? '<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>' : '';
-
-  indices.forEach(item => {
-    let displayIndexName = item.name;
-    const matchedIndex = AVAILABLE_INDICES.find(idx => idx.symbol === item.symbol);
-    if (matchedIndex) displayIndexName = matchedIndex.name;
-
-    const card = document.createElement('div'); card.className = 'idx-card-box';
-    const sign = item.pct >= 0 ? '+' : ''; const cls = item.pct >= 0 ? 'up' : 'down';
-    card.innerHTML = `<div class="idx-box-name">${displayIndexName}${offlineTag}</div>
-      <div class="idx-box-price">${item.price.toLocaleString('en-US', {maximumFractionDigits:2})}</div>
-      <div class="idx-box-change-row ${cls}">
-        <span>${sign}${item.changeAmt.toFixed(2)}</span>
-        <span>(${sign}${item.pct.toFixed(2)}%)</span>
-      </div>
-      <div class="idx-box-src">via Yahoo ${isOffline ? 'Cache' : ''}</div>`;
-    container.appendChild(card);
-  });
-}
-
-async function fetchGlobalIndicesFromWorker() {
-  if (!cfWorkerUrl || cfWorkerUrl === '') return;
-  if (navigator.onLine === false) {
-    const cachedIdx = localStorage.getItem('tw_cached_indices');
-    if (cachedIdx) { try { renderGlobalIndices(JSON.parse(cachedIdx), true); } catch(e) {} }
-    return;
-  }
-
-  try {
-    const workerSymbols = activeForeignIndices.join(',');
-    if (!workerSymbols) {
-      renderGlobalIndices([]);
-      return;
-    }
-    const response = await fetch(`${cfWorkerUrl}/indices?symbols=${encodeURIComponent(workerSymbols)}&_=${Date.now()}`, { 
-      signal: AbortSignal.timeout(API_TIMEOUT),
-      headers: { 'Accept': 'application/json' },
-      cache: 'no-store'
-    });
-    if (response.ok) {
-      const data = await response.json();
-      if (data.indices && data.indices.length > 0) {
-        const parsedIndices = data.indices.map(item => {
-          const price = item.price ?? item.regularMarketPrice ?? item.previousClose ?? 0;
-          const changeAmt = item.change ?? item.regularMarketChange ?? 0;
-          const pct = item.changePercent ?? item.regularMarketChangePercent ?? 0;
-          const name = item.name || item.symbol;
-          return { symbol: item.symbol, name, price, pct, changeAmt };
-        });
-        parsedIndices.sort((a, b) => activeForeignIndices.indexOf(a.symbol) - activeForeignIndices.indexOf(b.symbol));
-        cachedGlobalIndices = parsedIndices;
-        trackApiUsage('Yahoo');
-        try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
-        renderGlobalIndices(cachedGlobalIndices, false);
-      }
-    }
-  } catch (e) {
-    const cachedIdx = localStorage.getItem('tw_cached_indices');
-    if (cachedIdx) { try { renderGlobalIndices(JSON.parse(cachedIdx), true); } catch(e2) {} }
+function renameTab(tabIndex) {
+  const oldName = tabNames[tabIndex] || `分頁 ${tabIndex+1}`;
+  const newName = prompt('請輸入此分頁的新名稱：', oldName);
+  if (newName !== null) {
+    const finalName = newName.trim() === '' ? `分頁 ${tabIndex+1}` : newName.trim();
+    tabNames[tabIndex] = finalName;
+    try { localStorage.setItem(TN_KEY, JSON.stringify(tabNames)); } catch(e){}
+    renderTabs(); showToast(`已更名為「${finalName}」`);
   }
 }
 
-async function fetchFugle(symbol){
-  const kr = getKeyRotator();
-  if (kr.count === 0) return null;
-  for (let i = 0; i < kr.count; i++){
-    const currentKey = kr.next();
-    try {
-      const resp = await fetch(FUGLE + encodeURIComponent(symbol), {
-        headers: {'X-API-KEY': currentKey, 'X-Requested-With': 'StockPortfolioApp', 'Cache-Control': 'no-cache'},
-        signal: AbortSignal.timeout(API_TIMEOUT),
-        cache: 'no-store'
-      });
-      if (resp.ok) {
-        const d = await resp.json();
-        const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
-        if (p != null) {
-          trackApiUsage('Fugle');
-          // 嘗試解析 Fugle API 回傳的股票名稱
-          let fetchedName = d.name || (d.data && d.data.info && d.data.info.name) || '';
-          return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle', name: fetchedName};
-        }
-      }
-    } catch(e) {}
-  }
-  return null; 
-}
-
-async function fetchYahoo(symbol){
-  const tryFetch = async (suffix) => {
-    try {
-      const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}${suffix}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
-      const resp = await fetchWithProxy(yahooUrl);
-      if (!resp) return null;
-      const text = await resp.text();
-      const lines = text.trim().split('\n');
-      if (lines.length < 2) return null;
-      const cols = lines[lines.length - 1].split(',');
-      if (cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
-      const price = parseFloat(cols[4]);
-      const open = parseFloat(cols[1]);
-      const chg = +(price - open).toFixed(2);
-      const pct = +((chg / open) * 100).toFixed(2);
-      trackApiUsage('Yahoo');
-      return {price, change: chg, changePercent: pct, source: 'Yahoo', name: ''};
-    } catch(e) { return null; }
-  };
-  let res = await tryFetch('.TW');
-  if (!res) res = await tryFetch('.TWO');
-  return res;
-}
-
-async function fetchWeightedIndex(){
-  const kr = getKeyRotator();
-  if (kr.count > 0){
-    for (let i = 0; i < kr.count; i++){
-      try {
-        const resp = await fetch(FUGLE + 'IX0001', {
-          headers: {'X-API-KEY': kr.next(), 'X-Requested-With': 'StockPortfolioApp', 'Cache-Control': 'no-cache'},
-          signal: AbortSignal.timeout(API_TIMEOUT),
-          cache: 'no-store'
-        });
-        if (resp.ok) {
-          const d = await resp.json();
-          const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
-          if (p != null) {
-            trackApiUsage('Fugle');
-            return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle'};
-          }
-        }
-      } catch(e) {}
-    }
-  }
-  
-  try {
-    const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
-    const resp = await fetchWithProxy(yahooUrl);
-    if (resp) {
-      const text = await resp.text();
-      const lines = text.trim().split('\n');
-      if (lines.length >= 2) {
-        const cols = lines[lines.length - 1].split(',');
-        if (cols.length >= 6 && cols[4] !== 'null' && cols[1] !== 'null') {
-          const price = parseFloat(cols[4]);
-          const open = parseFloat(cols[1]);
-          const chg = +(price - open).toFixed(2);
-          const pct = +((chg / open) * 100).toFixed(2);
-          trackApiUsage('Yahoo');
-          return {price, change: chg, changePercent: pct, source: 'Yahoo'};
-        }
-      }
-    }
-  } catch(e) {}
-
-  return null;
-}
-
-function isAnyMarketOpen() {
-  const now = new Date(); const day = now.getDay(); const hour = now.getHours(); const min = now.getMinutes();
-  if (day === 0 || day === 6) return false;
-  const time = hour + min / 60;
-  if (time >= 8 && time <= 14) return true;
-  if (time >= 15 || time <= 5) return true;
-  return false;
-}
-
-async function refreshPrices(){
-  const isOffline = navigator.onLine === false;
-  if (isOffline) { 
-    showToast('目前處於離線狀態，顯示快取資料'); 
-    const twNameBox = document.querySelector('#idxScrollContainer .idx-card-box:first-child .idx-box-name');
-    if (twNameBox && !twNameBox.innerHTML.includes('(離線)')) {
-      twNameBox.innerHTML = `臺灣加權指數<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>`;
-    }
-    return;
-  } else {
-    const twNameBox = document.querySelector('#idxScrollContainer .idx-card-box:first-child .idx-box-name');
-    if (twNameBox) twNameBox.innerHTML = `臺灣加權指數`;
-  }
-
-  const idxR = fetchWeightedIndex();
-  const idxEl = document.getElementById('idxPrice'); const idxChgEl = document.getElementById('idxChange');
-  const idxPctEl = document.getElementById('idxPct'); const idxSrcEl = document.getElementById('idxSource');
-  
-  if (idxR){
-    idxR.then(res => {
-      if(res) {
-        idxEl.textContent=res.price.toLocaleString('en-US',{maximumFractionDigits:0});
-        idxChgEl.textContent=(res.change>=0?'+':'')+res.change.toFixed(2); idxChgEl.className=(res.change>=0?'up':'down');
-        idxPctEl.textContent='('+(res.changePercent>=0?'+':'')+res.changePercent.toFixed(2)+'%)'; idxPctEl.className=(res.changePercent>=0?'up':'down');
-        idxSrcEl.textContent='via '+res.source+' '+new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'});
-        try { localStorage.setItem('tw_cached_twii', JSON.stringify(res)); } catch(e){}
-      }
-    });
-  }
-  fetchGlobalIndicesFromWorker();
-  
-  const currentStocks = tabStocks[currentTab];
-  if (currentStocks.length === 0) return;
-  const uniqueSymbols = [...new Set(currentStocks.map(s => s.symbol))];
-  const batchSize = MAX_CONCURRENT_REQUESTS;
-  
-  let hasUpdates = false; 
-  
-  for (let i = 0; i < uniqueSymbols.length; i += batchSize) {
-    const batch = uniqueSymbols.slice(i, i + batchSize);
-    const promises = batch.map(async (sym) => {
-      let r = await fetchFugle(sym);
-      if (!r) r = await fetchYahoo(sym);
-      return { sym, r };
-    });
-    
-    const results = await Promise.allSettled(promises);
-    results.forEach((result) => {
-      if (result.status === 'fulfilled') {
-        const { sym, r } = result.value;
-        if (r) {
-          hasUpdates = true;
-          const now = new Date();
-          const uTime = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-          for (let idx = 0; idx < 5; idx++) {
-            tabStocks[idx].filter(s => s.symbol === sym).forEach(s => {
-              s.price = r.price; s.change = r.change; s.changePercent = r.changePercent; s.source = r.source;
-              if (r.name && !s.name) s.name = r.name; // 如果 API 有回傳名稱且目前沒設定，則自動填入
-              s.updateTime = uTime;
-              if (idx === currentTab) renderRow(s);
-            });
-          }
-        }
-      }
-    });
-  }
-  
-  if (hasUpdates) {
-    for (let i = 0; i < 5; i++) {
-      try { localStorage.setItem(getStockKey(i), JSON.stringify(tabStocks[i])); } catch(e) {}
-    }
-  }
-  
-  updateSummary();
-  adjustPollingInterval();
-  renderApiStats();
-}
-
-function adjustPollingInterval() {
-  const kr = getKeyRotator(); const keyCount = kr.count; 
-  let newInterval = 20000;
-  
-  if (!isAnyMarketOpen()) { newInterval = 60000; } 
-  else if (keyCount === 2) { newInterval = 10000; }
-  
-  if (newInterval !== currentInterval) { 
-    currentInterval = newInterval; 
-    if(window.heartbeatWorker) heartbeatWorker.postMessage({ action: 'start', interval: currentInterval });
-  }
+function formatPrice(p){
+  if(p==null) return '—';
+  if(Math.abs(p)>=1000) return p.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  return p.toFixed(2);
 }
 
 function renderRow(s){
-  const el=document.querySelector('.srow[data-id="'+s.id+'"]');if(!el)return;
-  const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
+  const el = document.querySelector('.srow[data-id="'+s.id+'"]');
+  if(!el) return;
+  const shares = s.displayUnit==='張' ? s.displayQty*1000 : s.displayQty;
   let p = s.price; let chg = s.change ?? 0;
+  
   const symCont = el.querySelector('.sym-container');
-  if(symCont){ 
-    symCont.querySelector('.sym').textContent=s.symbol; 
+  if(symCont){
+    symCont.querySelector('.sym').textContent = s.symbol;
     let nameEl = symCont.querySelector('.sym-name');
     if(s.name) {
       if(!nameEl) {
         nameEl = document.createElement('div');
         nameEl.className = 'sym-name';
-        nameEl.style.cssText = 'font-size:12px; color:var(--t-muted); margin-top:4px; font-weight:normal; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;';
+        nameEl.style.cssText = 'font-size:12px; color:var(--t-muted); margin-top:2px; font-weight:normal; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;';
         symCont.appendChild(nameEl);
       }
       nameEl.textContent = s.name;
-    } else if (nameEl) {
-      nameEl.remove();
-    }
+    } else if (nameEl) { nameEl.remove(); }
   }
-  const qn=el.querySelector('.qty-cell');
-  if(qn){
-    qn.innerHTML=`<div style="line-height:1.2;font-size:inherit;">${s.displayQty} ${s.displayUnit}</div>
+  
+  const qn = el.querySelector('.qty-cell');
+  if(qn) qn.innerHTML = `<div style="line-height:1.2;">${s.displayQty} ${s.displayUnit}</div>
     <div style="font-size:0.8em;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}">${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}</div>`;
+  
+  const pEl = el.querySelector('.price');
+  if(p!=null){ 
+    pEl.textContent = formatPrice(p); 
+    pEl.className = 'price ' + (chg>=0?'up':'down');
+    pEl.classList.remove('flash-update'); void pEl.offsetWidth; pEl.classList.add('flash-update');
   }
-  const pEl=el.querySelector('.price');
-  if(p!=null){ pEl.textContent=formatPrice(p); pEl.className='price '+(chg>=0?'up':'down'); }
-  const cp=el.querySelector('.chgp');
-  if(s.changePercent!=null){cp.textContent=(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%';cp.className='chgp '+(s.changePercent>=0?'up':'down');}
-  const cg=el.querySelector('.chg');
-  if(s.change!=null){cg.textContent=(chg>=0?'+':'')+chg.toFixed(2);cg.className='chg '+(chg>=0?'up':'down');}
+  
+  const cp = el.querySelector('.chgp');
+  if(s.changePercent!=null){ cp.textContent = (s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%'; cp.className = 'chgp '+(s.changePercent>=0?'up':'down'); }
+  const cg = el.querySelector('.chg');
+  if(s.change!=null){ cg.textContent = (chg>=0?'+':'')+chg.toFixed(2); cg.className = 'chg '+(chg>=0?'up':'down'); cg.classList.remove('flash-update'); void cg.offsetWidth; cg.classList.add('flash-update'); }
+  
   const tp = el.querySelector('.today-pnl');
-  if(s.change!=null){ const todayPnl = Math.round(shares * chg); tp.textContent = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString(); tp.className = 'today-pnl ' + (todayPnl >= 0 ? 'up' : 'down'); }
+  if(s.change!=null){ const todayPnl = Math.round(shares * chg); tp.textContent = (todayPnl>=0?'+':'') + todayPnl.toLocaleString(); tp.className = 'today-pnl '+(todayPnl>=0?'up':'down'); tp.classList.remove('flash-update'); void tp.offsetWidth; tp.classList.add('flash-update'); }
+  
   let totalHtml = '—'; let totalValForClass = 0;
-  if (p != null) {
+  if(p != null && s.buyPrice != null && s.buyPrice > 0) {
     const mktValue = Math.round(shares * p);
-    if (s.buyPrice != null && s.buyPrice > 0) {
-      const cost = s.buyPrice * shares; const unPnl = Math.round(mktValue - cost); const roi = ((mktValue - cost) / cost) * 100;
-      totalValForClass = unPnl;
-      totalHtml = `<div style="line-height:1.2;font-size:inherit;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
+    const cost = s.buyPrice * shares; const unPnl = Math.round(mktValue - cost); const roi = ((mktValue - cost) / cost) * 100;
+    totalValForClass = unPnl;
+    totalHtml = `<div style="line-height:1.2;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
       <div style="font-size:0.8em;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`;
-    } else {
-      totalValForClass = 0;
-      totalHtml = `<div style="line-height:1.2;font-size:inherit;" class="neutral">—</div>
-      <div style="font-size:0.8em;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
-    }
+  } else if (p != null) {
+    totalHtml = `<div style="line-height:1.2;" class="neutral">—</div>
+      <div style="font-size:0.8em;opacity:0.6;margin-top:2px;font-weight:normal;" class="neutral">設均價</div>`;
   }
   el.querySelector('.total').innerHTML = totalHtml;
   el.querySelector('.total').className = 'total ' + (totalValForClass !== 0 ? (totalValForClass >= 0 ? 'up' : 'down') : '');
 }
 
 function renderAll(){
-  const body=document.getElementById('listBody'); const empty=document.getElementById('emptyState');
-  const tableScroll=document.getElementById('tableScroll'); const sumArea = document.getElementById('summaryArea'); const saveArea = document.getElementById('saveArea');
-  body.innerHTML=''; const currentStocks = tabStocks[currentTab];
-  if(currentStocks.length===0){ empty.style.display='block';tableScroll.style.display='none';sumArea.style.display='none';saveArea.style.display='none';return; }
-  empty.style.display='none';tableScroll.style.display='block';sumArea.style.display='block';saveArea.style.display='block';
+  const body = document.getElementById('listBody');
+  const empty = document.getElementById('emptyState');
+  const tableScroll = document.getElementById('tableScroll');
+  const sumArea = document.getElementById('summaryArea');
+  const saveArea = document.getElementById('saveArea');
+  body.innerHTML = '';
+  const currentStocks = tabStocks[currentTab];
+  if(currentStocks.length === 0){ empty.style.display='block'; tableScroll.style.display='none'; sumArea.style.display='none'; saveArea.style.display='none'; return; }
+  empty.style.display='none'; tableScroll.style.display='block'; sumArea.style.display='block'; saveArea.style.display='block';
+  
   for(const s of currentStocks){
-    const div=document.createElement('div');div.className='srow';div.dataset.id=s.id;
-    const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
-    let p = s.price; let chg = s.change ?? 0;
+    const div = document.createElement('div'); div.className = 'srow'; div.dataset.id = s.id;
+    const shares = s.displayUnit==='張' ? s.displayQty*1000 : s.displayQty;
+    let p = s.price, chg = s.change ?? 0;
     let pStr = '—'; if(p!=null) pStr = formatPrice(p);
     const cgp = s.changePercent!=null ? (s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%' : '—';
     let cgStr = '—'; if(s.change!=null) cgStr = (chg>=0?'+':'') + chg.toFixed(2);
     let tpStr = '—'; let tpClass = '';
-    if (s.change != null) { const todayPnl = Math.round(shares * chg); tpStr = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString(); tpClass = todayPnl >= 0 ? 'up' : 'down'; }
+    if(s.change != null){ const todayPnl = Math.round(shares * chg); tpStr = (todayPnl>=0?'+':'') + todayPnl.toLocaleString(); tpClass = todayPnl>=0?'up':'down'; }
     let totalHtml = '—'; let totalValForClass = 0;
-    if (p != null) {
-      const mktValue = Math.round(shares * p);
-      if (s.buyPrice != null && s.buyPrice > 0) {
-        const cost = s.buyPrice * shares; const unPnl = Math.round(mktValue - cost); const roi = ((mktValue - cost) / cost) * 100;
-        totalValForClass = unPnl;
-        totalHtml = `<div style="line-height:1.2;font-size:inherit;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
-        <div style="font-size:0.8em;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`;
-      } else {
-        totalValForClass = 0;
-        totalHtml = `<div style="line-height:1.2;font-size:inherit;" class="neutral">—</div>
-        <div style="font-size:0.8em;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
-      }
+    if(p != null && s.buyPrice != null && s.buyPrice > 0){
+      const mktValue = Math.round(shares * p); const cost = s.buyPrice * shares; const unPnl = Math.round(mktValue - cost); const roi = ((mktValue - cost)/cost)*100;
+      totalValForClass = unPnl;
+      totalHtml = `<div style="line-height:1.2;">${unPnl>=0?'+':''}${unPnl.toLocaleString()}</div>
+        <div style="font-size:0.8em;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi>=0?'+':''}${roi.toFixed(2)}%</div>`;
+    } else if (p != null) {
+      totalHtml = `<div style="line-height:1.2;" class="neutral">—</div>
+        <div style="font-size:0.8em;opacity:0.6;margin-top:2px;font-weight:normal;" class="neutral">設均價</div>`;
     }
-    div.innerHTML= '<div class="sym-container"><div class="sym">'+s.symbol+'</div>'+
-    (s.name ? '<div class="sym-name" style="font-size:12px; color:var(--t-muted); margin-top:4px; font-weight:normal; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">'+s.name+'</div>' : '') +
-    '</div>'+
-    '<div class="qty-cell"><div style="line-height:1.2;font-size:inherit;">'+s.displayQty+' '+s.displayUnit+'</div><div style="font-size:0.8em;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'">'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'</div></div>'+
-    '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+
-    '<div class="chgp '+(s.changePercent!=null?(s.changePercent>=0?'up':'down'):'')+'">'+cgp+'</div>'+
-    '<div class="chg '+(s.change!=null?(chg>=0?'up':'down'):'')+'">'+cgStr+'</div>'+
-    '<div class="today-pnl '+tpClass+'">'+tpStr+'</div>'+
-    '<div class="total '+(totalValForClass!==0?(totalValForClass>=0?'up':'down'):'')+'">'+totalHtml+'</div>'+
-    '<div class="act"><button type="button" onclick="openEditModal(\''+s.id+'\')">✎</button><button type="button" class="del-btn" onclick="deleteStock(\''+s.id+'\')">✕</button></div>';
+    div.innerHTML = `<div class="sym-container"><div class="sym">${s.symbol}</div>${s.name ? '<div class="sym-name" style="font-size:12px;color:var(--t-muted);margin-top:2px;font-weight:normal;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;">'+s.name+'</div>' : ''}</div>
+      <div class="qty-cell"><div style="line-height:1.2;">${s.displayQty} ${s.displayUnit}</div><div style="font-size:0.8em;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}">${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}</div></div>
+      <div class="price ${p!=null?(chg>=0?'up':'down'):''}">${pStr}</div>
+      <div class="chgp ${s.changePercent!=null?(s.changePercent>=0?'up':'down'):''}">${cgp}</div>
+      <div class="chg ${s.change!=null?(chg>=0?'up':'down'):''}">${cgStr}</div>
+      <div class="today-pnl ${tpClass}">${tpStr}</div>
+      <div class="total ${totalValForClass!==0?(totalValForClass>=0?'up':'down'):''}">${totalHtml}</div>
+      <div class="act"><button type="button" onclick="openEditModal('${s.id}')">✎</button><button type="button" onclick="deleteStock('${s.id}')">✕</button></div>`;
     body.appendChild(div);
   }
   updateSummary();
@@ -1076,66 +962,35 @@ function renderAll(){
 
 function updateSummary(){
   let pnl=0, asset=0, totalUnPnl=0; let hasUnPnl = false;
-  const currentStocks = tabStocks[currentTab];
-  for(const s of currentStocks){
-    const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
-    let p=s.price??0, c=s.change??0;
+  for(const s of tabStocks[currentTab]){
+    const sh = s.displayUnit==='張' ? s.displayQty*1000 : s.displayQty;
+    let p = s.price??0, c = s.change??0;
     pnl += Math.round(sh * c); asset += Math.round(sh * p);
-    if (s.buyPrice != null && s.price != null && s.buyPrice > 0) { totalUnPnl += Math.round((s.price - s.buyPrice) * sh); hasUnPnl = true; }
+    if(s.buyPrice != null && s.price != null && s.buyPrice > 0){ totalUnPnl += Math.round((s.price - s.buyPrice) * sh); hasUnPnl = true; }
   }
-  const pe=document.getElementById('totalPnl');pe.textContent=(pnl>=0?'+':'')+pnl.toLocaleString();pe.className='val '+(pnl>=0?'up':'down');
-  const ae = document.getElementById('totalAsset');ae.textContent = (asset>=0?'+':'')+asset.toLocaleString();ae.className = 'val neutral';
+  const pe = document.getElementById('totalPnl'); pe.textContent = (pnl>=0?'+':'')+pnl.toLocaleString(); pe.className = 'val '+(pnl>=0?'up':'down');
+  document.getElementById('totalAsset').textContent = (asset>=0?'+':'')+asset.toLocaleString();
   const ue = document.getElementById('totalUnrealized');
-  if(hasUnPnl) { ue.textContent = (totalUnPnl >= 0 ? '+' : '') + totalUnPnl.toLocaleString(); ue.className = 'val ' + (totalUnPnl >= 0 ? 'up' : 'down'); }
+  if(hasUnPnl){ ue.textContent = (totalUnPnl>=0?'+':'')+totalUnPnl.toLocaleString(); ue.className = 'val '+(totalUnPnl>=0?'up':'down'); }
   else { ue.textContent = '—'; ue.className = 'val neutral'; }
 }
-
-function toggleSummary(e) {
-  if(e) e.stopPropagation();
+function toggleSummary(e){ if(e) e.stopPropagation();
   const details = document.getElementById('summaryDetails'); const toggleBtn = document.getElementById('sumToggleBtn');
-  if (details.style.display === 'none') { details.style.display = 'block'; toggleBtn.style.display = 'none'; }
-  else { details.style.display = 'none'; toggleBtn.style.display = 'block'; }
+  if(details.style.display === 'none'){ details.style.display = 'block'; toggleBtn.textContent = '▲ 收起明細'; }
+  else { details.style.display = 'none'; toggleBtn.textContent = '▼ 展開明細'; }
 }
 
-function openAddModal() {
-  document.getElementById('addModalOverlay').classList.add('show');
-  setTimeout(() => document.getElementById('symInput').focus(), 100);
-}
-function closeAddModal() {
-  document.getElementById('addModalOverlay').classList.remove('show');
-}
-
-function addStock(){
-  let sym=document.getElementById('symInput').value.trim().toUpperCase();
-  sym = sym.replace(/[^A-Z0-9]/g, '');
-  const qty=parseInt(document.getElementById('qtyInput').value);
-  const unit=document.getElementById('unitSelect').value;
-  const bpRaw = document.getElementById('buyPriceInput').value; const bp = parseFloat(bpRaw);
-  const buyPrice = isNaN(bp) || bp <= 0 ? null : bp;
-  if(!sym||!qty||qty<1){showToast('請輸入代號與數量');return}
-  const currentStocks = tabStocks[currentTab];
-  if(currentStocks.some(s=>s.symbol===sym)){showToast('該股票已存在於此分頁');return}
-  
-  // 自動從字典帶入名稱
-  const stockName = STOCK_DICT[sym] || '';
-
-  const id='s_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
-  currentStocks.push({id,symbol:sym, name: stockName, displayQty:qty,displayUnit:unit,buyPrice:buyPrice,shares:unit==='張'?qty*1000:qty,price:null,change:null,changePercent:null});
-  saveHoldings();renderAll();
-  document.getElementById('symInput').value=''; document.getElementById('qtyInput').value=''; document.getElementById('buyPriceInput').value='';
-  showToast('已新增 '+sym); 
-  closeAddModal();
-  forceRefresh();
-}
-
-function deleteStock(id){
-  if(!confirm('確定刪除？'))return;
-  tabStocks[currentTab]=tabStocks[currentTab].filter(s=>s.id!==id);saveHoldings();renderAll();showToast('記錄已刪除');
-}
-
-function openEditModal(id) {
+// ========================================================= 🧩 模態框控制 =========================================================
+function openAddModal(){ document.getElementById('addModalOverlay').classList.add('show'); setTimeout(()=>document.getElementById('symInput').focus(),100); }
+function closeAddModal(){ document.getElementById('addModalOverlay').classList.remove('show'); }
+function openModal(){ document.getElementById('fugleKeyInput').value=fugleKey; document.getElementById('secondFugleKeyInput').value=secondFugleKey; document.getElementById('tabCountSelect').value=tabCount; updateKeyStatus(); renderApiStats(); document.getElementById('modalOverlay').classList.add('show'); }
+function closeModal(){ document.getElementById('modalOverlay').classList.remove('show'); }
+function saveAndCloseModal(){ saveKeys(); saveTabCount(); closeModal(); showToast('設定已儲存'); forceRefresh(); }
+function openManual(){ document.getElementById('manualOverlay').classList.add('show'); }
+function closeManual(){ document.getElementById('manualOverlay').classList.remove('show'); }
+function openEditModal(id){
   const s = tabStocks[currentTab].find(x => x.id === id);
-  if (!s) return;
+  if(!s) return;
   document.getElementById('editId').value = s.id;
   document.getElementById('editSymInput').value = s.symbol;
   document.getElementById('editNameInput').value = s.name || '';
@@ -1144,323 +999,397 @@ function openEditModal(id) {
   document.getElementById('editBuyPriceInput').value = s.buyPrice || '';
   document.getElementById('editModalOverlay').classList.add('show');
 }
+function closeEditModal(){ document.getElementById('editModalOverlay').classList.remove('show'); }
 
-function closeEditModal() { document.getElementById('editModalOverlay').classList.remove('show'); }
-
-function saveEditStock() {
+function saveEditStock(){
   const id = document.getElementById('editId').value;
   const s = tabStocks[currentTab].find(x => x.id === id);
-  if (!s) return;
-  const ns = document.getElementById('editSymInput').value.trim().toUpperCase();
-  const cleanSym = ns.replace(/[^A-Z0-9]/g, '');
-  if (cleanSym) { s.symbol = cleanSym; s.price = null; s.change = null; s.changePercent = null; s.source = null; s.updateTime = null; }
-  
+  if(!s) return;
+  const ns = document.getElementById('editSymInput').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if(ns) { s.symbol = ns; s.price = null; s.change = null; s.changePercent = null; s.source = null; s.updateTime = null; }
   s.name = document.getElementById('editNameInput').value.trim();
-  
   const nq = parseInt(document.getElementById('editQtyInput').value);
-  if (nq > 0) { s.displayQty = nq; s.shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty; }
+  if(nq > 0) { s.displayQty = nq; s.shares = s.displayUnit==='張' ? s.displayQty*1000 : s.displayQty; }
   s.displayUnit = document.getElementById('editUnitSelect').value;
-  s.shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
-  const nbp = document.getElementById('editBuyPriceInput').value; const bpNum = parseFloat(nbp);
-  s.buyPrice = (isNaN(bpNum) || bpNum <= 0) ? null : bpNum;
+  s.shares = s.displayUnit==='張' ? s.displayQty*1000 : s.displayQty;
+  const nbp = parseFloat(document.getElementById('editBuyPriceInput').value);
+  s.buyPrice = (isNaN(nbp) || nbp <= 0) ? null : nbp;
   saveHoldings(); renderAll(); closeEditModal(); showToast('已修改'); forceRefresh();
 }
 
+function addStock(){
+  let sym = document.getElementById('symInput').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const qty = parseInt(document.getElementById('qtyInput').value);
+  const unit = document.getElementById('unitSelect').value;
+  const bpRaw = document.getElementById('buyPriceInput').value;
+  const bp = parseFloat(bpRaw);
+  const buyPrice = (isNaN(bp) || bp <= 0) ? null : bp;
+  if(!sym || !qty || qty<1){ showToast('請輸入代號與數量'); return; }
+  if(tabStocks[currentTab].some(s=>s.symbol===sym)){ showToast('該股票已存在於此分頁'); return; }
+  const stockName = STOCK_DICT[sym] || '';
+  const id = 's_' + Date.now() + '_' + Math.random().toString(36).slice(2,6);
+  tabStocks[currentTab].push({ id, symbol: sym, name: stockName, displayQty: qty, displayUnit: unit, buyPrice, shares: unit==='張' ? qty*1000 : qty, price: null, change: null, changePercent: null });
+  saveHoldings(); renderAll();
+  document.getElementById('symInput').value=''; document.getElementById('qtyInput').value=''; document.getElementById('buyPriceInput').value='';
+  showToast('已新增 '+sym); closeAddModal(); forceRefresh();
+}
+function deleteStock(id){ if(!confirm('確定刪除？')) return;
+  tabStocks[currentTab] = tabStocks[currentTab].filter(s=>s.id!==id); saveHoldings(); renderAll(); showToast('已刪除'); }
 function saveDailyPnl(){
-  let pnl=0,asset=0; const currentStocks = tabStocks[currentTab];
-  for(const s of currentStocks){
-    const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
-    let p=s.price??0, c=s.change??0; pnl += Math.round(sh * c); asset += Math.round(sh * p);
+  let pnl=0, asset=0;
+  for(const s of tabStocks[currentTab]){
+    const sh = s.displayUnit==='張' ? s.displayQty*1000 : s.displayQty;
+    let p=s.price??0, c=s.change??0;
+    pnl += Math.round(sh*c); asset += Math.round(sh*p);
   }
-  const n=new Date();
-  const ds=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
-  const ts=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
-  const currentRecords = tabRecords[currentTab];
-  currentRecords.unshift({date:ds,time:ts,totalPnl:pnl,totalAsset:asset,timestamp:n.getTime()});
-  if(currentRecords.length>50) tabRecords[currentTab]=currentRecords.slice(0,50);
-  saveRecords();renderHistory(); showToast('已存儲今日損益：'+(pnl>=0?'+':'')+pnl.toLocaleString());
+  const n = new Date();
+  const ds = n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
+  const ts = String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  tabRecords[currentTab].unshift({ date: ds, time: ts, totalPnl: pnl, totalAsset: asset, timestamp: n.getTime() });
+  if(tabRecords[currentTab].length > 50) tabRecords[currentTab] = tabRecords[currentTab].slice(0,50);
+  saveRecords(); renderHistory(); showToast('已存儲：'+(pnl>=0?'+':'')+pnl.toLocaleString());
 }
-
-function deleteHistory(timestamp) {
-  if(!confirm('確定刪除此筆記錄？')) return;
-  tabRecords[currentTab] = tabRecords[currentTab].filter(r => r.timestamp !== timestamp);
-  saveRecords();renderHistory();showToast('記錄已刪除');
-}
-
+function deleteHistory(timestamp){ if(!confirm('確定刪除？')) return;
+  tabRecords[currentTab] = tabRecords[currentTab].filter(r=>r.timestamp!==timestamp); saveRecords(); renderHistory(); showToast('已刪除'); }
 function renderHistory(){
-  const hb = document.getElementById('historyBody');
-  if(!hb) return;
-  hb.innerHTML = '';
-  const currentRecords = tabRecords[currentTab];
-  if(currentRecords.length === 0){
-    hb.innerHTML = '<div class="hist-empty">尚無記錄</div>';
-    return;
-  }
-  for(const r of currentRecords){
-    const div = document.createElement('div');
-    div.className = 'hist-item';
-    div.style.border = "1px solid var(--protrude-d)";
-    div.style.borderTop = "1px solid var(--protrude-l)";
-    div.style.borderLeft = "1px solid var(--protrude-l)";
-    const pnlStr = (r.totalPnl >= 0 ? '+' : '') + r.totalPnl.toLocaleString();
-    const pnlClass = r.totalPnl >= 0 ? 'up' : 'down';
-    div.innerHTML = `
-      <div class="hist-item-left">
-        <span class="hdate">${r.date} ${r.time}</span>
-        <span class="hval ${pnlClass}">${pnlStr}</span>
-      </div>
-      <button type="button" class="del-hist-btn" onclick="deleteHistory(${r.timestamp})">刪除</button>
-    `;
+  const hb = document.getElementById('historyBody'); hb.innerHTML='';
+  if(tabRecords[currentTab].length === 0){ hb.innerHTML = '<div class="hist-empty">尚無記錄</div>'; return; }
+  for(const r of tabRecords[currentTab]){
+    const div = document.createElement('div'); div.className = 'hist-item';
+    const pnlStr = (r.totalPnl>=0?'+':'')+r.totalPnl.toLocaleString();
+    div.innerHTML = `<div class="hist-item-left"><span class="hdate">${r.date} ${r.time}</span><span class="hval ${r.totalPnl>=0?'up':'down'}">${pnlStr}</span></div>
+      <button type="button" class="del-hist-btn" onclick="deleteHistory(${r.timestamp})">刪除</button>`;
     hb.appendChild(div);
   }
 }
 
-function openModal(){
-  document.getElementById('fugleKeyInput').value=fugleKey;
-  document.getElementById('secondFugleKeyInput').value=secondFugleKey;
-  document.getElementById('tabCountSelect').value=tabCount;
-  updateKeyStatus(); renderApiStats(); document.getElementById('modalOverlay').classList.add('show');
-}
-
-function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
-
-function saveAndCloseModal(){
-  saveKeys(); saveTabCount(); 
-  document.getElementById('modalOverlay').classList.remove('show'); 
-  showToast('設定已儲存'); 
-  forceRefresh(); 
-}
-
-function openManual() { document.getElementById('manualOverlay').classList.add('show'); }
-function closeManual() { document.getElementById('manualOverlay').classList.remove('show'); }
-
-// ⚙️ 國外指數燈箱管理函數群
-function openForeignIdxModal() {
-  renderForeignIdxConfigList();
-  document.getElementById('foreignIdxOverlay').classList.add('show');
-}
-
-function closeForeignIdxModal() {
-  document.getElementById('foreignIdxOverlay').classList.remove('show');
-  loadForeignIndicesConfig();
-  fetchGlobalIndicesFromWorker();
-}
-
-function renderForeignIdxConfigList() {
-  const container = document.getElementById('foreignIdxListContainer');
-  if (!container) return;
-  container.innerHTML = '';
-
-  if (AVAILABLE_INDICES.length === 0) {
-    container.innerHTML = '<div style="text-align:center; color:var(--t-muted); font-weight:600; padding:20px; font-size:14px;">目前無自選指數，請由上方新增</div>';
-    return;
-  }
-
+// ========================================================= 🌍 國外指數 UI =========================================================
+function openForeignIdxModal(){ renderForeignIdxConfigList(); document.getElementById('foreignIdxOverlay').classList.add('show'); }
+function closeForeignIdxModal(){ document.getElementById('foreignIdxOverlay').classList.remove('show'); loadForeignIndicesConfig(); fetchGlobalIndicesFromWorker(); }
+function renderForeignIdxConfigList(){
+  const container = document.getElementById('foreignIdxListContainer'); container.innerHTML='';
+  if(AVAILABLE_INDICES.length === 0){ container.innerHTML = '<div style="text-align:center;color:var(--t-muted);padding:20px;">無自選指數</div>'; return; }
   AVAILABLE_INDICES.forEach((idx, index) => {
     const row = document.createElement('div');
-    row.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:10px 14px; margin-bottom:8px; background:var(--bg); box-shadow:3px 3px 6px var(--s-dark), -3px -3px 6px var(--s-light); border-radius:8px; border:1px solid var(--protrude-d); border-top:1px solid var(--protrude-l); border-left:1px solid var(--protrude-l);";
-    
-    row.innerHTML = `
-      <div style="text-align:left; flex:1; min-width:0; padding-right:8px;">
-        <div style="font-weight:700; color:var(--t-main); font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${idx.name}</div>
-        <div style="font-size:12px; color:var(--t-muted); font-weight:600;">${idx.symbol}</div>
-      </div>
-      <button type="button" onclick="deleteForeignIdx(${index})" style="padding:6px 10px; font-size:12px; color:var(--up); box-shadow:2px 2px 4px var(--s-dark), -2px -2px 4px var(--s-light); border-radius:6px; border:1px solid var(--protrude-d); border-top:1px solid var(--protrude-l); border-left:1px solid var(--protrude-l);">✕</button>
-    `;
+    row.style.cssText = "display:flex;justify-content:space-between;align-items:center;padding:10px 14px;margin-bottom:8px;background:var(--bg);box-shadow:var(--shadow-sm);border-radius:8px;border:var(--border-light);";
+    row.innerHTML = `<div style="text-align:left;flex:1;min-width:0;padding-right:8px;"><div style="font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${idx.name}</div><div style="font-size:12px;color:var(--t-muted);">${idx.symbol}</div></div>
+      <button type="button" onclick="deleteForeignIdx(${index})" style="padding:6px 10px;font-size:12px;color:var(--up);box-shadow:var(--shadow-sm);border-radius:6px;border:var(--border-light);min-height:36px;">✕</button>`;
     container.appendChild(row);
   });
 }
-
-function addForeignIdx() {
-  const symInp = document.getElementById('newIdxSymbol');
-  const nameInp = document.getElementById('newIdxName');
-  let symbol = symInp.value.trim().toUpperCase();
-  const name = nameInp.value.trim();
-
-  if (!symbol || !name) {
-    showToast('請輸入代號與自訂名稱');
-    return;
-  }
-
-  if (['DJI', 'IXIC', 'GSPC', 'SOX', 'N225', 'KS11'].includes(symbol)) {
-    symbol = '^' + symbol;
-  }
-
-  if (AVAILABLE_INDICES.some(idx => idx.symbol === symbol)) {
-    showToast('此指數代號已存在於清單中');
-    return;
-  }
-
+function addForeignIdx(){
+  const symInp = document.getElementById('newIdxSymbol'); const nameInp = document.getElementById('newIdxName');
+  let symbol = symInp.value.trim().toUpperCase(); const name = nameInp.value.trim();
+  if(!symbol || !name){ showToast('請輸入代號與名稱'); return; }
+  if(['DJI','IXIC','GSPC','SOX','N225','KS11'].includes(symbol)) symbol = '^'+symbol;
+  if(AVAILABLE_INDICES.some(idx=>idx.symbol===symbol)){ showToast('已存在'); return; }
   AVAILABLE_INDICES.push({ symbol, name });
   localStorage.setItem('tw_custom_foreign_indices', JSON.stringify(AVAILABLE_INDICES));
-  
-  symInp.value = '';
-  nameInp.value = '';
-  renderForeignIdxConfigList();
-  showToast(`已新增 ${name}`);
+  symInp.value=''; nameInp.value=''; renderForeignIdxConfigList(); showToast(`已新增 ${name}`);
+}
+function deleteForeignIdx(index){
+  if(!confirm('確定刪除？')) return;
+  AVAILABLE_INDICES.splice(index, 1);
+  localStorage.setItem('tw_custom_foreign_indices', JSON.stringify(AVAILABLE_INDICES));
+  renderForeignIdxConfigList(); showToast('已刪除');
 }
 
-function deleteForeignIdx(index) {
-  const target = AVAILABLE_INDICES[index];
-  if (!target) return;
-  
-  if (confirm(`確定要刪除「${target.name} (${target.symbol})」嗎？`)) {
-    AVAILABLE_INDICES.splice(index, 1);
-    localStorage.setItem('tw_custom_foreign_indices', JSON.stringify(AVAILABLE_INDICES));
-    renderForeignIdxConfigList();
-    showToast('已刪除該自選項目');
+// ========================================================= 📈 指數報價 =========================================================
+function renderGlobalIndices(indices, isOffline = false) {
+  const container = document.getElementById('idxScrollContainer');
+  const boxes = container.querySelectorAll('.idx-card-box');
+  for(let i=1; i<boxes.length; i++) boxes[i].remove();
+  const offlineTag = isOffline ? '<span style="color:var(--t-muted);font-size:12px;margin-left:6px;opacity:0.8;">(離線)</span>' : '';
+  indices.forEach(item => {
+    const matched = AVAILABLE_INDICES.find(idx=>idx.symbol===item.symbol);
+    const displayName = matched ? matched.name : item.name;
+    const card = document.createElement('div'); card.className = 'idx-card-box';
+    const sign = item.pct >= 0 ? '+' : ''; const cls = item.pct >= 0 ? 'up' : 'down';
+    card.innerHTML = `<div class="idx-box-name">${displayName}${offlineTag}</div>
+      <div class="idx-box-price">${item.price.toLocaleString('en-US',{maximumFractionDigits:2})}</div>
+      <div class="idx-box-change-row ${cls}"><span>${sign}${item.changeAmt.toFixed(2)}</span><span>(${sign}${item.pct.toFixed(2)}%)</span></div>
+      <div class="idx-box-src">via Yahoo ${isOffline ? 'Cache' : ''}</div>`;
+    container.appendChild(card);
+  });
+}
+async function fetchGlobalIndicesFromWorker(){
+  if(!cfWorkerUrl || navigator.onLine === false){ 
+    const cached = localStorage.getItem('tw_cached_indices');
+    if(cached) try { renderGlobalIndices(JSON.parse(cached), true); } catch(e){} 
+    return;
+  }
+  try {
+    const symbols = activeForeignIndices.join(',');
+    if(!symbols) return;
+    const resp = await fetch(`${cfWorkerUrl}/indices?symbols=${encodeURIComponent(symbols)}&_=${Date.now()}`, { signal: AbortSignal.timeout(API_TIMEOUT), headers:{'Accept':'application/json'}, cache:'no-store' });
+    if(resp.ok){
+      const data = await resp.json();
+      if(data.indices && data.indices.length > 0){
+        const parsed = data.indices.map(item => ({
+          symbol: item.symbol,
+          name: item.name || item.symbol,
+          price: item.price ?? item.regularMarketPrice ?? 0,
+          pct: item.changePercent ?? item.regularMarketChangePercent ?? 0,
+          changeAmt: item.change ?? item.regularMarketChange ?? 0
+        }));
+        parsed.sort((a,b) => activeForeignIndices.indexOf(a.symbol) - activeForeignIndices.indexOf(b.symbol));
+        cachedGlobalIndices = parsed;
+        trackApiUsage('Yahoo');
+        try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
+        renderGlobalIndices(cachedGlobalIndices, false);
+      }
+    }
+  } catch(e){ 
+    const cached = localStorage.getItem('tw_cached_indices');
+    if(cached) try { renderGlobalIndices(JSON.parse(cached), true); } catch(e2){} 
   }
 }
-
-function formatPrice(p){
-  if(p==null)return '—';
-  if(Math.abs(p)>=1000)return p.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-  return p.toFixed(2);
+async function fetchWeightedIndex(){
+  const kr = getKeyRotator();
+  if(kr.count > 0){
+    for(let i=0; i<kr.count; i++){
+      try {
+        const resp = await fetch(FUGLE + 'IX0001', { headers: { 'X-API-KEY': kr.next(), 'Cache-Control': 'no-cache' }, signal: AbortSignal.timeout(API_TIMEOUT), cache:'no-store' });
+        if(resp.ok){
+          const d = await resp.json();
+          const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
+          if(p != null){ trackApiUsage('Fugle'); return { price:p, change:d.change??0, changePercent:d.changePercent??0, source:'Fugle' }; }
+        }
+      } catch(e){}
+    }
+  }
+  try {
+    const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
+    const resp = await fetchWithProxy(yahooUrl);
+    if(resp){
+      const text = await resp.text(); const lines = text.trim().split('\n');
+      if(lines.length >= 2){
+        const cols = lines[lines.length-1].split(',');
+        if(cols.length >= 6 && cols[4] !== 'null' && cols[1] !== 'null'){
+          const price = parseFloat(cols[4]); const open = parseFloat(cols[1]);
+          const chg = +(price - open).toFixed(2); const pct = +((chg/open)*100).toFixed(2);
+          trackApiUsage('Yahoo');
+          return { price, change:chg, changePercent:pct, source:'Yahoo' };
+        }
+      }
+    }
+  } catch(e){}
+  return null;
+}
+function isAnyMarketOpen(){
+  const now = new Date(); const day = now.getDay(); const hour = now.getHours(); const min = now.getMinutes();
+  if(day===0||day===6) return false;
+  const time = hour + min/60;
+  if(time>=8 && time<=14) return true;
+  if(time>=15 || time<=5) return true;
+  return false;
 }
 
-let toastTimer=null;
-function showToast(msg){ const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show'); clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2000); }
+// ========================================================= ⚡ 報價刷新核心 =========================================================
+async function fetchFugle(symbol){
+  const kr = getKeyRotator();
+  if(kr.count === 0) return null;
+  for(let i=0; i<kr.count; i++){
+    const currentKey = kr.next();
+    try {
+      const resp = await fetch(FUGLE + encodeURIComponent(symbol), { headers: { 'X-API-KEY': currentKey, 'Cache-Control': 'no-cache' }, signal: AbortSignal.timeout(API_TIMEOUT), cache:'no-store' });
+      if(resp.ok){
+        const d = await resp.json();
+        const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
+        if(p != null){ trackApiUsage('Fugle'); return { price:p, change:d.change??0, changePercent:d.changePercent??0, source:'Fugle', name: d.name || '' }; }
+      }
+    } catch(e){}
+  }
+  return null;
+}
+async function fetchYahoo(symbol){
+  const tryFetch = async (suffix) => {
+    try {
+      const url = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}${suffix}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
+      const resp = await fetchWithProxy(url);
+      if(!resp) return null;
+      const text = await resp.text(); const lines = text.trim().split('\n');
+      if(lines.length < 2) return null;
+      const cols = lines[lines.length-1].split(',');
+      if(cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
+      const price = parseFloat(cols[4]); const open = parseFloat(cols[1]);
+      const chg = +(price - open).toFixed(2); const pct = +((chg/open)*100).toFixed(2);
+      trackApiUsage('Yahoo');
+      return { price, change:chg, changePercent:pct, source:'Yahoo', name:'' };
+    } catch(e){ return null; }
+  };
+  let res = await tryFetch('.TW');
+  if(!res) res = await tryFetch('.TWO');
+  return res;
+}
+async function refreshPrices(){
+  const isOffline = navigator.onLine === false;
+  if(isOffline){ showToast('離線模式，顯示快取'); 
+    const nameBox = document.querySelector('#idxScrollContainer .idx-card-box:first-child .idx-box-name');
+    if(nameBox && !nameBox.innerHTML.includes('(離線)')) nameBox.innerHTML = `🇹🇼 加權指數<span style="color:var(--t-muted);font-size:12px;margin-left:6px;opacity:0.8;">(離線)</span>`;
+    return;
+  } else {
+    const nameBox = document.querySelector('#idxScrollContainer .idx-card-box:first-child .idx-box-name');
+    if(nameBox) nameBox.innerHTML = `🇹🇼 加權指數`;
+  }
+  const idxR = fetchWeightedIndex();
+  const idxEl = document.getElementById('idxPrice');
+  if(idxR){
+    idxR.then(res => {
+      if(res){
+        idxEl.textContent = res.price.toLocaleString('en-US',{maximumFractionDigits:0});
+        const chgEl = document.getElementById('idxChange'); chgEl.textContent = (res.change>=0?'+':'')+res.change.toFixed(2); chgEl.className = (res.change>=0?'up':'down');
+        const pctEl = document.getElementById('idxPct'); pctEl.textContent = '('+(res.changePercent>=0?'+':'')+res.changePercent.toFixed(2)+'%)'; pctEl.className = (res.changePercent>=0?'up':'down');
+        document.getElementById('idxSource').textContent = 'via '+res.source+' '+new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'});
+        try { localStorage.setItem('tw_cached_twii', JSON.stringify(res)); } catch(e){}
+      }
+    });
+  }
+  fetchGlobalIndicesFromWorker();
+  const currentStocks = tabStocks[currentTab];
+  if(currentStocks.length === 0) return;
+  const uniqueSymbols = [...new Set(currentStocks.map(s=>s.symbol))];
+  let hasUpdates = false;
+  for(let i=0; i<uniqueSymbols.length; i+=MAX_CONCURRENT_REQUESTS){
+    const batch = uniqueSymbols.slice(i, i+MAX_CONCURRENT_REQUESTS);
+    const promises = batch.map(async (sym) => {
+      let r = await fetchFugle(sym);
+      if(!r) r = await fetchYahoo(sym);
+      return { sym, r };
+    });
+    const results = await Promise.allSettled(promises);
+    results.forEach(result => {
+      if(result.status === 'fulfilled'){
+        const { sym, r } = result.value;
+        if(r){
+          hasUpdates = true;
+          const now = new Date();
+          const uTime = String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+          for(let idx=0; idx<5; idx++){
+            tabStocks[idx].filter(s => s.symbol === sym).forEach(s => {
+              s.price = r.price; s.change = r.change; s.changePercent = r.changePercent; s.source = r.source;
+              if(r.name && !s.name) s.name = r.name;
+              s.updateTime = uTime;
+              if(idx === currentTab) renderRow(s);
+            });
+          }
+        }
+      }
+    });
+  }
+  if(hasUpdates){
+    for(let i=0; i<5; i++){ try { localStorage.setItem(getStockKey(i), JSON.stringify(tabStocks[i])); } catch(e){} }
+  }
+  updateSummary();
+  adjustPollingInterval();
+  renderApiStats();
+}
+function adjustPollingInterval(){
+  const kr = getKeyRotator(); const keyCount = kr.count;
+  let newInterval = 20000;
+  if(!isAnyMarketOpen()) newInterval = 60000;
+  else if(keyCount === 2) newInterval = 10000;
+  if(newInterval !== currentInterval){ currentInterval = newInterval; if(window.heartbeatWorker) heartbeatWorker.postMessage({ action:'start', interval:currentInterval }); }
+}
 
+// ========================================================= ❤️ 心跳引擎 =========================================================
+const workerCode = `let timer=null; self.onmessage=function(e){ if(e.data.action==='start'){ if(timer) clearInterval(timer); timer=setInterval(()=>{ self.postMessage('tick'); }, e.data.interval); } else if(e.data.action==='stop'){ if(timer) clearInterval(timer); } };`;
+const workerBlob = new Blob([workerCode], { type:'application/javascript' });
+window.heartbeatWorker = new Worker(URL.createObjectURL(workerBlob));
+heartbeatWorker.onmessage = function(e){ if(e.data === 'tick') refresh(); };
+
+function forceRefresh(){ globalKeyRotator = null; lastRefreshTime = 0; isRefreshing = false; refresh(); }
+async function refresh(){
+  const now = Date.now();
+  if(isRefreshing && now - lastRefreshTime > 8000) isRefreshing = false;
+  if(isRefreshing || now - lastRefreshTime < 2000) return;
+  isRefreshing = true; lastRefreshTime = now;
+  try { await refreshPrices(); lastSuccessTime = Date.now(); } catch(e){ console.error(e); }
+  finally { isRefreshing = false; }
+}
+function handleTouchWakeup(){
+  if(Date.now() - lastSuccessTime > 15000 && !isRefreshing) forceRefresh();
+}
+document.addEventListener('touchend', handleTouchWakeup, { passive: true });
+document.addEventListener('click', handleTouchWakeup, { passive: true });
+
+// ========================================================= 🛠️ 輔助函式 =========================================================
+function toggleKeyVisibility(inputId, btnId){
+  const input = document.getElementById(inputId); const btn = document.getElementById(btnId);
+  if(input.classList.contains('pwd-mask')){ input.classList.remove('pwd-mask'); btn.textContent='🙈'; } 
+  else { input.classList.add('pwd-mask'); btn.textContent='👁'; }
+}
+function updateKeyStatus(){
+  ['fugleKey','secondFugleKey'].forEach((id,i)=>{
+    const el = document.getElementById(id+'Status'); if(!el) return;
+    const val = i===0 ? fugleKey : secondFugleKey;
+    if(val){ el.textContent='✓ 已設定'; el.className='key-status ok'; }
+    else { el.textContent='未設定'; el.className='key-status none'; }
+  });
+  renderApiStats();
+}
+let toastTimer=null;
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2000); }
 function exportData() {
-  const dataToExport = {
-    tabStocks: [localStorage.getItem(getStockKey(0)), localStorage.getItem(getStockKey(1)), localStorage.getItem(getStockKey(2)), localStorage.getItem(getStockKey(3)), localStorage.getItem(getStockKey(4))],
+  const data = { tabStocks: [localStorage.getItem(getStockKey(0)), localStorage.getItem(getStockKey(1)), localStorage.getItem(getStockKey(2)), localStorage.getItem(getStockKey(3)), localStorage.getItem(getStockKey(4))],
     tabRecords: [localStorage.getItem(getRecordKey(0)), localStorage.getItem(getRecordKey(1)), localStorage.getItem(getRecordKey(2)), localStorage.getItem(getRecordKey(3)), localStorage.getItem(getRecordKey(4))],
     tabNames: localStorage.getItem(TN_KEY), fugleKey: localStorage.getItem(FK), secondFugleKey: localStorage.getItem(SFK), theme: localStorage.getItem(TK), tabCount: localStorage.getItem(TC_KEY),
-    customForeignIndices: localStorage.getItem('tw_custom_foreign_indices')
-  };
-  const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "application/json" });
+    customForeignIndices: localStorage.getItem('tw_custom_foreign_indices') };
+  const blob = new Blob([JSON.stringify(data,null,2)], { type:"application/json" });
   const url = URL.createObjectURL(blob);
-  const downloadAnchorElement = document.createElement('a');
-  const d = new Date(); const dateString = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
-  downloadAnchorElement.setAttribute("href", url); downloadAnchorElement.setAttribute("download", "stock_backup_" + dateString + ".json");
-  document.body.appendChild(downloadAnchorElement); downloadAnchorElement.click(); document.body.removeChild(downloadAnchorElement); URL.revokeObjectURL(url);
-  showToast('✅ 備份檔案已成功下載');
+  const a = document.createElement('a');
+  const d = new Date(); const ds = d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
+  a.href = url; a.download = "stock_backup_"+ds+".json";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  showToast('✅ 備份已下載');
 }
-
-function triggerImport() { document.getElementById('importFile').click(); }
-
+function triggerImport(){ document.getElementById('importFile').click(); }
 function importData(event) {
-  const file = event.target.files[0]; if (!file) return;
+  const file = event.target.files[0]; if(!file) return;
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = function(e){
     try {
       const data = JSON.parse(e.target.result);
-      if(confirm('⚠️ 警告：這將會覆蓋您目前的所有資料！\n確定要還原備份嗎？')) {
-        if (data.tabStocks) { data.tabStocks.forEach((val, i) => { if(val) localStorage.setItem(getStockKey(i), val); }); }
-        if (data.tabRecords) { data.tabRecords.forEach((val, i) => { if(val) localStorage.setItem(getRecordKey(i), val); }); }
-        if (data.tabNames) localStorage.setItem(TN_KEY, data.tabNames);
-        if (data.fugleKey) localStorage.setItem(FK, data.fugleKey);
-        if (data.secondFugleKey) localStorage.setItem(SFK, data.secondFugleKey);
-        if (data.theme) localStorage.setItem(TK, data.theme);
-        if (data.tabCount) localStorage.setItem(TC_KEY, data.tabCount);
-        
-        if (data.customForeignIndices) {
-          localStorage.setItem('tw_custom_foreign_indices', data.customForeignIndices);
-        } else {
-          localStorage.setItem('tw_custom_foreign_indices', JSON.stringify(DEFAULT_INDICES));
-        }
-        
-        alert('🎉 備份還原成功！'); location.reload();
+      if(confirm('⚠️ 確定覆蓋所有資料？')){
+        if(data.tabStocks){ data.tabStocks.forEach((val,i)=>{ if(val) localStorage.setItem(getStockKey(i), val); }); }
+        if(data.tabRecords){ data.tabRecords.forEach((val,i)=>{ if(val) localStorage.setItem(getRecordKey(i), val); }); }
+        if(data.tabNames) localStorage.setItem(TN_KEY, data.tabNames);
+        if(data.fugleKey) localStorage.setItem(FK, data.fugleKey);
+        if(data.secondFugleKey) localStorage.setItem(SFK, data.secondFugleKey);
+        if(data.theme) localStorage.setItem(TK, data.theme);
+        if(data.tabCount) localStorage.setItem(TC_KEY, data.tabCount);
+        if(data.customForeignIndices) localStorage.setItem('tw_custom_foreign_indices', data.customForeignIndices);
+        else localStorage.setItem('tw_custom_foreign_indices', JSON.stringify(DEFAULT_INDICES));
+        alert('🎉 還原成功！'); location.reload();
       }
-    } catch (err) { alert('❌ 檔案格式錯誤，無法還原資料。'); }
+    } catch(err){ alert('❌ 檔案格式錯誤'); }
     document.getElementById('importFile').value = '';
   };
   reader.readAsText(file);
 }
 
-// ==========================================
-// 💡 V4.13.5 獨立背景心跳引擎 (Web Worker)
-// ==========================================
-let lastRefreshTime = 0;
-let lastSuccessTime = 0;
-let isRefreshing = false;
-
-const workerCode = `
-  let timer = null;
-  self.onmessage = function(e) {
-    if (e.data.action === 'start') {
-      if (timer) clearInterval(timer);
-      timer = setInterval(() => { self.postMessage('tick'); }, e.data.interval);
-    } else if (e.data.action === 'stop') {
-      if (timer) clearInterval(timer);
-    }
-  };
-`;
-const workerBlob = new Blob([workerCode], { type: 'application/javascript' });
-window.heartbeatWorker = new Worker(URL.createObjectURL(workerBlob));
-
-heartbeatWorker.onmessage = function(e) {
-  if (e.data === 'tick') {
-    refresh();
-  }
-};
-
-function forceRefresh() {
-  globalKeyRotator = null; 
-  lastRefreshTime = 0;     
-  isRefreshing = false;    
-  refresh();
-}
-
-async function refresh() {
-  const now = Date.now();
-  if (isRefreshing && now - lastRefreshTime > 8000) { isRefreshing = false; }
-  if (isRefreshing || now - lastRefreshTime < 2000) return;
-  
-  isRefreshing = true;
-  lastRefreshTime = now;
-  try { 
-    await refreshPrices(); 
-    lastSuccessTime = Date.now(); 
-  } 
-  catch(e) { console.error('Refresh Error:', e); } 
-  finally { isRefreshing = false; }
-}
-
-function handleTouchWakeup() {
-  const now = Date.now();
-  if (now - lastSuccessTime > 15000 && !isRefreshing) {
-    forceRefresh();
-  }
-}
-document.addEventListener('touchend', handleTouchWakeup, { passive: true });
-document.addEventListener('click', handleTouchWakeup, { passive: true });
-
-// 初始化載入
+// ========================================================= 🚀 初始化 =========================================================
 loadState(); renderAll(); renderHistory();
-
-setTimeout(forceRefresh, 500);  
-
-// 啟動心跳引擎
-heartbeatWorker.postMessage({ action: 'start', interval: currentInterval });
-
+setTimeout(forceRefresh, 500);
+heartbeatWorker.postMessage({ action:'start', interval:currentInterval });
 window.addEventListener('focus', forceRefresh);
 window.addEventListener('pageshow', forceRefresh);
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') forceRefresh();
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible') forceRefresh(); });
+
+document.getElementById('symInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('qtyInput').focus(); } });
+document.getElementById('qtyInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('buyPriceInput').focus(); } });
+document.getElementById('buyPriceInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); addStock(); } });
+
+['addModalOverlay','modalOverlay','manualOverlay','editModalOverlay','foreignIdxOverlay'].forEach(id => {
+  document.getElementById(id).addEventListener('click', function(e){ if(e.target===this) this.classList.remove('show'); });
 });
 
-// 監聽鍵盤輸入與彈窗關閉
-document.getElementById('symInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); } });
-document.getElementById('qtyInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('buyPriceInput').focus(); } });
-document.getElementById('buyPriceInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); addStock(); } });
-
-// 新增的燈箱關閉監聽
-document.getElementById('addModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-document.getElementById('foreignIdxOverlay').addEventListener('click',function(e){if(e.target===this)closeForeignIdxModal();});
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('Service Worker 註冊成功，範疇為:', reg.scope))
-      .catch(err => console.error('Service Worker 註冊失敗:', err));
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./sw.js').then(reg=>console.log('SW 註冊成功')).catch(err=>console.error('SW 註冊失敗:', err));
   });
 }
-
-console.log('股票庫存管理 V4.13.5 已啟動');
+console.log('📈 股票庫存管理 V4.14.0 已啟動 (全新 UI 升級)');
 </script>
 </body>
 </html>
