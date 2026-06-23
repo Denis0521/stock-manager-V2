@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-// 強制刷新快取：升級至 V4.12.1 (優化第一欄寬度，容納8字簡稱)
-const APP_VER = '4.12.1';
+// 強制刷新快取：升級至 V4.12.2 (極限微調第一欄寬度，緊貼8字簡稱)
+const APP_VER = '4.12.2';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -100,8 +100,8 @@ button:active, .tab-btn.active {
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 0; opacity: 0.7; }
 
 .table-scroll { margin: 8px 10px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; }
-.list-wrap { min-width: 740px; }
-.list-header, .srow { grid-template-columns: 125px 110px 90px 90px 80px 90px 120px 90px; }
+.list-wrap { min-width: 727px; }
+.list-header, .srow { grid-template-columns: 112px 110px 90px 90px 80px 90px 120px 90px; }
 .list-header { display: grid; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 17px; color: var(--t-muted); font-weight: 600; }
 .srow { display: grid; align-items: stretch; border-bottom: 1px solid var(--s-dark); font-size: 17px; }
 .srow:last-child { border-bottom: none; }
@@ -110,7 +110,7 @@ button:active, .tab-btn.active {
 .list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after { content: ''; position: absolute; top: 0; bottom: 0; right: -6px; width: 6px; background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; }
 .list-header > div:nth-child(8) { align-items: center; justify-content: center; padding-left: 14px; }
 .srow > div:nth-child(8) { flex-direction: row; align-items: center; justify-content: center; gap: 6px; padding-left: 14px; }
-.sym-container { align-items: flex-start !important; line-height: 1.1 !important; width: 100%; max-width: 125px; display: flex; flex-direction: column; justify-content: center; }
+.sym-container { align-items: flex-start !important; line-height: 1.1 !important; width: 100%; max-width: 112px; display: flex; flex-direction: column; justify-content: center; }
 .srow .sym { font-weight: 800; font-size: 17px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; }
 .srow .qty-cell { font-weight: 600; color: var(--t-main); overflow: hidden; width: 100%; }
 .srow .price { font-weight: 700; }
@@ -202,7 +202,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   .card-title { font-size: 18px; }
   .tab-btn { font-size: 18px; padding: 14px 10px; }
   .list-wrap { min-width: 100%; }
-  .list-header, .srow { grid-template-columns: 1.8fr 1.5fr 1fr 1.2fr 1.2fr 1.5fr 1.5fr 1.5fr; }
+  .list-header, .srow { grid-template-columns: 1.6fr 1.5fr 1fr 1.2fr 1.2fr 1.5fr 1.5fr 1.5fr; }
   .list-header { font-size: 18px; }
   .srow { font-size: 19px; }
   .srow .sym { font-size: 19px; }
@@ -346,7 +346,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.12.1 (支援股票簡稱與加寬排版)</div>
+    <div class="v-box">核心版本：V4.12.2 (股票簡稱滿版無縫排版)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -439,7 +439,7 @@ const STOCK_DICT = {
   '2330': '台積電', '2317': '鴻海', '2454': '聯發科', '2308': '台達電', '2382': '廣達', '2881': '富邦金', '2882': '國泰金'
 };
 
-/* ========================================================= 🔧 API 管理引擎 V4.12.1 ========================================================= */
+/* ========================================================= 🔧 API 管理引擎 V4.12.2 ========================================================= */
 const PROXY_LIST = [
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
@@ -1325,7 +1325,7 @@ function importData(event) {
 }
 
 // ==========================================
-// 💡 V4.12.1 獨立背景心跳引擎 (Web Worker)
+// 💡 V4.12.2 獨立背景心跳引擎 (Web Worker)
 // ==========================================
 let lastRefreshTime = 0;
 let lastSuccessTime = 0;
@@ -1413,7 +1413,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-console.log('股票庫存管理 V4.12.1 已啟動');
+console.log('股票庫存管理 V4.12.2 已啟動');
 </script>
 </body>
 </html>
