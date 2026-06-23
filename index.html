@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-// 強制刷新快取：升級至 V4.12.2 (極限微調第一欄寬度，緊貼8字簡稱)
-const APP_VER = '4.12.2';
+// 強制刷新快取：升級至 V4.13.0 (簡化主界面，新增持股改為按鈕與彈窗)
+const APP_VER = '4.13.0';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -140,7 +140,7 @@ button:active, .tab-btn.active {
   border: 1px solid var(--protrude-d); border-top: 1px solid var(--protrude-l); border-left: 1px solid var(--protrude-l);
 }
 
-#manualOverlay, #editModalOverlay, #foreignIdxOverlay { z-index: 1100; }
+#manualOverlay, #editModalOverlay, #foreignIdxOverlay, #addModalOverlay { z-index: 1100; }
 
 .modal h2 { font-size: 20px; margin-bottom: 16px; text-align: center; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
 .modal label { display: block; font-size: 15px; color: var(--t-muted); margin: 12px 0 6px; font-weight: 600; text-align: left; }
@@ -240,18 +240,9 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   </div>
 </div>
 <div class="tabs-bar" id="tabsBarContainer"></div>
-<div class="card">
-  <div class="card-title">新增持股</div>
-  <div class="form-row">
-    <input type="text" class="sym-inp" id="symInput" placeholder="代號" maxlength="10" autocomplete="nope" style="text-transform:uppercase">
-    <input type="number" id="qtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" autocomplete="nope">
-    <select id="unitSelect"><option value="張">張</option><option value="股">股</option></select>
-  </div>
-  <div class="form-row">
-    <input type="number" id="buyPriceInput" placeholder="買入均價 (選填計算損益)" step="0.01" min="0" inputmode="decimal" autocomplete="nope">
-    <button type="button" onclick="addStock()" style="flex:0 0 80px;">新增</button>
-  </div>
-</div>
+
+<button type="button" class="btn-save" onclick="openAddModal()" style="color: var(--accent); margin-bottom: 0;">＋ 新增持股</button>
+
 <div class="idx-scroll-container" id="idxScrollContainer">
   <div class="idx-card-box">
     <div class="idx-box-name">臺灣加權指數</div>
@@ -271,7 +262,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <div id="listBody"></div>
   </div>
 </div>
-<div id="emptyState" style="display:none;margin:8px 10px;padding:24px 14px;text-align:center;color:var(--t-muted);font-weight:600;font-size:16px">尚無持股，請在上方新增</div>
+<div id="emptyState" style="display:none;margin:8px 10px;padding:24px 14px;text-align:center;color:var(--t-muted);font-weight:600;font-size:16px">尚無持股，請點擊「＋ 新增持股」</div>
 <div class="summary" id="summaryArea" style="display:none;">
   <div onclick="toggleSummary()" style="cursor:pointer;">
     <div class="sum-row" style="padding-bottom:0;">
@@ -296,6 +287,26 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   <div id="historyBody"><div class="hist-empty">尚無記錄</div></div>
 </div>
 <div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="addModalOverlay">
+  <div class="modal">
+    <h2>新增持股</h2>
+    <label>股票代號</label>
+    <input type="text" id="symInput" placeholder="代號" maxlength="10" autocomplete="nope" style="text-transform:uppercase; margin-bottom: 10px;">
+    
+    <label>數量</label>
+    <div style="display:flex; gap:10px; margin-bottom: 10px;">
+      <input type="number" id="qtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" autocomplete="nope" style="flex:1;">
+      <select id="unitSelect" style="flex:0 0 80px;"><option value="張">張</option><option value="股">股</option></select>
+    </div>
+    
+    <label>買入均價 (選填計算損益)</label>
+    <input type="number" id="buyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="nope" style="margin-bottom: 20px;">
+    
+    <button type="button" class="modal-close" onclick="addStock()" style="background:var(--accent); color:#fff; text-shadow:none; margin-top:0;">確認新增</button>
+    <button type="button" class="modal-close" onclick="closeAddModal()" style="margin-top:10px;">取消</button>
+  </div>
+</div>
 
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal fullscreen-modal">
@@ -346,7 +357,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.12.2 (股票簡稱滿版無縫排版)</div>
+    <div class="v-box">核心版本：V4.13.0 (新增持股彈窗化)</div>
     <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
   </div>
 </div>
@@ -439,7 +450,7 @@ const STOCK_DICT = {
   '2330': '台積電', '2317': '鴻海', '2454': '聯發科', '2308': '台達電', '2382': '廣達', '2881': '富邦金', '2882': '國泰金'
 };
 
-/* ========================================================= 🔧 API 管理引擎 V4.12.2 ========================================================= */
+/* ========================================================= 🔧 API 管理引擎 ========================================================= */
 const PROXY_LIST = [
   'https://api.allorigins.win/raw?url=',
   'https://corsproxy.io/?',
@@ -1063,6 +1074,14 @@ function toggleSummary(e) {
   else { details.style.display = 'none'; toggleBtn.style.display = 'block'; }
 }
 
+function openAddModal() {
+  document.getElementById('addModalOverlay').classList.add('show');
+  setTimeout(() => document.getElementById('symInput').focus(), 100);
+}
+function closeAddModal() {
+  document.getElementById('addModalOverlay').classList.remove('show');
+}
+
 function addStock(){
   let sym=document.getElementById('symInput').value.trim().toUpperCase();
   sym = sym.replace(/[^A-Z0-9]/g, '');
@@ -1081,7 +1100,9 @@ function addStock(){
   currentStocks.push({id,symbol:sym, name: stockName, displayQty:qty,displayUnit:unit,buyPrice:buyPrice,shares:unit==='張'?qty*1000:qty,price:null,change:null,changePercent:null});
   saveHoldings();renderAll();
   document.getElementById('symInput').value=''; document.getElementById('qtyInput').value=''; document.getElementById('buyPriceInput').value='';
-  showToast('已新增 '+sym); forceRefresh();
+  showToast('已新增 '+sym); 
+  closeAddModal();
+  forceRefresh();
 }
 
 function deleteStock(id){
@@ -1325,7 +1346,7 @@ function importData(event) {
 }
 
 // ==========================================
-// 💡 V4.12.2 獨立背景心跳引擎 (Web Worker)
+// 💡 V4.13.0 獨立背景心跳引擎 (Web Worker)
 // ==========================================
 let lastRefreshTime = 0;
 let lastSuccessTime = 0;
@@ -1400,6 +1421,9 @@ document.addEventListener('visibilitychange', () => {
 document.getElementById('symInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); } });
 document.getElementById('qtyInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('buyPriceInput').focus(); } });
 document.getElementById('buyPriceInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); addStock(); } });
+
+// 新增的燈箱關閉監聽
+document.getElementById('addModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
@@ -1413,7 +1437,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-console.log('股票庫存管理 V4.12.2 已啟動');
+console.log('股票庫存管理 V4.13.0 已啟動');
 </script>
 </body>
 </html>
