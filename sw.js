@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stock-portfolio-v4.13.5'; // 同步升級至 V4.13.5
+const CACHE_NAME = 'stock-portfolio-v4.13.6'; // 同步升級至 V4.13.6
 const urlsToCache = [
   './',
   './index.html',

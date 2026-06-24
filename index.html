@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-// 強制刷新快取：升級至 V4.13.5 (加大頂部按鈕與字體)
-const APP_VER = '4.13.5';
+// 強制刷新快取：升級至 V4.13.6 (國旗、圖示與並排按鈕優化)
+const APP_VER = '4.13.6';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -22,37 +22,31 @@ if(localStorage.getItem('tw_app_version') !== APP_VER) {
 <style>
 /* ========================================================= 🚀 核心變數引擎 ========================================================= */
 :root { 
-  /* 預設淺色：背景更白亮，暗部陰影加深，增加立體下沉感 */
   --bg: #ebf0f6; --s-light: #ffffff; --s-dark: #98a7bd; --t-main: #2d3436; --t-muted: #6b7280;
   --up: #d93025; --down: #188038; --engrave-l: rgba(255,255,255,0.9); --engrave-d: rgba(0,0,0,0.18);
   --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.08); --accent: #1a73e8;
 }
 body.tech { 
-  /* 深色科技：底色與暗部提亮，減輕沉重感，文字微調更亮以維持對比 */
   --bg: #383e4a; --s-light: #464d5c; --s-dark: #2a2e38; --t-main: #f0f4f8; --t-muted: #a0aec0; 
   --up: #ff6b6b; --down: #51cf66; --engrave-l: rgba(255,255,255,0.08); --engrave-d: rgba(0,0,0,0.4); 
   --protrude-l: rgba(255,255,255,0.15); --protrude-d: rgba(0,0,0,0.25); --accent: #58a6ff; 
 }
 body.blue-light { 
-  /* 淺藍：背景變淡雅，陰影顏色加深 */
   --bg: #eef5fb; --s-light: #ffffff; --s-dark: #a3b7cc; --t-main: #102a43; --t-muted: #486581; 
   --up: #e53e3e; --down: #2f855a; --engrave-l: rgba(255,255,255,0.9); --engrave-d: rgba(0,0,0,0.18); 
   --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.08); --accent: #2b6cb0; 
 }
 body.purple-light { 
-  /* 淺紫：背景更偏粉白，暗部輪廓更深邃 */
   --bg: #f4f1fa; --s-light: #ffffff; --s-dark: #bab0cd; --t-main: #322659; --t-muted: #6b5b8e; 
   --up: #d53f8c; --down: #2f855a; --engrave-l: rgba(255,255,255,0.9); --engrave-d: rgba(0,0,0,0.18); 
   --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.08); --accent: #6b46c1; 
 }
 body.pink { 
-  /* 櫻花粉：背景提升明度至透白粉，底部陰影稍微加重 */
   --bg: #fcf1f3; --s-light: #ffffff; --s-dark: #ccaebb; --t-main: #4a123a; --t-muted: #9b2c2c; 
   --up: #e53e3e; --down: #38a169; --engrave-l: rgba(255,255,255,0.8); --engrave-d: rgba(0,0,0,0.15); 
   --protrude-l: rgba(255,255,255,0.9); --protrude-d: rgba(0,0,0,0.07); --accent: #d63384; 
 }
 body.cement { 
-  /* 水泥灰（偏深）：整體明度提升，看起來更像高質感的淺灰清水模 */
   --bg: #b6bbc4; --s-light: #d1d6e0; --s-dark: #989da6; --t-main: #22252a; --t-muted: #4a5059; 
   --up: #c62828; --down: #1b5e20; --engrave-l: rgba(255,255,255,0.7); --engrave-d: rgba(0,0,0,0.25); 
   --protrude-l: rgba(255,255,255,0.7); --protrude-d: rgba(0,0,0,0.12); --accent: #111111; 
@@ -113,9 +107,8 @@ button:active, .tab-btn.active {
 }
 .tab-btn { flex: 1; padding: 10px 6px; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* 💡 加大頂部按鈕樣式 */
 .btn-theme, .btn-adv, .btn-add-hdr { padding: 10px 14px; font-size: 16px; white-space: nowrap; font-weight: 700; }
-.btn-add-hdr { color: var(--up); text-shadow: none; } /* 紅字新增持股 */
+.btn-add-hdr { color: var(--up); text-shadow: none; } 
 
 .form-row button { font-size: 16px; letter-spacing: 2px; padding-left: 18px; }
 .btn-save { width: calc(100% - 20px); padding: 14px; font-size: 17px; margin: 8px 10px; }
@@ -177,7 +170,7 @@ button:active, .tab-btn.active {
 
 .modal h2 { font-size: 20px; margin-bottom: 16px; text-align: center; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
 .modal label { display: block; font-size: 15px; color: var(--t-muted); margin: 12px 0 6px; font-weight: 600; text-align: left; }
-.modal-close { margin-top: 20px; width: 100%; padding: 14px; font-size: 17px; }
+.modal-close { width: 100%; padding: 14px; font-size: 17px; }
 .key-status { font-size: 12px; padding: 4px 10px; border-radius: 12px; display: inline-block; margin-top: 6px; font-weight: 600; }
 .key-status.ok { background: var(--bg); box-shadow: inset 2px 2px 4px var(--s-dark), inset -2px -2px 4px var(--s-light); color: var(--up); border: 1px solid var(--protrude-l); }
 .key-status.none { background: var(--bg); box-shadow: inset 2px 2px 4px var(--s-dark), inset -2px -2px 4px var(--s-light); color: var(--t-muted); border: 1px solid var(--protrude-l); }
@@ -280,7 +273,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 <div class="header">
   <h1>股票庫存管理</h1>
   <div class="hdr-right">
-    <button type="button" class="btn-add-hdr" onclick="openAddModal()">新增持股</button>
+    <button type="button" class="btn-add-hdr" onclick="openAddModal()">+新增</button>
     <button type="button" class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙</button>
     <button type="button" class="btn-adv" onclick="openModal()">進階</button>
   </div>
@@ -289,7 +282,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 
 <div class="idx-scroll-container" id="idxScrollContainer">
   <div class="idx-card-box">
-    <div class="idx-box-name">臺灣加權指數</div>
+    <div class="idx-box-name">🇹🇼 臺灣加權指數</div>
     <div class="idx-box-price" id="idxPrice">—</div>
     <div class="idx-box-change-row">
       <span id="idxChange"></span>
@@ -306,7 +299,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <div id="listBody"></div>
   </div>
 </div>
-<div id="emptyState" style="display:none;margin:8px 10px;padding:24px 14px;text-align:center;color:var(--t-muted);font-weight:600;font-size:16px">尚無持股，請點擊上方「新增持股」</div>
+<div id="emptyState" style="display:none;margin:8px 10px;padding:24px 14px;text-align:center;color:var(--t-muted);font-weight:600;font-size:16px">尚無持股，請點擊上方「+新增」</div>
 <div class="summary" id="summaryArea" style="display:none;">
   <div onclick="toggleSummary()" style="cursor:pointer;">
     <div class="sum-row" style="padding-bottom:0;">
@@ -324,7 +317,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   </div>
 </div>
 <div class="summary-btn-box">
-  <button type="button" class="btn-save" id="saveArea" style="display:none;" onclick="saveDailyPnl()">存儲今日損益總計</button>
+  <button type="button" class="btn-save" id="saveArea" style="display:none;" onclick="saveDailyPnl()">💾 存儲今日損益總計</button>
 </div>
 <div class="history">
   <div class="card-title" style="margin:0 0 4px">歷史記錄</div>
@@ -345,10 +338,12 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     </div>
     
     <label>買入均價 (選填計算損益)</label>
-    <input type="number" id="buyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="off" style="margin-bottom: 20px;">
+    <input type="number" id="buyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="off" style="margin-bottom: 10px;">
     
-    <button type="button" class="modal-close" onclick="addStock()" style="background:var(--accent); color:#fff; text-shadow:none; margin-top:0;">確認新增</button>
-    <button type="button" class="modal-close" onclick="closeAddModal()" style="margin-bottom:10px;">取消</button>
+    <div style="display: flex; gap: 12px; margin-top: 20px;">
+      <button type="button" class="modal-close" onclick="addStock()" style="flex:1; background:var(--accent); color:#fff; text-shadow:none; margin:0;">確認新增</button>
+      <button type="button" class="modal-close" onclick="closeAddModal()" style="flex:1; margin:0;">取消</button>
+    </div>
   </div>
 </div>
 
@@ -401,8 +396,8 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.13.5 (頂部按鈕全面加大)</div>
-    <button type="button" class="modal-close" onclick="saveAndCloseModal()">儲存設定並關閉</button>
+    <div class="v-box">核心版本：V4.13.6 (優化圖示與按鈕排列)</div>
+    <button type="button" class="modal-close" style="margin-top: 24px;" onclick="saveAndCloseModal()">💾 儲存設定並關閉</button>
   </div>
 </div>
 
@@ -412,12 +407,12 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <div class="card" style="margin: 0 0 16px 0; padding: 10px; box-shadow: inset 3px 3px 6px var(--s-dark), inset -3px -3px 6px var(--s-light); border-bottom:1px solid var(--protrude-l); border-right:1px solid var(--protrude-l);">
       <div class="card-title" style="font-size:14px; margin-bottom:6px;">新增自選指數</div>
       <div class="form-row">
-        <input type="text" id="newIdxSymbol" placeholder="代號 (如: ^SOX, TSLA)" style="font-size:14px; padding:8px;">
-        <input type="text" id="newIdxName" placeholder="自訂名稱 (如: 費半)" style="font-size:14px; padding:8px;">
+        <input type="text" id="newIdxSymbol" placeholder="代號 (如: ^SOX)" style="font-size:14px; padding:8px;">
+        <input type="text" id="newIdxName" placeholder="自訂名稱 (含國旗)" style="font-size:14px; padding:8px;">
         <button type="button" onclick="addForeignIdx()" style="flex:0 0 44px; padding:0; font-size:20px; color:var(--accent); font-weight:bold;">＋</button>
       </div>
       <div style="font-size:11px; color:var(--t-muted); margin-top:6px; text-align:left; line-height:1.4;">
-        * 提示：美股大盤指數開頭通常為 ^ (例如 ^DJI, ^IXIC, ^GSPC)，個股或 ADR 直接輸入代號即可。
+        * 提示：可自行使用手機輸入法國旗符號。美股大盤指數開頭通常為 ^ (例如 ^DJI, ^IXIC)。
       </div>
     </div>
     <label>目前自選列表</label>
@@ -477,9 +472,12 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <label>單位</label>
     <select id="editUnitSelect"><option value="張">張</option><option value="股">股</option></select>
     <label>買入均價 (留空或不填則不計算總損益)</label>
-    <input type="number" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="off">
-    <button type="button" class="modal-close" onclick="saveEditStock()" style="background:var(--accent); color:#fff; text-shadow:none;">確認儲存</button>
-    <button type="button" class="modal-close" onclick="closeEditModal()" style="margin-top:10px;">取消</button>
+    <input type="number" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="off" style="margin-bottom: 10px;">
+    
+    <div style="display: flex; gap: 12px; margin-top: 20px;">
+      <button type="button" class="modal-close" onclick="saveEditStock()" style="flex:1; background:var(--accent); color:#fff; text-shadow:none; margin:0;">💾 確認儲存</button>
+      <button type="button" class="modal-close" onclick="closeEditModal()" style="flex:1; margin:0;">取消</button>
+    </div>
   </div>
 </div>
 
@@ -572,15 +570,15 @@ function toggleKeyVisibility(inputId, btnId) {
 
 let cfWorkerUrl = 'https://yahoo-index-proxy.denis0521.workers.dev';
 
-// 國外指數動態管理與初始配置設定
+// 國外指數動態管理與初始配置設定 (加上國旗)
 const DEFAULT_INDICES = [
-  { symbol: '^DJI', name: '道瓊工業指數' },
-  { symbol: '^IXIC', name: '那斯達克指數' },
-  { symbol: '^GSPC', name: '標普500指數' },
-  { symbol: '^SOX', name: '費城半導體指數' },
-  { symbol: 'TSM', name: '台積電 ADR' },
-  { symbol: '^N225', name: '日經225指數' },
-  { symbol: '^KS11', name: '韓國綜合指數' }
+  { symbol: '^DJI', name: '🇺🇸 道瓊工業指數' },
+  { symbol: '^IXIC', name: '🇺🇸 那斯達克指數' },
+  { symbol: '^GSPC', name: '🇺🇸 標普500指數' },
+  { symbol: '^SOX', name: '🇺🇸 費城半導體指數' },
+  { symbol: 'TSM', name: '🇹🇼 台積電 ADR' },
+  { symbol: '^N225', name: '🇯🇵 日經225指數' },
+  { symbol: '^KS11', name: '🇰🇷 韓國綜合指數' }
 ];
 
 let AVAILABLE_INDICES = [];
@@ -591,6 +589,19 @@ function loadForeignIndicesConfig() {
   if (stored) {
     try {
       AVAILABLE_INDICES = JSON.parse(stored);
+      // 自動升級無國旗舊名為帶有國旗的新名稱
+      let updated = false;
+      AVAILABLE_INDICES = AVAILABLE_INDICES.map(idx => {
+        if (idx.name === '道瓊工業指數') { idx.name = '🇺🇸 道瓊工業指數'; updated = true; }
+        if (idx.name === '那斯達克指數') { idx.name = '🇺🇸 那斯達克指數'; updated = true; }
+        if (idx.name === '標普500指數') { idx.name = '🇺🇸 標普500指數'; updated = true; }
+        if (idx.name === '費城半導體指數') { idx.name = '🇺🇸 費城半導體指數'; updated = true; }
+        if (idx.name === '台積電 ADR') { idx.name = '🇹🇼 台積電 ADR'; updated = true; }
+        if (idx.name === '日經225指數') { idx.name = '🇯🇵 日經225指數'; updated = true; }
+        if (idx.name === '韓國綜合指數') { idx.name = '🇰🇷 韓國綜合指數'; updated = true; }
+        return idx;
+      });
+      if (updated) localStorage.setItem('tw_custom_foreign_indices', JSON.stringify(AVAILABLE_INDICES));
     } catch(e) {
       AVAILABLE_INDICES = [...DEFAULT_INDICES];
     }
@@ -920,12 +931,12 @@ async function refreshPrices(){
     showToast('目前處於離線狀態，顯示快取資料'); 
     const twNameBox = document.querySelector('#idxScrollContainer .idx-card-box:first-child .idx-box-name');
     if (twNameBox && !twNameBox.innerHTML.includes('(離線)')) {
-      twNameBox.innerHTML = `臺灣加權指數<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>`;
+      twNameBox.innerHTML = `🇹🇼 臺灣加權指數<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>`;
     }
     return;
   } else {
     const twNameBox = document.querySelector('#idxScrollContainer .idx-card-box:first-child .idx-box-name');
-    if (twNameBox) twNameBox.innerHTML = `臺灣加權指數`;
+    if (twNameBox) twNameBox.innerHTML = `🇹🇼 臺灣加權指數`;
   }
 
   const idxR = fetchWeightedIndex();
@@ -1395,7 +1406,7 @@ function importData(event) {
 }
 
 // ==========================================
-// 💡 V4.13.5 獨立背景心跳引擎 (Web Worker)
+// 💡 V4.13.6 獨立背景心跳引擎 (Web Worker)
 // ==========================================
 let lastRefreshTime = 0;
 let lastSuccessTime = 0;
@@ -1486,7 +1497,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-console.log('股票庫存管理 V4.13.5 已啟動');
+console.log('股票庫存管理 V4.13.6 已啟動');
 </script>
 </body>
 </html>
