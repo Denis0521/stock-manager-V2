@@ -12,7 +12,7 @@
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
 // 強制刷新快取：升級至 V4.14.0 (國旗、圖示與並排按鈕優化)
-const APP_VER = '4.14.1';
+const APP_VER = '4.15.0';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -295,16 +295,383 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   .manual-content h3 { font-size: 20px; }
   .btn-manual-row { font-size: 17px; padding: 12px 10px; }
 }
+
+/* ========================================================= ✨ V4.15.0 視覺升級：圖示、按鈕、轉場動畫 ========================================================= */
+
+/* Font Awesome 圖示對齊 */
+button i, .tab-btn i { margin-right: 4px; font-size: 0.9em; }
+button i:only-child, .tab-btn i:only-child { margin-right: 0; }
+
+/* 主要按鈕樣式 */
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent)) !important;
+  color: #fff !important;
+  text-shadow: none !important;
+  border: none !important;
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease;
+}
+.btn-primary:hover::after {
+  left: 100%;
+}
+.btn-primary:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3), var(--shadow-strong) !important;
+}
+.btn-primary:active {
+  transform: translateY(0) !important;
+}
+
+/* 小圖示按鈕 */
+.btn-small-icon {
+  padding: 4px 8px;
+  font-size: 12px;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  color: var(--accent);
+  background: var(--bg);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.btn-small-icon:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-strong);
+}
+.btn-small-icon:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-inset);
+}
+
+/* 新增按鈕圖示 */
+.btn-icon-add {
+  flex: 0 0 44px;
+  padding: 0;
+  font-size: 16px;
+  color: var(--accent);
+  font-weight: bold;
+  background: var(--bg);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-icon-add:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-strong);
+  color: var(--up);
+}
+.btn-icon-add:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-inset);
+}
+
+/* ========== 🎬 下拉選單與收起選單慢速捲起與放下動畫 ========== */
+#summaryDetails {
+  display: block;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.4s ease 0.1s,
+              padding 0.4s ease;
+  padding: 0 4px;
+}
+#summaryDetails.show {
+  max-height: 300px;
+  opacity: 1;
+  padding: 4px 4px;
+}
+
+/* 下拉箭頭旋轉動畫 */
+#sumToggleBtn i {
+  display: inline-block;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#sumToggleBtn.rotated i {
+  transform: rotate(180deg);
+}
+
+/* ========== 🎬 Modal 轉場動畫 ========== */
+.modal-overlay {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+.modal-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+.modal {
+  transform: translateY(30px) scale(0.95);
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+              opacity 0.35s ease;
+}
+.modal-overlay.show .modal {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+/* 全螢幕 modal 特殊轉場 */
+.modal.fullscreen-modal {
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.modal-overlay.show .modal.fullscreen-modal {
+  transform: translateX(0);
+}
+
+/* ========== 🎬 列表項目進入動畫 ========== */
+@keyframes slideInRow {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.srow {
+  animation: slideInRow 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.srow:nth-child(1) { animation-delay: 0.05s; }
+.srow:nth-child(2) { animation-delay: 0.1s; }
+.srow:nth-child(3) { animation-delay: 0.15s; }
+.srow:nth-child(4) { animation-delay: 0.2s; }
+.srow:nth-child(5) { animation-delay: 0.25s; }
+.srow:nth-child(6) { animation-delay: 0.3s; }
+.srow:nth-child(7) { animation-delay: 0.35s; }
+.srow:nth-child(8) { animation-delay: 0.4s; }
+
+/* ========== 🎬 Toast 動畫升級 ========== */
+.toast {
+  transform: translateX(-50%) translateY(20px);
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ========== 🎬 Tab 切換動畫 ========== */
+.tab-btn {
+  position: relative;
+  overflow: hidden;
+}
+.tab-btn::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 3px 3px 0 0;
+  transition: width 0.3s ease, left 0.3s ease;
+}
+.tab-btn.active::before {
+  width: 60%;
+  left: 20%;
+}
+
+/* ========== 🎬 卡片 Hover 效果 ========== */
+.idx-card-box {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.idx-card-box:hover {
+  transform: translateY(-2px);
+}
+
+/* ========== 🎬 歷史記錄項目動畫 ========== */
+@keyframes histSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.hist-item {
+  animation: histSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ========== 🎬 按鈕點擊波紋效果 ========== */
+@keyframes ripple {
+  0% { transform: scale(0); opacity: 0.5; }
+  100% { transform: scale(4); opacity: 0; }
+}
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+.btn-ripple::after {
+  content: '';
+  position: absolute;
+  width: 20px; height: 20px;
+  background: rgba(255,255,255,0.4);
+  border-radius: 50%;
+  transform: scale(0);
+  pointer-events: none;
+}
+.btn-ripple:active::after {
+  animation: ripple 0.6s ease-out;
+}
+
+/* ========== 🎬 輸入框 Focus 動畫 ========== */
+input:focus, select:focus {
+  box-shadow: var(--shadow-inset), 0 0 0 2px var(--accent);
+  border-color: var(--accent);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+/* ========== 🎬 滾動條美化 ========== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--s-dark);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--t-muted);
+}
+
+/* ========== 🎬 空狀態動畫 ========== */
+@keyframes floatEmpty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+#emptyState {
+  animation: floatEmpty 3s ease-in-out infinite;
+}
+
+/* ========== 🎬 載入動畫 ========== */
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+#idxPrice:empty::before,
+#idxChange:empty::before {
+  content: '—';
+  animation: pulseGlow 1.5s ease-in-out infinite;
+}
+
+/* ========== 操作按鈕美化 ========== */
+.srow .act button {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 14px;
+  transition: all 0.25s ease;
+}
+.srow .act button:hover {
+  transform: scale(1.1);
+}
+.srow .act button:active {
+  transform: scale(0.95);
+}
+.srow .act button.del-btn {
+  color: var(--up);
+}
+.srow .act button.del-btn:hover {
+  background: rgba(220, 38, 38, 0.1);
+}
+
+/* ========== 分頁標籤美化 ========== */
+.tabs-bar {
+  gap: 6px;
+}
+.tab-btn {
+  border-radius: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* ========== 摘要區域美化 ========== */
+.sum-toggle-btn {
+  transition: all 0.3s ease;
+  padding: 8px 0;
+  border-radius: 8px;
+}
+.sum-toggle-btn:hover {
+  background: var(--bg);
+  box-shadow: var(--shadow-inset);
+}
+
+/* ========== 指數卡片美化 ========== */
+.idx-card-box {
+  padding: 10px 18px;
+  border-radius: 14px;
+  margin: 0 4px;
+}
+.idx-box-name {
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+.idx-box-price {
+  font-size: 22px;
+  letter-spacing: -0.5px;
+}
+
+/* ========== 歷史記錄美化 ========== */
+.hist-item {
+  border-radius: 14px;
+  margin-top: 10px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.hist-item:hover {
+  transform: translateX(4px);
+}
+
+/* ========== 表頭美化 ========== */
+.list-header {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+/* ========== 響應式優化 ========== */
+@media (max-width: 360px) {
+  .header h1 { font-size: 16px; }
+  .btn-add-hdr, .btn-adv { font-size: 13px; padding: 8px 10px; }
+  button i { margin-right: 2px; }
+}
+
 </style>
 <link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
 <div class="header">
   <h1>股票庫存管理</h1>
   <div class="hdr-right">
-    <button type="button" class="btn-add-hdr" onclick="openAddModal()">+新增</button>
+    <button type="button" class="btn-add-hdr" onclick="openAddModal()"><i class="fas fa-plus-circle"></i> 新增</button>
     <button type="button" class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙</button>
-    <button type="button" class="btn-adv" onclick="openModal()">進階</button>
+    <button type="button" class="btn-adv" onclick="openModal()"><i class="fas fa-cog"></i> 進階</button>
   </div>
 </div>
 <div class="tabs-bar" id="tabsBarContainer"></div>
@@ -335,18 +702,18 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       <span class="lab">今日損益總計</span>
       <span class="val" id="totalPnl">+0</span>
     </div>
-    <div class="sum-toggle-btn" id="sumToggleBtn">▼ 下拉選單</div>
+    <div class="sum-toggle-btn" id="sumToggleBtn"><i class="fas fa-chevron-down"></i> 下拉選單</div>
   </div>
   <div id="summaryDetails" style="display:none;">
     <div class="sum-divider" style="margin-top:10px;"></div>
     <div class="sum-row"><span class="lab">總未實現損益 (ROI)</span><span class="val" id="totalUnrealized">—</span></div>
     <div class="sum-divider"></div>
     <div class="sum-row" style="padding-bottom:0;"><span class="lab">持股資產總計</span><span class="val" id="totalAsset">0</span></div>
-    <div class="sum-toggle-btn" style="margin-top:10px;" onclick="toggleSummary(event)">▲ 收起選單</div>
+    <div class="sum-toggle-btn" style="margin-top:10px;" onclick="toggleSummary(event)"><i class="fas fa-chevron-up"></i> 收起選單</div>
   </div>
 </div>
 <div class="summary-btn-box">
-  <button type="button" class="btn-save" id="saveArea" style="display:none;" onclick="saveDailyPnl()">💾 存儲今日損益總計</button>
+  <button type="button" class="btn-save" id="saveArea" style="display:none;" onclick="saveDailyPnl()"><i class="fas fa-archive"></i> 存儲今日損益總計</button>
 </div>
 <div class="history">
   <div class="card-title" style="margin:0 0 4px">歷史記錄</div>
@@ -370,8 +737,8 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <input type="number" id="buyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="off" style="margin-bottom: 10px;">
     
     <div style="display: flex; gap: 12px; margin-top: 20px;">
-      <button type="button" class="modal-close" onclick="addStock()" style="flex:1; background:var(--accent); color:#fff; text-shadow:none; margin:0;">確認新增</button>
-      <button type="button" class="modal-close" onclick="closeAddModal()" style="flex:1; margin:0;">取消</button>
+      <button type="button" class="modal-close btn-primary" onclick="addStock()" style="flex:1; margin:0;"><i class="fas fa-check"></i> 確認新增</button>
+      <button type="button" class="modal-close" onclick="closeAddModal()" style="flex:1; margin:0;"><i class="fas fa-times"></i> 取消</button>
     </div>
   </div>
 </div>
@@ -381,7 +748,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <button type="button" class="btn-close-icon" onclick="closeModal()">✕</button>
     <h2>進階設定</h2>
     <div class="settings-row">
-      <button type="button" class="btn-manual-row" onclick="openManual()">📖 使用說明</button>
+      <button type="button" class="btn-manual-row" onclick="openManual()"><i class="fas fa-book-open"></i> 使用說明</button>
       <div class="tab-count-wrapper">
         <div class="tab-count-label">分頁數量</div>
         <select id="tabCountSelect">
@@ -412,7 +779,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       <div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:12px;box-shadow:var(--shadow-inset); border:1px solid var(--border-light);">
         <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--t-muted); margin-bottom:8px; padding:0 4px;">
           <span>📊 今日 API 使用量</span>
-          <button type="button" onclick="openForeignIdxModal()" style="padding:4px 8px; font-size:12px; box-shadow:var(--shadow-soft); border:1px solid var(--border-light); border-radius:6px; color:var(--accent);">⚙️ 設定國外指數</button>
+          <button type="button" onclick="openForeignIdxModal()" class="btn-small-icon"><i class="fas fa-globe"></i> 設定國外指數</button>
         </div>
         <div id="apiStatsBox"></div>
       </div>
@@ -420,13 +787,13 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <div class="backup-box">
       <div class="backup-title">資料備份與還原</div>
       <div class="backup-btns">
-        <button type="button" class="btn-backup" onclick="exportData()">📥 匯出備份</button>
-        <button type="button" class="btn-backup" onclick="triggerImport()">📤 匯入還原</button>
+        <button type="button" class="btn-backup" onclick="exportData()"><i class="fas fa-download"></i> 匯出備份</button>
+        <button type="button" class="btn-backup" onclick="triggerImport()"><i class="fas fa-upload"></i> 匯入還原</button>
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
     <div class="v-box">核心版本：V4.14.0 (優化圖示與按鈕排列)</div>
-    <button type="button" class="modal-close" style="margin-top: 24px;" onclick="saveAndCloseModal()">💾 儲存設定並關閉</button>
+    <button type="button" class="modal-close btn-primary" style="margin-top: 24px;" onclick="saveAndCloseModal()"><i class="fas fa-check-circle"></i> 儲存設定並關閉</button>
   </div>
 </div>
 
@@ -438,7 +805,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       <div class="form-row">
         <input type="text" id="newIdxSymbol" placeholder="代號 (如: ^SOX)" style="font-size:14px; padding:8px;">
         <input type="text" id="newIdxName" placeholder="自訂名稱 (含國旗)" style="font-size:14px; padding:8px;">
-        <button type="button" onclick="addForeignIdx()" style="flex:0 0 44px; padding:0; font-size:20px; color:var(--accent); font-weight:bold;">＋</button>
+        <button type="button" onclick="addForeignIdx()" class="btn-icon-add"><i class="fas fa-plus"></i></button>
       </div>
       <div style="font-size:11px; color:var(--t-muted); margin-top:6px; text-align:left; line-height:1.4;">
         * 提示：可自行使用手機輸入法國旗符號。美股大盤指數開頭通常為 ^ (例如 ^DJI, ^IXIC)。
@@ -446,7 +813,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     </div>
     <label>目前自選列表</label>
     <div id="foreignIdxListContainer" style="max-height: 250px; overflow-y: auto; margin-bottom: 16px; padding-right: 4px;"></div>
-    <button type="button" class="modal-close" onclick="closeForeignIdxModal()">關閉並重新整理</button>
+    <button type="button" class="modal-close" onclick="closeForeignIdxModal()"><i class="fas fa-sync-alt"></i> 關閉並重新整理</button>
   </div>
 </div>
 
@@ -482,7 +849,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       <h3>五、強制喚醒技巧</h3>
       <p>若打開 APP 時報價未即時跳動，只要<strong>手指輕觸螢幕滑動或點擊任意空白處</strong>，系統內部的「心跳引擎」便會被瞬間喚醒，強迫更新最新報價！</p>
     </div>
-    <button type="button" class="modal-close" onclick="closeManual()">關閉說明</button>
+    <button type="button" class="modal-close" onclick="closeManual()"><i class="fas fa-times"></i> 關閉說明</button>
   </div>
 </div>
 
@@ -504,8 +871,8 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <input type="number" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="off" style="margin-bottom: 10px;">
     
     <div style="display: flex; gap: 12px; margin-top: 20px;">
-      <button type="button" class="modal-close" onclick="saveEditStock()" style="flex:1; background:var(--accent); color:#fff; text-shadow:none; margin:0;">💾 確認儲存</button>
-      <button type="button" class="modal-close" onclick="closeEditModal()" style="flex:1; margin:0;">取消</button>
+      <button type="button" class="modal-close btn-primary" onclick="saveEditStock()" style="flex:1; margin:0;"><i class="fas fa-save"></i> 確認儲存</button>
+      <button type="button" class="modal-close" onclick="closeEditModal()" style="flex:1; margin:0;"><i class="fas fa-times"></i> 取消</button>
     </div>
   </div>
 </div>
@@ -1156,9 +1523,17 @@ function updateSummary(){
 
 function toggleSummary(e) {
   if(e) e.stopPropagation();
-  const details = document.getElementById('summaryDetails'); const toggleBtn = document.getElementById('sumToggleBtn');
-  if (details.style.display === 'none') { details.style.display = 'block'; toggleBtn.style.display = 'none'; }
-  else { details.style.display = 'none'; toggleBtn.style.display = 'block'; }
+  const details = document.getElementById('summaryDetails');
+  const toggleBtn = document.getElementById('sumToggleBtn');
+  const isHidden = !details.classList.contains('show');
+
+  if (isHidden) {
+    details.classList.add('show');
+    toggleBtn.style.display = 'none';
+  } else {
+    details.classList.remove('show');
+    setTimeout(() => { toggleBtn.style.display = 'block'; }, 400);
+  }
 }
 
 function openAddModal() {
