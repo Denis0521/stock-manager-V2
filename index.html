@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="股票庫存管理">
-<meta name="theme-color" id="themeColorMeta" content="#e0e5ec">
+<meta name="theme-color" id="themeColorMeta" content="#f0f2f6">
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
@@ -20,11 +20,20 @@ if(localStorage.getItem('tw_app_version') !== APP_VER) {
 }
 </script>
 <style>
-/* ========================================================= 🚀 核心變數引擎 ========================================================= */
+/* ========================================================= 🚀 核心變數引擎（柔光微調配色） ========================================================= */
 :root { 
-  --bg: #ebf0f6; --s-light: #ffffff; --s-dark: #98a7bd; --t-main: #2d3436; --t-muted: #6b7280;
-  --up: #d93025; --down: #188038; --engrave-l: rgba(255,255,255,0.9); --engrave-d: rgba(0,0,0,0.18);
-  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.08); --accent: #1a73e8;
+  --bg: #f0f2f6;
+  --s-light: #ffffff;
+  --s-dark: #9aabb8;
+  --t-main: #2c3e50;
+  --t-muted: #7f8c8d;
+  --up: #e74c3c;
+  --down: #27ae60;
+  --engrave-l: rgba(255,255,255,0.85);
+  --engrave-d: rgba(0,0,0,0.16);
+  --protrude-l: rgba(255,255,255,1);
+  --protrude-d: rgba(0,0,0,0.07);
+  --accent: #3498db;
 }
 body.tech { 
   --bg: #383e4a; --s-light: #464d5c; --s-dark: #2a2e38; --t-main: #f0f4f8; --t-muted: #a0aec0; 
@@ -677,7 +686,7 @@ function applyThemeText(t){
   else if(t==='purple-light'){ body.classList.add('purple-light'); themeBtn.textContent='🍇'; metaTheme.content='#ece8f3'; }
   else if(t==='pink'){ body.classList.add('pink'); themeBtn.textContent='🌸'; metaTheme.content='#f3e6e8'; }
   else if(t==='cement'){ body.classList.add('cement'); themeBtn.textContent='🏢'; metaTheme.content='#a3a8b0'; }
-  else { themeBtn.textContent='🌙'; metaTheme.content='#e0e5ec'; }
+  else { themeBtn.textContent='🌙'; metaTheme.content='#f0f2f6'; }
 }
 
 function saveHoldings(){try{localStorage.setItem(getStockKey(currentTab),JSON.stringify(tabStocks[currentTab]));}catch(e){}}
