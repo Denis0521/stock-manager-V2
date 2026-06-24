@@ -1028,4 +1028,511 @@ async function refreshPrices(){
   }
   
   if (hasUpdates) {
-    for (let i = 0; i
+    for (let i = 0; i < 5; i++) {
+      try { localStorage.setItem(getStockKey(i), JSON.stringify(tabStocks[i])); } catch(e) {}
+    }
+  }
+  
+  updateSummary();
+  adjustPollingInterval();
+  renderApiStats();
+}
+
+function adjustPollingInterval() {
+  const kr = getKeyRotator(); const keyCount = kr.count; 
+  let newInterval = 20000;
+  
+  if (!isAnyMarketOpen()) { newInterval = 60000; } 
+  else if (keyCount === 2) { newInterval = 10000; }
+  
+  if (newInterval !== currentInterval) { 
+    currentInterval = newInterval; 
+    if(window.heartbeatWorker) heartbeatWorker.postMessage({ action: 'start', interval: currentInterval });
+  }
+}
+
+function renderRow(s){
+  const el=document.querySelector('.srow[data-id="'+s.id+'"]');if(!el)return;
+  const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
+  let p = s.price; let chg = s.change ?? 0;
+  const symCont = el.querySelector('.sym-container');
+  if(symCont){ 
+    symCont.querySelector('.sym').textContent=s.symbol; 
+    let nameEl = symCont.querySelector('.sym-name');
+    if(s.name) {
+      if(!nameEl) {
+        nameEl = document.createElement('div');
+        nameEl.className = 'sym-name';
+        nameEl.style.cssText = 'font-size:12px; color:var(--t-muted); margin-top:4px; font-weight:normal; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;';
+        symCont.appendChild(nameEl);
+      }
+      nameEl.textContent = s.name;
+    } else if (nameEl) {
+      nameEl.remove();
+    }
+  }
+  const qn=el.querySelector('.qty-cell');
+  if(qn){
+    qn.innerHTML=`<div style="line-height:1.2;font-size:inherit;">${s.displayQty} ${s.displayUnit}</div>
+    <div style="font-size:0.8em;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}">${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}</div>`;
+  }
+  const pEl=el.querySelector('.price');
+  if(p!=null){ pEl.textContent=formatPrice(p); pEl.className='price '+(chg>=0?'up':'down'); }
+  const cp=el.querySelector('.chgp');
+  if(s.changePercent!=null){cp.textContent=(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%';cp.className='chgp '+(s.changePercent>=0?'up':'down');}
+  const cg=el.querySelector('.chg');
+  if(s.change!=null){cg.textContent=(chg>=0?'+':'')+chg.toFixed(2);cg.className='chg '+(chg>=0?'up':'down');}
+  const tp = el.querySelector('.today-pnl');
+  if(s.change!=null){ const todayPnl = Math.round(shares * chg); tp.textContent = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString(); tp.className = 'today-pnl ' + (todayPnl >= 0 ? 'up' : 'down'); }
+  let totalHtml = '—'; let totalValForClass = 0;
+  if (p != null) {
+    const mktValue = Math.round(shares * p);
+    if (s.buyPrice != null && s.buyPrice > 0) {
+      const cost = s.buyPrice * shares; const unPnl = Math.round(mktValue - cost); const roi = ((mktValue - cost) / cost) * 100;
+      totalValForClass = unPnl;
+      totalHtml = `<div style="line-height:1.2;font-size:inherit;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
+      <div style="font-size:0.8em;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`;
+    } else {
+      totalValForClass = 0;
+      totalHtml = `<div style="line-height:1.2;font-size:inherit;" class="neutral">—</div>
+      <div style="font-size:0.8em;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
+    }
+  }
+  el.querySelector('.total').innerHTML = totalHtml;
+  el.querySelector('.total').className = 'total ' + (totalValForClass !== 0 ? (totalValForClass >= 0 ? 'up' : 'down') : '');
+}
+
+function renderAll(){
+  const body=document.getElementById('listBody'); const empty=document.getElementById('emptyState');
+  const tableScroll=document.getElementById('tableScroll'); const sumArea = document.getElementById('summaryArea'); const saveArea = document.getElementById('saveArea');
+  body.innerHTML=''; const currentStocks = tabStocks[currentTab];
+  if(currentStocks.length===0){ empty.style.display='block';tableScroll.style.display='none';sumArea.style.display='none';saveArea.style.display='none';return; }
+  empty.style.display='none';tableScroll.style.display='block';sumArea.style.display='block';saveArea.style.display='block';
+  for(const s of currentStocks){
+    const div=document.createElement('div');div.className='srow';div.dataset.id=s.id;
+    const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
+    let p = s.price; let chg = s.change ?? 0;
+    let pStr = '—'; if(p!=null) pStr = formatPrice(p);
+    const cgp = s.changePercent!=null ? (s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%' : '—';
+    let cgStr = '—'; if(s.change!=null) cgStr = (chg>=0?'+':'') + chg.toFixed(2);
+    let tpStr = '—'; let tpClass = '';
+    if (s.change != null) { const todayPnl = Math.round(shares * chg); tpStr = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString(); tpClass = todayPnl >= 0 ? 'up' : 'down'; }
+    let totalHtml = '—'; let totalValForClass = 0;
+    if (p != null) {
+      const mktValue = Math.round(shares * p);
+      if (s.buyPrice != null && s.buyPrice > 0) {
+        const cost = s.buyPrice * shares; const unPnl = Math.round(mktValue - cost); const roi = ((mktValue - cost) / cost) * 100;
+        totalValForClass = unPnl;
+        totalHtml = `<div style="line-height:1.2;font-size:inherit;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
+        <div style="font-size:0.8em;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`;
+      } else {
+        totalValForClass = 0;
+        totalHtml = `<div style="line-height:1.2;font-size:inherit;" class="neutral">—</div>
+        <div style="font-size:0.8em;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
+      }
+    }
+    div.innerHTML= '<div class="sym-container"><div class="sym">'+s.symbol+'</div>'+
+    (s.name ? '<div class="sym-name" style="font-size:12px; color:var(--t-muted); margin-top:4px; font-weight:normal; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">'+s.name+'</div>' : '') +
+    '</div>'+
+    '<div class="qty-cell"><div style="line-height:1.2;font-size:inherit;">'+s.displayQty+' '+s.displayUnit+'</div><div style="font-size:0.8em;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'">'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'</div></div>'+
+    '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+
+    '<div class="chgp '+(s.changePercent!=null?(s.changePercent>=0?'up':'down'):'')+'">'+cgp+'</div>'+
+    '<div class="chg '+(s.change!=null?(chg>=0?'up':'down'):'')+'">'+cgStr+'</div>'+
+    '<div class="today-pnl '+tpClass+'">'+tpStr+'</div>'+
+    '<div class="total '+(totalValForClass!==0?(totalValForClass>=0?'up':'down'):'')+'">'+totalHtml+'</div>'+
+    '<div class="act"><button type="button" onclick="openEditModal(\''+s.id+'\')">✎</button><button type="button" class="del-btn" onclick="deleteStock(\''+s.id+'\')">✕</button></div>';
+    body.appendChild(div);
+  }
+  updateSummary();
+}
+
+function updateSummary(){
+  let pnl=0, asset=0, totalUnPnl=0; let hasUnPnl = false;
+  const currentStocks = tabStocks[currentTab];
+  for(const s of currentStocks){
+    const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
+    let p=s.price??0, c=s.change??0;
+    pnl += Math.round(sh * c); asset += Math.round(sh * p);
+    if (s.buyPrice != null && s.price != null && s.buyPrice > 0) { totalUnPnl += Math.round((s.price - s.buyPrice) * sh); hasUnPnl = true; }
+  }
+  const pe=document.getElementById('totalPnl');pe.textContent=(pnl>=0?'+':'')+pnl.toLocaleString();pe.className='val '+(pnl>=0?'up':'down');
+  const ae = document.getElementById('totalAsset');ae.textContent = (asset>=0?'+':'')+asset.toLocaleString();ae.className = 'val neutral';
+  const ue = document.getElementById('totalUnrealized');
+  if(hasUnPnl) { ue.textContent = (totalUnPnl >= 0 ? '+' : '') + totalUnPnl.toLocaleString(); ue.className = 'val ' + (totalUnPnl >= 0 ? 'up' : 'down'); }
+  else { ue.textContent = '—'; ue.className = 'val neutral'; }
+}
+
+function toggleSummary(e) {
+  if(e) e.stopPropagation();
+  const details = document.getElementById('summaryDetails'); const toggleBtn = document.getElementById('sumToggleBtn');
+  if (details.style.display === 'none') { details.style.display = 'block'; toggleBtn.style.display = 'none'; }
+  else { details.style.display = 'none'; toggleBtn.style.display = 'block'; }
+}
+
+function openAddModal() {
+  document.getElementById('addModalOverlay').classList.add('show');
+  setTimeout(() => document.getElementById('symInput').focus(), 100);
+}
+function closeAddModal() {
+  document.getElementById('addModalOverlay').classList.remove('show');
+}
+
+function addStock(){
+  let sym=document.getElementById('symInput').value.trim().toUpperCase();
+  sym = sym.replace(/[^A-Z0-9]/g, '');
+  const qty=parseInt(document.getElementById('qtyInput').value);
+  const unit=document.getElementById('unitSelect').value;
+  const bpRaw = document.getElementById('buyPriceInput').value; const bp = parseFloat(bpRaw);
+  const buyPrice = isNaN(bp) || bp <= 0 ? null : bp;
+  if(!sym||!qty||qty<1){showToast('請輸入代號與數量');return}
+  const currentStocks = tabStocks[currentTab];
+  if(currentStocks.some(s=>s.symbol===sym)){showToast('該股票已存在於此分頁');return}
+  
+  // 自動從字典帶入名稱
+  const stockName = STOCK_DICT[sym] || '';
+
+  const id='s_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+  currentStocks.push({id,symbol:sym, name: stockName, displayQty:qty,displayUnit:unit,buyPrice:buyPrice,shares:unit==='張'?qty*1000:qty,price:null,change:null,changePercent:null});
+  saveHoldings();renderAll();
+  document.getElementById('symInput').value=''; document.getElementById('qtyInput').value=''; document.getElementById('buyPriceInput').value='';
+  showToast('已新增 '+sym); 
+  closeAddModal();
+  forceRefresh();
+}
+
+function deleteStock(id){
+  if(!confirm('確定刪除？'))return;
+  tabStocks[currentTab]=tabStocks[currentTab].filter(s=>s.id!==id);saveHoldings();renderAll();showToast('記錄已刪除');
+}
+
+function openEditModal(id) {
+  const s = tabStocks[currentTab].find(x => x.id === id);
+  if (!s) return;
+  document.getElementById('editId').value = s.id;
+  document.getElementById('editSymInput').value = s.symbol;
+  document.getElementById('editNameInput').value = s.name || '';
+  document.getElementById('editQtyInput').value = s.displayQty;
+  document.getElementById('editUnitSelect').value = s.displayUnit;
+  document.getElementById('editBuyPriceInput').value = s.buyPrice || '';
+  document.getElementById('editModalOverlay').classList.add('show');
+}
+
+function closeEditModal() { document.getElementById('editModalOverlay').classList.remove('show'); }
+
+function saveEditStock() {
+  const id = document.getElementById('editId').value;
+  const s = tabStocks[currentTab].find(x => x.id === id);
+  if (!s) return;
+  const ns = document.getElementById('editSymInput').value.trim().toUpperCase();
+  const cleanSym = ns.replace(/[^A-Z0-9]/g, '');
+  if (cleanSym) { s.symbol = cleanSym; s.price = null; s.change = null; s.changePercent = null; s.source = null; s.updateTime = null; }
+  
+  s.name = document.getElementById('editNameInput').value.trim();
+  
+  const nq = parseInt(document.getElementById('editQtyInput').value);
+  if (nq > 0) { s.displayQty = nq; s.shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty; }
+  s.displayUnit = document.getElementById('editUnitSelect').value;
+  s.shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
+  const nbp = document.getElementById('editBuyPriceInput').value; const bpNum = parseFloat(nbp);
+  s.buyPrice = (isNaN(bpNum) || bpNum <= 0) ? null : bpNum;
+  saveHoldings(); renderAll(); closeEditModal(); showToast('已修改'); forceRefresh();
+}
+
+function saveDailyPnl(){
+  let pnl=0,asset=0; const currentStocks = tabStocks[currentTab];
+  for(const s of currentStocks){
+    const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
+    let p=s.price??0, c=s.change??0; pnl += Math.round(sh * c); asset += Math.round(sh * p);
+  }
+  const n=new Date();
+  const ds=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
+  const ts=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  const currentRecords = tabRecords[currentTab];
+  currentRecords.unshift({date:ds,time:ts,totalPnl:pnl,totalAsset:asset,timestamp:n.getTime()});
+  if(currentRecords.length>50) tabRecords[currentTab]=currentRecords.slice(0,50);
+  saveRecords();renderHistory(); showToast('已存儲今日損益：'+(pnl>=0?'+':'')+pnl.toLocaleString());
+}
+
+function deleteHistory(timestamp) {
+  if(!confirm('確定刪除此筆記錄？')) return;
+  tabRecords[currentTab] = tabRecords[currentTab].filter(r => r.timestamp !== timestamp);
+  saveRecords();renderHistory();showToast('記錄已刪除');
+}
+
+function renderHistory(){
+  const hb = document.getElementById('historyBody');
+  if(!hb) return;
+  hb.innerHTML = '';
+  const currentRecords = tabRecords[currentTab];
+  if(currentRecords.length === 0){
+    hb.innerHTML = '<div class="hist-empty">尚無記錄</div>';
+    return;
+  }
+  for(const r of currentRecords){
+    const div = document.createElement('div');
+    div.className = 'hist-item';
+    div.style.border = "1px solid var(--protrude-d)";
+    div.style.borderTop = "1px solid var(--protrude-l)";
+    div.style.borderLeft = "1px solid var(--protrude-l)";
+    const pnlStr = (r.totalPnl >= 0 ? '+' : '') + r.totalPnl.toLocaleString();
+    const pnlClass = r.totalPnl >= 0 ? 'up' : 'down';
+    div.innerHTML = `
+      <div class="hist-item-left">
+        <span class="hdate">${r.date} ${r.time}</span>
+        <span class="hval ${pnlClass}">${pnlStr}</span>
+      </div>
+      <button type="button" class="del-hist-btn" onclick="deleteHistory(${r.timestamp})">刪除</button>
+    `;
+    hb.appendChild(div);
+  }
+}
+
+function openModal(){
+  document.getElementById('fugleKeyInput').value=fugleKey;
+  document.getElementById('secondFugleKeyInput').value=secondFugleKey;
+  document.getElementById('tabCountSelect').value=tabCount;
+  updateKeyStatus(); renderApiStats(); document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+
+function saveAndCloseModal(){
+  saveKeys(); saveTabCount(); 
+  document.getElementById('modalOverlay').classList.remove('show'); 
+  showToast('設定已儲存'); 
+  forceRefresh(); 
+}
+
+function openManual() { document.getElementById('manualOverlay').classList.add('show'); }
+function closeManual() { document.getElementById('manualOverlay').classList.remove('show'); }
+
+// ⚙️ 國外指數燈箱管理函數群
+function openForeignIdxModal() {
+  renderForeignIdxConfigList();
+  document.getElementById('foreignIdxOverlay').classList.add('show');
+}
+
+function closeForeignIdxModal() {
+  document.getElementById('foreignIdxOverlay').classList.remove('show');
+  loadForeignIndicesConfig();
+  fetchGlobalIndicesFromWorker();
+}
+
+function renderForeignIdxConfigList() {
+  const container = document.getElementById('foreignIdxListContainer');
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (AVAILABLE_INDICES.length === 0) {
+    container.innerHTML = '<div style="text-align:center; color:var(--t-muted); font-weight:600; padding:20px; font-size:14px;">目前無自選指數，請由上方新增</div>';
+    return;
+  }
+
+  AVAILABLE_INDICES.forEach((idx, index) => {
+    const row = document.createElement('div');
+    row.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:10px 14px; margin-bottom:8px; background:var(--bg); box-shadow:var(--shadow-soft); border-radius:8px; border:1px solid var(--border-light);";
+    
+    row.innerHTML = `
+      <div style="text-align:left; flex:1; min-width:0; padding-right:8px;">
+        <div style="font-weight:700; color:var(--t-main); font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${idx.name}</div>
+        <div style="font-size:12px; color:var(--t-muted); font-weight:600;">${idx.symbol}</div>
+      </div>
+      <button type="button" onclick="deleteForeignIdx(${index})" style="padding:6px 10px; font-size:12px; color:var(--up); box-shadow:var(--shadow-soft); border:1px solid var(--border-light); border-radius:6px;">✕</button>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function addForeignIdx() {
+  const symInp = document.getElementById('newIdxSymbol');
+  const nameInp = document.getElementById('newIdxName');
+  let symbol = symInp.value.trim().toUpperCase();
+  const name = nameInp.value.trim();
+
+  if (!symbol || !name) {
+    showToast('請輸入代號與自訂名稱');
+    return;
+  }
+
+  if (['DJI', 'IXIC', 'GSPC', 'SOX', 'N225', 'KS11'].includes(symbol)) {
+    symbol = '^' + symbol;
+  }
+
+  if (AVAILABLE_INDICES.some(idx => idx.symbol === symbol)) {
+    showToast('此指數代號已存在於清單中');
+    return;
+  }
+
+  AVAILABLE_INDICES.push({ symbol, name });
+  localStorage.setItem('tw_custom_foreign_indices', JSON.stringify(AVAILABLE_INDICES));
+  
+  symInp.value = '';
+  nameInp.value = '';
+  renderForeignIdxConfigList();
+  showToast(`已新增 ${name}`);
+}
+
+function deleteForeignIdx(index) {
+  const target = AVAILABLE_INDICES[index];
+  if (!target) return;
+  
+  if (confirm(`確定要刪除「${target.name} (${target.symbol})」嗎？`)) {
+    AVAILABLE_INDICES.splice(index, 1);
+    localStorage.setItem('tw_custom_foreign_indices', JSON.stringify(AVAILABLE_INDICES));
+    renderForeignIdxConfigList();
+    showToast('已刪除該自選項目');
+  }
+}
+
+function formatPrice(p){
+  if(p==null)return '—';
+  if(Math.abs(p)>=1000)return p.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  return p.toFixed(2);
+}
+
+let toastTimer=null;
+function showToast(msg){ const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show'); clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2000); }
+
+function exportData() {
+  const dataToExport = {
+    tabStocks: [localStorage.getItem(getStockKey(0)), localStorage.getItem(getStockKey(1)), localStorage.getItem(getStockKey(2)), localStorage.getItem(getStockKey(3)), localStorage.getItem(getStockKey(4))],
+    tabRecords: [localStorage.getItem(getRecordKey(0)), localStorage.getItem(getRecordKey(1)), localStorage.getItem(getRecordKey(2)), localStorage.getItem(getRecordKey(3)), localStorage.getItem(getRecordKey(4))],
+    tabNames: localStorage.getItem(TN_KEY), fugleKey: localStorage.getItem(FK), secondFugleKey: localStorage.getItem(SFK), theme: localStorage.getItem(TK), tabCount: localStorage.getItem(TC_KEY),
+    customForeignIndices: localStorage.getItem('tw_custom_foreign_indices')
+  };
+  const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const downloadAnchorElement = document.createElement('a');
+  const d = new Date(); const dateString = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+  downloadAnchorElement.setAttribute("href", url); downloadAnchorElement.setAttribute("download", "stock_backup_" + dateString + ".json");
+  document.body.appendChild(downloadAnchorElement); downloadAnchorElement.click(); document.body.removeChild(downloadAnchorElement); URL.revokeObjectURL(url);
+  showToast('✅ 備份檔案已成功下載');
+}
+
+function triggerImport() { document.getElementById('importFile').click(); }
+
+function importData(event) {
+  const file = event.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if(confirm('⚠️ 警告：這將會覆蓋您目前的所有資料！\n確定要還原備份嗎？')) {
+        if (data.tabStocks) { data.tabStocks.forEach((val, i) => { if(val) localStorage.setItem(getStockKey(i), val); }); }
+        if (data.tabRecords) { data.tabRecords.forEach((val, i) => { if(val) localStorage.setItem(getRecordKey(i), val); }); }
+        if (data.tabNames) localStorage.setItem(TN_KEY, data.tabNames);
+        if (data.fugleKey) localStorage.setItem(FK, data.fugleKey);
+        if (data.secondFugleKey) localStorage.setItem(SFK, data.secondFugleKey);
+        if (data.theme) localStorage.setItem(TK, data.theme);
+        if (data.tabCount) localStorage.setItem(TC_KEY, data.tabCount);
+        
+        if (data.customForeignIndices) {
+          localStorage.setItem('tw_custom_foreign_indices', data.customForeignIndices);
+        } else {
+          localStorage.setItem('tw_custom_foreign_indices', JSON.stringify(DEFAULT_INDICES));
+        }
+        
+        alert('🎉 備份還原成功！'); location.reload();
+      }
+    } catch (err) { alert('❌ 檔案格式錯誤，無法還原資料。'); }
+    document.getElementById('importFile').value = '';
+  };
+  reader.readAsText(file);
+}
+
+// ==========================================
+// 💡 V4.13.6 獨立背景心跳引擎 (Web Worker)
+// ==========================================
+let lastRefreshTime = 0;
+let lastSuccessTime = 0;
+let isRefreshing = false;
+
+const workerCode = `
+  let timer = null;
+  self.onmessage = function(e) {
+    if (e.data.action === 'start') {
+      if (timer) clearInterval(timer);
+      timer = setInterval(() => { self.postMessage('tick'); }, e.data.interval);
+    } else if (e.data.action === 'stop') {
+      if (timer) clearInterval(timer);
+    }
+  };
+`;
+const workerBlob = new Blob([workerCode], { type: 'application/javascript' });
+window.heartbeatWorker = new Worker(URL.createObjectURL(workerBlob));
+
+heartbeatWorker.onmessage = function(e) {
+  if (e.data === 'tick') {
+    refresh();
+  }
+};
+
+function forceRefresh() {
+  globalKeyRotator = null; 
+  lastRefreshTime = 0;     
+  isRefreshing = false;    
+  refresh();
+}
+
+async function refresh() {
+  const now = Date.now();
+  if (isRefreshing && now - lastRefreshTime > 8000) { isRefreshing = false; }
+  if (isRefreshing || now - lastRefreshTime < 2000) return;
+  
+  isRefreshing = true;
+  lastRefreshTime = now;
+  try { 
+    await refreshPrices(); 
+    lastSuccessTime = Date.now(); 
+  } 
+  catch(e) { console.error('Refresh Error:', e); } 
+  finally { isRefreshing = false; }
+}
+
+function handleTouchWakeup() {
+  const now = Date.now();
+  if (now - lastSuccessTime > 15000 && !isRefreshing) {
+    forceRefresh();
+  }
+}
+document.addEventListener('touchend', handleTouchWakeup, { passive: true });
+document.addEventListener('click', handleTouchWakeup, { passive: true });
+
+// 初始化載入
+loadState(); renderAll(); renderHistory();
+
+setTimeout(forceRefresh, 500);  
+
+// 啟動心跳引擎
+heartbeatWorker.postMessage({ action: 'start', interval: currentInterval });
+
+window.addEventListener('focus', forceRefresh);
+window.addEventListener('pageshow', forceRefresh);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') forceRefresh();
+});
+
+// 監聽鍵盤輸入與彈窗關閉
+document.getElementById('symInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); } });
+document.getElementById('qtyInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('buyPriceInput').focus(); } });
+document.getElementById('buyPriceInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); addStock(); } });
+
+// 新增的燈箱關閉監聽
+document.getElementById('addModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
+document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
+document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
+document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
+document.getElementById('foreignIdxOverlay').addEventListener('click',function(e){if(e.target===this)closeForeignIdxModal();});
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('Service Worker 註冊成功，範疇為:', reg.scope))
+      .catch(err => console.error('Service Worker 註冊失敗:', err));
+  });
+}
+
+console.log('股票庫存管理 V4.13.6 已啟動');
+</script>
+</body>
+</html>
