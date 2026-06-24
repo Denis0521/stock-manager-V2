@@ -40,6 +40,8 @@ if(localStorage.getItem('tw_app_version') !== APP_VER) {
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
+
+/* 現有主題（保留） */
 body.tech { 
   --bg: #383e4a; --s-light: #464d5c; --s-dark: #2a2e38; --t-main: #f0f4f8; --t-muted: #a0aec0; 
   --up: #ff6b6b; --down: #51cf66; --engrave-l: rgba(255,255,255,0.08); --engrave-d: rgba(0,0,0,0.4); 
@@ -81,7 +83,47 @@ body.cement {
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 
-/* ========================================================= 🌐 基礎排版 ========================================================= */
+/* ===== 🌊 新主題：Ocean Breeze ===== */
+body.ocean {
+  --bg: #e4edf5;
+  --s-light: #ffffff;
+  --s-dark: #9bb7cc;
+  --t-main: #0b2b3d;
+  --t-muted: #4b6a7a;
+  --up: #e23e3e;
+  --down: #1e8b6c;
+  --engrave-l: rgba(255,255,255,0.9);
+  --engrave-d: rgba(0,0,0,0.15);
+  --protrude-l: rgba(255,255,255,1);
+  --protrude-d: rgba(0,0,0,0.06);
+  --accent: #1f7a8c;
+  --border-light: #b8cedb;
+  --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
+  --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
+  --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
+}
+
+/* ===== 🌅 新主題：Sunset Glow ===== */
+body.sunset {
+  --bg: #f9efe8;
+  --s-light: #ffffff;
+  --s-dark: #dcb8a8;
+  --t-main: #4a2c1a;
+  --t-muted: #8b6b5a;
+  --up: #c0392b;
+  --down: #2d7d46;
+  --engrave-l: rgba(255,255,255,0.9);
+  --engrave-d: rgba(0,0,0,0.16);
+  --protrude-l: rgba(255,255,255,1);
+  --protrude-d: rgba(0,0,0,0.07);
+  --accent: #d4875e;
+  --border-light: #e3c9b8;
+  --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
+  --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
+  --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
+}
+
+/* ========================================================= 🌐 基礎排版（其餘樣式與之前相同） ========================================================= */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif; background:var(--bg); color:var(--t-main); padding:0 0 60px; min-height:100vh; font-size:15px; overflow-x:hidden; transition:background-color 0.4s ease, color 0.4s ease}
 input,select,button{font-family:inherit;font-size:inherit;outline:none;text-align:center}
@@ -712,6 +754,8 @@ function applyThemeText(t){
   else if(t==='purple-light'){ body.classList.add('purple-light'); themeBtn.textContent='🍇'; metaTheme.content='#ece8f3'; }
   else if(t==='pink'){ body.classList.add('pink'); themeBtn.textContent='🌸'; metaTheme.content='#f3e6e8'; }
   else if(t==='cement'){ body.classList.add('cement'); themeBtn.textContent='🏢'; metaTheme.content='#a3a8b0'; }
+  else if(t==='ocean'){ body.classList.add('ocean'); themeBtn.textContent='🌊'; metaTheme.content='#d4e3ed'; }
+  else if(t==='sunset'){ body.classList.add('sunset'); themeBtn.textContent='🌅'; metaTheme.content='#f3e3d4'; }
   else { themeBtn.textContent='🌙'; metaTheme.content='#f0f2f6'; }
 }
 
@@ -740,7 +784,9 @@ function toggleTheme(){
   else if(body.classList.contains('blue-light')) nextTheme = 'purple-light';
   else if(body.classList.contains('purple-light')) nextTheme = 'pink';
   else if(body.classList.contains('pink')) nextTheme = 'cement';
-  else if(body.classList.contains('cement')) nextTheme = 'light';
+  else if(body.classList.contains('cement')) nextTheme = 'ocean';
+  else if(body.classList.contains('ocean')) nextTheme = 'sunset';
+  else if(body.classList.contains('sunset')) nextTheme = 'light';
   else nextTheme = 'tech';
   applyThemeText(nextTheme); try{localStorage.setItem(TK, nextTheme);}catch(e){}
 }
