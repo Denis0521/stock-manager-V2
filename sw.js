@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stock-portfolio-v4.14.2'; // 🚀 升級至 V4.14.2 以觸發 PWA 更新
+const CACHE_NAME = 'stock-portfolio-v4.14.1'; // 同步升級至 V4.13.6
 const urlsToCache = [
   './',
   './index.html',
@@ -32,10 +32,10 @@ self.addEventListener('fetch', event => {
   const requestUrl = new URL(event.request.url);
   
   // 這些 API 請求不進快取，直接抓取最新資料
-  const isApiRequest = requestUrl.hostname.includes('api.fugle.tw') ||
-                       requestUrl.hostname.includes('finance.yahoo.com') ||
-                       requestUrl.hostname.includes('allorigins.win') ||
-                       requestUrl.hostname.includes('denis0521.workers.dev') ||
+  const isApiRequest = requestUrl.hostname.includes('api.fugle.tw') || 
+                       requestUrl.hostname.includes('finance.yahoo.com') || 
+                       requestUrl.hostname.includes('allorigins.win') || 
+                       requestUrl.hostname.includes('denis0521.workers.dev') || 
                        requestUrl.hostname.includes('corsproxy.io') ||
                        requestUrl.hostname.includes('codetabs.com') ||
                        requestUrl.hostname.includes('thingproxy.freeboard.io') ||
