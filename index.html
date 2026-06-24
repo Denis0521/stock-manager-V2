@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-// 強制刷新快取：升級至 V4.13.6 (國旗、圖示與並排按鈕優化)
-const APP_VER = '4.13.6';
+// 強制刷新快取：升級至 V4.14.0 (國旗、圖示與並排按鈕優化)
+const APP_VER = '4.14.0';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -20,63 +20,78 @@ if(localStorage.getItem('tw_app_version') !== APP_VER) {
 }
 </script>
 <style>
-/* ========================================================= 🚀 核心變數引擎（柔光微調 + 加強框線） ========================================================= */
+/* ========================================================= 🚀 核心變數引擎（V4.14.0 配色全面升級） ========================================================= */
 :root { 
-  --bg: #f0f2f6;
-  --s-light: #ffffff;
-  --s-dark: #9aabb8;
-  --t-main: #2c3e50;
-  --t-muted: #7f8c8d;
-  --up: #e74c3c;
-  --down: #27ae60;
-  --engrave-l: rgba(255,255,255,0.85);
-  --engrave-d: rgba(0,0,0,0.16);
+  --bg: #E8ECF1;
+  --s-light: #FFFFFF;
+  --s-dark: #B8C4D0;
+  --t-main: #1A2332;
+  --t-muted: #6B7B8D;
+  --up: #DC2626;
+  --down: #16A34A;
+  --engrave-l: rgba(255,255,255,0.9);
+  --engrave-d: rgba(0,0,0,0.12);
   --protrude-l: rgba(255,255,255,1);
-  --protrude-d: rgba(0,0,0,0.07);
-  --accent: #3498db;
-  /* 額外強化層次用 */
-  --border-light: #c8d2dc;
+  --protrude-d: rgba(0,0,0,0.06);
+  --accent: #2563EB;
+  --border-light: #D1D8E0;
   --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 body.tech { 
-  --bg: #383e4a; --s-light: #464d5c; --s-dark: #2a2e38; --t-main: #f0f4f8; --t-muted: #a0aec0; 
-  --up: #ff6b6b; --down: #51cf66; --engrave-l: rgba(255,255,255,0.08); --engrave-d: rgba(0,0,0,0.4); 
-  --protrude-l: rgba(255,255,255,0.15); --protrude-d: rgba(0,0,0,0.25); --accent: #58a6ff;
-  --border-light: #555b6b; --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
+  --bg: #1E2330; --s-light: #2D3344; --s-dark: #151820; --t-main: #F8FAFC; --t-muted: #94A3B8; 
+  --up: #FF5252; --down: #4ADE80; --engrave-l: rgba(255,255,255,0.12); --engrave-d: rgba(0,0,0,0.5); 
+  --protrude-l: rgba(255,255,255,0.18); --protrude-d: rgba(0,0,0,0.35); --accent: #60A5FA;
+  --border-light: #3D4556; --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 body.blue-light { 
-  --bg: #eef5fb; --s-light: #ffffff; --s-dark: #a3b7cc; --t-main: #102a43; --t-muted: #486581; 
-  --up: #e53e3e; --down: #2f855a; --engrave-l: rgba(255,255,255,0.9); --engrave-d: rgba(0,0,0,0.18); 
-  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.08); --accent: #2b6cb0;
-  --border-light: #bccfe0; --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
+  --bg: #E0E8F0; --s-light: #F0F5FA; --s-dark: #A0B4C8; --t-main: #0A1628; --t-muted: #4A6B8A; 
+  --up: #EF4444; --down: #22C55E; --engrave-l: rgba(255,255,255,0.95); --engrave-d: rgba(0,0,0,0.14); 
+  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.06); --accent: #1D4ED8;
+  --border-light: #B8C8D8; --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 body.purple-light { 
-  --bg: #f4f1fa; --s-light: #ffffff; --s-dark: #bab0cd; --t-main: #322659; --t-muted: #6b5b8e; 
-  --up: #d53f8c; --down: #2f855a; --engrave-l: rgba(255,255,255,0.9); --engrave-d: rgba(0,0,0,0.18); 
-  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.08); --accent: #6b46c1;
-  --border-light: #d0c3e0; --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
+  --bg: #EDE8F4; --s-light: #FAF7FF; --s-dark: #B8A8CC; --t-main: #1E0B3A; --t-muted: #6B5B8E; 
+  --up: #E11D48; --down: #10B981; --engrave-l: rgba(255,255,255,0.95); --engrave-d: rgba(0,0,0,0.14); 
+  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.06); --accent: #7C3AED;
+  --border-light: #C8B8D8; --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 body.pink { 
-  --bg: #fcf1f3; --s-light: #ffffff; --s-dark: #ccaebb; --t-main: #4a123a; --t-muted: #9b2c2c; 
-  --up: #e53e3e; --down: #38a169; --engrave-l: rgba(255,255,255,0.8); --engrave-d: rgba(0,0,0,0.15); 
-  --protrude-l: rgba(255,255,255,0.9); --protrude-d: rgba(0,0,0,0.07); --accent: #d63384;
-  --border-light: #e2c8d4; --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
+  --bg: #F5E8EC; --s-light: #FFF5F7; --s-dark: #D4A8B8; --t-main: #3A0A2A; --t-muted: #8B5A6B; 
+  --up: #DC2626; --down: #059669; --engrave-l: rgba(255,255,255,0.9); --engrave-d: rgba(0,0,0,0.12); 
+  --protrude-l: rgba(255,255,255,0.95); --protrude-d: rgba(0,0,0,0.06); --accent: #DB2777;
+  --border-light: #D8B8C4; --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 body.cement { 
-  --bg: #b6bbc4; --s-light: #d1d6e0; --s-dark: #989da6; --t-main: #22252a; --t-muted: #4a5059; 
-  --up: #c62828; --down: #1b5e20; --engrave-l: rgba(255,255,255,0.7); --engrave-d: rgba(0,0,0,0.25); 
-  --protrude-l: rgba(255,255,255,0.7); --protrude-d: rgba(0,0,0,0.12); --accent: #111111;
-  --border-light: #a8adb6; --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
+  --bg: #C4C8CE; --s-light: #D8DDE4; --s-dark: #A0A5AD; --t-main: #1A1D21; --t-muted: #5A5E64; 
+  --up: #B91C1C; --down: #15803D; --engrave-l: rgba(255,255,255,0.8); --engrave-d: rgba(0,0,0,0.2); 
+  --protrude-l: rgba(255,255,255,0.85); --protrude-d: rgba(0,0,0,0.1); --accent: #1F2937;
+  --border-light: #B0B4BA; --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
+  --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
+  --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
+}
+body.forest { 
+  --bg: #E4EBE6; --s-light: #F2F7F3; --s-dark: #A8B8AC; --t-main: #0A1F0E; --t-muted: #4A6B52; 
+  --up: #DC2626; --down: #16A34A; --engrave-l: rgba(255,255,255,0.95); --engrave-d: rgba(0,0,0,0.12); 
+  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.06); --accent: #15803D;
+  --border-light: #B8C8BC; --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
+  --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
+  --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
+}
+body.midnight { 
+  --bg: #1A1F2E; --s-light: #2A3045; --s-dark: #111520; --t-main: #E2E8F0; --t-muted: #8899AA; 
+  --up: #FF6B6B; --down: #6EE7B7; --engrave-l: rgba(255,255,255,0.15); --engrave-d: rgba(0,0,0,0.55); 
+  --protrude-l: rgba(255,255,255,0.2); --protrude-d: rgba(0,0,0,0.4); --accent: #818CF8;
+  --border-light: #2D3348; --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
@@ -431,7 +446,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.13.6 (優化圖示與按鈕排列)</div>
+    <div class="v-box">核心版本：V4.14.0 (優化圖示與按鈕排列)</div>
     <button type="button" class="modal-close" style="margin-top: 24px;" onclick="saveAndCloseModal()">💾 儲存設定並關閉</button>
   </div>
 </div>
@@ -707,12 +722,14 @@ function loadState(){
 function applyThemeText(t){
   const body=document.body; const themeBtn=document.getElementById('themeBtn'); const metaTheme = document.getElementById('themeColorMeta');
   body.className = '';
-  if(t==='tech'){ body.classList.add('tech'); themeBtn.textContent='🚀'; metaTheme.content='#2b303a'; }
-  else if(t==='blue-light'){ body.classList.add('blue-light'); themeBtn.textContent='💎'; metaTheme.content='#e3edf7'; }
-  else if(t==='purple-light'){ body.classList.add('purple-light'); themeBtn.textContent='🍇'; metaTheme.content='#ece8f3'; }
-  else if(t==='pink'){ body.classList.add('pink'); themeBtn.textContent='🌸'; metaTheme.content='#f3e6e8'; }
-  else if(t==='cement'){ body.classList.add('cement'); themeBtn.textContent='🏢'; metaTheme.content='#a3a8b0'; }
-  else { themeBtn.textContent='🌙'; metaTheme.content='#f0f2f6'; }
+  if(t==='tech'){ body.classList.add('tech'); themeBtn.textContent='🚀'; metaTheme.content='#1E2330'; }
+  else if(t==='blue-light'){ body.classList.add('blue-light'); themeBtn.textContent='💎'; metaTheme.content='#E0E8F0'; }
+  else if(t==='purple-light'){ body.classList.add('purple-light'); themeBtn.textContent='🍇'; metaTheme.content='#EDE8F4'; }
+  else if(t==='pink'){ body.classList.add('pink'); themeBtn.textContent='🌸'; metaTheme.content='#F5E8EC'; }
+  else if(t==='cement'){ body.classList.add('cement'); themeBtn.textContent='🏢'; metaTheme.content='#C4C8CE'; }
+  else if(t==='forest'){ body.classList.add('forest'); themeBtn.textContent='🌲'; metaTheme.content='#E4EBE6'; }
+  else if(t==='midnight'){ body.classList.add('midnight'); themeBtn.textContent='🌙'; metaTheme.content='#1A1F2E'; }
+  else { themeBtn.textContent='☀️'; metaTheme.content='#E8ECF1'; }
 }
 
 function saveHoldings(){try{localStorage.setItem(getStockKey(currentTab),JSON.stringify(tabStocks[currentTab]));}catch(e){}}
@@ -740,7 +757,9 @@ function toggleTheme(){
   else if(body.classList.contains('blue-light')) nextTheme = 'purple-light';
   else if(body.classList.contains('purple-light')) nextTheme = 'pink';
   else if(body.classList.contains('pink')) nextTheme = 'cement';
-  else if(body.classList.contains('cement')) nextTheme = 'light';
+  else if(body.classList.contains('cement')) nextTheme = 'forest';
+  else if(body.classList.contains('forest')) nextTheme = 'midnight';
+  else if(body.classList.contains('midnight')) nextTheme = 'light';
   else nextTheme = 'tech';
   applyThemeText(nextTheme); try{localStorage.setItem(TK, nextTheme);}catch(e){}
 }
@@ -1441,7 +1460,7 @@ function importData(event) {
 }
 
 // ==========================================
-// 💡 V4.13.6 獨立背景心跳引擎 (Web Worker)
+// 💡 V4.14.0 獨立背景心跳引擎 (Web Worker)
 // ==========================================
 let lastRefreshTime = 0;
 let lastSuccessTime = 0;
@@ -1532,7 +1551,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-console.log('股票庫存管理 V4.13.6 已啟動');
+console.log('股票庫存管理 V4.14.0 已啟動');
 </script>
 </body>
 </html>
