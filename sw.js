@@ -1,8 +1,9 @@
-const CACHE_NAME = 'stock-portfolio-v4.14.1'; // 同步升級至 V4.13.6
+const CACHE_NAME = 'stock-portfolio-v4.14.1';
 const urlsToCache = [
   './',
   './index.html',
   './manifest.json',
+  './icon-192.png', // 已補上 192x192 圖示，確保符合 Chrome 的安裝標準
   './icon-512.png'
 ];
 
