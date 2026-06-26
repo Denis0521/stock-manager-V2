@@ -39,14 +39,36 @@ if(localStorage.getItem('tw_app_version') !== APP_VER) {
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
+
 body.tech { 
-  --bg: #1E2330; --s-light: #2D3344; --s-dark: #151820; --t-main: #F8FAFC; --t-muted: #94A3B8; 
-  --up: #FF5252; --down: #4ADE80; --engrave-l: rgba(255,255,255,0.12); --engrave-d: rgba(0,0,0,0.5); 
-  --protrude-l: rgba(255,255,255,0.18); --protrude-d: rgba(0,0,0,0.35); --accent: #60A5FA;
-  --border-light: #3D4556; --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
+  /* 背景與陰影：縮小色差，使用偏中性的深灰藍色 */
+  --bg: #181C24; 
+  --s-light: #212631; 
+  --s-dark: #101218; 
+  
+  /* 文字：降低主文字亮度，讓次要文字更柔和 */
+  --t-main: #D1D5DB; 
+  --t-muted: #6B7280; 
+  
+  /* 漲跌色：降低飽和度，避免螢光刺眼 */
+  --up: #F87171; 
+  --down: #34D399; 
+  
+  /* 雕刻與凸起效果：調降透明度 */
+  --engrave-l: rgba(255, 255, 255, 0.05); 
+  --engrave-d: rgba(0, 0, 0, 0.4); 
+  --protrude-l: rgba(255, 255, 255, 0.08); 
+  --protrude-d: rgba(0, 0, 0, 0.3); 
+  
+  /* 點綴色與邊框：使用更內斂的藍與深灰 */
+  --accent: #3B82F6;
+  --border-light: #2A303C; 
+  
+  --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
+
 body.blue-light { 
   --bg: #D0DEE8; --s-light: #E8F0F8; --s-dark: #8CA0B8; --t-main: #061220; --t-muted: #3A5A7A; 
   --up: #DC2626; --down: #16A34A; --engrave-l: rgba(255,255,255,0.95); --engrave-d: rgba(0,0,0,0.16); 
@@ -71,9 +93,6 @@ body.pink {
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
-
-
-
 
 /* ========================================================= 🌐 基礎排版 ========================================================= */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -701,7 +720,7 @@ function loadState(){
 function applyThemeText(t){
   const body=document.body; const themeBtn=document.getElementById('themeBtn'); const metaTheme = document.getElementById('themeColorMeta');
   body.className = '';
-  if(t==='tech'){ body.classList.add('tech'); themeBtn.textContent='🚀'; metaTheme.content='#1E2330'; }
+  if(t==='tech'){ body.classList.add('tech'); themeBtn.textContent='🚀'; metaTheme.content='#181C24'; }
   else if(t==='blue-light'){ body.classList.add('blue-light'); themeBtn.textContent='💎'; metaTheme.content='#D0DEE8'; }
   else if(t==='purple-light'){ body.classList.add('purple-light'); themeBtn.textContent='🍇'; metaTheme.content='#EDE8F4'; }
   else if(t==='pink'){ body.classList.add('pink'); themeBtn.textContent='🌸'; metaTheme.content='#F5E8EC'; }
