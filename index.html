@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-// 強制刷新快取：升級至 V4.14.2 (優化版面與護眼暗色主題)
-const APP_VER = '4.14.2';
+// 強制刷新快取：升級至 V4.14.0 (國旗、圖示與並排按鈕優化)
+const APP_VER = '4.14.1';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -20,7 +20,7 @@ if(localStorage.getItem('tw_app_version') !== APP_VER) {
 }
 </script>
 <style>
-/* ========================================================= 🚀 核心變數引擎（V4.14.2 配色全面升級） ========================================================= */
+/* ========================================================= 🚀 核心變數引擎（V4.14.0 配色全面升級） ========================================================= */
 :root { 
   --bg: #E8ECF1;
   --s-light: #FFFFFF;
@@ -39,36 +39,14 @@ if(localStorage.getItem('tw_app_version') !== APP_VER) {
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
-
 body.tech { 
-  /* 背景與陰影：縮小色差，使用偏中性的深灰藍色 */
-  --bg: #181C24; 
-  --s-light: #212631; 
-  --s-dark: #101218; 
-  
-  /* 文字：降低主文字亮度，讓次要文字更柔和 */
-  --t-main: #D1D5DB; 
-  --t-muted: #6B7280; 
-  
-  /* 漲跌色：降低飽和度，避免螢光刺眼 */
-  --up: #F87171; 
-  --down: #34D399; 
-  
-  /* 雕刻與凸起效果：調降透明度 */
-  --engrave-l: rgba(255, 255, 255, 0.05); 
-  --engrave-d: rgba(0, 0, 0, 0.4); 
-  --protrude-l: rgba(255, 255, 255, 0.08); 
-  --protrude-d: rgba(0, 0, 0, 0.3); 
-  
-  /* 點綴色與邊框：使用更內斂的藍與深灰 */
-  --accent: #3B82F6;
-  --border-light: #2A303C; 
-  
-  --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
+  --bg: #1E2330; --s-light: #2D3344; --s-dark: #151820; --t-main: #F8FAFC; --t-muted: #94A3B8; 
+  --up: #FF5252; --down: #4ADE80; --engrave-l: rgba(255,255,255,0.12); --engrave-d: rgba(0,0,0,0.5); 
+  --protrude-l: rgba(255,255,255,0.18); --protrude-d: rgba(0,0,0,0.35); --accent: #60A5FA;
+  --border-light: #3D4556; --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
-
 body.blue-light { 
   --bg: #D0DEE8; --s-light: #E8F0F8; --s-dark: #8CA0B8; --t-main: #061220; --t-muted: #3A5A7A; 
   --up: #DC2626; --down: #16A34A; --engrave-l: rgba(255,255,255,0.95); --engrave-d: rgba(0,0,0,0.16); 
@@ -93,6 +71,9 @@ body.pink {
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
+
+
+
 
 /* ========================================================= 🌐 基礎排版 ========================================================= */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -444,7 +425,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.14.2 (優化版面與護眼暗色主題)</div>
+    <div class="v-box">核心版本：V4.14.0 (優化圖示與按鈕排列)</div>
     <button type="button" class="modal-close" style="margin-top: 24px;" onclick="saveAndCloseModal()">💾 儲存設定並關閉</button>
   </div>
 </div>
@@ -720,7 +701,7 @@ function loadState(){
 function applyThemeText(t){
   const body=document.body; const themeBtn=document.getElementById('themeBtn'); const metaTheme = document.getElementById('themeColorMeta');
   body.className = '';
-  if(t==='tech'){ body.classList.add('tech'); themeBtn.textContent='🚀'; metaTheme.content='#181C24'; }
+  if(t==='tech'){ body.classList.add('tech'); themeBtn.textContent='🚀'; metaTheme.content='#1E2330'; }
   else if(t==='blue-light'){ body.classList.add('blue-light'); themeBtn.textContent='💎'; metaTheme.content='#D0DEE8'; }
   else if(t==='purple-light'){ body.classList.add('purple-light'); themeBtn.textContent='🍇'; metaTheme.content='#EDE8F4'; }
   else if(t==='pink'){ body.classList.add('pink'); themeBtn.textContent='🌸'; metaTheme.content='#F5E8EC'; }
@@ -1530,65 +1511,20 @@ document.getElementById('buyPriceInput').addEventListener('keydown',e=>{ if(e.ke
 
 // 新增的燈箱關閉監聽
 document.getElementById('addModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>股票庫存管理</title>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="股票庫存管理">
-<meta name="theme-color" id="themeColorMeta" content="#f0f2f6">
-<link rel="apple-touch-icon" href="icon-512.png">
-<link rel="icon" href="icon-512.png" type="image/png">
-<script>
-// 強制刷新快取：升級至 V4.14.2 (優化版面與護眼暗色主題)
-const APP_VER = '4.14.2';
-if(localStorage.getItem('tw_app_version') !== APP_VER) {
-  localStorage.setItem('tw_app_version', APP_VER);
-  if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
-  setTimeout(() => location.reload(true), 200);
-}
-</script>
-<style>
-/* ========================================================= 🚀 核心變數引擎（V4.14.2 配色全面升級） ========================================================= */
-:root { 
-  --bg: #E8ECF1; --s-light: #FFFFFF; --s-dark: #B8C4D0; --t-main: #1A2332; --t-muted: #6B7B8D; 
-  --up: #DC2626; --down: #16A34A; --engrave-l: rgba(255,255,255,0.9); --engrave-d: rgba(0,0,0,0.12); 
-  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.06); --accent: #2563EB; --border-light: #D1D8E0;
-  --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
-  --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
-  --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
+document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
+document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
+document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
+document.getElementById('foreignIdxOverlay').addEventListener('click',function(e){if(e.target===this)closeForeignIdxModal();});
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('Service Worker 註冊成功，範疇為:', reg.scope))
+      .catch(err => console.error('Service Worker 註冊失敗:', err));
+  });
 }
 
-body.tech { 
-  --bg: #181C24; --s-light: #212631; --s-dark: #101218; --t-main: #D1D5DB; --t-muted: #6B7280; 
-  --up: #F87171; --down: #34D399; --engrave-l: rgba(255,255,255,0.05); --engrave-d: rgba(0,0,0,0.4); 
-  --protrude-l: rgba(255,255,255,0.08); --protrude-d: rgba(0,0,0,0.3); --accent: #3B82F6; --border-light: #2A303C;
-  --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
-  --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
-  --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
-}
-
-/* (其他主題配色省略，與前述一致...) */
-body.blue-light { --bg: #D0DEE8; --s-light: #E8F0F8; --s-dark: #8CA0B8; --t-main: #061220; --t-muted: #3A5A7A; --up: #DC2626; --down: #16A34A; --engrave-l: rgba(255,255,255,0.95); --engrave-d: rgba(0,0,0,0.16); --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.08); --accent: #1E40AF; --border-light: #A8B8C8; }
-body.purple-light { --bg: #EDE8F4; --s-light: #FAF7FF; --s-dark: #B8A8CC; --t-main: #1E0B3A; --t-muted: #6B5B8E; --up: #E11D48; --down: #10B981; --engrave-l: rgba(255,255,255,0.95); --engrave-d: rgba(0,0,0,0.14); --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.06); --accent: #7C3AED; --border-light: #C8B8D8; }
-body.pink { --bg: #F5E8EC; --s-light: #FFF5F7; --s-dark: #D4A8B8; --t-main: #3A0A2A; --t-muted: #8B5A6B; --up: #DC2626; --down: #059669; --engrave-l: rgba(255,255,255,0.9); --engrave-d: rgba(0,0,0,0.12); --protrude-l: rgba(255,255,255,0.95); --protrude-d: rgba(0,0,0,0.06); --accent: #DB2777; --border-light: #D8B8C4; }
-
-/* 基礎排版與功能樣式 (保持一致，確保欄位更靠近) */
-.list-wrap { min-width: 670px; } 
-.list-header, .srow { grid-template-columns: 110px 95px 75px 75px 75px 85px 105px 70px; }
-.list-header > div, .srow > div { padding: 6px 4px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; white-space: nowrap; }
-
-/* ...其餘程式碼請參考前次完整架構... */
-</style>
-</head>
-<body>
-<div class="v-box">核心版本：V4.14.2 (優化版面與護眼暗色主題)</div>
-<script>
-console.log('股票庫存管理 V4.14.2 已啟動');
-// ... 其餘邏輯 ...
+console.log('股票庫存管理 V4.14.0 已啟動');
 </script>
 </body>
-</html><
+</html>
