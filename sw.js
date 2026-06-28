@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stock-portfolio-v4.14.1';
+const CACHE_NAME = 'stock-portfolio-v4.15.0';
 const urlsToCache = [
   './',
   './index.html',
