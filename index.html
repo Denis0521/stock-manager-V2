@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-// 強制刷新快取：升級至 V4.14.6 (修正新聞快取與RSS來源問題)
-const APP_VER = '4.14.6';
+// 強制刷新快取：升級至 V4.14.7 (更換新聞源，徹底解決單一媒體洗版問題)
+const APP_VER = '4.14.7';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -423,7 +423,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.14.6 (優化RSS排他與快取)</div>
+    <div class="v-box">核心版本：V4.14.7 (優化新聞交叉防佔位)</div>
     <button type="button" class="modal-close" style="margin-top: 24px;" onclick="saveAndCloseModal()">💾 儲存設定並關閉</button>
   </div>
 </div>
@@ -1041,41 +1041,58 @@ async function fetchAllNews() {
   if (!tickerContainer) return;
   if (navigator.onLine === false) { tickerContainer.innerHTML = '<span class="ticker-item">目前處於離線狀態，無法載入最新新聞。</span>'; return; }
 
-  // 調整為更具即時性的 RSS Feed URL
+  // 1. 引進對前端最開放友善、具備大量台股財經資訊的新聞源
   const sources = [
-    { name: '鉅亨網', url: 'https://news.cnyes.com/rss/id/tw_stock' }, // 改用全台股分類，新聞量更大
+    { name: '鉅亨網', url: 'https://news.cnyes.com/rss/id/tw_stock' },            // 更即時的台股大類
     { name: '經濟日報', url: 'https://money.udn.com/rssfeed/news/1001/5591' },
-    { name: 'Yahoo股市', url: 'https://tw.stock.yahoo.com/rss/tw-market' } // 改用台股大盤焦點分類
+    { name: '科技新報', url: 'https://technews.tw/category/finance/feed/' }        // 大量科技權值股、半導體脈動新聞
   ];
 
   try {
-    // 使用當下時間戳記 _t 強制打碎 rss2json 的服務端快取機制
     const timestamp = Date.now();
     const fetchPromises = sources.map(async (source) => {
       const targetRssUrl = `${source.url}?_t=${timestamp}`;
       const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(targetRssUrl)}&_=${timestamp}`;
       
-      const response = await fetch(apiUrl, { cache: 'no-store' });
-      const data = await response.json();
-      if (data.status === 'ok' && data.items) { 
-        return data.items.map(item => ({ ...item, sourceName: source.name })); 
-      }
-      return [];
+      try {
+        const response = await fetch(apiUrl, { cache: 'no-store' });
+        const data = await response.json();
+        if (data.status === 'ok' && data.items && data.items.length > 0) { 
+          return data.items.map(item => ({ title: item.title, link: item.link, sourceName: source.name })).slice(0, 10); 
+        }
+      } catch (e) { console.warn(`${source.name} 主路線遭阻擋，啟用解鎖路徑...`); }
+
+      // 備用解鎖路徑：若主 API 遭轉接快取阻擋，強行破壞快取扒取最新內容
+      try {
+        const backupUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(source.url + '?nocache=' + timestamp)}`;
+        const res = await fetch(backupUrl);
+        const text = await res.text();
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(text, "text/xml");
+        const items = xmlDoc.getElementsByTagName("item");
+        let parsedItems = [];
+        for(let i=0; i<Math.min(items.length, 10); i++) {
+          const title = items[i].getElementsByTagName("title")[0]?.textContent || '';
+          const link = items[i].getElementsByTagName("link")[0]?.textContent || '';
+          if(title) parsedItems.push({ title, link, sourceName: source.name });
+        }
+        return parsedItems;
+      } catch(err) { return []; }
     });
 
     const results = await Promise.all(fetchPromises);
     
-    // 加強版 Interleaving 交叉混流排序法
+    // 2. 嚴格交叉洗牌算法：確保展示順序為「鉅亨 -> 經濟 -> 科技新報 -> 鉅亨...」
     let allNews = [];
     const maxLength = Math.max(...results.map(r => r.length));
     for (let i = 0; i < maxLength; i++) {
-      if (results[0] && results[0][i]) allNews.push(results[0][i]); // 鉅亨網
-      if (results[1] && results[1][i]) allNews.push(results[1][i]); // 經濟日報
-      if (results[2] && results[2][i]) allNews.push(results[2][i]); // Yahoo股市
+      if (results[0] && results[0][i]) allNews.push(results[0][i]);
+      if (results[1] && results[1][i]) allNews.push(results[1][i]);
+      if (results[2] && results[2][i]) allNews.push(results[2][i]);
     }
     
-    // 取前 30 則進行輪播
-    allNews = allNews.slice(0, 30);
+    // 限制最高 25 則進行輪播，減少瀏覽器負擔並加速重複呈現
+    allNews = allNews.slice(0, 25);
 
     if (allNews.length > 0) {
       const htmlContent = allNews.map(item => {
@@ -1083,9 +1100,11 @@ async function fetchAllNews() {
       }).join('');
       
       tickerContainer.innerHTML = htmlContent;
-      tickerContainer.style.animationDuration = `${allNews.length * 7}s`;
+      tickerContainer.style.animationDuration = `${allNews.length * 6.5}s`;
+    } else {
+      tickerContainer.innerHTML = '<span class="ticker-item">暫時無法取得即時快訊，請稍後重試。</span>';
     }
-  } catch (error) { console.error('新聞載入失敗:', error); }
+  } catch (error) { console.error('新聞處理核心異常:', error); }
 }
 
 // 初始化載入
@@ -1114,7 +1133,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-console.log('股票庫存管理 V4.14.6 已啟動');
+console.log('股票庫存管理 V4.14.7 已啟動');
 </script>
 </body>
 </html>
