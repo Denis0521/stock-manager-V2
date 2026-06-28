@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-// 強制刷新快取：升級至 V4.14.2 (整合三大財經跑馬燈)
-const APP_VER = '4.14.2';
+// 強制刷新快取：升級至 V4.14.3 (修正新聞來源與跑馬燈 UI)
+const APP_VER = '4.14.3';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -124,9 +124,14 @@ button:active, .tab-btn.active { transform: translateY(0); box-shadow: var(--sha
   border-radius: 8px; border: 1px solid var(--border-light);
 }
 .news-ticker-title { 
-  background: var(--up); color: #fff; padding: 0 14px; 
-  font-weight: bold; font-size: 15px; z-index: 2; 
-  border-radius: 8px 0 0 8px; text-shadow: none;
+  background: transparent;
+  color: var(--up);
+  padding: 0 10px 0 14px; 
+  font-weight: bold; 
+  font-size: 15px; 
+  z-index: 2; 
+  border-right: 1px solid var(--border-light);
+  text-shadow: none;
 }
 .news-ticker-wrap { 
   flex: 1; position: relative; overflow: hidden; 
@@ -414,7 +419,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.14.2 (整合三大財經跑馬燈)</div>
+    <div class="v-box">核心版本：V4.14.3 (跑馬燈修正優化版)</div>
     <button type="button" class="modal-close" style="margin-top: 24px;" onclick="saveAndCloseModal()">💾 儲存設定並關閉</button>
   </div>
 </div>
@@ -452,7 +457,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       <h3 style="color: var(--accent); margin: 16px 0 8px;">四、慢速本地儲存與備份 ⚠️</h3>
       <p>庫存 100% 存放在手機內，請務必養成每週點擊「📥 匯出備份」的習慣！</p>
       <h3 style="color: var(--accent); margin: 16px 0 8px;">五、即時新聞跑馬燈 📰</h3>
-      <p>首頁會自動抓取並輪播三大財經媒體的最新頭條，點擊標題即可開啟新聞網頁。您可隨時從「進階」選單將其隱藏。</p>
+      <p>首頁會自動抓取並隨機輪播三大財經媒體的最新頭條，點擊標題即可開啟新聞網頁。您可隨時從「進階」選單將其隱藏。</p>
     </div>
     <button type="button" class="modal-close" onclick="closeManual()" style="margin-top:20px;">關閉說明</button>
   </div>
@@ -510,9 +515,7 @@ class KeyRotator {
 let globalKeyRotator = null;
 function getKeyRotator() {
   const keys = [fugleKey, secondFugleKey].filter(k => k && k.trim() !== '');
-  if (!globalKeyRotator || globalKeyRotator.count !== keys.length) {
-    globalKeyRotator = new KeyRotator(keys);
-  }
+  if (!globalKeyRotator || globalKeyRotator.count !== keys.length) { globalKeyRotator = new KeyRotator(keys); }
   return globalKeyRotator;
 }
 
@@ -523,17 +526,13 @@ async function fetchWithProxy(targetUrl, proxyIndex = 0) {
     const resp = await fetch(proxyUrl, { signal: AbortSignal.timeout(API_TIMEOUT), cache: 'no-store' });
     if (!resp.ok) throw new Error('Proxy error');
     return resp;
-  } catch (e) {
-    return fetchWithProxy(targetUrl, proxyIndex + 1);
-  }
+  } catch (e) { return fetchWithProxy(targetUrl, proxyIndex + 1); }
 }
 
 function trackApiUsage(source) {
   const today = new Date().toISOString().split('T')[0];
-  const key = `api_usage_${today}_${source}`;
-  const count = (parseInt(localStorage.getItem(key) || '0')) + 1;
-  try { localStorage.setItem(key, String(count)); } catch(e){}
-  return count;
+  const key = `api_usage_${today}_${source}`; const count = (parseInt(localStorage.getItem(key) || '0')) + 1;
+  try { localStorage.setItem(key, String(count)); } catch(e){} return count;
 }
 
 function getApiUsageStats() {
@@ -542,19 +541,12 @@ function getApiUsageStats() {
 }
 
 function renderApiStats() {
-  const stats = getApiUsageStats();
-  const el = document.getElementById('apiStatsBox');
-  if (el) {
-    el.innerHTML = `<div style="display:flex;justify-content:space-around;text-align:center;font-size:13px;color:var(--t-muted);text-shadow:-1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d);">
-      <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${stats.fugle}</div><div>Fugle</div></div>
-      <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${stats.yahoo}</div><div>Yahoo</div></div>
-    </div>`;
-  }
+  const stats = getApiUsageStats(); const el = document.getElementById('apiStatsBox');
+  if (el) { el.innerHTML = `<div style="display:flex;justify-content:space-around;text-align:center;font-size:13px;color:var(--t-muted);text-shadow:-1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d);"><div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${stats.fugle}</div><div>Fugle</div></div><div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${stats.yahoo}</div><div>Yahoo</div></div></div>`; }
 }
 
 function toggleKeyVisibility(inputId, btnId) {
-  const input = document.getElementById(inputId);
-  const btn = document.getElementById(btnId);
+  const input = document.getElementById(inputId); const btn = document.getElementById(btnId);
   if (input.classList.contains('pwd-mask')) { input.classList.remove('pwd-mask'); btn.textContent = '🙈'; } 
   else { input.classList.add('pwd-mask'); btn.textContent = '👁'; }
 }
@@ -572,8 +564,7 @@ function loadForeignIndicesConfig() {
   const stored = localStorage.getItem('tw_custom_foreign_indices');
   if (stored) {
     try {
-      AVAILABLE_INDICES = JSON.parse(stored);
-      let updated = false;
+      AVAILABLE_INDICES = JSON.parse(stored); let updated = false;
       AVAILABLE_INDICES = AVAILABLE_INDICES.map(idx => {
         if (idx.name === '道瓊工業指數') { idx.name = '🇺🇸 道瓊工業指數'; updated = true; }
         if (idx.name === '那斯達克指數') { idx.name = '🇺🇸 那斯達克指數'; updated = true; }
@@ -611,8 +602,7 @@ function loadState(){
       const s=localStorage.getItem(getStockKey(i)); if(s) tabStocks[i]=JSON.parse(s);
       const r=localStorage.getItem(getRecordKey(i)); if(r) tabRecords[i]=JSON.parse(r);
     }
-    if(currentTab >= tabCount) currentTab = 0;
-    const t=localStorage.getItem(TK); applyThemeText(t);
+    if(currentTab >= tabCount) currentTab = 0; const t=localStorage.getItem(TK); applyThemeText(t);
     
     const cachedIdx = localStorage.getItem('tw_cached_indices');
     if(cachedIdx) { cachedGlobalIndices = JSON.parse(cachedIdx); if(cachedGlobalIndices.length > 0) renderGlobalIndices(cachedGlobalIndices, false); }
@@ -629,9 +619,7 @@ function loadState(){
     }
   }catch(e){console.error(e);}
 
-  document.getElementById('fugleKeyInput').value=fugleKey;
-  document.getElementById('secondFugleKeyInput').value=secondFugleKey;
-  document.getElementById('tabCountSelect').value=tabCount;
+  document.getElementById('fugleKeyInput').value=fugleKey; document.getElementById('secondFugleKeyInput').value=secondFugleKey; document.getElementById('tabCountSelect').value=tabCount;
   updateKeyStatus(); renderTabs(); renderApiStats();
 }
 
@@ -1014,7 +1002,7 @@ async function refresh() {
 function handleTouchWakeup() { const now = Date.now(); if (now - lastSuccessTime > 15000 && !isRefreshing) { forceRefresh(); } }
 document.addEventListener('touchend', handleTouchWakeup, { passive: true }); document.addEventListener('click', handleTouchWakeup, { passive: true });
 
-/* === 新增：跑馬燈邏輯與資料抓取 === */
+/* === 跑馬燈邏輯與資料抓取 === */
 function initTickerToggle() {
   const tickerWrapper = document.getElementById('newsTickerWrapper');
   const toggleBtn = document.getElementById('modalTickerToggleBtn');
@@ -1049,10 +1037,11 @@ async function fetchAllNews() {
   if (!tickerContainer) return;
   if (navigator.onLine === false) { tickerContainer.innerHTML = '<span class="ticker-item">目前處於離線狀態，無法載入最新新聞。</span>'; return; }
 
+  // 1. 更穩定且涵蓋廣泛的 RSS 來源
   const sources = [
-    { name: '鉅亨網', url: 'https://news.cnyes.com/rss/id/tw_macro' },
-    { name: '經濟日報', url: 'https://money.udn.com/rssfeed/news/1001/5588' },
-    { name: '工商時報', url: 'https://ctee.com.tw/rss/news-finance' }
+    { name: '鉅亨網', url: 'https://news.cnyes.com/rss/id/tw_stock_news' },
+    { name: '經濟日報', url: 'https://money.udn.com/rssfeed/news/1001/5591' },
+    { name: 'Yahoo股市', url: 'https://tw.stock.yahoo.com/rss/taiwan' } 
   ];
 
   try {
@@ -1065,13 +1054,20 @@ async function fetchAllNews() {
     });
 
     const results = await Promise.all(fetchPromises);
+    
+    // 2. 依照時間排序，並只取最新的 20 則
     let allNews = results.flat().sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
     allNews = allNews.slice(0, 20); 
 
+    // 3. 隨機打亂新聞順序，讓每次重整時開頭都不同
+    allNews = allNews.sort(() => Math.random() - 0.5);
+
     if (allNews.length > 0) {
       const htmlContent = allNews.map(item => {
-        return `<a href="${item.link}" target="_blank" class="ticker-item"><span class="news-source-tag">[${item.sourceName}]</span>${item.title}</a>`;
+        // 4. onclick 事件可防止手機版點擊後跑馬燈永久暫停
+        return `<a href="${item.link}" target="_blank" class="ticker-item" onclick="this.parentElement.style.animationPlayState='running'; setTimeout(()=>this.parentElement.style.animationPlayState='', 500);"><span class="news-source-tag">[${item.sourceName}]</span>${item.title}</a>`;
       }).join('');
+      
       tickerContainer.innerHTML = htmlContent;
       tickerContainer.style.animationDuration = `${allNews.length * 8}s`;
     }
@@ -1104,7 +1100,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-console.log('股票庫存管理 V4.14.2 已啟動');
+console.log('股票庫存管理 V4.14.3 已啟動');
 </script>
 </body>
 </html>
