@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-// 強制刷新快取：升級至 V4.14.3 (修正新聞來源與跑馬燈 UI)
-const APP_VER = '4.14.3';
+// 強制刷新快取：升級至 V4.14.4 (加入跑馬燈暫停/繼續功能)
+const APP_VER = '4.14.4';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -124,6 +124,9 @@ button:active, .tab-btn.active { transform: translateY(0); box-shadow: var(--sha
   border-radius: 8px; border: 1px solid var(--border-light);
 }
 .news-ticker-title { 
+  display: flex; 
+  align-items: center; 
+  gap: 8px;
   background: transparent;
   color: var(--up);
   padding: 0 10px 0 14px; 
@@ -132,6 +135,24 @@ button:active, .tab-btn.active { transform: translateY(0); box-shadow: var(--sha
   z-index: 2; 
   border-right: 1px solid var(--border-light);
   text-shadow: none;
+}
+.ticker-btn {
+  background: var(--bg); 
+  border: 1px solid var(--border-light); 
+  border-radius: 6px;
+  padding: 4px 8px; 
+  font-size: 12px; 
+  font-weight: bold; 
+  color: var(--t-main);
+  cursor: pointer; 
+  box-shadow: var(--shadow-soft);
+  transition: all 0.2s ease;
+  height: 26px;
+  line-height: normal;
+}
+.ticker-btn:active {
+  box-shadow: var(--shadow-inset);
+  transform: translateY(1px);
 }
 .news-ticker-wrap { 
   flex: 1; position: relative; overflow: hidden; 
@@ -293,7 +314,10 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 
 <div class="ticker-wrapper" id="newsTickerWrapper">
   <div class="news-ticker-container" id="newsTickerContainer">
-    <div class="news-ticker-title">財經快訊</div>
+    <div class="news-ticker-title">
+      <span>財經快訊</span>
+      <button type="button" class="ticker-btn" id="tickerToggleBtn" onclick="toggleTickerState()">暫停</button>
+    </div>
     <div class="news-ticker-wrap">
       <div class="news-ticker" id="newsTicker">新聞載入中，請稍候...</div>
     </div>
@@ -419,7 +443,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.14.3 (跑馬燈修正優化版)</div>
+    <div class="v-box">核心版本：V4.14.4 (加入跑馬燈暫停/繼續功能)</div>
     <button type="button" class="modal-close" style="margin-top: 24px;" onclick="saveAndCloseModal()">💾 儲存設定並關閉</button>
   </div>
 </div>
@@ -1032,12 +1056,28 @@ function initTickerToggle() {
   });
 }
 
+function toggleTickerState() {
+  const ticker = document.getElementById('newsTicker');
+  const btn = document.getElementById('tickerToggleBtn');
+  if (!ticker || !btn) return;
+  
+  if (ticker.style.animationPlayState === 'paused') {
+    ticker.style.animationPlayState = 'running';
+    btn.textContent = '暫停';
+    btn.style.color = 'var(--t-main)';
+  } else {
+    ticker.style.animationPlayState = 'paused';
+    btn.textContent = '繼續';
+    btn.style.color = 'var(--up)';
+  }
+}
+
 async function fetchAllNews() {
   const tickerContainer = document.getElementById('newsTicker');
   if (!tickerContainer) return;
   if (navigator.onLine === false) { tickerContainer.innerHTML = '<span class="ticker-item">目前處於離線狀態，無法載入最新新聞。</span>'; return; }
 
-  // 1. 更穩定且涵蓋廣泛的 RSS 來源
+  // 涵蓋廣泛的 RSS 來源
   const sources = [
     { name: '鉅亨網', url: 'https://news.cnyes.com/rss/id/tw_stock_news' },
     { name: '經濟日報', url: 'https://money.udn.com/rssfeed/news/1001/5591' },
@@ -1055,17 +1095,14 @@ async function fetchAllNews() {
 
     const results = await Promise.all(fetchPromises);
     
-    // 2. 依照時間排序，並只取最新的 20 則
     let allNews = results.flat().sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
     allNews = allNews.slice(0, 20); 
-
-    // 3. 隨機打亂新聞順序，讓每次重整時開頭都不同
     allNews = allNews.sort(() => Math.random() - 0.5);
 
     if (allNews.length > 0) {
       const htmlContent = allNews.map(item => {
-        // 4. onclick 事件可防止手機版點擊後跑馬燈永久暫停
-        return `<a href="${item.link}" target="_blank" class="ticker-item" onclick="this.parentElement.style.animationPlayState='running'; setTimeout(()=>this.parentElement.style.animationPlayState='', 500);"><span class="news-source-tag">[${item.sourceName}]</span>${item.title}</a>`;
+        // 移除 onclick，避免覆蓋手動暫停設定
+        return `<a href="${item.link}" target="_blank" class="ticker-item"><span class="news-source-tag">[${item.sourceName}]</span>${item.title}</a>`;
       }).join('');
       
       tickerContainer.innerHTML = htmlContent;
@@ -1100,7 +1137,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-console.log('股票庫存管理 V4.14.3 已啟動');
+console.log('股票庫存管理 V4.14.4 已啟動');
 </script>
 </body>
 </html>
