@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-// 強制刷新快取：升級至 V4.14.5 (新聞交叉顯示、移除按鈕、縮小標題框)
-const APP_VER = '4.14.5';
+// 強制刷新快取：升級至 V4.14.6 (修正新聞快取與RSS來源問題)
+const APP_VER = '4.14.6';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -129,9 +129,9 @@ button:active, .tab-btn.active { transform: translateY(0); box-shadow: var(--sha
   justify-content: center;
   background: transparent;
   color: var(--up);
-  padding: 0 6px; /* 縮小左右內距 */
+  padding: 0 6px; 
   font-weight: bold; 
-  font-size: 14px; /* 縮小字體 */
+  font-size: 14px; 
   z-index: 2; 
   border-right: 1px solid var(--border-light);
   text-shadow: none;
@@ -423,7 +423,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.14.5 (新聞交叉顯示、縮小標題)</div>
+    <div class="v-box">核心版本：V4.14.6 (優化RSS排他與快取)</div>
     <button type="button" class="modal-close" style="margin-top: 24px;" onclick="saveAndCloseModal()">💾 儲存設定並關閉</button>
   </div>
 </div>
@@ -1041,25 +1041,31 @@ async function fetchAllNews() {
   if (!tickerContainer) return;
   if (navigator.onLine === false) { tickerContainer.innerHTML = '<span class="ticker-item">目前處於離線狀態，無法載入最新新聞。</span>'; return; }
 
-  // 涵蓋廣泛的 RSS 來源
+  // 調整為更具即時性的 RSS Feed URL
   const sources = [
-    { name: '鉅亨網', url: 'https://news.cnyes.com/rss/id/tw_stock_news' },
+    { name: '鉅亨網', url: 'https://news.cnyes.com/rss/id/tw_stock' }, // 改用全台股分類，新聞量更大
     { name: '經濟日報', url: 'https://money.udn.com/rssfeed/news/1001/5591' },
-    { name: 'Yahoo股市', url: 'https://tw.stock.yahoo.com/rss/taiwan' } 
+    { name: 'Yahoo股市', url: 'https://tw.stock.yahoo.com/rss/tw-market' } // 改用台股大盤焦點分類
   ];
 
   try {
+    // 使用當下時間戳記 _t 強制打碎 rss2json 的服務端快取機制
+    const timestamp = Date.now();
     const fetchPromises = sources.map(async (source) => {
-      const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(source.url)}`;
+      const targetRssUrl = `${source.url}?_t=${timestamp}`;
+      const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(targetRssUrl)}&_=${timestamp}`;
+      
       const response = await fetch(apiUrl, { cache: 'no-store' });
       const data = await response.json();
-      if (data.status === 'ok') { return data.items.map(item => ({ ...item, sourceName: source.name })); }
+      if (data.status === 'ok' && data.items) { 
+        return data.items.map(item => ({ ...item, sourceName: source.name })); 
+      }
       return [];
     });
 
     const results = await Promise.all(fetchPromises);
     
-    // 交叉合併新聞，確保三家來源會輪流出現
+    // 加強版 Interleaving 交叉混流排序法
     let allNews = [];
     const maxLength = Math.max(...results.map(r => r.length));
     for (let i = 0; i < maxLength; i++) {
@@ -1068,17 +1074,16 @@ async function fetchAllNews() {
       if (results[2] && results[2][i]) allNews.push(results[2][i]); // Yahoo股市
     }
     
-    // 只取最新的 30 則輪播
+    // 取前 30 則進行輪播
     allNews = allNews.slice(0, 30);
 
     if (allNews.length > 0) {
       const htmlContent = allNews.map(item => {
-        // 恢復點擊後短暫解除暫停的設定
         return `<a href="${item.link}" target="_blank" class="ticker-item" onclick="this.parentElement.style.animationPlayState='running'; setTimeout(()=>this.parentElement.style.animationPlayState='', 500);"><span class="news-source-tag">[${item.sourceName}]</span>${item.title}</a>`;
       }).join('');
       
       tickerContainer.innerHTML = htmlContent;
-      tickerContainer.style.animationDuration = `${allNews.length * 6}s`; // 適當加長秒數以確保閱讀時間
+      tickerContainer.style.animationDuration = `${allNews.length * 7}s`;
     }
   } catch (error) { console.error('新聞載入失敗:', error); }
 }
@@ -1109,7 +1114,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-console.log('股票庫存管理 V4.14.5 已啟動');
+console.log('股票庫存管理 V4.14.6 已啟動');
 </script>
 </body>
 </html>
