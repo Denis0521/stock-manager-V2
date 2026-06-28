@@ -12,7 +12,7 @@
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
 // 強制刷新快取：升級至 V4.14.0 (國旗、圖示與並排按鈕優化)
-const APP_VER = '4.15.0';
+const APP_VER = '4.14.1';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -294,126 +294,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   .manual-content { font-size: 18px; }
   .manual-content h3 { font-size: 20px; }
   .btn-manual-row { font-size: 17px; padding: 12px 10px; }
-
-
-/* ========================================================= 📰 財經新聞跑馬燈 ========================================================= */
-.news-ticker-bar {
-  margin: 6px 10px 2px;
-  padding: 0;
-  border-radius: 10px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  height: 38px;
-  position: relative;
-  background: var(--bg);
-  box-shadow: var(--shadow-soft);
-  border: 1px solid var(--border-light);
-}
-.news-ticker-label {
-  flex: 0 0 auto;
-  padding: 0 12px;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 800;
-  color: var(--accent);
-  background: var(--bg);
-  box-shadow: 3px 0 6px var(--s-dark), -2px 0 4px var(--s-light);
-  border-right: 1px solid var(--border-light);
-  z-index: 3;
-  white-space: nowrap;
-  letter-spacing: 0.5px;
-}
-.news-ticker-track-wrap {
-  flex: 1;
-  overflow: hidden;
-  position: relative;
-  height: 100%;
-  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
-}
-.news-ticker-track {
-  display: flex;
-  align-items: center;
-  height: 100%;
-  white-space: nowrap;
-  will-change: transform;
-}
-@keyframes ticker-scroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-.news-ticker-track.animating {
-  animation: ticker-scroll 60s linear infinite;
-}
-.news-ticker-item {
-  display: inline-flex;
-  align-items: center;
-  padding: 0 24px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--t-main);
-  white-space: nowrap;
-  flex-shrink: 0;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-.news-ticker-item:hover {
-  color: var(--accent);
-}
-.news-ticker-item::before {
-  content: '•';
-  margin-right: 10px;
-  color: var(--accent);
-  font-size: 18px;
-  line-height: 1;
-}
-.news-ticker-item .time-tag {
-  font-size: 11px;
-  color: var(--t-muted);
-  margin-left: 6px;
-  font-weight: 500;
-  opacity: 0.8;
-}
-.news-ticker-loading {
-  padding: 0 16px;
-  font-size: 13px;
-  color: var(--t-muted);
-  font-weight: 600;
-}
-.news-ticker-error {
-  padding: 0 16px;
-  font-size: 13px;
-  color: var(--up);
-  font-weight: 600;
-}
-.news-ticker-dots {
-  display: flex;
-  gap: 4px;
-  padding: 0 10px;
-  align-items: center;
-}
-.news-ticker-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--s-dark);
-  transition: background 0.3s, transform 0.3s;
-}
-.news-ticker-dot.active {
-  background: var(--accent);
-  transform: scale(1.3);
-}
-
-@media (max-width: 360px) {
-  .news-ticker-bar { height: 34px; }
-  .news-ticker-label { font-size: 11px; padding: 0 8px; }
-  .news-ticker-item { font-size: 12px; padding: 0 16px; }
-}
-
 }
 </style>
 <link rel="manifest" href="manifest.json">
@@ -426,15 +306,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <button type="button" class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙</button>
     <button type="button" class="btn-adv" onclick="openModal()">進階</button>
   </div>
-</div>
-<div class="news-ticker-bar" id="newsTickerBar">
-  <div class="news-ticker-label" id="newsTickerLabel">📰 載入中...</div>
-  <div class="news-ticker-track-wrap">
-    <div class="news-ticker-track" id="newsTickerTrack">
-      <div class="news-ticker-loading">正在抓取財經新聞...</div>
-    </div>
-  </div>
-  <div class="news-ticker-dots" id="newsTickerDots"></div>
 </div>
 <div class="tabs-bar" id="tabsBarContainer"></div>
 
@@ -554,7 +425,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.15.0 (新增財經媒體跑馬燈)</div>
+    <div class="v-box">核心版本：V4.14.0 (優化圖示與按鈕排列)</div>
     <button type="button" class="modal-close" style="margin-top: 24px;" onclick="saveAndCloseModal()">💾 儲存設定並關閉</button>
   </div>
 </div>
@@ -640,167 +511,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </div>
 
 <script>
-
-/* ========================================================= 📰 財經新聞跑馬燈引擎 ========================================================= */
-const NEWS_SOURCES = [
-  { name: '鉅亨網', url: 'https://news.cnyes.com/news/cat/headline/rss', color: '#2563EB' },
-  { name: '中央社財經', url: 'https://www.cna.com.tw/rss/feed.aspx?topic=fn', color: '#0891B2' },
-  { name: '自由財經', url: 'https://news.ltn.com.tw/rss/business.xml', color: '#16A34A' },
-  { name: '聯合財經', url: 'https://udn.com/rss/feed/2/6649', color: '#9333EA' },
-  { name: '工商時報', url: 'https://www.ctee.com.tw/rss/', color: '#DC2626' }
-];
-
-let currentNewsSourceIndex = 0;
-let newsTickerTimer = null;
-let newsRotationTimer = null;
-let cachedNewsData = {};
-
-async function fetchRssNews(sourceObj) {
-  const cacheKey = `news_cache_${sourceObj.name}`;
-  const cacheTimeKey = `news_cache_time_${sourceObj.name}`;
-  const now = Date.now();
-  const cachedTime = localStorage.getItem(cacheTimeKey);
-
-  // 5分鐘內使用快取
-  if (cachedTime && (now - parseInt(cachedTime)) < 300000) {
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-      try { return JSON.parse(cached); } catch(e) {}
-    }
-  }
-
-  // 嘗試透過 proxy 抓取
-  for (let pi = 0; pi < PROXY_LIST.length; pi++) {
-    try {
-      const proxyUrl = PROXY_LIST[pi] + encodeURIComponent(sourceObj.url);
-      const resp = await fetch(proxyUrl, { 
-        signal: AbortSignal.timeout(8000),
-        cache: 'no-store',
-        headers: { 'Accept': 'application/xml, text/xml, */*' }
-      });
-      if (!resp.ok) continue;
-      const text = await resp.text();
-      const parser = new DOMParser();
-      const xml = parser.parseFromString(text, 'text/xml');
-      const items = xml.querySelectorAll('item');
-      const news = [];
-      items.forEach((item, idx) => {
-        if (idx >= 12) return;
-        const title = item.querySelector('title')?.textContent?.trim() || '';
-        const link = item.querySelector('link')?.textContent?.trim() || '';
-        const pubDate = item.querySelector('pubDate')?.textContent?.trim() || '';
-        let timeStr = '';
-        if (pubDate) {
-          try {
-            const d = new Date(pubDate);
-            timeStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-          } catch(e) {}
-        }
-        if (title && title.length > 0) {
-          news.push({ title: title.replace(/<[^>]*>/g, ''), link, time: timeStr });
-        }
-      });
-      if (news.length > 0) {
-        try {
-          localStorage.setItem(cacheKey, JSON.stringify(news));
-          localStorage.setItem(cacheTimeKey, String(now));
-        } catch(e) {}
-        return news;
-      }
-    } catch (e) { continue; }
-  }
-  return null;
-}
-
-function renderNewsTicker(newsList, sourceObj) {
-  const track = document.getElementById('newsTickerTrack');
-  const label = document.getElementById('newsTickerLabel');
-  const dots = document.getElementById('newsTickerDots');
-
-  if (!track || !label) return;
-
-  label.textContent = `📰 ${sourceObj.name}`;
-  label.style.color = sourceObj.color;
-
-  // 渲染 dots
-  if (dots) {
-    dots.innerHTML = '';
-    NEWS_SOURCES.forEach((src, i) => {
-      const dot = document.createElement('div');
-      dot.className = 'news-ticker-dot' + (i === currentNewsSourceIndex ? ' active' : '');
-      dots.appendChild(dot);
-    });
-  }
-
-  if (!newsList || newsList.length === 0) {
-    track.innerHTML = '<div class="news-ticker-error">⚠️ 暫時無法取得新聞，使用快取中...</div>';
-    return;
-  }
-
-  // 建立兩組相同內容以實現無縫滾動
-  let html = '';
-  for (let pass = 0; pass < 2; pass++) {
-    for (const item of newsList) {
-      const timeTag = item.time ? `<span class="time-tag">${item.time}</span>` : '';
-      html += `<a class="news-ticker-item" href="${item.link}" target="_blank" rel="noopener" onclick="event.stopPropagation();">${item.title}${timeTag}</a>`;
-    }
-  }
-
-  track.innerHTML = html;
-  track.classList.remove('animating');
-  void track.offsetWidth; // 強制重繪
-  track.classList.add('animating');
-}
-
-async function rotateNewsSource() {
-  const sourceObj = NEWS_SOURCES[currentNewsSourceIndex];
-  let news = cachedNewsData[sourceObj.name];
-
-  if (!news) {
-    news = await fetchRssNews(sourceObj);
-    if (news) cachedNewsData[sourceObj.name] = news;
-  }
-
-  // 如果當前沒有資料，嘗試找其他來源的快取
-  if (!news || news.length === 0) {
-    for (let i = 0; i < NEWS_SOURCES.length; i++) {
-      const fallback = NEWS_SOURCES[i];
-      if (fallback.name === sourceObj.name) continue;
-      let fbNews = cachedNewsData[fallback.name];
-      if (!fbNews) {
-        fbNews = await fetchRssNews(fallback);
-        if (fbNews) cachedNewsData[fallback.name] = fbNews;
-      }
-      if (fbNews && fbNews.length > 0) {
-        news = fbNews;
-        break;
-      }
-    }
-  }
-
-  renderNewsTicker(news, sourceObj);
-
-  // 預載下一個來源
-  const nextIndex = (currentNewsSourceIndex + 1) % NEWS_SOURCES.length;
-  const nextSource = NEWS_SOURCES[nextIndex];
-  if (!cachedNewsData[nextSource.name]) {
-    fetchRssNews(nextSource).then(n => { if (n) cachedNewsData[nextSource.name] = n; });
-  }
-}
-
-function startNewsTicker() {
-  rotateNewsSource();
-  // 每 30 秒輪播一次媒體來源
-  newsRotationTimer = setInterval(() => {
-    currentNewsSourceIndex = (currentNewsSourceIndex + 1) % NEWS_SOURCES.length;
-    rotateNewsSource();
-  }, 30000);
-}
-
-function stopNewsTicker() {
-  if (newsRotationTimer) { clearInterval(newsRotationTimer); newsRotationTimer = null; }
-}
-
 /* ========================================================= 🔧 熱門股票與ETF簡稱字典 ========================================================= */
 const STOCK_DICT = {
   '0050': '元大台灣50', '0056': '元大高股息', '00878': '國泰永續高股息', '00929': '復華台灣科技優息',
@@ -1782,7 +1492,6 @@ document.addEventListener('click', handleTouchWakeup, { passive: true });
 
 // 初始化載入
 loadState(); renderAll(); renderHistory();
-startNewsTicker();
 
 setTimeout(forceRefresh, 500);  
 
@@ -1815,7 +1524,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-console.log('股票庫存管理 V4.15.0 已啟動');
+console.log('股票庫存管理 V4.14.0 已啟動');
 </script>
 </body>
 </html>
