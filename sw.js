@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stock-portfolio-v4.14.4';
+const CACHE_NAME = 'stock-portfolio-v4.14.5';
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(['./', './index.html'])));
