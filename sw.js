@@ -1,9 +1,9 @@
-const CACHE_NAME = 'stock-portfolio-v4.14.1';
+const CACHE_NAME = 'stock-portfolio-v4.14.2';
 const urlsToCache = [
   './',
   './index.html',
   './manifest.json',
-  './icon-192.png', // 已補上 192x192 圖示，確保符合 Chrome 的安裝標準
+  './icon-192.png', 
   './icon-512.png'
 ];
 
@@ -40,7 +40,8 @@ self.addEventListener('fetch', event => {
                        requestUrl.hostname.includes('corsproxy.io') ||
                        requestUrl.hostname.includes('codetabs.com') ||
                        requestUrl.hostname.includes('thingproxy.freeboard.io') ||
-                       requestUrl.hostname.includes('docs.google.com');
+                       requestUrl.hostname.includes('docs.google.com') ||
+                       requestUrl.hostname.includes('api.rss2json.com');
 
   if (isApiRequest) {
     event.respondWith(fetch(event.request));
