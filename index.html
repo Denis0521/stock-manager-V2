@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="股票庫存管理">
-<meta name="theme-color" id="themeColorMeta" content="#f0f2f6">
+<meta name="theme-color" id="themeColorMeta" content="#1B263B">
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
@@ -20,60 +20,102 @@ if(localStorage.getItem('tw_app_version') !== APP_VER) {
 }
 </script>
 <style>
-/* ========================================================= 🚀 核心變數引擎（V4.14.0 配色全面升級） ========================================================= */
+/* ========================================================= 🚀 核心變數引擎（深色拼色升級版） ========================================================= */
 :root { 
-  --bg: #E8ECF1;
-  --s-light: #FFFFFF;
-  --s-dark: #B8C4D0;
-  --t-main: #1A2332;
-  --t-muted: #6B7B8D;
-  --up: #DC2626;
-  --down: #16A34A;
-  --engrave-l: rgba(255,255,255,0.9);
-  --engrave-d: rgba(0,0,0,0.12);
-  --protrude-l: rgba(255,255,255,1);
-  --protrude-d: rgba(0,0,0,0.06);
-  --accent: #2563EB;
-  --border-light: #D1D8E0;
+  /* 經典主題：深海軍藍 x 活力橘 */
+  --bg: #1B263B; 
+  --s-light: #273756;
+  --s-dark: #0F1520;
+  --t-main: #F8F9FA;
+  --t-muted: #8D99AE;
+  --up: #EF233C;
+  --down: #2A9D8F;
+  --engrave-l: rgba(255,255,255,0.15);
+  --engrave-d: rgba(0,0,0,0.6);
+  --protrude-l: rgba(255,255,255,0.2);
+  --protrude-d: rgba(0,0,0,0.5);
+  --accent: #F77F00; /* 拼色亮點 */
+  --border-light: #415A77;
   --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 body.tech { 
-  --bg: #1E2330; --s-light: #2D3344; --s-dark: #151820; --t-main: #F8FAFC; --t-muted: #94A3B8; 
-  --up: #FF5252; --down: #4ADE80; --engrave-l: rgba(255,255,255,0.12); --engrave-d: rgba(0,0,0,0.5); 
-  --protrude-l: rgba(255,255,255,0.18); --protrude-d: rgba(0,0,0,0.35); --accent: #60A5FA;
-  --border-light: #3D4556; --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
+  /* 科技主題：極致黑 x 螢光青 */
+  --bg: #0B0C10; 
+  --s-light: #1F2833;
+  --s-dark: #000000;
+  --t-main: #66FCF1; /* 拼色主字體 */
+  --t-muted: #C5C6C7; 
+  --up: #FF007F; 
+  --down: #39FF14; 
+  --engrave-l: rgba(255,255,255,0.1); 
+  --engrave-d: rgba(0,0,0,0.8); 
+  --protrude-l: rgba(255,255,255,0.15); 
+  --protrude-d: rgba(0,0,0,0.6); 
+  --accent: #45A29E;
+  --border-light: #1F2833; 
+  --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 body.blue-light { 
-  --bg: #D0DEE8; --s-light: #E8F0F8; --s-dark: #8CA0B8; --t-main: #061220; --t-muted: #3A5A7A; 
-  --up: #DC2626; --down: #16A34A; --engrave-l: rgba(255,255,255,0.95); --engrave-d: rgba(0,0,0,0.16); 
-  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.08); --accent: #1E40AF;
-  --border-light: #A8B8C8; --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
+  /* 藍色主題：普魯士藍 x 芥末黃 */
+  --bg: #003049; 
+  --s-light: #004060; 
+  --s-dark: #002030; 
+  --t-main: #FCBF49; /* 拼色主字體 */
+  --t-muted: #EAE2B7; 
+  --up: #F77F00; 
+  --down: #4CAF50; 
+  --engrave-l: rgba(255,255,255,0.15); 
+  --engrave-d: rgba(0,0,0,0.6); 
+  --protrude-l: rgba(255,255,255,0.2); 
+  --protrude-d: rgba(0,0,0,0.5); 
+  --accent: #D62828; /* 深紅點綴 */
+  --border-light: #004C70; 
+  --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 body.purple-light { 
-  --bg: #EDE8F4; --s-light: #FAF7FF; --s-dark: #B8A8CC; --t-main: #1E0B3A; --t-muted: #6B5B8E; 
-  --up: #E11D48; --down: #10B981; --engrave-l: rgba(255,255,255,0.95); --engrave-d: rgba(0,0,0,0.14); 
-  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.06); --accent: #7C3AED;
-  --border-light: #C8B8D8; --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
+  /* 紫色主題：深邃紫 x 萊姆綠 */
+  --bg: #240046; 
+  --s-light: #3C0073; 
+  --s-dark: #120023; 
+  --t-main: #E0AAFF; 
+  --t-muted: #9D4EDD; 
+  --up: #FF0054; 
+  --down: #00F5D4; 
+  --engrave-l: rgba(255,255,255,0.15); 
+  --engrave-d: rgba(0,0,0,0.7); 
+  --protrude-l: rgba(255,255,255,0.2); 
+  --protrude-d: rgba(0,0,0,0.6); 
+  --accent: #A6FF00; /* 拼色亮點 */
+  --border-light: #5A189A; 
+  --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 body.pink { 
-  --bg: #F5E8EC; --s-light: #FFF5F7; --s-dark: #D4A8B8; --t-main: #3A0A2A; --t-muted: #8B5A6B; 
-  --up: #DC2626; --down: #059669; --engrave-l: rgba(255,255,255,0.9); --engrave-d: rgba(0,0,0,0.12); 
-  --protrude-l: rgba(255,255,255,0.95); --protrude-d: rgba(0,0,0,0.06); --accent: #DB2777;
-  --border-light: #D8B8C4; --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
+  /* 粉紅主題改為：深緋紅 x 亮孔雀藍 */
+  --bg: #450920; 
+  --s-light: #630E30; 
+  --s-dark: #270510; 
+  --t-main: #F9E0E9; 
+  --t-muted: #A53860; 
+  --up: #FF9F1C; 
+  --down: #2EC4B6; 
+  --engrave-l: rgba(255,255,255,0.15); 
+  --engrave-d: rgba(0,0,0,0.7); 
+  --protrude-l: rgba(255,255,255,0.2); 
+  --protrude-d: rgba(0,0,0,0.6); 
+  --accent: #00B4D8; /* 拼色亮點 */
+  --border-light: #7A0033; 
+  --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
-
-
-
 
 /* ========================================================= 🌐 基礎排版 ========================================================= */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -146,18 +188,18 @@ button:active, .tab-btn.active {
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
 .idx-card-box { flex: 0 0 auto; min-width: 160px; padding: 2px 16px; scroll-snap-align: start; border-right: 1px solid var(--s-dark); text-align: left; }
 .idx-card-box:last-child { border-right: none; }
-.idx-box-name { font-size: 18px; color: var(--t-muted); font-weight: 600; margin-top: 2px; line-height: 1.3; } /* 放大字體讓各國國旗等大 */
+.idx-box-name { font-size: 18px; color: var(--t-muted); font-weight: 600; margin-top: 2px; line-height: 1.3; } 
 .idx-box-price { font-size: 18px; font-weight: 700; margin: 1px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
 .idx-box-change-row { display: flex; align-items: center; justify-content: flex-start; gap: 6px; font-size: 16px; font-weight: 600; white-space: nowrap; }
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 0; opacity: 0.7; }
 
 .table-scroll { margin: 8px 10px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; }
-.list-wrap { min-width: 670px; } /* 縮減最小寬度使欄位能更靠近 */
-.list-header, .srow { grid-template-columns: 110px 95px 75px 75px 75px 85px 105px 70px; } /* 微調欄位寬度讓明細更靠近 */
+.list-wrap { min-width: 670px; } 
+.list-header, .srow { grid-template-columns: 110px 95px 75px 75px 75px 85px 105px 70px; } 
 .list-header { display: grid; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 17px; color: var(--t-muted); font-weight: 600; }
 .srow { display: grid; align-items: stretch; border-bottom: 1px solid var(--s-dark); font-size: 17px; }
 .srow:last-child { border-bottom: none; }
-.list-header > div, .srow > div { padding: 6px 4px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; white-space: nowrap; } /* 縮小左右 padding */
+.list-header > div, .srow > div { padding: 6px 4px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; white-space: nowrap; } 
 .list-header > div:nth-child(1), .srow > div:nth-child(1) { align-items: flex-start; text-align: left; position: sticky; left: 0; z-index: 2; background: var(--bg); padding-left: 8px; }
 .list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after { content: ''; position: absolute; top: 0; bottom: 0; right: -6px; width: 6px; background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; }
 .list-header > div:nth-child(8) { align-items: center; justify-content: center; padding-left: 10px; }
@@ -231,7 +273,8 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   border: 1px solid var(--border-light);
 }
 .tab-count-label { font-size: 12px; color: var(--t-muted); font-weight: 600; margin-bottom: 2px; text-align: left; }
-.tab-count-wrapper select { width: 100%; box-shadow: none; padding: 4px 0; background: transparent; font-size: 15px; border: none; }
+.tab-count-wrapper select { width: 100%; box-shadow: none; padding: 4px 0; background: transparent; font-size: 15px; border: none; color: var(--t-main); }
+.tab-count-wrapper select option { background: var(--bg); color: var(--t-main); }
 
 .api-section { margin-bottom: 20px; padding-top: 10px; border-top: 1px solid var(--s-dark); }
 .api-link-box { text-align: center; margin-bottom: 16px; padding: 10px; background: var(--bg); border-radius: 8px; box-shadow: var(--shadow-soft); border: 1px solid var(--border-light); }
@@ -288,7 +331,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   .btn-backup { font-size: 17px; padding: 14px; }
   .v-box { font-size: 15px; }
   .idx-card-box { min-width: 200px; padding: 8px 20px; }
-  .idx-box-name { font-size: 20px; } /* 桌面加大字體，國旗更一致 */
+  .idx-box-name { font-size: 20px; } 
   .idx-box-price { font-size: 20px; }
   .idx-box-change-row { font-size: 18px; }
   .manual-content { font-size: 18px; }
@@ -701,11 +744,11 @@ function loadState(){
 function applyThemeText(t){
   const body=document.body; const themeBtn=document.getElementById('themeBtn'); const metaTheme = document.getElementById('themeColorMeta');
   body.className = '';
-  if(t==='tech'){ body.classList.add('tech'); themeBtn.textContent='🚀'; metaTheme.content='#1E2330'; }
-  else if(t==='blue-light'){ body.classList.add('blue-light'); themeBtn.textContent='💎'; metaTheme.content='#D0DEE8'; }
-  else if(t==='purple-light'){ body.classList.add('purple-light'); themeBtn.textContent='🍇'; metaTheme.content='#EDE8F4'; }
-  else if(t==='pink'){ body.classList.add('pink'); themeBtn.textContent='🌸'; metaTheme.content='#F5E8EC'; }
-  else { themeBtn.textContent='☀️'; metaTheme.content='#E8ECF1'; }
+  if(t==='tech'){ body.classList.add('tech'); themeBtn.textContent='🚀'; metaTheme.content='#0B0C10'; }
+  else if(t==='blue-light'){ body.classList.add('blue-light'); themeBtn.textContent='💎'; metaTheme.content='#003049'; }
+  else if(t==='purple-light'){ body.classList.add('purple-light'); themeBtn.textContent='🍇'; metaTheme.content='#240046'; }
+  else if(t==='pink'){ body.classList.add('pink'); themeBtn.textContent='🌸'; metaTheme.content='#450920'; }
+  else { themeBtn.textContent='☀️'; metaTheme.content='#1B263B'; }
 }
 
 function saveHoldings(){try{localStorage.setItem(getStockKey(currentTab),JSON.stringify(tabStocks[currentTab]));}catch(e){}}
