@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-// 強制刷新快取：升級至 V4.14.2 (新增財經新聞跑馬燈)
-const APP_VER = '4.14.2';
+// 強制刷新快取：升級至 V4.14.3 (優化跑馬燈位置、速度與開關)
+const APP_VER = '4.14.3';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -20,98 +20,53 @@ if(localStorage.getItem('tw_app_version') !== APP_VER) {
 }
 </script>
 <style>
-/* ========================================================= 🚀 核心變數引擎（加入拼色設計） ========================================================= */
+/* ========================================================= 🚀 核心變數引擎 ========================================================= */
 :root { 
-  --bg: #E8ECF1;
-  --bg-card: #FFFFFF;
-  --s-light: #FFFFFF;
-  --s-dark: #B8C4D0;
-  --t-main: #1A2332;
-  --t-muted: #6B7B8D;
-  --up: #DC2626;
-  --down: #16A34A;
-  --engrave-l: rgba(255,255,255,0.9);
-  --engrave-d: rgba(0,0,0,0.12);
-  --protrude-l: rgba(255,255,255,1);
-  --protrude-d: rgba(0,0,0,0.06);
-  --accent: #2563EB;
-  --border-light: #D1D8E0;
+  --bg: #E8ECF1; --bg-card: #FFFFFF; --s-light: #FFFFFF; --s-dark: #B8C4D0; 
+  --t-main: #1A2332; --t-muted: #6B7B8D; --up: #DC2626; --down: #16A34A; 
+  --engrave-l: rgba(255,255,255,0.9); --engrave-d: rgba(0,0,0,0.12); 
+  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.06); 
+  --accent: #2563EB; --border-light: #D1D8E0; 
   --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 body.tech { 
-  --bg: #1E2330; 
-  --bg-card: #2D3344;
-  --s-light: #2D3344; 
-  --s-dark: #151820; 
-  --t-main: #F8FAFC; 
-  --t-muted: #94A3B8; 
-  --up: #FF5252; 
-  --down: #4ADE80; 
-  --engrave-l: rgba(255,255,255,0.12); 
-  --engrave-d: rgba(0,0,0,0.5); 
-  --protrude-l: rgba(255,255,255,0.18); 
-  --protrude-d: rgba(0,0,0,0.35); 
-  --accent: #60A5FA;
-  --border-light: #3D4556; 
+  --bg: #1E2330; --bg-card: #2D3344; --s-light: #2D3344; --s-dark: #151820; 
+  --t-main: #F8FAFC; --t-muted: #94A3B8; --up: #FF5252; --down: #4ADE80; 
+  --engrave-l: rgba(255,255,255,0.12); --engrave-d: rgba(0,0,0,0.5); 
+  --protrude-l: rgba(255,255,255,0.18); --protrude-d: rgba(0,0,0,0.35); 
+  --accent: #60A5FA; --border-light: #3D4556; 
   --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 body.blue-light { 
-  --bg: #D0DEE8; 
-  --bg-card: #E8F0F8;
-  --s-light: #E8F0F8; 
-  --s-dark: #8CA0B8; 
-  --t-main: #061220; 
-  --t-muted: #3A5A7A; 
-  --up: #DC2626; 
-  --down: #16A34A; 
-  --engrave-l: rgba(255,255,255,0.95); 
-  --engrave-d: rgba(0,0,0,0.16); 
-  --protrude-l: rgba(255,255,255,1); 
-  --protrude-d: rgba(0,0,0,0.08); 
-  --accent: #1E40AF;
-  --border-light: #A8B8C8; 
+  --bg: #D0DEE8; --bg-card: #E8F0F8; --s-light: #E8F0F8; --s-dark: #8CA0B8; 
+  --t-main: #061220; --t-muted: #3A5A7A; --up: #DC2626; --down: #16A34A; 
+  --engrave-l: rgba(255,255,255,0.95); --engrave-d: rgba(0,0,0,0.16); 
+  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.08); 
+  --accent: #1E40AF; --border-light: #A8B8C8; 
   --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 body.purple-light { 
-  --bg: #EDE8F4; 
-  --bg-card: #FAF7FF;
-  --s-light: #FAF7FF; 
-  --s-dark: #B8A8CC; 
-  --t-main: #1E0B3A; 
-  --t-muted: #6B5B8E; 
-  --up: #E11D48; 
-  --down: #10B981; 
-  --engrave-l: rgba(255,255,255,0.95); 
-  --engrave-d: rgba(0,0,0,0.14); 
-  --protrude-l: rgba(255,255,255,1); 
-  --protrude-d: rgba(0,0,0,0.06); 
-  --accent: #7C3AED;
-  --border-light: #C8B8D8; 
+  --bg: #EDE8F4; --bg-card: #FAF7FF; --s-light: #FAF7FF; --s-dark: #B8A8CC; 
+  --t-main: #1E0B3A; --t-muted: #6B5B8E; --up: #E11D48; --down: #10B981; 
+  --engrave-l: rgba(255,255,255,0.95); --engrave-d: rgba(0,0,0,0.14); 
+  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.06); 
+  --accent: #7C3AED; --border-light: #C8B8D8; 
   --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 body.pink { 
-  --bg: #F5E8EC; 
-  --bg-card: #FFF5F7;
-  --s-light: #FFF5F7; 
-  --s-dark: #D4A8B8; 
-  --t-main: #3A0A2A; 
-  --t-muted: #8B5A6B; 
-  --up: #DC2626; 
-  --down: #059669; 
-  --engrave-l: rgba(255,255,255,0.9); 
-  --engrave-d: rgba(0,0,0,0.12); 
-  --protrude-l: rgba(255,255,255,0.95); 
-  --protrude-d: rgba(0,0,0,0.06); 
-  --accent: #DB2777;
-  --border-light: #D8B8C4; 
+  --bg: #F5E8EC; --bg-card: #FFF5F7; --s-light: #FFF5F7; --s-dark: #D4A8B8; 
+  --t-main: #3A0A2A; --t-muted: #8B5A6B; --up: #DC2626; --down: #059669; 
+  --engrave-l: rgba(255,255,255,0.9); --engrave-d: rgba(0,0,0,0.12); 
+  --protrude-l: rgba(255,255,255,0.95); --protrude-d: rgba(0,0,0,0.06); 
+  --accent: #DB2777; --border-light: #D8B8C4; 
   --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
@@ -119,20 +74,63 @@ body.pink {
 
 /* ========================================================= 🌐 基礎排版 ========================================================= */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-/* 修改 padding-top 給跑馬燈留空間 */
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif; background:var(--bg); color:var(--t-main); padding:35px 0 60px; min-height:100vh; font-size:15px; overflow-x:hidden; transition:background-color 0.4s ease, color 0.4s ease}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif; background:var(--bg); color:var(--t-main); padding:0 0 60px; min-height:100vh; font-size:15px; overflow-x:hidden; transition:background-color 0.4s ease, color 0.4s ease}
 input,select,button{font-family:inherit;font-size:inherit;outline:none;text-align:center}
 
-/* 新增跑馬燈樣式 */
-.news-ticker-container { position: fixed; top: 0; left: 0; width: 100%; background: var(--bg-card); color: var(--t-main); height: 35px; line-height: 35px; overflow: hidden; z-index: 9999; font-size: 14px; box-shadow: var(--shadow-strong); border-bottom: 1px solid var(--border-light); transition: background-color 0.4s ease, color 0.4s ease; }
-.ticker-title { position: absolute; left: 0; top: 0; background: var(--accent); color: #fff; padding: 0 15px; font-weight: bold; z-index: 10; box-shadow: 3px 0 5px rgba(0,0,0,0.2); }
-.ticker-wrap { width: 100%; padding-left: 100%; white-space: nowrap; display: inline-block; animation: ticker linear infinite; }
-.ticker-item { display: inline-block; padding: 0 30px; color: var(--t-main); text-decoration: none; font-weight: 600; }
-.ticker-item:hover { color: var(--accent); text-decoration: underline; }
-.ticker-source { background: var(--s-dark); color: var(--bg-card); padding: 2px 6px; border-radius: 3px; font-size: 12px; margin-right: 8px; font-weight: bold; }
+/* 新增跑馬燈樣式 (緊湊、隨主題變色、紅字) */
+.news-ticker-container { 
+  margin: 6px 4px; /* 最小化左右邊距 */
+  background: var(--bg-card); /* 底色與主題一致 */
+  border-radius: 6px; 
+  box-shadow: var(--shadow-soft); 
+  border: 1px solid var(--border-light); 
+  display: flex; 
+  align-items: center; 
+  height: 34px; 
+  overflow: hidden; 
+  transition: all 0.4s ease;
+}
+.ticker-title { 
+  flex: 0 0 auto; 
+  color: var(--up); /* 紅色字體 */
+  font-weight: 900; 
+  font-size: 14px; 
+  padding: 0 8px; 
+  background: var(--bg-card); 
+  z-index: 2; 
+  border-right: 1px dashed var(--border-light);
+}
+.ticker-scroll-area { 
+  flex: 1; 
+  overflow: hidden; 
+  position: relative; 
+}
+.ticker-wrap { 
+  display: inline-block; 
+  white-space: nowrap; 
+  padding-left: 100%; 
+  animation: ticker linear infinite; 
+}
+.ticker-item { 
+  display: inline-block; 
+  padding: 0 20px; 
+  color: var(--up); /* 新聞文字也設為紅色 */
+  text-decoration: none; 
+  font-weight: 700; 
+  font-size: 15px; 
+}
+.ticker-item:hover { text-decoration: underline; }
+.ticker-source { 
+  color: var(--t-muted); 
+  font-size: 11px; 
+  margin-right: 6px; 
+  border: 1px solid var(--border-light); 
+  padding: 2px 4px; 
+  border-radius: 4px; 
+}
 @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
 
-/* 所有新擬態元件加上明顯邊框，強化層次，並改用色塊顏色 (--bg-card) 達到拼色效果 */
+/* 卡片與元件框架 */
 .header, .tabs-bar, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .backup-box { 
   background: var(--bg-card); 
   box-shadow: var(--shadow-soft);
@@ -141,17 +139,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
   border: 1px solid var(--border-light);
 }
 
-.header { box-shadow: var(--shadow-strong); border-bottom: 2px solid var(--s-dark); }
-.tabs-bar { box-shadow: var(--shadow-soft); }
-.card { box-shadow: var(--shadow-soft); }
-.idx-scroll-container { box-shadow: var(--shadow-soft); }
-.table-scroll { box-shadow: var(--shadow-soft); }
-.summary { box-shadow: var(--shadow-soft); }
-.hist-item { box-shadow: var(--shadow-soft); }
-.backup-box { box-shadow: var(--shadow-soft); }
-
-/* 修改 header 的 top 為 35px，配合跑馬燈 */
-.header { border-radius: 0 0 16px 16px; padding: 12px 10px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 35px; z-index: 100; }
+.header { box-shadow: var(--shadow-strong); border-bottom: 2px solid var(--s-dark); border-radius: 0 0 16px 16px; padding: 12px 10px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
 .header h1 { font-size: 20px; font-weight: 700; color: var(--t-main); user-select: none; margin-left: 6px; }
 .header .hdr-right { display: flex; gap: 6px; }
 
@@ -346,13 +334,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 </head>
 <body>
 
-<div class="news-ticker-container">
-  <div class="ticker-title">即時財經</div>
-  <div class="ticker-wrap" id="js-ticker">
-    <span class="ticker-item">財經新聞載入中...</span>
-  </div>
-</div>
-
 <div class="header">
   <h1>股票庫存管理</h1>
   <div class="hdr-right">
@@ -361,6 +342,16 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <button type="button" class="btn-adv" onclick="openModal()">進階</button>
   </div>
 </div>
+
+<div class="news-ticker-container" id="tickerContainer">
+  <div class="ticker-title">財經新聞</div>
+  <div class="ticker-scroll-area">
+    <div class="ticker-wrap" id="js-ticker">
+      <span class="ticker-item" style="color:var(--t-muted);">新聞載入中...</span>
+    </div>
+  </div>
+</div>
+
 <div class="tabs-bar" id="tabsBarContainer"></div>
 
 <div class="idx-scroll-container" id="idxScrollContainer">
@@ -434,6 +425,12 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   <div class="modal fullscreen-modal">
     <button type="button" class="btn-close-icon" onclick="closeModal()">✕</button>
     <h2>進階設定</h2>
+
+    <div class="settings-row" style="align-items:center; padding:12px 16px; background:var(--bg-card); border-radius:8px; border:1px solid var(--border-light); box-shadow:var(--shadow-inset); margin-bottom:16px;">
+      <span style="flex:1; text-align:left; font-size:16px; font-weight:600; color:var(--t-main);">📰 顯示財經新聞列</span>
+      <input type="checkbox" id="showTickerCheckbox" style="flex:none; width:22px; height:22px; margin:0;" onchange="toggleTicker()">
+    </div>
+
     <div class="settings-row">
       <button type="button" class="btn-manual-row" onclick="openManual()">📖 使用說明</button>
       <div class="tab-count-wrapper">
@@ -479,7 +476,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.14.2 (新增跑馬燈與主題適配)</div>
+    <div class="v-box">核心版本：V4.14.3 (支援動態新聞跑馬燈)</div>
     <button type="button" class="modal-close" style="margin-top: 24px;" onclick="saveAndCloseModal()">💾 儲存設定並關閉</button>
   </div>
 </div>
@@ -511,30 +508,28 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       <h3>一、基本操作與股票簡稱</h3>
       <ul>
         <li><strong>記帳與損益：</strong>輸入股票代號、張/股數及買入均價。系統會自動計算目前總現值、今日損益與總未實現損益（ROI）。</li>
-        <li><strong>自帶ETF字典：</strong>系統內建台灣熱門 ETF 與權值股字典（如 0050, 00878 等），新增時會自動帶入簡稱。若查無簡稱或想自訂，可隨時點擊列表右側「✎」按鈕手動編輯「股票簡稱」。</li>
+        <li><strong>自帶ETF字典：</strong>系統內建台灣熱門 ETF 與權值股字典，新增時會自動帶入簡稱。若想自訂，可點擊列表右側「✎」按鈕手動編輯「股票簡稱」。</li>
       </ul>
 
-      <h3>二、分頁（組合）的靈活妙用 💡</h3>
-      <p>進階設定中最多可開啟 5 個分頁，雙擊標籤即可重新命名。強烈建議這樣規劃：</p>
+      <h3>二、分頁與新聞跑馬燈 💡</h3>
       <ul>
-        <li><strong>家人資產代管：</strong>將分頁命名為「我的庫存」、「老婆帳戶」、「小孩教育金」，一台手機就能輕鬆分開管理全家資產、互不干擾。</li>
-        <li><strong>投資策略分流：</strong>建立「長期存股」與「短線波段」分頁，將不同核心邏輯的股票分開追蹤，避免被短期波動影響長期領息心態。</li>
-        <li><strong>純觀察看盤：</strong>建立一個「自選觀察」分頁，只要輸入代號，數量填 0 或不填均價，它就會變成一個極簡純粹的即時報價面板。</li>
+        <li><strong>分頁：</strong>進階設定中最多可開啟 5 個分頁，雙擊標籤即可重新命名。適合做長短線或家人帳戶的分流。</li>
+        <li><strong>財經新聞：</strong>頂部的跑馬燈每小時會抓取各家財經媒體即時新聞，若覺得干擾，可於「進階設定」中隨時關閉。</li>
       </ul>
 
       <h3>三、API 報價引擎原則</h3>
       <ul>
-        <li><strong>雙組 Key 模式（強烈推薦 🌟）：</strong>填入兩組 Fugle API Key，更新頻率將直接提速至每 <strong>10 秒</strong>！系統會輪流調用兩組金鑰，徹底分散限額風險，讓報價如流水般順暢。</li>
+        <li><strong>雙組 Key 模式（強烈推薦 🌟）：</strong>填入兩組 Fugle API Key，更新頻率將直接提速至每 <strong>10 秒</strong>！</li>
         <li><strong>防呆快取：</strong>當全球市場進入盤後或斷線，會自動抓取手機內最新的暫存檔，確保畫面永遠有數據。</li>
       </ul>
 
       <h3>四、慢速本地儲存與備份重要性 ⚠️</h3>
       <ul>
-        <li>本軟體不使用雲端資料庫，您的庫存 100% 存放在手機內。如果清除快取或換手機，資料就會歸零。<strong>請務必養成每週點擊「📥 匯出備份」的習慣！</strong></li>
+        <li>本軟體不使用雲端資料庫，您的庫存 100% 存放在手機內。<strong>請務必養成每週點擊「📥 匯出備份」的習慣！</strong></li>
       </ul>
       
       <h3>五、強制喚醒技巧</h3>
-      <p>若打開 APP 時報價未即時跳動，只要<strong>手指輕觸螢幕滑動或點擊任意空白處</strong>，系統內部的「心跳引擎」便會被瞬間喚醒，強迫更新最新報價！</p>
+      <p>若打開 APP 時報價未即時跳動，只要<strong>手指輕觸螢幕滑動或點擊任意空白處</strong>，系統內部的「心跳引擎」便會被瞬間喚醒！</p>
     </div>
     <button type="button" class="modal-close" onclick="closeManual()">關閉說明</button>
   </div>
@@ -653,7 +648,7 @@ function toggleKeyVisibility(inputId, btnId) {
 
 let cfWorkerUrl = 'https://yahoo-index-proxy.denis0521.workers.dev';
 
-// 國外指數動態管理與初始配置設定 (加上國旗)
+// 國外指數動態管理與初始配置設定
 const DEFAULT_INDICES = [
   { symbol: '^DJI', name: '🇺🇸 道瓊工業指數' },
   { symbol: '^IXIC', name: '🇺🇸 那斯達克指數' },
@@ -672,7 +667,6 @@ function loadForeignIndicesConfig() {
   if (stored) {
     try {
       AVAILABLE_INDICES = JSON.parse(stored);
-      // 自動升級無國旗舊名為帶有國旗的新名稱
       let updated = false;
       AVAILABLE_INDICES = AVAILABLE_INDICES.map(idx => {
         if (idx.name === '道瓊工業指數') { idx.name = '🇺🇸 道瓊工業指數'; updated = true; }
@@ -702,8 +696,9 @@ let tabNames = ['分頁 1', '分頁 2', '分頁 3', '分頁 4', '分頁 5'];
 let tabCount = 3;
 let fugleKey='',secondFugleKey='';
 let currentInterval = 20000;
+let showTicker = true; 
 
-const FK='tw_fugle_key',SFK='tw_second_fugle_key',TK='tw_theme', CUR_TAB_KEY='tw_current_tab', TN_KEY='tw_tab_names', TC_KEY='tw_tab_count';
+const FK='tw_fugle_key',SFK='tw_second_fugle_key',TK='tw_theme', CUR_TAB_KEY='tw_current_tab', TN_KEY='tw_tab_names', TC_KEY='tw_tab_count', TICKER_KEY='tw_show_ticker';
 const getStockKey = (idx) => `tw_stock_portfolio_tab_${idx}`;
 const getRecordKey = (idx) => `tw_records_tab_${idx}`;
 let cachedGlobalIndices = [];
@@ -717,6 +712,11 @@ function loadState(){
     const ct=localStorage.getItem(CUR_TAB_KEY);if(ct!=null)currentTab=parseInt(ct);
     const tn=localStorage.getItem(TN_KEY);if(tn) tabNames=JSON.parse(tn);
     const tc=localStorage.getItem(TC_KEY);if(tc) tabCount=parseInt(tc);
+    
+    // 載入跑馬燈開關狀態
+    const st = localStorage.getItem(TICKER_KEY);
+    if(st !== null) showTicker = (st === 'true');
+    document.getElementById('tickerContainer').style.display = showTicker ? 'flex' : 'none';
 
     for(let i=0; i<5; i++){
       const s=localStorage.getItem(getStockKey(i)); if(s) tabStocks[i]=JSON.parse(s);
@@ -747,9 +747,16 @@ function loadState(){
   document.getElementById('fugleKeyInput').value=fugleKey;
   document.getElementById('secondFugleKeyInput').value=secondFugleKey;
   document.getElementById('tabCountSelect').value=tabCount;
+  
   updateKeyStatus(); 
   renderTabs();
   renderApiStats();
+}
+
+function toggleTicker() {
+  showTicker = document.getElementById('showTickerCheckbox').checked;
+  document.getElementById('tickerContainer').style.display = showTicker ? 'flex' : 'none';
+  try { localStorage.setItem(TICKER_KEY, showTicker); } catch(e){}
 }
 
 function applyThemeText(t){
@@ -1335,6 +1342,9 @@ function openModal(){
   document.getElementById('fugleKeyInput').value=fugleKey;
   document.getElementById('secondFugleKeyInput').value=secondFugleKey;
   document.getElementById('tabCountSelect').value=tabCount;
+  
+  document.getElementById('showTickerCheckbox').checked = showTicker;
+  
   updateKeyStatus(); renderApiStats(); document.getElementById('modalOverlay').classList.add('show');
 }
 
@@ -1557,12 +1567,14 @@ async function loadFinanceNews() {
       tickerHtml += `<a href="${item.link}" target="_blank" class="ticker-item"><span class="ticker-source">${item.source}</span>${item.title}</a>`; 
     });
     
-    tickerContainer.innerHTML = tickerHtml + tickerHtml; // 複製一次達成無縫輪播
+    tickerContainer.innerHTML = tickerHtml + tickerHtml; 
+    
     const totalLength = tickerContainer.textContent.length;
-    const speedFactor = 0.15; // 速度調整
+    // 速度調整：數值越小跑越快。原為0.15，現大幅提升至0.06
+    const speedFactor = 0.06; 
     tickerContainer.style.animationDuration = `${totalLength * speedFactor}s`;
   } catch (error) {
-    tickerContainer.innerHTML = '<span class="ticker-item" style="color:var(--up);">無法載入即時新聞，請稍後再試</span>';
+    tickerContainer.innerHTML = '<span class="ticker-item" style="color:var(--t-muted);">無法載入即時新聞，請稍後再試</span>';
   }
 }
 
@@ -1571,7 +1583,6 @@ loadState(); renderAll(); renderHistory();
 
 setTimeout(forceRefresh, 500);  
 
-// 啟動心跳引擎
 heartbeatWorker.postMessage({ action: 'start', interval: currentInterval });
 
 window.addEventListener('focus', forceRefresh);
@@ -1600,7 +1611,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-console.log('股票庫存管理 V4.14.2 已啟動');
+console.log('股票庫存管理 V4.14.3 已啟動');
 </script>
 </body>
 </html>
