@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-// 強制刷新快取：升級至 V4.14.4 (調整跑馬燈速度與文字顏色)
-const APP_VER = '4.14.4';
+// 強制刷新快取：升級至 V4.14.3 (優化跑馬燈位置、速度與開關)
+const APP_VER = '4.14.3';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -77,12 +77,39 @@ body.pink {
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif; background:var(--bg); color:var(--t-main); padding:0 0 60px; min-height:100vh; font-size:15px; overflow-x:hidden; transition:background-color 0.4s ease, color 0.4s ease}
 input,select,button{font-family:inherit;font-size:inherit;outline:none;text-align:center}
 
-/* 新增跑馬燈樣式 (緊湊、隨主題變色、文字改為主題黑色) */
+/* 卡片與元件框架 */
+.header, .tabs-bar, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .backup-box { 
+  background: var(--bg-card); 
+  box-shadow: var(--shadow-soft);
+  border-radius: 12px; 
+  transition: background-color 0.4s ease, box-shadow 0.4s ease;
+  border: 1px solid var(--border-light);
+}
+
+.header { 
+  box-shadow: var(--shadow-strong); 
+  border-bottom: 2px solid var(--s-dark); 
+  border-radius: 0 0 16px 16px; 
+  padding: 12px 10px; 
+  display: flex; 
+  flex-direction: column; 
+  position: sticky; 
+  top: 0; 
+  z-index: 100; 
+  transition: all 0.4s ease;
+}
+.header-top { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+.header h1 { font-size: 20px; font-weight: 700; color: var(--t-main); user-select: none; margin-left: 6px; }
+.header-top .hdr-right { display: flex; gap: 6px; }
+
+/* 跑馬燈樣式 */
 .news-ticker-container { 
-  margin: 6px 4px; 
+  margin: 10px 0 0 0; 
+  width: 100%; 
+  box-sizing: border-box;
   background: var(--bg-card); 
   border-radius: 6px; 
-  box-shadow: var(--shadow-soft); 
+  box-shadow: var(--shadow-inset); 
   border: 1px solid var(--border-light); 
   display: flex; 
   align-items: center; 
@@ -114,12 +141,12 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .ticker-item { 
   display: inline-block; 
   padding: 0 20px; 
-  color: var(--t-main); /* 新聞文字改為黑色/主題主色 */
+  color: var(--up); 
   text-decoration: none; 
   font-weight: 700; 
   font-size: 15px; 
 }
-.ticker-item:hover { text-decoration: underline; color: var(--accent); }
+.ticker-item:hover { text-decoration: underline; }
 .ticker-source { 
   color: var(--t-muted); 
   font-size: 11px; 
@@ -130,18 +157,6 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 }
 @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
 
-/* 卡片與元件框架 */
-.header, .tabs-bar, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .backup-box { 
-  background: var(--bg-card); 
-  box-shadow: var(--shadow-soft);
-  border-radius: 12px; 
-  transition: background-color 0.4s ease, box-shadow 0.4s ease;
-  border: 1px solid var(--border-light);
-}
-
-.header { box-shadow: var(--shadow-strong); border-bottom: 2px solid var(--s-dark); border-radius: 0 0 16px 16px; padding: 12px 10px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-.header h1 { font-size: 20px; font-weight: 700; color: var(--t-main); user-select: none; margin-left: 6px; }
-.header .hdr-right { display: flex; gap: 6px; }
 
 .tabs-bar { padding: 6px 10px; margin: 8px 10px; gap: 8px; display: flex; }
 .card { padding: 12px 16px; margin: 8px 10px; }
@@ -283,7 +298,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 @media (max-width: 360px) {
   .header h1 { font-size: 16px; margin-left: 2px; }
   .btn-theme, .btn-adv, .btn-add-hdr { padding: 8px 10px; font-size: 15px; }
-  .header .hdr-right { gap: 4px; }
+  .header-top .hdr-right { gap: 4px; }
 }
 
 @media (max-width: 767px) {
@@ -335,20 +350,21 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 <body>
 
 <div class="header">
-  <h1>股票庫存管理</h1>
-  <div class="hdr-right">
-    <button type="button" class="btn-add-hdr" onclick="openAddModal()">+新增</button>
-    <button type="button" class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙</button>
-    <button type="button" class="btn-adv" onclick="openModal()">進階</button>
+  <div class="header-top">
+    <h1>股票庫存管理</h1>
+    <div class="hdr-right">
+      <button type="button" class="btn-add-hdr" onclick="openAddModal()">+新增</button>
+      <button type="button" class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙</button>
+      <button type="button" class="btn-adv" onclick="openModal()">進階</button>
+    </div>
   </div>
-</div>
 
-<!-- 跑馬燈移至 header 下方，改用 Flex 結構 -->
-<div class="news-ticker-container" id="tickerContainer">
-  <div class="ticker-title">財經新聞</div>
-  <div class="ticker-scroll-area">
-    <div class="ticker-wrap" id="js-ticker">
-      <span class="ticker-item" style="color:var(--t-muted);">新聞載入中...</span>
+  <div class="news-ticker-container" id="tickerContainer">
+    <div class="ticker-title">財經新聞</div>
+    <div class="ticker-scroll-area">
+      <div class="ticker-wrap" id="js-ticker">
+        <span class="ticker-item" style="color:var(--t-muted);">新聞載入中...</span>
+      </div>
     </div>
   </div>
 </div>
@@ -427,7 +443,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <button type="button" class="btn-close-icon" onclick="closeModal()">✕</button>
     <h2>進階設定</h2>
 
-    <!-- 新增跑馬燈開關設定區 -->
     <div class="settings-row" style="align-items:center; padding:12px 16px; background:var(--bg-card); border-radius:8px; border:1px solid var(--border-light); box-shadow:var(--shadow-inset); margin-bottom:16px;">
       <span style="flex:1; text-align:left; font-size:16px; font-weight:600; color:var(--t-main);">📰 顯示財經新聞列</span>
       <input type="checkbox" id="showTickerCheckbox" style="flex:none; width:22px; height:22px; margin:0;" onchange="toggleTicker()">
@@ -478,7 +493,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.14.4 (動態新聞跑馬燈優化)</div>
+    <div class="v-box">核心版本：V4.14.3 (支援動態新聞跑馬燈)</div>
     <button type="button" class="modal-close" style="margin-top: 24px;" onclick="saveAndCloseModal()">💾 儲存設定並關閉</button>
   </div>
 </div>
@@ -1560,7 +1575,7 @@ async function loadFinanceNews() {
     const newsData = await response.json();
     
     if (newsData.length === 0) { 
-      tickerContainer.innerHTML = '<span class="ticker-item" style="color:var(--t-muted);">目前暫無新聞</span>'; 
+      tickerContainer.innerHTML = '<span class="ticker-item">目前暫無新聞</span>'; 
       return; 
     }
     
@@ -1572,8 +1587,8 @@ async function loadFinanceNews() {
     tickerContainer.innerHTML = tickerHtml + tickerHtml; 
     
     const totalLength = tickerContainer.textContent.length;
-    // 速度調整：將 0.06 變慢到 0.11
-    const speedFactor = 0.11; 
+    // 速度調整：數值越小跑越快。原為0.06，改為0.12即可將速度減半
+    const speedFactor = 0.12; 
     tickerContainer.style.animationDuration = `${totalLength * speedFactor}s`;
   } catch (error) {
     tickerContainer.innerHTML = '<span class="ticker-item" style="color:var(--t-muted);">無法載入即時新聞，請稍後再試</span>';
@@ -1600,4 +1615,20 @@ document.getElementById('qtyInput').addEventListener('keydown',e=>{ if(e.key==='
 document.getElementById('buyPriceInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); addStock(); } });
 
 document.getElementById('addModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-document.getElementById('modalOverlay').addEventListener('click',functionNormally I can help with things like this, but I don't seem to have access to that content. You can try again or ask me for something else.
+document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
+document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
+document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
+document.getElementById('foreignIdxOverlay').addEventListener('click',function(e){if(e.target===this)closeForeignIdxModal();});
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('Service Worker 註冊成功，範疇為:', reg.scope))
+      .catch(err => console.error('Service Worker 註冊失敗:', err));
+  });
+}
+
+console.log('股票庫存管理 V4.14.3 已啟動');
+</script>
+</body>
+</html>
