@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-// 強制刷新快取：升級至 V4.14.3 (優化跑馬燈位置、速度與開關)
-const APP_VER = '4.14.3';
+// 強制刷新快取：升級至 V4.14.4 (新增無分頁選項、進階設定按鈕黑色化、修正 API 說明)
+const APP_VER = '4.14.4';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -90,7 +90,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
   box-shadow: var(--shadow-strong); 
   border-bottom: 2px solid var(--s-dark); 
   border-radius: 0 0 16px 16px; 
-  padding: 12px 10px 4px 10px; /* 減少下方內距讓跑馬燈更貼底 */
+  padding: 12px 10px 4px 10px;
   display: flex; 
   flex-direction: column; 
   position: sticky; 
@@ -102,9 +102,9 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .header h1 { font-size: 20px; font-weight: 700; color: var(--t-main); user-select: none; margin-left: 6px; }
 .header-top .hdr-right { display: flex; gap: 6px; }
 
-/* 跑馬燈樣式 (無標題、無鏤空、平面融入) */
+/* 跑馬燈樣式 */
 .news-ticker-container { 
-  margin: 16px 0 0 0; /* 增加上方外距往下推 */
+  margin: 16px 0 0 0; 
   width: 100%; 
   box-sizing: border-box;
   background: transparent; 
@@ -117,37 +117,12 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
   overflow: hidden; 
   transition: all 0.4s ease;
 }
-.ticker-scroll-area { 
-  flex: 1; 
-  overflow: hidden; 
-  position: relative; 
-}
-.ticker-wrap { 
-  display: inline-block; 
-  white-space: nowrap; 
-  padding-left: 100%; 
-  animation: ticker linear infinite; 
-}
-.ticker-item { 
-  display: inline-block; 
-  padding: 0 20px; 
-  color: #2563EB; /* 設定為藍色字體 */
-  text-decoration: none; 
-  font-weight: 700; 
-  font-size: 15px; 
-}
-body.tech .ticker-item {
-  color: #60A5FA; /* 深色模式自動切換為亮藍色以確保清晰度 */
-}
+.ticker-scroll-area { flex: 1; overflow: hidden; position: relative; }
+.ticker-wrap { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker linear infinite; }
+.ticker-item { display: inline-block; padding: 0 20px; color: #2563EB; text-decoration: none; font-weight: 700; font-size: 15px; }
+body.tech .ticker-item { color: #60A5FA; }
 .ticker-item:hover { text-decoration: underline; }
-.ticker-source { 
-  color: var(--t-muted); 
-  font-size: 11px; 
-  margin-right: 6px; 
-  border: 1px solid var(--border-light); 
-  padding: 2px 4px; 
-  border-radius: 4px; 
-}
+.ticker-source { color: var(--t-muted); font-size: 11px; margin-right: 6px; border: 1px solid var(--border-light); padding: 2px 4px; border-radius: 4px; }
 @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
 
 .tabs-bar { padding: 6px 10px; margin: 8px 10px; gap: 8px; display: flex; }
@@ -255,7 +230,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 .backup-box { padding: 16px; margin: 8px 0 0; }
 .backup-title { font-size: 16px; font-weight: 700; color: var(--t-muted); margin-bottom: 12px; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); text-align: left; }
 .backup-btns { display: flex; gap: 12px; }
-.btn-backup { flex: 1; padding: 8px 12px; font-size: 15px; } /* 縮小按鈕高度 */
+.btn-backup { flex: 1; padding: 8px 12px; font-size: 15px; }
 .v-box { text-align: center; font-size: 13px; color: var(--t-muted); margin-top: 24px; font-weight: 600; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
 .up { color: var(--up) !important; text-shadow: none !important; }
 .down { color: var(--down) !important; text-shadow: none !important; }
@@ -269,7 +244,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 .manual-content li { margin-bottom: 6px; }
 
 .settings-row { display: flex; gap: 12px; margin-bottom: 16px; align-items: stretch; }
-/* 分一半空間：讓說明按鈕跟分頁選單平分寬度 */
 .btn-manual-row { flex: 1; padding: 8px 10px; font-size: 15px; color: var(--accent); margin: 0; white-space: nowrap; background: var(--bg-card); border-radius: 8px; box-shadow: var(--shadow-soft); border: 1px solid var(--border-light); font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .btn-manual-row:hover { transform: translateY(-1px); box-shadow: var(--shadow-strong); }
 .btn-manual-row:active { transform: translateY(0); box-shadow: var(--shadow-inset); }
@@ -289,6 +263,22 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 .btn-close-icon:hover { color: var(--t-main); transform: scale(1.1); }
 
 .pwd-mask { -webkit-text-security: disc; text-security: disc; }
+
+/* ========================================================= 按鈕顏色例外處理 ========================================================= */
+#modalOverlay .modal button,
+#modalOverlay .modal a.btn-link,
+#modalOverlay .modal .btn-manual-row,
+#modalOverlay .modal .btn-close-icon {
+  color: #000 !important;
+}
+
+body.tech #modalOverlay .modal button,
+body.tech #modalOverlay .modal a.btn-link,
+body.tech #modalOverlay .modal .btn-manual-row,
+body.tech #modalOverlay .modal .btn-close-icon {
+  color: #F8FAFC !important;
+}
+/* ===================================================================================================================================== */
 
 @media (max-width: 360px) {
   .header h1 { font-size: 16px; margin-left: 2px; }
@@ -443,6 +433,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <div class="tab-count-wrapper">
           <div class="tab-count-label">分頁數量</div>
           <select id="tabCountSelect">
+            <option value="0">無分頁</option>
             <option value="1">1 個分頁</option>
             <option value="2">2 個分頁</option>
             <option value="3">3 個分頁</option>
@@ -487,7 +478,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
       </div>
       
       <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存設定並關閉</button>
-      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.14.3 (支援動態新聞跑馬燈)</div>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.14.4</div>
     </div>
   </div>
 </div>
@@ -524,13 +515,13 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 
       <h3>二、分頁與新聞跑馬燈 💡</h3>
       <ul>
-        <li><strong>分頁：</strong>進階設定中最多可開啟 5 個分頁，雙擊標籤即可重新命名。適合做長短線或家人帳戶的分流。</li>
+        <li><strong>分頁：</strong>進階設定中最多可開啟 5 個分頁，雙擊標籤即可重新命名。適合做長短線或家人帳戶的分流。也可以切換至「無分頁」隱藏此欄位。</li>
         <li><strong>財經新聞：</strong>頂部的跑馬燈每小時會抓取各家財經媒體即時新聞，若覺得干擾，可於「進階設定」中隨時關閉。</li>
       </ul>
 
       <h3>三、API 報價引擎原則</h3>
       <ul>
-        <li><strong>雙組 Key 模式（強烈推薦 🌟）：</strong>填入兩組 Fugle API Key，更新頻率將直接提速至每 <strong>10 秒</strong>！</li>
+        <li><strong>雙組 Key 模式（強烈推薦 🌟）：</strong>強烈建議填入兩組 Fugle API Key！若只使用一組 Key，頻繁更新容易觸發 API 呼叫次數限制導致被暫停使用(發生斷線)。填入兩組 Key 可輪流交替使用，不僅更新頻率將直接提速至每 <strong>10 秒</strong>，更能大幅降低單一 Key 的請求壓力，避免帳號被限制。</li>
         <li><strong>防呆快取：</strong>當全球市場進入盤後或斷線，會自動抓取手機內最新的暫存檔，確保畫面永遠有數據。</li>
       </ul>
 
@@ -736,7 +727,9 @@ function loadState(){
       const r=localStorage.getItem(getRecordKey(i)); if(r) tabRecords[i]=JSON.parse(r);
     }
 
-    if(currentTab >= tabCount) currentTab = 0;
+    // 處理無分頁的情境防呆 (tabCount為0視同以分頁1作為主力)
+    let maxTabs = tabCount === 0 ? 1 : tabCount;
+    if(currentTab >= maxTabs) currentTab = 0;
 
     const t=localStorage.getItem(TK); applyThemeText(t);
     
@@ -799,7 +792,9 @@ function saveTabCount(){
   if(newCount === tabCount) return;
   tabCount = newCount; 
   try{localStorage.setItem(TC_KEY, tabCount);}catch(e){}
-  if(currentTab >= tabCount) { currentTab = 0; try{localStorage.setItem(CUR_TAB_KEY, currentTab);}catch(e){} }
+  
+  let maxTabs = tabCount === 0 ? 1 : tabCount;
+  if(currentTab >= maxTabs) { currentTab = 0; try{localStorage.setItem(CUR_TAB_KEY, currentTab);}catch(e){} }
   renderTabs(); renderAll(); renderHistory(); 
 }
 
@@ -814,7 +809,7 @@ function toggleTheme(){
 }
 
 function switchTab(tabIndex){
-  if(currentTab === tabIndex) return;
+  if(currentTab === tabIndex || tabCount === 0) return;
   currentTab = tabIndex; try{localStorage.setItem(CUR_TAB_KEY, currentTab);}catch(e){}
   renderTabs(); renderAll(); renderHistory(); forceRefresh();
 }
@@ -833,6 +828,13 @@ function renameTab(tabIndex) {
 function renderTabs() {
   const container = document.getElementById('tabsBarContainer');
   container.innerHTML = '';
+  
+  if (tabCount === 0) {
+    container.style.display = 'none'; // 無分頁時隱藏板塊並讓其它元素往上靠
+    return;
+  }
+  
+  container.style.display = 'flex';
   for(let i=0; i<tabCount; i++){
     const btn = document.createElement('button');
     btn.type = 'button'; btn.className = 'tab-btn'; btn.id = `tab${i}`;
@@ -1627,7 +1629,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-console.log('股票庫存管理 V4.14.3 已啟動');
+console.log('股票庫存管理 V4.14.4 已啟動');
 </script>
 </body>
 </html>
