@@ -131,10 +131,13 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .ticker-item { 
   display: inline-block; 
   padding: 0 20px; 
-  color: var(--t-main); 
+  color: #2563EB; /* 設定為藍色字體 */
   text-decoration: none; 
   font-weight: 700; 
   font-size: 15px; 
+}
+body.tech .ticker-item {
+  color: #60A5FA; /* 深色模式自動切換為亮藍色以確保清晰度 */
 }
 .ticker-item:hover { text-decoration: underline; }
 .ticker-source { 
