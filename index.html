@@ -431,55 +431,58 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <button type="button" class="btn-close-icon" onclick="closeModal()">✕</button>
     <h2>進階設定</h2>
 
-    <div class="settings-row">
-      <button type="button" class="btn-manual-row" onclick="openManual()">📖 使用說明</button>
-      <div class="tab-count-wrapper">
-        <div class="tab-count-label">分頁數量</div>
-        <select id="tabCountSelect">
-          <option value="1">1 個分頁</option>
-          <option value="2">2 個分頁</option>
-          <option value="3">3 個分頁</option>
-          <option value="4">4 個分頁</option>
-          <option value="5">5 個分頁</option>
-        </select>
-      </div>
-    </div>
-    <div class="api-section">
-      <button type="button" id="tickerToggleBtn" onclick="toggleTicker()" style="width: 100%; padding: 12px; font-size: 16px; margin-bottom: 16px;">📰 財經新聞列：已開啟</button>
-      
-      <div class="api-link-box">
-        <a class="btn-link" href="https://developer.fugle.tw/docs/key/" target="_blank">🔗 申請 Fugle API Key</a>
-      </div>
-      <label>🔑 Fugle API Key（主要）</label>
-      <div style="display:flex;gap:8px;align-items:stretch;">
-        <input type="text" id="fugleKeyInput" class="pwd-mask" placeholder="輸入第一組 Key" autocomplete="off" spellcheck="false" style="flex:1;">
-        <button type="button" onclick="toggleKeyVisibility('fugleKeyInput','keyToggle1')" id="keyToggle1" style="flex:0 0 44px;font-size:16px;">👁</button>
-      </div>
-      <div><span class="key-status none" id="fugleKeyStatus">未設定</span></div>
-      <label>🔑 Fugle API Key 2（備用）</label>
-      <div style="display:flex;gap:8px;align-items:stretch;">
-        <input type="text" id="secondFugleKeyInput" class="pwd-mask" placeholder="輸入第二組 Key（選填）" autocomplete="off" spellcheck="false" style="flex:1;">
-        <button type="button" onclick="toggleKeyVisibility('secondFugleKeyInput','keyToggle2')" id="keyToggle2" style="flex:0 0 44px;font-size:16px;">👁</button>
-      </div>
-      <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
-      <div style="margin-top:16px;padding:12px;background:var(--bg-card);border-radius:12px;box-shadow:var(--shadow-inset); border:1px solid var(--border-light);">
-        <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--t-muted); margin-bottom:8px; padding:0 4px;">
-          <span>📊 今日 API 使用量</span>
-          <button type="button" onclick="openForeignIdxModal()" style="padding:4px 8px; font-size:12px; box-shadow:var(--shadow-soft); border:1px solid var(--border-light); border-radius:6px; color:var(--accent);">⚙️ 設定國外指數</button>
+    <div style="max-width: 85%; margin: 0 auto;">
+      <div class="settings-row">
+        <button type="button" class="btn-manual-row" onclick="openManual()">📖 使用說明</button>
+        <div class="tab-count-wrapper">
+          <div class="tab-count-label">分頁數量</div>
+          <select id="tabCountSelect">
+            <option value="1">1 個分頁</option>
+            <option value="2">2 個分頁</option>
+            <option value="3">3 個分頁</option>
+            <option value="4">4 個分頁</option>
+            <option value="5">5 個分頁</option>
+          </select>
         </div>
-        <div id="apiStatsBox"></div>
       </div>
-    </div>
-    <div class="backup-box">
-      <div class="backup-title">資料備份與還原</div>
-      <div class="backup-btns">
-        <button type="button" class="btn-backup" onclick="exportData()">📥 匯出備份</button>
-        <button type="button" class="btn-backup" onclick="triggerImport()">📤 匯入還原</button>
-        <input type="file" id="importFile" style="display:none" onchange="importData(event)">
+      <div class="api-section">
+        <button type="button" id="tickerToggleBtn" onclick="toggleTicker()" style="width: 100%; padding: 12px; font-size: 16px; margin-bottom: 16px;">📰 財經新聞列：已開啟</button>
+        
+        <div class="api-link-box">
+          <a class="btn-link" href="https://developer.fugle.tw/docs/key/" target="_blank">🔗 申請 Fugle API Key</a>
+        </div>
+        <label>🔑 Fugle API Key（主要）</label>
+        <div style="display:flex;gap:8px;align-items:stretch;">
+          <input type="text" id="fugleKeyInput" class="pwd-mask" placeholder="輸入第一組 Key" autocomplete="off" spellcheck="false" style="flex:1;">
+          <button type="button" onclick="toggleKeyVisibility('fugleKeyInput','keyToggle1')" id="keyToggle1" style="flex:0 0 44px;font-size:16px;">👁</button>
+        </div>
+        <div><span class="key-status none" id="fugleKeyStatus">未設定</span></div>
+        <label>🔑 Fugle API Key 2（備用）</label>
+        <div style="display:flex;gap:8px;align-items:stretch;">
+          <input type="text" id="secondFugleKeyInput" class="pwd-mask" placeholder="輸入第二組 Key（選填）" autocomplete="off" spellcheck="false" style="flex:1;">
+          <button type="button" onclick="toggleKeyVisibility('secondFugleKeyInput','keyToggle2')" id="keyToggle2" style="flex:0 0 44px;font-size:16px;">👁</button>
+        </div>
+        <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
+        <div style="margin-top:16px;padding:12px;background:var(--bg-card);border-radius:12px;box-shadow:var(--shadow-inset); border:1px solid var(--border-light);">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--t-muted); margin-bottom:8px; padding:0 4px;">
+            <span>📊 今日 API 使用量</span>
+            <button type="button" onclick="openForeignIdxModal()" style="padding:4px 8px; font-size:12px; box-shadow:var(--shadow-soft); border:1px solid var(--border-light); border-radius:6px; color:var(--accent); white-space:nowrap; flex-shrink:0;">⚙️ 設定國外指數</button>
+          </div>
+          <div id="apiStatsBox"></div>
+        </div>
       </div>
+      <div class="backup-box" style="background:transparent; box-shadow:none; border:none; padding:10px 0;">
+        <div class="backup-title">資料備份與還原</div>
+        <div class="backup-btns">
+          <button type="button" class="btn-backup" onclick="exportData()">📥 匯出備份</button>
+          <button type="button" class="btn-backup" onclick="triggerImport()">📤 匯入還原</button>
+          <input type="file" id="importFile" style="display:none" onchange="importData(event)">
+        </div>
+      </div>
+      
+      <button type="button" class="modal-close" style="margin-top: 16px; width: 100%;" onclick="saveAndCloseModal()">💾 儲存設定並關閉</button>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.14.3 (支援動態新聞跑馬燈)</div>
     </div>
-    <div class="v-box">核心版本：V4.14.3 (支援動態新聞跑馬燈)</div>
-    <button type="button" class="modal-close" style="margin-top: 24px;" onclick="saveAndCloseModal()">💾 儲存設定並關閉</button>
   </div>
 </div>
 
