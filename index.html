@@ -102,30 +102,20 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .header h1 { font-size: 20px; font-weight: 700; color: var(--t-main); user-select: none; margin-left: 6px; }
 .header-top .hdr-right { display: flex; gap: 6px; }
 
-/* 跑馬燈樣式 */
+/* 跑馬燈樣式 (無標題、無鏤空) */
 .news-ticker-container { 
   margin: 10px 0 0 0; 
   width: 100%; 
   box-sizing: border-box;
   background: var(--bg-card); 
   border-radius: 6px; 
-  box-shadow: var(--shadow-inset); 
+  box-shadow: var(--shadow-soft); /* 取消鏤空，改回一般陰影 */
   border: 1px solid var(--border-light); 
   display: flex; 
   align-items: center; 
   height: 34px; 
   overflow: hidden; 
   transition: all 0.4s ease;
-}
-.ticker-title { 
-  flex: 0 0 auto; 
-  color: var(--up); 
-  font-weight: 900; 
-  font-size: 14px; 
-  padding: 0 8px; 
-  background: var(--bg-card); 
-  z-index: 2; 
-  border-right: 1px dashed var(--border-light);
 }
 .ticker-scroll-area { 
   flex: 1; 
@@ -141,7 +131,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .ticker-item { 
   display: inline-block; 
   padding: 0 20px; 
-  color: var(--up); 
+  color: var(--t-main); /* 黑色字體，且會隨深淺色模式自動變更 */
   text-decoration: none; 
   font-weight: 700; 
   font-size: 15px; 
@@ -156,7 +146,6 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
   border-radius: 4px; 
 }
 @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
-
 
 .tabs-bar { padding: 6px 10px; margin: 8px 10px; gap: 8px; display: flex; }
 .card { padding: 12px 16px; margin: 8px 10px; }
@@ -360,7 +349,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   </div>
 
   <div class="news-ticker-container" id="tickerContainer">
-    <div class="ticker-title">財經新聞</div>
     <div class="ticker-scroll-area">
       <div class="ticker-wrap" id="js-ticker">
         <span class="ticker-item" style="color:var(--t-muted);">新聞載入中...</span>
@@ -1587,8 +1575,8 @@ async function loadFinanceNews() {
     tickerContainer.innerHTML = tickerHtml + tickerHtml; 
     
     const totalLength = tickerContainer.textContent.length;
-    // 速度調整：數值越小跑越快。原為0.06，改為0.12即可將速度減半
-    const speedFactor = 0.12; 
+    // 速度調整：數值越小跑越快。原為0.12，改為0.18使速度更慢
+    const speedFactor = 0.18; 
     tickerContainer.style.animationDuration = `${totalLength * speedFactor}s`;
   } catch (error) {
     tickerContainer.innerHTML = '<span class="ticker-item" style="color:var(--t-muted);">無法載入即時新聞，請稍後再試</span>';
