@@ -102,15 +102,15 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .header h1 { font-size: 20px; font-weight: 700; color: var(--t-main); user-select: none; margin-left: 6px; }
 .header-top .hdr-right { display: flex; gap: 6px; }
 
-/* 跑馬燈樣式 (無標題、無鏤空) */
+/* 跑馬燈樣式 — 完全平面化：無框線、無陰影、背景透明 */
 .news-ticker-container { 
   margin: 10px 0 0 0; 
   width: 100%; 
   box-sizing: border-box;
-  background: var(--bg-card); 
-  border-radius: 6px; 
-  box-shadow: var(--shadow-soft); /* 取消鏤空，改回一般陰影 */
-  border: 1px solid var(--border-light); 
+  background: transparent; 
+  border-radius: 0; 
+  box-shadow: none;
+  border: none; 
   display: flex; 
   align-items: center; 
   height: 34px; 
@@ -131,7 +131,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .ticker-item { 
   display: inline-block; 
   padding: 0 20px; 
-  color: var(--t-main); /* 黑色字體，且會隨深淺色模式自動變更 */
+  color: var(--t-main);
   text-decoration: none; 
   font-weight: 700; 
   font-size: 15px; 
@@ -348,6 +348,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     </div>
   </div>
 
+  <!-- 新聞跑馬燈 — 完全平面化，無框線無陰影 -->
   <div class="news-ticker-container" id="tickerContainer">
     <div class="ticker-scroll-area">
       <div class="ticker-wrap" id="js-ticker">
@@ -431,16 +432,12 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
     <button type="button" class="btn-close-icon" onclick="closeModal()">✕</button>
     <h2>進階設定</h2>
 
+    <!-- settings-row：只剩「使用說明」與「分頁數量」 -->
     <div class="settings-row" style="align-items:center; padding:12px 16px; background:var(--bg-card); border-radius:8px; border:1px solid var(--border-light); box-shadow:var(--shadow-inset); margin-bottom:16px;">
-      <span style="flex:1; text-align:left; font-size:16px; font-weight:600; color:var(--t-main);">📰 顯示財經新聞列</span>
-      <input type="checkbox" id="showTickerCheckbox" style="flex:none; width:22px; height:22px; margin:0;" onchange="toggleTicker()">
-    </div>
-
-    <div class="settings-row">
-      <button type="button" class="btn-manual-row" onclick="openManual()">📖 使用說明</button>
-      <div class="tab-count-wrapper">
-        <div class="tab-count-label">分頁數量</div>
-        <select id="tabCountSelect">
+      <button type="button" class="btn-manual-row" onclick="openManual()" style="flex:0 0 45%; padding:12px 10px; font-size:15px; color:var(--accent); margin:0; white-space:nowrap;">📖 使用說明</button>
+      <div class="tab-count-wrapper" style="flex:1; display:flex; flex-direction:column; justify-content:center; background:var(--bg-card); border-radius:8px; box-shadow:var(--shadow-inset); padding:4px 12px; border:1px solid var(--border-light);">
+        <div class="tab-count-label" style="font-size:12px; color:var(--t-muted); font-weight:600; margin-bottom:2px; text-align:left;">分頁數量</div>
+        <select id="tabCountSelect" style="width:100%; box-shadow:none; padding:4px 0; background:transparent; font-size:15px; border:none;">
           <option value="1">1 個分頁</option>
           <option value="2">2 個分頁</option>
           <option value="3">3 個分頁</option>
@@ -449,7 +446,16 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         </select>
       </div>
     </div>
+
+    <!-- api-section：最上方新增「顯示財經新聞列」按鈕，在申請 Fugle API Key 上面 -->
     <div class="api-section">
+      <!-- 顯示財經新聞列 — 按鈕開關 -->
+      <div style="display:flex; gap:12px; margin-bottom:16px; align-items:stretch;">
+        <button type="button" class="btn-manual-row" onclick="toggleTickerBtn()" id="tickerToggleBtn" style="flex:1; padding:12px 10px; font-size:15px; color:var(--accent); margin:0; white-space:nowrap; border:1px solid var(--border-light); border-radius:8px; box-shadow:var(--shadow-soft); background:var(--bg-card);">
+          📰 顯示財經新聞列：<span id="tickerStatusText">開啟</span>
+        </button>
+      </div>
+
       <div class="api-link-box">
         <a class="btn-link" href="https://developer.fugle.tw/docs/key/" target="_blank">🔗 申請 Fugle API Key</a>
       </div>
@@ -473,6 +479,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <div id="apiStatsBox"></div>
       </div>
     </div>
+
     <div class="backup-box">
       <div class="backup-title">資料備份與還原</div>
       <div class="backup-btns">
@@ -756,12 +763,27 @@ function loadState(){
   updateKeyStatus(); 
   renderTabs();
   renderApiStats();
+  updateTickerButton(); // 同步按鈕狀態
 }
 
-function toggleTicker() {
-  showTicker = document.getElementById('showTickerCheckbox').checked;
+// 更新新聞跑馬燈按鈕的顯示狀態
+function updateTickerButton() {
+  const statusSpan = document.getElementById('tickerStatusText');
+  const btn = document.getElementById('tickerToggleBtn');
+  if (statusSpan) {
+    statusSpan.textContent = showTicker ? '開啟' : '關閉';
+  }
+  if (btn) {
+    btn.style.color = showTicker ? 'var(--accent)' : 'var(--t-muted)';
+  }
+}
+
+// 按鈕切換跑馬燈開關（取代原 checkbox 版本）
+function toggleTickerBtn() {
+  showTicker = !showTicker;
   document.getElementById('tickerContainer').style.display = showTicker ? 'flex' : 'none';
   try { localStorage.setItem(TICKER_KEY, showTicker); } catch(e){}
+  updateTickerButton();
 }
 
 function applyThemeText(t){
@@ -1575,7 +1597,6 @@ async function loadFinanceNews() {
     tickerContainer.innerHTML = tickerHtml + tickerHtml; 
     
     const totalLength = tickerContainer.textContent.length;
-    // 速度調整：數值越小跑越快。原為0.12，改為0.18使速度更慢
     const speedFactor = 0.18; 
     tickerContainer.style.animationDuration = `${totalLength * speedFactor}s`;
   } catch (error) {
