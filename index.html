@@ -252,7 +252,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 .backup-box { padding: 16px; margin: 8px 0 0; }
 .backup-title { font-size: 16px; font-weight: 700; color: var(--t-muted); margin-bottom: 12px; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); text-align: left; }
 .backup-btns { display: flex; gap: 12px; }
-.btn-backup { flex: 1; padding: 12px; font-size: 15px; }
+.btn-backup { flex: 1; padding: 8px 12px; font-size: 15px; } /* 縮小按鈕高度 */
 .v-box { text-align: center; font-size: 13px; color: var(--t-muted); margin-top: 24px; font-weight: 600; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
 .up { color: var(--up) !important; text-shadow: none !important; }
 .down { color: var(--down) !important; text-shadow: none !important; }
@@ -266,14 +266,15 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 .manual-content li { margin-bottom: 6px; }
 
 .settings-row { display: flex; gap: 12px; margin-bottom: 20px; align-items: stretch; }
-.btn-manual-row { flex: 0 0 45%; padding: 12px 10px; font-size: 15px; color: var(--accent); margin: 0; white-space: nowrap; }
+/* 縮減按鈕高度 */
+.btn-manual-row { flex: 0 0 45%; padding: 8px 10px; font-size: 15px; color: var(--accent); margin: 0; white-space: nowrap; }
 .tab-count-wrapper { 
   flex: 1; display: flex; flex-direction: column; justify-content: center; background: var(--bg-card); border-radius: 8px; 
-  box-shadow: var(--shadow-inset); padding: 4px 12px;
+  box-shadow: var(--shadow-inset); padding: 2px 12px; /* 縮減高度 */
   border: 1px solid var(--border-light);
 }
 .tab-count-label { font-size: 12px; color: var(--t-muted); font-weight: 600; margin-bottom: 2px; text-align: left; }
-.tab-count-wrapper select { width: 100%; box-shadow: none; padding: 4px 0; background: transparent; font-size: 15px; border: none; }
+.tab-count-wrapper select { width: 100%; box-shadow: none; padding: 2px 0; background: transparent; font-size: 15px; border: none; } /* 縮減選單高度 */
 
 .api-section { margin-bottom: 20px; padding-top: 10px; border-top: 1px solid var(--s-dark); }
 .api-link-box { text-align: center; margin-bottom: 16px; padding: 10px; background: var(--bg-card); border-radius: 8px; box-shadow: var(--shadow-soft); border: 1px solid var(--border-light); }
@@ -297,7 +298,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   .srow .sym { font-size: 17px; }
   .srow .chgp { font-size: 17px; }
   .tab-btn { font-size: 15px; padding: 8px 4px; }
-  .btn-manual-row { font-size: 14px; padding: 10px 6px; }
+  .btn-manual-row { font-size: 14px; padding: 8px 6px; } /* 縮減小螢幕高度 */
 }
 
 @media (min-width: 768px) {
@@ -323,7 +324,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   .modal h2 { font-size: 24px; }
   .modal label { font-size: 17px; }
   .modal-close { font-size: 19px; padding: 16px; }
-  .btn-backup { font-size: 17px; padding: 14px; }
+  .btn-backup { font-size: 17px; padding: 10px 14px; } /* 縮減高度 */
   .v-box { font-size: 15px; }
   .idx-card-box { min-width: 200px; padding: 8px 20px; }
   .idx-box-name { font-size: 20px; } 
@@ -331,7 +332,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   .idx-box-change-row { font-size: 18px; }
   .manual-content { font-size: 18px; }
   .manual-content h3 { font-size: 20px; }
-  .btn-manual-row { font-size: 17px; padding: 12px 10px; }
+  .btn-manual-row { font-size: 17px; padding: 10px 10px; } /* 縮減高度 */
 }
 </style>
 <link rel="manifest" href="manifest.json">
@@ -446,7 +447,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         </div>
       </div>
       <div class="api-section">
-        <button type="button" id="tickerToggleBtn" onclick="toggleTicker()" style="width: 100%; padding: 12px; font-size: 16px; margin-bottom: 16px;">📰 財經新聞列：已開啟</button>
+        <button type="button" id="tickerToggleBtn" onclick="toggleTicker()" style="width: 100%; padding: 8px 12px; font-size: 15px; margin-bottom: 16px;">📰 財經新聞列：已開啟</button>
         
         <div class="api-link-box">
           <a class="btn-link" href="https://developer.fugle.tw/docs/key/" target="_blank">🔗 申請 Fugle API Key</a>
@@ -480,7 +481,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         </div>
       </div>
       
-      <button type="button" class="modal-close" style="margin-top: 16px; width: 100%;" onclick="saveAndCloseModal()">💾 儲存設定並關閉</button>
+      <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存設定並關閉</button>
       <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.14.3 (支援動態新聞跑馬燈)</div>
     </div>
   </div>
