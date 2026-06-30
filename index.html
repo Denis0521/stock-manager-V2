@@ -11,8 +11,8 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-// 強制刷新快取：升級至 V4.14.0 (國旗、圖示與並排按鈕優化)
-const APP_VER = '4.14.1';
+// 強制刷新快取：升級至 V4.14.2 (新增財經新聞跑馬燈)
+const APP_VER = '4.14.2';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -23,7 +23,7 @@ if(localStorage.getItem('tw_app_version') !== APP_VER) {
 /* ========================================================= 🚀 核心變數引擎（加入拼色設計） ========================================================= */
 :root { 
   --bg: #E8ECF1;
-  --bg-card: #FFFFFF; /* 新增白色色塊 */
+  --bg-card: #FFFFFF;
   --s-light: #FFFFFF;
   --s-dark: #B8C4D0;
   --t-main: #1A2332;
@@ -42,7 +42,7 @@ if(localStorage.getItem('tw_app_version') !== APP_VER) {
 }
 body.tech { 
   --bg: #1E2330; 
-  --bg-card: #2D3344; /* 新增更淺的顏色色塊 */
+  --bg-card: #2D3344;
   --s-light: #2D3344; 
   --s-dark: #151820; 
   --t-main: #F8FAFC; 
@@ -117,13 +117,20 @@ body.pink {
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 
-
-
-
 /* ========================================================= 🌐 基礎排版 ========================================================= */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif; background:var(--bg); color:var(--t-main); padding:0 0 60px; min-height:100vh; font-size:15px; overflow-x:hidden; transition:background-color 0.4s ease, color 0.4s ease}
+/* 修改 padding-top 給跑馬燈留空間 */
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif; background:var(--bg); color:var(--t-main); padding:35px 0 60px; min-height:100vh; font-size:15px; overflow-x:hidden; transition:background-color 0.4s ease, color 0.4s ease}
 input,select,button{font-family:inherit;font-size:inherit;outline:none;text-align:center}
+
+/* 新增跑馬燈樣式 */
+.news-ticker-container { position: fixed; top: 0; left: 0; width: 100%; background: var(--bg-card); color: var(--t-main); height: 35px; line-height: 35px; overflow: hidden; z-index: 9999; font-size: 14px; box-shadow: var(--shadow-strong); border-bottom: 1px solid var(--border-light); transition: background-color 0.4s ease, color 0.4s ease; }
+.ticker-title { position: absolute; left: 0; top: 0; background: var(--accent); color: #fff; padding: 0 15px; font-weight: bold; z-index: 10; box-shadow: 3px 0 5px rgba(0,0,0,0.2); }
+.ticker-wrap { width: 100%; padding-left: 100%; white-space: nowrap; display: inline-block; animation: ticker linear infinite; }
+.ticker-item { display: inline-block; padding: 0 30px; color: var(--t-main); text-decoration: none; font-weight: 600; }
+.ticker-item:hover { color: var(--accent); text-decoration: underline; }
+.ticker-source { background: var(--s-dark); color: var(--bg-card); padding: 2px 6px; border-radius: 3px; font-size: 12px; margin-right: 8px; font-weight: bold; }
+@keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
 
 /* 所有新擬態元件加上明顯邊框，強化層次，並改用色塊顏色 (--bg-card) 達到拼色效果 */
 .header, .tabs-bar, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .backup-box { 
@@ -134,7 +141,6 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
   border: 1px solid var(--border-light);
 }
 
-/* 個別區塊稍作陰影強弱差異 */
 .header { box-shadow: var(--shadow-strong); border-bottom: 2px solid var(--s-dark); }
 .tabs-bar { box-shadow: var(--shadow-soft); }
 .card { box-shadow: var(--shadow-soft); }
@@ -144,7 +150,8 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .hist-item { box-shadow: var(--shadow-soft); }
 .backup-box { box-shadow: var(--shadow-soft); }
 
-.header { border-radius: 0 0 16px 16px; padding: 12px 10px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+/* 修改 header 的 top 為 35px，配合跑馬燈 */
+.header { border-radius: 0 0 16px 16px; padding: 12px 10px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 35px; z-index: 100; }
 .header h1 { font-size: 20px; font-weight: 700; color: var(--t-main); user-select: none; margin-left: 6px; }
 .header .hdr-right { display: flex; gap: 6px; }
 
@@ -154,7 +161,6 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .form-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
 .form-row:last-child { margin-bottom: 0; }
 
-/* 輸入框：加強內陰影與邊框，使用色塊顏色 */
 input, select { 
   flex: 1; min-width: 0; padding: 12px; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; 
   box-shadow: var(--shadow-inset);
@@ -166,7 +172,6 @@ input::placeholder { color: var(--t-muted); text-shadow: none; font-weight: norm
 .form-row select { flex: 0 0 68px; padding: 12px 4px; text-align: center; }
 .form-row .sym-inp { flex: 0 0 90px; }
 
-/* 按鈕：加強邊框與陰影，使用色塊顏色 */
 button, .tab-btn { 
   background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; padding: 10px 16px; 
   box-shadow: var(--shadow-soft);
@@ -191,18 +196,18 @@ button:active, .tab-btn.active {
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
 .idx-card-box { flex: 0 0 auto; min-width: 160px; padding: 2px 16px; scroll-snap-align: start; border-right: 1px solid var(--s-dark); text-align: left; }
 .idx-card-box:last-child { border-right: none; }
-.idx-box-name { font-size: 18px; color: var(--t-muted); font-weight: 600; margin-top: 2px; line-height: 1.3; } /* 放大字體讓各國國旗等大 */
+.idx-box-name { font-size: 18px; color: var(--t-muted); font-weight: 600; margin-top: 2px; line-height: 1.3; } 
 .idx-box-price { font-size: 18px; font-weight: 700; margin: 1px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
 .idx-box-change-row { display: flex; align-items: center; justify-content: flex-start; gap: 6px; font-size: 16px; font-weight: 600; white-space: nowrap; }
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 0; opacity: 0.7; }
 
 .table-scroll { margin: 8px 10px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; }
-.list-wrap { min-width: 670px; } /* 縮減最小寬度使欄位能更靠近 */
-.list-header, .srow { grid-template-columns: 110px 95px 75px 75px 75px 85px 105px 70px; } /* 微調欄位寬度讓明細更靠近 */
+.list-wrap { min-width: 670px; } 
+.list-header, .srow { grid-template-columns: 110px 95px 75px 75px 75px 85px 105px 70px; } 
 .list-header { display: grid; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 17px; color: var(--t-muted); font-weight: 600; }
 .srow { display: grid; align-items: stretch; border-bottom: 1px solid var(--s-dark); font-size: 17px; }
 .srow:last-child { border-bottom: none; }
-.list-header > div, .srow > div { padding: 6px 4px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; white-space: nowrap; } /* 縮小左右 padding */
+.list-header > div, .srow > div { padding: 6px 4px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; white-space: nowrap; } 
 .list-header > div:nth-child(1), .srow > div:nth-child(1) { align-items: flex-start; text-align: left; position: sticky; left: 0; z-index: 2; background: var(--bg-card); padding-left: 8px; }
 .list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after { content: ''; position: absolute; top: 0; bottom: 0; right: -6px; width: 6px; background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; }
 .list-header > div:nth-child(8) { align-items: center; justify-content: center; padding-left: 10px; }
@@ -285,11 +290,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 .btn-close-icon { position: absolute; top: 15px; right: 15px; background: transparent !important; box-shadow: none !important; color: var(--t-muted); font-size: 24px; width: 40px; height: 40px; padding: 0; display: flex; justify-content: center; align-items: center; border-radius: 50%; text-shadow: none !important; cursor: pointer; border: none !important; }
 .btn-close-icon:hover { color: var(--t-main); transform: scale(1.1); }
 
-/* 🛡️ 防密碼管理員遮罩樣式 */
-.pwd-mask {
-  -webkit-text-security: disc;
-  text-security: disc;
-}
+.pwd-mask { -webkit-text-security: disc; text-security: disc; }
 
 @media (max-width: 360px) {
   .header h1 { font-size: 16px; margin-left: 2px; }
@@ -298,7 +299,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 }
 
 @media (max-width: 767px) {
-  body { max-width: 480px; margin: 0 auto; font-size: 15px; }
+  body { max-width: 480px; margin: 0 auto; }
   input, select { font-size: 16px; }
   .srow { font-size: 17px; }
   .srow .sym { font-size: 17px; }
@@ -333,7 +334,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
   .btn-backup { font-size: 17px; padding: 14px; }
   .v-box { font-size: 15px; }
   .idx-card-box { min-width: 200px; padding: 8px 20px; }
-  .idx-box-name { font-size: 20px; } /* 桌面加大字體，國旗更一致 */
+  .idx-box-name { font-size: 20px; } 
   .idx-box-price { font-size: 20px; }
   .idx-box-change-row { font-size: 18px; }
   .manual-content { font-size: 18px; }
@@ -344,6 +345,14 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 <link rel="manifest" href="manifest.json">
 </head>
 <body>
+
+<div class="news-ticker-container">
+  <div class="ticker-title">即時財經</div>
+  <div class="ticker-wrap" id="js-ticker">
+    <span class="ticker-item">財經新聞載入中...</span>
+  </div>
+</div>
+
 <div class="header">
   <h1>股票庫存管理</h1>
   <div class="hdr-right">
@@ -470,7 +479,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
         <input type="file" id="importFile" style="display:none" onchange="importData(event)">
       </div>
     </div>
-    <div class="v-box">核心版本：V4.14.0 (優化圖示與按鈕排列)</div>
+    <div class="v-box">核心版本：V4.14.2 (新增跑馬燈與主題適配)</div>
     <button type="button" class="modal-close" style="margin-top: 24px;" onclick="saveAndCloseModal()">💾 儲存設定並關閉</button>
   </div>
 </div>
@@ -909,7 +918,6 @@ async function fetchFugle(symbol){
         const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
         if (p != null) {
           trackApiUsage('Fugle');
-          // 嘗試解析 Fugle API 回傳的股票名稱
           let fetchedName = d.name || (d.data && d.data.info && d.data.info.name) || '';
           return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle', name: fetchedName};
         }
@@ -1054,7 +1062,7 @@ async function refreshPrices(){
           for (let idx = 0; idx < 5; idx++) {
             tabStocks[idx].filter(s => s.symbol === sym).forEach(s => {
               s.price = r.price; s.change = r.change; s.changePercent = r.changePercent; s.source = r.source;
-              if (r.name && !s.name) s.name = r.name; // 如果 API 有回傳名稱且目前沒設定，則自動填入
+              if (r.name && !s.name) s.name = r.name; 
               s.updateTime = uTime;
               if (idx === currentTab) renderRow(s);
             });
@@ -1225,7 +1233,6 @@ function addStock(){
   const currentStocks = tabStocks[currentTab];
   if(currentStocks.some(s=>s.symbol===sym)){showToast('該股票已存在於此分頁');return}
   
-  // 自動從字典帶入名稱
   const stockName = STOCK_DICT[sym] || '';
 
   const id='s_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
@@ -1343,7 +1350,6 @@ function saveAndCloseModal(){
 function openManual() { document.getElementById('manualOverlay').classList.add('show'); }
 function closeManual() { document.getElementById('manualOverlay').classList.remove('show'); }
 
-// ⚙️ 國外指數燈箱管理函數群
 function openForeignIdxModal() {
   renderForeignIdxConfigList();
   document.getElementById('foreignIdxOverlay').classList.add('show');
@@ -1477,9 +1483,6 @@ function importData(event) {
   reader.readAsText(file);
 }
 
-// ==========================================
-// 💡 V4.14.0 獨立背景心跳引擎 (Web Worker)
-// ==========================================
 let lastRefreshTime = 0;
 let lastSuccessTime = 0;
 let isRefreshing = false;
@@ -1535,6 +1538,34 @@ function handleTouchWakeup() {
 document.addEventListener('touchend', handleTouchWakeup, { passive: true });
 document.addEventListener('click', handleTouchWakeup, { passive: true });
 
+// 載入財經跑馬燈資料
+async function loadFinanceNews() {
+  const workerUrl = 'https://finance-news-api.denis0521.workers.dev/';
+  const tickerContainer = document.getElementById('js-ticker');
+  try {
+    const response = await fetch(workerUrl);
+    if (!response.ok) throw new Error('網路回應不正確');
+    const newsData = await response.json();
+    
+    if (newsData.length === 0) { 
+      tickerContainer.innerHTML = '<span class="ticker-item">目前暫無新聞</span>'; 
+      return; 
+    }
+    
+    let tickerHtml = '';
+    newsData.forEach(item => { 
+      tickerHtml += `<a href="${item.link}" target="_blank" class="ticker-item"><span class="ticker-source">${item.source}</span>${item.title}</a>`; 
+    });
+    
+    tickerContainer.innerHTML = tickerHtml + tickerHtml; // 複製一次達成無縫輪播
+    const totalLength = tickerContainer.textContent.length;
+    const speedFactor = 0.15; // 速度調整
+    tickerContainer.style.animationDuration = `${totalLength * speedFactor}s`;
+  } catch (error) {
+    tickerContainer.innerHTML = '<span class="ticker-item" style="color:var(--up);">無法載入即時新聞，請稍後再試</span>';
+  }
+}
+
 // 初始化載入
 loadState(); renderAll(); renderHistory();
 
@@ -1549,12 +1580,12 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') forceRefresh();
 });
 
-// 監聽鍵盤輸入與彈窗關閉
+document.addEventListener('DOMContentLoaded', loadFinanceNews);
+
 document.getElementById('symInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); } });
 document.getElementById('qtyInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('buyPriceInput').focus(); } });
 document.getElementById('buyPriceInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); addStock(); } });
 
-// 新增的燈箱關閉監聽
 document.getElementById('addModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
@@ -1569,7 +1600,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-console.log('股票庫存管理 V4.14.0 已啟動');
+console.log('股票庫存管理 V4.14.2 已啟動');
 </script>
 </body>
 </html>
