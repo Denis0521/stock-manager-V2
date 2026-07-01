@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = '4.14.5'; // 版本微升級，標記邏輯優化版
+const APP_VER = '4.15.0'; // 版本升級：新增歷史配息紀錄與含息總報酬功能
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -125,16 +125,17 @@ button:active, .tab-btn.active { transform: translateY(0); box-shadow: var(--sha
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 0; opacity: 0.7; }
 
 .table-scroll { margin: 8px 10px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; }
-.list-wrap { min-width: 670px; } 
-.list-header, .srow { grid-template-columns: 110px 95px 75px 75px 75px 85px 105px 70px; } 
-.list-header { display: grid; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 17px; color: var(--t-muted); font-weight: 600; }
+/* 增加寬度以容納新的含息總報酬欄位 */
+.list-wrap { min-width: 790px; } 
+.list-header, .srow { grid-template-columns: 110px 95px 75px 75px 75px 85px 105px 105px 70px; } 
+.list-header { display: grid; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 16px; color: var(--t-muted); font-weight: 600; }
 .srow { display: grid; align-items: stretch; border-bottom: 1px solid var(--s-dark); font-size: 17px; }
 .srow:last-child { border-bottom: none; }
 .list-header > div, .srow > div { padding: 6px 4px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; white-space: nowrap; } 
 .list-header > div:nth-child(1), .srow > div:nth-child(1) { align-items: flex-start; text-align: left; position: sticky; left: 0; z-index: 2; background: var(--bg-card); padding-left: 8px; }
 .list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after { content: ''; position: absolute; top: 0; bottom: 0; right: -6px; width: 6px; background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; }
-.list-header > div:nth-child(8) { align-items: center; justify-content: center; padding-left: 10px; }
-.srow > div:nth-child(8) { flex-direction: row; align-items: center; justify-content: center; gap: 4px; padding-left: 10px; }
+.list-header > div:nth-child(9) { align-items: center; justify-content: center; padding-left: 10px; }
+.srow > div:nth-child(9) { flex-direction: row; align-items: center; justify-content: center; gap: 4px; padding-left: 10px; }
 .sym-container { align-items: flex-start !important; line-height: 1.1 !important; width: 100%; max-width: 112px; display: flex; flex-direction: column; justify-content: center; }
 .srow .sym { font-weight: 800; font-size: 17px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; }
 .srow .qty-cell { font-weight: 600; color: var(--t-main); overflow: hidden; width: 100%; }
@@ -223,10 +224,10 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
   .card-title { font-size: 18px; }
   .tab-btn { font-size: 18px; padding: 14px 10px; }
   .list-wrap { min-width: 100%; }
-  .list-header, .srow { grid-template-columns: 1.4fr 1.3fr 1fr 1fr 1fr 1.2fr 1.4fr 1fr; }
-  .list-header { font-size: 18px; }
-  .srow, .srow .sym, .srow .chgp { font-size: 19px; }
-  .srow .act button { padding: 8px 14px; font-size: 17px; }
+  .list-header, .srow { grid-template-columns: 1.4fr 1.3fr 1fr 1fr 1fr 1.2fr 1.4fr 1.4fr 1fr; }
+  .list-header { font-size: 17px; }
+  .srow, .srow .sym, .srow .chgp { font-size: 18px; }
+  .srow .act button { padding: 8px 14px; font-size: 16px; }
   .sum-row .lab { font-size: 19px; }
   .sum-row .val { font-size: 24px; }
   .sum-toggle-btn { font-size: 17px; }
@@ -286,7 +287,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
 <div class="table-scroll" id="tableScroll" style="display:none;">
   <div class="list-wrap" id="listContainer">
     <div class="list-header">
-      <div>代號</div><div>庫存/均價</div><div>現價</div><div>幅度</div><div>漲跌</div><div>今日損益</div><div>總損益</div><div>動作</div>
+      <div>代號</div><div>庫存/均價</div><div>現價</div><div>幅度</div><div>漲跌</div><div>今日損益</div><div>資本損益</div><div>含息報酬</div><div>動作</div>
     </div>
     <div id="listBody"></div>
   </div>
@@ -304,9 +305,12 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
   </div>
   <div id="summaryDetails" style="display:none;">
     <div class="sum-divider" style="margin-top:10px;"></div>
-    <div class="sum-row"><span class="lab">總未實現損益 (ROI)</span><span class="val" id="totalUnrealized">—</span></div>
+    <div class="sum-row"><span class="lab">資本損益 (未實現)</span><span class="val" id="totalUnrealized">—</span></div>
+    <div class="sum-row"><span class="lab">已領配息總計</span><span class="val" id="totalDivSum">0</span></div>
     <div class="sum-divider"></div>
-    <div class="sum-row" style="padding-bottom:0;"><span class="lab">持股資產總計</span><span class="val" id="totalAsset">0</span></div>
+    <div class="sum-row"><span class="lab">含息總報酬 (ROI)</span><span class="val" id="totalReturn">—</span></div>
+    <div class="sum-divider"></div>
+    <div class="sum-row" style="padding-bottom:0;"><span class="lab">持股資產總值</span><span class="val" id="totalAsset">0</span></div>
     <div class="sum-toggle-btn" style="margin-top:10px;" onclick="toggleSummary(event)">▲ 收起選單</div>
   </div>
 </div>
@@ -345,8 +349,13 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
   <div class="modal">
     <h2>編輯持股</h2>
     <input type="hidden" id="editId">
-    <label>股票代號</label>
+    
+    <label style="display:flex; justify-content:space-between; align-items:flex-end;">
+      <span>股票代號</span>
+      <a id="editExternalLink" href="#" target="_blank" class="btn-link" style="font-size:14px; font-weight:normal;">🔗 Goodinfo! 歷年配息</a>
+    </label>
     <input type="text" id="editSymInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase">
+    
     <label>股票簡稱 (選填)</label>
     <input type="text" id="editNameInput" placeholder="自訂簡稱 (如: 台積電)" autocomplete="off">
     <label>數量</label>
@@ -354,7 +363,18 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
     <label>單位</label>
     <select id="editUnitSelect"><option value="張">張</option><option value="股">股</option></select>
     <label>買入均價 (留空不計算總損益)</label>
-    <input type="number" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="off" style="margin-bottom: 10px;">
+    <input type="number" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="off">
+    
+    <hr style="border:0; border-top:1px solid var(--border-light); margin: 20px 0;">
+    <label style="color:var(--t-main); font-size:16px;">💰 歷史配息紀錄 (實領總額)</label>
+    <div style="display:flex; gap:8px; margin-bottom:10px;">
+      <input type="date" id="divDateInput" style="flex:2; padding:10px; font-size:15px;">
+      <input type="number" id="divAmtInput" placeholder="金額(元)" min="0" step="1" inputmode="numeric" style="flex:2; padding:10px; font-size:15px;">
+      <button type="button" onclick="addDividend()" style="flex:1; padding:0; font-size:20px; color:var(--accent); background:var(--bg-card); box-shadow:var(--shadow-inset);">＋</button>
+    </div>
+    <div id="dividendListContainer" style="max-height:140px; overflow-y:auto; border:1px solid var(--border-light); border-radius:8px; padding:6px; margin-bottom:10px; background:var(--bg);">
+      </div>
+
     <div style="display: flex; gap: 12px; margin-top: 20px;">
       <button type="button" class="modal-close" onclick="saveEditStock()" style="flex:1; background:var(--accent); color:#fff; text-shadow:none; margin:0;">💾 確認儲存</button>
       <button type="button" class="modal-close" onclick="closeModalById('editModalOverlay')" style="flex:1; margin:0;">取消</button>
@@ -415,7 +435,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.14.5</div>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.15.0</div>
     </div>
   </div>
 </div>
@@ -441,8 +461,8 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
   <div class="modal">
     <h2>📖 系統使用說明</h2>
     <div class="manual-content">
-      <h3>一、基本操作</h3>
-      <p>輸入股票代號、張/股數及買入均價。系統會自動計算總現值與損益。內建台灣熱門 ETF 字典會自動帶入簡稱，可隨時修改。</p>
+      <h3>一、基本操作與配息</h3>
+      <p>輸入股票代號、股數及買入均價。編輯介面中可手動新增「實領配息金額」，系統將為你精確計算「資本損益(純價差)」與「含息總報酬」。</p>
       <h3>二、分頁與新聞</h3>
       <p>最多可開啟 5 個分頁（雙擊標籤可重命名），新聞跑馬燈可於設定中關閉。</p>
       <h3>三、API 雙 Key 引擎</h3>
@@ -489,6 +509,7 @@ let showTicker = true;
 let currentInterval = 20000;
 let availableIndices = [];
 let cachedGlobalIndices = [];
+let tempDividends = []; // 編輯模態框暫存用的配息陣列
 
 class KeyRotator {
   constructor(keys) { this.keys = keys.filter(k => k && k.trim() !== ''); this.index = 0; }
@@ -516,7 +537,11 @@ function loadState(){
   if(currentTab >= maxTabs) currentTab = 0;
 
   for(let i=0; i<5; i++){
-    tabStocks[i] = LS.get(LS.KEYS.STOCK(i), []);
+    tabStocks[i] = LS.get(LS.KEYS.STOCK(i), []).map(s => {
+      // 確保舊資料相容新的配息陣列
+      if(!s.dividends) s.dividends = [];
+      return s;
+    });
     tabRecords[i] = LS.get(LS.KEYS.RECORD(i), []);
   }
 
@@ -599,6 +624,9 @@ function getStockHtmlInner(s) {
   const shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
   const p = s.price; const chg = s.change ?? 0;
   
+  // 計算已領配息總額
+  const totalDiv = (s.dividends || []).reduce((sum, d) => sum + d.amount, 0);
+  
   let tpStr = '—', tpClass = '';
   if (s.change != null) { 
     const todayPnl = Math.round(shares * chg); 
@@ -606,17 +634,30 @@ function getStockHtmlInner(s) {
     tpClass = getColorCls(todayPnl); 
   }
   
-  let totalHtml = '—', totalValForClass = 0;
+  let capHtml = '—', capVal = 0;
+  let totHtml = '—', totVal = 0;
   if (p != null) {
     const mktValue = Math.round(shares * p);
     if (s.buyPrice != null && s.buyPrice > 0) {
-      const cost = s.buyPrice * shares; const unPnl = Math.round(mktValue - cost); const roi = ((mktValue - cost) / cost) * 100;
-      totalValForClass = unPnl;
-      totalHtml = `<div style="line-height:1.2;font-size:inherit;">${getSign(unPnl)}${unPnl.toLocaleString()}</div>
-      <div style="font-size:0.8em;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${getSign(roi)}${roi.toFixed(2)}%</div>`;
+      const cost = s.buyPrice * shares;
+      
+      // 資本損益 (純價差)
+      const capPnL = Math.round(mktValue - cost);
+      const capRoi = (capPnL / cost) * 100;
+      capVal = capPnL;
+      capHtml = `<div style="line-height:1.2;font-size:inherit;">${getSign(capPnL)}${capPnL.toLocaleString()}</div>
+      <div style="font-size:0.8em;opacity:0.85;margin-top:2px;white-space:nowrap;">${getSign(capRoi)}${capRoi.toFixed(2)}%</div>`;
+
+      // 含息總報酬 (價差 + 股息)
+      const totPnL = capPnL + totalDiv;
+      const totRoi = (totPnL / cost) * 100;
+      totVal = totPnL;
+      totHtml = `<div style="line-height:1.2;font-size:inherit;">${getSign(totPnL)}${totPnL.toLocaleString()}</div>
+      <div style="font-size:0.8em;color:var(--t-muted);margin-top:2px;white-space:nowrap;font-weight:normal;">息 +${totalDiv.toLocaleString()}</div>
+      <div style="font-size:0.8em;opacity:0.85;margin-top:2px;white-space:nowrap;">${getSign(totRoi)}${totRoi.toFixed(2)}%</div>`;
     } else {
-      totalHtml = `<div style="line-height:1.2;font-size:inherit;" class="neutral">—</div>
-      <div style="font-size:0.8em;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
+      capHtml = totHtml = `<div style="line-height:1.2;font-size:inherit;" class="neutral">—</div>
+      <div style="font-size:0.8em;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;" class="neutral">點擊 ✎ 設均價</div>`;
     }
   }
 
@@ -636,7 +677,8 @@ function getStockHtmlInner(s) {
     <div class="chgp ${cgpClass}">${cgp}</div>
     <div class="chg ${pClass}">${cgStr}</div>
     <div class="today-pnl ${tpClass}">${tpStr}</div>
-    <div class="total ${getColorCls(totalValForClass)}">${totalHtml}</div>
+    <div class="total ${getColorCls(capVal)}">${capHtml}</div>
+    <div class="total ${getColorCls(totVal)}">${totHtml}</div>
     <div class="act">
       <button type="button" onclick="openEditModal('${s.id}')">✎</button>
       <button type="button" class="del-btn" onclick="deleteStock('${s.id}')">✕</button>
@@ -670,17 +712,30 @@ function renderRow(s) {
 }
 
 function updateSummary(){
-  let pnl = 0, asset = 0, totalUnPnl = 0, hasUnPnl = false;
+  let pnl = 0, asset = 0, totalCapPnL = 0, totalDivs = 0, hasUnPnl = false;
   tabStocks[currentTab].forEach(s => {
     const sh = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
-    pnl += Math.round(sh * (s.change ?? 0)); asset += Math.round(sh * (s.price ?? 0));
-    if (s.buyPrice > 0 && s.price != null) { totalUnPnl += Math.round((s.price - s.buyPrice) * sh); hasUnPnl = true; }
+    pnl += Math.round(sh * (s.change ?? 0)); 
+    asset += Math.round(sh * (s.price ?? 0));
+    const stockDivs = (s.dividends || []).reduce((sum, d) => sum + d.amount, 0);
+    totalDivs += stockDivs;
+    if (s.buyPrice > 0 && s.price != null) { 
+      totalCapPnL += Math.round((s.price - s.buyPrice) * sh); 
+      hasUnPnl = true; 
+    }
   });
   
-  const setHtml = (id, val, cls) => { const e = document.getElementById(id); e.textContent = val; e.className = `val ${cls}`; };
+  const setHtml = (id, val, cls) => { const e = document.getElementById(id); if(e){e.textContent = val; e.className = `val ${cls}`;} };
+  
   setHtml('totalPnl', getSign(pnl) + pnl.toLocaleString(), getColorCls(pnl));
   setHtml('totalAsset', getSign(asset) + asset.toLocaleString(), 'neutral');
-  setHtml('totalUnrealized', hasUnPnl ? getSign(totalUnPnl) + totalUnPnl.toLocaleString() : '—', hasUnPnl ? getColorCls(totalUnPnl) : 'neutral');
+  
+  // 更新詳細選單內的各項數據
+  setHtml('totalUnrealized', hasUnPnl ? getSign(totalCapPnL) + totalCapPnL.toLocaleString() : '—', hasUnPnl ? getColorCls(totalCapPnL) : 'neutral');
+  setHtml('totalDivSum', getSign(totalDivs) + totalDivs.toLocaleString(), totalDivs > 0 ? 'up' : 'neutral');
+  
+  const totUnPnl = totalCapPnL + totalDivs;
+  setHtml('totalReturn', hasUnPnl ? getSign(totUnPnl) + totUnPnl.toLocaleString() : '—', hasUnPnl ? getColorCls(totUnPnl) : 'neutral');
 }
 
 /* ========================================================= 📡 網路請求與資料流 ========================================================= */
@@ -873,7 +928,7 @@ function addStock(){
   tabStocks[currentTab].push({
     id: 's_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), symbol: sym, name: STOCK_DICT[sym] || '',
     displayQty: qty, displayUnit: unit, buyPrice: isNaN(bp) || bp <= 0 ? null : bp,
-    shares: unit === '張' ? qty * 1000 : qty, price: null, change: null, changePercent: null
+    shares: unit === '張' ? qty * 1000 : qty, price: null, change: null, changePercent: null, dividends: []
   });
   LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll();
   ['symInput', 'qtyInput', 'buyPriceInput'].forEach(id => document.getElementById(id).value = '');
@@ -886,13 +941,57 @@ function deleteStock(id){
   LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll(); showToast('記錄已刪除');
 }
 
+// 渲染模態框內的配息暫存清單
+function renderTempDividends() {
+  const c = document.getElementById('dividendListContainer');
+  if(!tempDividends.length) { 
+    c.innerHTML = '<div style="text-align:center;color:var(--t-muted);font-size:13px;padding:15px;">尚無配息紀錄</div>'; 
+    return; 
+  }
+  c.innerHTML = tempDividends.map((d, i) => `
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 6px; border-bottom:1px solid var(--border-light); font-size:15px;">
+      <span>${d.date}</span>
+      <span style="font-weight:bold; color:var(--up);">+${d.amount.toLocaleString()} 元</span>
+      <button type="button" onclick="removeTempDividend(${i})" style="padding:2px 8px; font-size:12px; border:none; background:transparent; color:var(--up); font-weight:bold;">✕ 刪除</button>
+    </div>
+  `).join('');
+}
+
+// 暫存新增配息
+function addDividend() {
+  const d = document.getElementById('divDateInput').value;
+  const a = parseInt(document.getElementById('divAmtInput').value);
+  if(!d || isNaN(a) || a <= 0) return showToast('請輸入有效日期與金額');
+  tempDividends.push({date: d, amount: a});
+  tempDividends.sort((x, y) => new Date(y.date) - new Date(x.date)); // 日期新到舊排序
+  renderTempDividends();
+  document.getElementById('divAmtInput').value = '';
+}
+
+// 暫存刪除配息
+function removeTempDividend(i) {
+  tempDividends.splice(i, 1);
+  renderTempDividends();
+}
+
 function openEditModal(id) {
   const s = tabStocks[currentTab].find(x => x.id === id); if (!s) return;
+  
+  // 動態設定 Goodinfo 查詢連結
+  const goodinfoUrl = `https://goodinfo.tw/tw/StockDividendPolicy.asp?STOCK_ID=${s.symbol}`;
+  document.getElementById('editExternalLink').href = goodinfoUrl;
+  
   document.getElementById('editId').value = s.id; document.getElementById('editSymInput').value = s.symbol;
   document.getElementById('editNameInput').value = s.name || ''; document.getElementById('editQtyInput').value = s.displayQty;
   document.getElementById('editUnitSelect').value = s.displayUnit; document.getElementById('editBuyPriceInput').value = s.buyPrice || '';
+  
+  // 載入配息暫存
+  tempDividends = JSON.parse(JSON.stringify(s.dividends || []));
+  renderTempDividends();
+  
   document.getElementById('editModalOverlay').classList.add('show');
 }
+
 function saveEditStock() {
   const s = tabStocks[currentTab].find(x => x.id === document.getElementById('editId').value); if (!s) return;
   const sym = document.getElementById('editSymInput').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -904,6 +1003,10 @@ function saveEditStock() {
   s.shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
   const bp = parseFloat(document.getElementById('editBuyPriceInput').value);
   s.buyPrice = isNaN(bp) || bp <= 0 ? null : bp;
+  
+  // 將暫存的配息存入核心資料
+  s.dividends = JSON.parse(JSON.stringify(tempDividends));
+  
   LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll(); closeModalById('editModalOverlay'); showToast('已修改'); forceRefresh();
 }
 

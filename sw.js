@@ -1,4 +1,5 @@
-const CACHE_NAME = 'stock-portfolio-v4.14.3';
+// 請將版本號更新為與 index.html 一致的 4.15.0
+const CACHE_NAME = 'stock-portfolio-v4.15.0'; 
 const urlsToCache = [
   './',
   './index.html',
@@ -32,22 +33,20 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const requestUrl = new URL(event.request.url);
   
-  // 這些 API 請求不進快取，直接抓取最新資料
+  // API 請求不進快取
   const isApiRequest = requestUrl.hostname.includes('api.fugle.tw') || 
                        requestUrl.hostname.includes('finance.yahoo.com') || 
                        requestUrl.hostname.includes('allorigins.win') || 
                        requestUrl.hostname.includes('denis0521.workers.dev') || 
                        requestUrl.hostname.includes('corsproxy.io') ||
                        requestUrl.hostname.includes('codetabs.com') ||
-                       requestUrl.hostname.includes('thingproxy.freeboard.io') ||
-                       requestUrl.hostname.includes('docs.google.com');
+                       requestUrl.hostname.includes('thingproxy.freeboard.io');
 
   if (isApiRequest) {
     event.respondWith(fetch(event.request));
     return;
   }
 
-  // 網頁靜態資源優先透過網路抓取，抓不到才退回使用快取
   event.respondWith(
     fetch(event.request).then(response => {
       return caches.open(CACHE_NAME).then(cache => {
