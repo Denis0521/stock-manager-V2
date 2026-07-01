@@ -11,8 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-// 強制刷新快取：升級至 V4.14.4 (新增無分頁選項、進階設定按鈕黑色化、修正 API 說明)
-const APP_VER = '4.14.4';
+const APP_VER = '4.14.5'; // 版本微升級，標記邏輯優化版
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -79,44 +78,15 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 
 /* 卡片與元件框架 */
 .header, .tabs-bar, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .backup-box { 
-  background: var(--bg-card); 
-  box-shadow: var(--shadow-soft);
-  border-radius: 12px; 
-  transition: background-color 0.4s ease, box-shadow 0.4s ease;
-  border: 1px solid var(--border-light);
+  background: var(--bg-card); box-shadow: var(--shadow-soft); border-radius: 12px; transition: background-color 0.4s ease, box-shadow 0.4s ease; border: 1px solid var(--border-light);
 }
-
-.header { 
-  box-shadow: var(--shadow-strong); 
-  border-bottom: 2px solid var(--s-dark); 
-  border-radius: 0 0 16px 16px; 
-  padding: 12px 10px 4px 10px;
-  display: flex; 
-  flex-direction: column; 
-  position: sticky; 
-  top: 0; 
-  z-index: 100; 
-  transition: all 0.4s ease;
-}
+.header { box-shadow: var(--shadow-strong); border-bottom: 2px solid var(--s-dark); border-radius: 0 0 16px 16px; padding: 12px 10px 4px 10px; display: flex; flex-direction: column; position: sticky; top: 0; z-index: 100; transition: all 0.4s ease; }
 .header-top { display: flex; align-items: center; justify-content: space-between; width: 100%; }
 .header h1 { font-size: 20px; font-weight: 700; color: var(--t-main); user-select: none; margin-left: 6px; }
 .header-top .hdr-right { display: flex; gap: 6px; }
 
 /* 跑馬燈樣式 */
-.news-ticker-container { 
-  margin: 16px 0 0 0; 
-  width: 100%; 
-  box-sizing: border-box;
-  background: transparent; 
-  border-radius: 6px; 
-  box-shadow: none; 
-  border: none; 
-  display: flex; 
-  align-items: center; 
-  height: 34px; 
-  overflow: hidden; 
-  transition: all 0.4s ease;
-}
+.news-ticker-container { margin: 16px 0 0 0; width: 100%; box-sizing: border-box; background: transparent; border-radius: 6px; box-shadow: none; border: none; display: flex; align-items: center; height: 34px; overflow: hidden; transition: all 0.4s ease; }
 .ticker-scroll-area { flex: 1; overflow: hidden; position: relative; }
 .ticker-wrap { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker linear infinite; }
 .ticker-item { display: inline-block; padding: 0 20px; color: #2563EB; text-decoration: none; font-weight: 700; font-size: 15px; }
@@ -131,34 +101,17 @@ body.tech .ticker-item { color: #60A5FA; }
 .form-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
 .form-row:last-child { margin-bottom: 0; }
 
-input, select { 
-  flex: 1; min-width: 0; padding: 12px; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; 
-  box-shadow: var(--shadow-inset);
-  color: var(--t-main); font-weight: 600; text-align: left; 
-  text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); 
-  transition: background-color 0.4s ease, box-shadow 0.4s ease;
-}
+input, select { flex: 1; min-width: 0; padding: 12px; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; box-shadow: var(--shadow-inset); color: var(--t-main); font-weight: 600; text-align: left; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); transition: background-color 0.4s ease, box-shadow 0.4s ease; }
 input::placeholder { color: var(--t-muted); text-shadow: none; font-weight: normal; }
 .form-row select { flex: 0 0 68px; padding: 12px 4px; text-align: center; }
 .form-row .sym-inp { flex: 0 0 90px; }
 
-button, .tab-btn { 
-  background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; padding: 10px 16px; 
-  box-shadow: var(--shadow-soft);
-  color: var(--t-main); font-weight: 600; cursor: pointer; transition: all 0.25s ease; 
-  text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); 
-  display: flex; align-items: center; justify-content: center;
-}
+button, .tab-btn { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; padding: 10px 16px; box-shadow: var(--shadow-soft); color: var(--t-main); font-weight: 600; cursor: pointer; transition: all 0.25s ease; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); display: flex; align-items: center; justify-content: center; }
 button:hover, .tab-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-strong); }
-button:active, .tab-btn.active { 
-  transform: translateY(0); box-shadow: var(--shadow-inset); color: var(--accent); 
-  border-color: var(--accent);
-}
+button:active, .tab-btn.active { transform: translateY(0); box-shadow: var(--shadow-inset); color: var(--accent); border-color: var(--accent); }
 .tab-btn { flex: 1; padding: 10px 6px; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
 .btn-theme, .btn-adv, .btn-add-hdr { padding: 10px 14px; font-size: 16px; white-space: nowrap; font-weight: 700; }
 .btn-add-hdr { color: var(--up); text-shadow: none; } 
-
 .form-row button { font-size: 16px; letter-spacing: 2px; padding-left: 18px; }
 .btn-save { width: calc(100% - 20px); padding: 14px; font-size: 17px; margin: 8px 10px; }
 
@@ -207,23 +160,14 @@ button:active, .tab-btn.active {
 
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 999; align-items: flex-start; justify-content: center; }
 .modal-overlay.show { display: flex; }
-.modal { 
-  position: relative; border-radius: 20px; padding: 24px 20px; width: calc(100% - 28px); max-width: 400px; 
-  max-height: calc(100% - 40px); overflow-y: auto; background: var(--bg-card); 
-  box-shadow: 0 25px 50px rgba(0,0,0,0.5), var(--shadow-strong);
-  border: 1px solid var(--border-light);
-  margin-top: 20px;
-}
-
+.modal { position: relative; border-radius: 20px; padding: 24px 20px; width: calc(100% - 28px); max-width: 400px; max-height: calc(100% - 40px); overflow-y: auto; background: var(--bg-card); box-shadow: 0 25px 50px rgba(0,0,0,0.5), var(--shadow-strong); border: 1px solid var(--border-light); margin-top: 20px; }
 #manualOverlay, #editModalOverlay, #foreignIdxOverlay, #addModalOverlay { z-index: 1100; }
-
 .modal h2 { font-size: 20px; margin-bottom: 16px; text-align: center; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
 .modal label { display: block; font-size: 15px; color: var(--t-muted); margin: 12px 0 6px; font-weight: 600; text-align: left; }
 .modal-close { width: 100%; padding: 14px; font-size: 17px; }
 .key-status { font-size: 12px; padding: 4px 10px; border-radius: 12px; display: inline-block; margin-top: 6px; font-weight: 600; }
 .key-status.ok { background: var(--bg-card); box-shadow: var(--shadow-inset); color: var(--up); border: 1px solid var(--border-light); }
 .key-status.none { background: var(--bg-card); box-shadow: var(--shadow-inset); color: var(--t-muted); border: 1px solid var(--border-light); }
-.info-box { padding: 12px 14px; font-size: 13px; line-height: 1.6; margin-bottom: 16px; font-weight: 600; color: var(--accent); background: var(--bg-card); box-shadow: var(--shadow-inset); border-radius: 12px; border: 1px solid var(--border-light); }
 .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--t-main); color: var(--bg-card); padding: 12px 24px; border-radius: 30px; font-size: 15px; font-weight: bold; z-index: 9999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
 .toast.show { opacity: 1; }
 a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
@@ -236,66 +180,42 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 .down { color: var(--down) !important; text-shadow: none !important; }
 .neutral { color: var(--t-main) !important; text-shadow: none !important; }
 
-.btn-manual { width: 100%; padding: 12px; font-size: 16px; margin-bottom: 16px; color: var(--accent); }
 .manual-content { text-align: left; font-size: 16px; line-height: 1.8; color: var(--t-main); }
 .manual-content h3 { font-size: 18px; margin: 16px 0 8px; color: var(--accent); text-align: left; }
-.manual-content p { margin-bottom: 10px; }
+.manual-content p, .manual-content li { margin-bottom: 10px; }
 .manual-content ul { padding-left: 20px; margin-bottom: 12px; }
-.manual-content li { margin-bottom: 6px; }
 
 .settings-row { display: flex; gap: 12px; margin-bottom: 16px; align-items: stretch; }
 .btn-manual-row { flex: 1; padding: 8px 10px; font-size: 15px; color: var(--accent); margin: 0; white-space: nowrap; background: var(--bg-card); border-radius: 8px; box-shadow: var(--shadow-soft); border: 1px solid var(--border-light); font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .btn-manual-row:hover { transform: translateY(-1px); box-shadow: var(--shadow-strong); }
 .btn-manual-row:active { transform: translateY(0); box-shadow: var(--shadow-inset); }
-.tab-count-wrapper { 
-  flex: 1; display: flex; flex-direction: column; justify-content: center; background: var(--bg-card); border-radius: 8px; 
-  box-shadow: var(--shadow-inset); padding: 2px 12px; 
-  border: 1px solid var(--border-light);
-}
+.tab-count-wrapper { flex: 1; display: flex; flex-direction: column; justify-content: center; background: var(--bg-card); border-radius: 8px; box-shadow: var(--shadow-inset); padding: 2px 12px; border: 1px solid var(--border-light); }
 .tab-count-label { font-size: 12px; color: var(--t-muted); font-weight: 600; margin-bottom: 2px; text-align: left; }
 .tab-count-wrapper select { width: 100%; box-shadow: none; padding: 2px 0; background: transparent; font-size: 15px; border: none; }
-
 .api-section { margin-bottom: 16px; } 
 .api-link-box { text-align: center; margin-bottom: 16px; padding: 10px; background: var(--bg-card); border-radius: 8px; box-shadow: var(--shadow-soft); border: 1px solid var(--border-light); }
 
 .modal.fullscreen-modal { width: 100vw !important; max-width: 100vw !important; height: 100vh !important; max-height: 100vh !important; border-radius: 0; padding: 18px 20px 20px !important; margin: 0 !important; border: none; box-sizing: border-box; z-index: 999; }
 .btn-close-icon { position: absolute; top: 15px; right: 15px; background: transparent !important; box-shadow: none !important; color: var(--t-muted); font-size: 24px; width: 40px; height: 40px; padding: 0; display: flex; justify-content: center; align-items: center; border-radius: 50%; text-shadow: none !important; cursor: pointer; border: none !important; }
 .btn-close-icon:hover { color: var(--t-main); transform: scale(1.1); }
-
 .pwd-mask { -webkit-text-security: disc; text-security: disc; }
 
-/* ========================================================= 按鈕顏色例外處理 ========================================================= */
-#modalOverlay .modal button,
-#modalOverlay .modal a.btn-link,
-#modalOverlay .modal .btn-manual-row,
-#modalOverlay .modal .btn-close-icon {
-  color: #000 !important;
-}
-
-body.tech #modalOverlay .modal button,
-body.tech #modalOverlay .modal a.btn-link,
-body.tech #modalOverlay .modal .btn-manual-row,
-body.tech #modalOverlay .modal .btn-close-icon {
-  color: #F8FAFC !important;
-}
-/* ===================================================================================================================================== */
+/* 按鈕顏色例外處理 */
+#modalOverlay .modal button, #modalOverlay .modal a.btn-link, #modalOverlay .modal .btn-manual-row, #modalOverlay .modal .btn-close-icon { color: #000 !important; }
+body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link, body.tech #modalOverlay .modal .btn-manual-row, body.tech #modalOverlay .modal .btn-close-icon { color: #F8FAFC !important; }
 
 @media (max-width: 360px) {
   .header h1 { font-size: 16px; margin-left: 2px; }
   .btn-theme, .btn-adv, .btn-add-hdr { padding: 8px 10px; font-size: 15px; }
   .header-top .hdr-right { gap: 4px; }
 }
-
 @media (max-width: 767px) {
   body { max-width: 480px; margin: 0 auto; }
   input, select { font-size: 16px; }
-  .srow { font-size: 17px; }
-  .srow .sym { font-size: 17px; }
-  .srow .chgp { font-size: 17px; }
+  .srow, .srow .sym, .srow .chgp { font-size: 17px; }
   .tab-btn { font-size: 15px; padding: 8px 4px; }
   .btn-manual-row { font-size: 14px; padding: 8px 6px; } 
 }
-
 @media (min-width: 768px) {
   body { font-size: 16px; }
   .header h1 { font-size: 26px; margin-left: 10px; }
@@ -305,9 +225,7 @@ body.tech #modalOverlay .modal .btn-close-icon {
   .list-wrap { min-width: 100%; }
   .list-header, .srow { grid-template-columns: 1.4fr 1.3fr 1fr 1fr 1fr 1.2fr 1.4fr 1fr; }
   .list-header { font-size: 18px; }
-  .srow { font-size: 19px; }
-  .srow .sym { font-size: 19px; }
-  .srow .chgp { font-size: 19px; }
+  .srow, .srow .sym, .srow .chgp { font-size: 19px; }
   .srow .act button { padding: 8px 14px; font-size: 17px; }
   .sum-row .lab { font-size: 19px; }
   .sum-row .val { font-size: 24px; }
@@ -322,8 +240,7 @@ body.tech #modalOverlay .modal .btn-close-icon {
   .btn-backup { font-size: 17px; padding: 10px 14px; }
   .v-box { font-size: 15px; }
   .idx-card-box { min-width: 200px; padding: 8px 20px; }
-  .idx-box-name { font-size: 20px; } 
-  .idx-box-price { font-size: 20px; }
+  .idx-box-name, .idx-box-price { font-size: 20px; } 
   .idx-box-change-row { font-size: 18px; }
   .manual-content { font-size: 18px; }
   .manual-content h3 { font-size: 20px; }
@@ -343,7 +260,6 @@ body.tech #modalOverlay .modal .btn-close-icon {
       <button type="button" class="btn-adv" onclick="openModal()">進階</button>
     </div>
   </div>
-
   <div class="news-ticker-container" id="tickerContainer">
     <div class="ticker-scroll-area">
       <div class="ticker-wrap" id="js-ticker">
@@ -366,6 +282,7 @@ body.tech #modalOverlay .modal .btn-close-icon {
     <div class="idx-box-src" id="idxSource">Loading...</div>
   </div>
 </div>
+
 <div class="table-scroll" id="tableScroll" style="display:none;">
   <div class="list-wrap" id="listContainer">
     <div class="list-header">
@@ -374,7 +291,9 @@ body.tech #modalOverlay .modal .btn-close-icon {
     <div id="listBody"></div>
   </div>
 </div>
+
 <div id="emptyState" style="display:none;margin:8px 10px;padding:24px 14px;text-align:center;color:var(--t-muted);font-weight:600;font-size:16px">尚無持股，請點擊上方「+新增」</div>
+
 <div class="summary" id="summaryArea" style="display:none;">
   <div onclick="toggleSummary()" style="cursor:pointer;">
     <div class="sum-row" style="padding-bottom:0;">
@@ -391,13 +310,16 @@ body.tech #modalOverlay .modal .btn-close-icon {
     <div class="sum-toggle-btn" style="margin-top:10px;" onclick="toggleSummary(event)">▲ 收起選單</div>
   </div>
 </div>
+
 <div class="summary-btn-box">
   <button type="button" class="btn-save" id="saveArea" style="display:none;" onclick="saveDailyPnl()">💾 存儲今日損益總計</button>
 </div>
+
 <div class="history">
   <div class="card-title" style="margin:0 0 4px">歷史記錄</div>
   <div id="historyBody"><div class="hist-empty">尚無記錄</div></div>
 </div>
+
 <div class="toast" id="toast"></div>
 
 <div class="modal-overlay" id="addModalOverlay">
@@ -405,31 +327,48 @@ body.tech #modalOverlay .modal .btn-close-icon {
     <h2>新增持股</h2>
     <label>股票代號</label>
     <input type="text" id="symInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase; margin-bottom: 10px;">
-    
     <label>數量</label>
     <div style="display:flex; gap:10px; margin-bottom: 10px;">
       <input type="number" id="qtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" autocomplete="off" style="flex:1;">
       <select id="unitSelect" style="flex:0 0 80px;"><option value="張">張</option><option value="股">股</option></select>
     </div>
-    
-    <label>買入均價 (選填計算損益)</label>
+    <label>買入均價 (選填)</label>
     <input type="number" id="buyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="off" style="margin-bottom: 10px;">
-    
     <div style="display: flex; gap: 12px; margin-top: 20px;">
       <button type="button" class="modal-close" onclick="addStock()" style="flex:1; background:var(--accent); color:#fff; text-shadow:none; margin:0;">確認新增</button>
-      <button type="button" class="modal-close" onclick="closeAddModal()" style="flex:1; margin:0;">取消</button>
+      <button type="button" class="modal-close" onclick="closeModalById('addModalOverlay')" style="flex:1; margin:0;">取消</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="editModalOverlay">
+  <div class="modal">
+    <h2>編輯持股</h2>
+    <input type="hidden" id="editId">
+    <label>股票代號</label>
+    <input type="text" id="editSymInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase">
+    <label>股票簡稱 (選填)</label>
+    <input type="text" id="editNameInput" placeholder="自訂簡稱 (如: 台積電)" autocomplete="off">
+    <label>數量</label>
+    <input type="number" id="editQtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" autocomplete="off">
+    <label>單位</label>
+    <select id="editUnitSelect"><option value="張">張</option><option value="股">股</option></select>
+    <label>買入均價 (留空不計算總損益)</label>
+    <input type="number" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="off" style="margin-bottom: 10px;">
+    <div style="display: flex; gap: 12px; margin-top: 20px;">
+      <button type="button" class="modal-close" onclick="saveEditStock()" style="flex:1; background:var(--accent); color:#fff; text-shadow:none; margin:0;">💾 確認儲存</button>
+      <button type="button" class="modal-close" onclick="closeModalById('editModalOverlay')" style="flex:1; margin:0;">取消</button>
     </div>
   </div>
 </div>
 
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal fullscreen-modal">
-    <button type="button" class="btn-close-icon" onclick="closeModal()">✕</button>
+    <button type="button" class="btn-close-icon" onclick="closeModalById('modalOverlay')">✕</button>
     <h2>進階設定</h2>
-
     <div style="max-width: 85%; margin: 0 auto;">
       <div class="settings-row">
-        <button type="button" class="btn-manual-row" onclick="openManual()">📖 使用說明</button>
+        <button type="button" class="btn-manual-row" onclick="document.getElementById('manualOverlay').classList.add('show')">📖 使用說明</button>
         <div class="tab-count-wrapper">
           <div class="tab-count-label">分頁數量</div>
           <select id="tabCountSelect">
@@ -443,8 +382,7 @@ body.tech #modalOverlay .modal .btn-close-icon {
         </div>
       </div>
       <div class="api-section">
-        <button type="button" id="tickerToggleBtn" onclick="toggleTicker()" style="width: 100%; padding: 8px 12px; font-size: 15px; margin-bottom: 16px;">📰 財經新聞列：已開啟</button>
-        
+        <button type="button" id="tickerToggleBtn" onclick="toggleTicker()" style="width: 100%; padding: 8px 12px; font-size: 15px; margin-bottom: 16px;">📰 財經新聞列：</button>
         <div class="api-link-box">
           <a class="btn-link" href="https://developer.fugle.tw/docs/key/" target="_blank">🔗 申請 Fugle API Key</a>
         </div>
@@ -456,14 +394,14 @@ body.tech #modalOverlay .modal .btn-close-icon {
         <div><span class="key-status none" id="fugleKeyStatus">未設定</span></div>
         <label>🔑 Fugle API Key 2（備用）</label>
         <div style="display:flex;gap:8px;align-items:stretch;">
-          <input type="text" id="secondFugleKeyInput" class="pwd-mask" placeholder="輸入第二組 Key（選填）" autocomplete="off" spellcheck="false" style="flex:1;">
+          <input type="text" id="secondFugleKeyInput" class="pwd-mask" placeholder="輸入第二組 Key" autocomplete="off" spellcheck="false" style="flex:1;">
           <button type="button" onclick="toggleKeyVisibility('secondFugleKeyInput','keyToggle2')" id="keyToggle2" style="flex:0 0 44px;font-size:16px;">👁</button>
         </div>
         <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
         <div style="margin-top:16px;padding:12px;background:var(--bg-card);border-radius:12px;box-shadow:var(--shadow-inset); border:1px solid var(--border-light);">
           <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--t-muted); margin-bottom:8px; padding:0 4px;">
             <span>📊 今日 API 使用量</span>
-            <button type="button" onclick="openForeignIdxModal()" style="padding:4px 8px; font-size:12px; box-shadow:var(--shadow-soft); border:1px solid var(--border-light); border-radius:6px; color:var(--accent); white-space:nowrap; flex-shrink:0;">⚙️ 設定國外指數</button>
+            <button type="button" onclick="openForeignIdxModal()" style="padding:4px 8px; font-size:12px; box-shadow:var(--shadow-soft); border:1px solid var(--border-light); border-radius:6px; color:var(--accent); white-space:nowrap; flex-shrink:0;">⚙️ 國外指數</button>
           </div>
           <div id="apiStatsBox"></div>
         </div>
@@ -471,21 +409,20 @@ body.tech #modalOverlay .modal .btn-close-icon {
       <div class="backup-box" style="background:transparent; box-shadow:none; border:none; padding:10px 0;">
         <div class="backup-title">資料備份與還原</div>
         <div class="backup-btns">
-          <button type="button" class="btn-backup" onclick="exportData()">📥 匯出備份</button>
-          <button type="button" class="btn-backup" onclick="triggerImport()">📤 匯入還原</button>
+          <button type="button" class="btn-backup" onclick="exportData()">📥 匯出</button>
+          <button type="button" class="btn-backup" onclick="document.getElementById('importFile').click()">📤 還原</button>
           <input type="file" id="importFile" style="display:none" onchange="importData(event)">
         </div>
       </div>
-      
-      <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存設定並關閉</button>
-      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.14.4</div>
+      <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.14.5</div>
     </div>
   </div>
 </div>
 
 <div class="modal-overlay" id="foreignIdxOverlay">
   <div class="modal">
-    <h2>⚙️ 國外指數自選設定</h2>
+    <h2>⚙️ 國外指數設定</h2>
     <div class="card" style="margin: 0 0 16px 0; padding: 10px; box-shadow: var(--shadow-inset); border:1px solid var(--border-light);">
       <div class="card-title" style="font-size:14px; margin-bottom:6px;">新增自選指數</div>
       <div class="form-row">
@@ -493,11 +430,8 @@ body.tech #modalOverlay .modal .btn-close-icon {
         <input type="text" id="newIdxName" placeholder="自訂名稱 (含國旗)" style="font-size:14px; padding:8px;">
         <button type="button" onclick="addForeignIdx()" style="flex:0 0 44px; padding:0; font-size:20px; color:var(--accent); font-weight:bold;">＋</button>
       </div>
-      <div style="font-size:11px; color:var(--t-muted); margin-top:6px; text-align:left; line-height:1.4;">
-        * 提示：可自行使用手機輸入法國旗符號。美股大盤指數開頭通常為 ^ (例如 ^DJI, ^IXIC)。
-      </div>
     </div>
-    <label>目前自選列表</label>
+    <label>目前列表</label>
     <div id="foreignIdxListContainer" style="max-height: 250px; overflow-y: auto; margin-bottom: 16px; padding-right: 4px;"></div>
     <button type="button" class="modal-close" onclick="closeForeignIdxModal()">關閉並重新整理</button>
   </div>
@@ -507,1173 +441,630 @@ body.tech #modalOverlay .modal .btn-close-icon {
   <div class="modal">
     <h2>📖 系統使用說明</h2>
     <div class="manual-content">
-      <h3>一、基本操作與股票簡稱</h3>
-      <ul>
-        <li><strong>記帳與損益：</strong>輸入股票代號、張/股數及買入均價。系統會自動計算目前總現值、今日損益與總未實現損益（ROI）。</li>
-        <li><strong>自帶ETF字典：</strong>系統內建台灣熱門 ETF 與權值股字典，新增時會自動帶入簡稱。若想自訂，可點擊列表右側「✎」按鈕手動編輯「股票簡稱」。</li>
-      </ul>
-
-      <h3>二、分頁與新聞跑馬燈 💡</h3>
-      <ul>
-        <li><strong>分頁：</strong>進階設定中最多可開啟 5 個分頁，雙擊標籤即可重新命名。適合做長短線或家人帳戶的分流。也可以切換至「無分頁」隱藏此欄位。</li>
-        <li><strong>財經新聞：</strong>頂部的跑馬燈每小時會抓取各家財經媒體即時新聞，若覺得干擾，可於「進階設定」中隨時關閉。</li>
-      </ul>
-
-      <h3>三、API 報價引擎原則</h3>
-      <ul>
-        <li><strong>雙組 Key 模式（強烈推薦 🌟）：</strong>強烈建議填入兩組 Fugle API Key！若只使用一組 Key，頻繁更新容易觸發 API 呼叫次數限制導致被暫停使用(發生斷線)。填入兩組 Key 可輪流交替使用，不僅更新頻率將直接提速至每 <strong>10 秒</strong>，更能大幅降低單一 Key 的請求壓力，避免帳號被限制。</li>
-        <li><strong>防呆快取：</strong>當全球市場進入盤後或斷線，會自動抓取手機內最新的暫存檔，確保畫面永遠有數據。</li>
-      </ul>
-
-      <h3>四、慢速本地儲存與備份重要性 ⚠️</h3>
-      <ul>
-        <li>本軟體不使用雲端資料庫，您的庫存 100% 存放在手機內。<strong>請務必養成每週點擊「📥 匯出備份」的習慣！</strong></li>
-      </ul>
-      
-      <h3>五、強制喚醒技巧</h3>
-      <p>若打開 APP 時報價未即時跳動，只要<strong>手指輕觸螢幕滑動或點擊任意空白處</strong>，系統內部的「心跳引擎」便會被瞬間喚醒！</p>
+      <h3>一、基本操作</h3>
+      <p>輸入股票代號、張/股數及買入均價。系統會自動計算總現值與損益。內建台灣熱門 ETF 字典會自動帶入簡稱，可隨時修改。</p>
+      <h3>二、分頁與新聞</h3>
+      <p>最多可開啟 5 個分頁（雙擊標籤可重命名），新聞跑馬燈可於設定中關閉。</p>
+      <h3>三、API 雙 Key 引擎</h3>
+      <p>建議填入兩組 Fugle API Key，輪替使用能將更新速度提升至 10 秒，且大幅降低斷線率。</p>
+      <h3>四、本地儲存與備份</h3>
+      <p>資料 100% 存於手機，請務必定期手動匯出備份檔案！</p>
     </div>
-    <button type="button" class="modal-close" onclick="closeManual()">關閉說明</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="editModalOverlay">
-  <div class="modal">
-    <h2>編輯持股</h2>
-    <input type="hidden" id="editId">
-    <label>股票代號</label>
-    <input type="text" id="editSymInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase">
-    
-    <label>股票簡稱 (選填)</label>
-    <input type="text" id="editNameInput" placeholder="自訂簡稱 (如: 台積電)" autocomplete="off">
-
-    <label>數量</label>
-    <input type="number" id="editQtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" autocomplete="off">
-    <label>單位</label>
-    <select id="editUnitSelect"><option value="張">張</option><option value="股">股</option></select>
-    <label>買入均價 (留空或不填則不計算總損益)</label>
-    <input type="number" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="off" style="margin-bottom: 10px;">
-    
-    <div style="display: flex; gap: 12px; margin-top: 20px;">
-      <button type="button" class="modal-close" onclick="saveEditStock()" style="flex:1; background:var(--accent); color:#fff; text-shadow:none; margin:0;">💾 確認儲存</button>
-      <button type="button" class="modal-close" onclick="closeEditModal()" style="flex:1; margin:0;">取消</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="updateNoticeOverlay" style="z-index: 1200;">
-  <div class="modal">
-    <button type="button" class="btn-close-icon" onclick="closeUpdateNotice()">✕</button>
-    <h2>🎉 系統升級通知</h2>
-    <div class="manual-content" style="margin-top: 10px;">
-      <p>感謝您的使用！本次更新帶來了兩項實用的新功能：</p>
-      
-      <div class="info-box" style="margin-top: 16px;">
-        <h3 style="margin: 0 0 6px; font-size: 17px;">📰 即時財經新聞跑馬燈</h3>
-        <p style="margin: 0; font-size: 15px; font-weight: normal; color: var(--t-main);">我們在畫面上方加入了各家媒體的即時財經新聞，讓您掌握最新市場動態。（若您偏好乾淨的版面，可隨時至「進階設定」中將其關閉。）</p>
-      </div>
-
-      <div class="info-box">
-        <h3 style="margin: 0 0 6px; font-size: 17px;">📱 極簡「無分頁」模式</h3>
-        <p style="margin: 0; font-size: 15px; font-weight: normal; color: var(--t-main);">針對不需要多個帳戶或長短線分流的使用者，現在可以在進階設定的「分頁數量」中選擇「無分頁」，讓您的投資組合介面更加直覺清爽！</p>
-      </div>
-    </div>
-    
-    <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 12px; background: var(--accent); color: #fff; text-shadow: none;" onclick="closeUpdateNotice()">🚀 我知道了，開始體驗</button>
+    <button type="button" class="modal-close" onclick="closeModalById('manualOverlay')">關閉</button>
   </div>
 </div>
 
 <script>
-/* ========================================================= 🔧 熱門股票與ETF簡稱字典 ========================================================= */
-const STOCK_DICT = {
-  '0050': '元大台灣50', '0056': '元大高股息', '00878': '國泰永續高股息', '00929': '復華台灣科技優息',
-  '00919': '群益台灣精選高息', '00713': '元大台灣高息低波', '006208': '富邦台50', '00940': '元大台灣價值高息',
-  '00939': '統一台灣高息動能', '00679B': '元大美債20年', '00687B': '國泰20年美債', '00937B': '群益ESG投等債20+',
-  '00720B': '元大投資級公司債', '00881': '國泰台灣5G+', '00891': '中信關鍵半導體', '00830': '國泰費城半導體',
-  '00715L': '期街口布蘭特正2', '00632R': '元大台灣50反1', '00915': '凱基優選高股息30', '00900': '富邦特選高股息30',
-  '2330': '台積電', '2317': '鴻海', '2454': '聯發科', '2308': '台達電', '2382': '廣達', '2881': '富邦金', '2882': '國泰金'
+/* ========================================================= 🔧 工具與字典 ========================================================= */
+const STOCK_DICT = {'0050':'元大台灣50','0056':'元大高股息','00878':'國泰永續高股息','00929':'復華台灣科技優息','00919':'群益台灣精選高息','00713':'元大台灣高息低波','006208':'富邦台50','00940':'元大台灣價值高息','00939':'統一台灣高息動能','00679B':'元大美債20年','00687B':'國泰20年美債','00937B':'群益ESG投等債20+','00720B':'元大投資級公司債','00881':'國泰台灣5G+','00891':'中信關鍵半導體','00830':'國泰費城半導體','00715L':'期街口布蘭特正2','00632R':'元大台灣50反1','00915':'凱基優選高股息30','00900':'富邦特選高股息30','2330':'台積電','2317':'鴻海','2454':'聯發科','2308':'台達電','2382':'廣達','2881':'富邦金','2882':'國泰金'};
+
+const DEFAULT_INDICES = [{symbol:'^DJI',name:'🇺🇸 道瓊工業指數'},{symbol:'^IXIC',name:'🇺🇸 那斯達克指數'},{symbol:'^GSPC',name:'🇺🇸 標普500指數'},{symbol:'^SOX',name:'🇺🇸 費城半導體指數'},{symbol:'TSM',name:'🇹🇼 台積電 ADR'},{symbol:'^N225',name:'🇯🇵 日經225指數'},{symbol:'^KS11',name:'🇰🇷 韓國綜合指數'}];
+const PROXY_LIST = ['https://api.allorigins.win/raw?url=', 'https://corsproxy.io/?', 'https://api.codetabs.com/v1/proxy?quest=', 'https://thingproxy.freeboard.io/fetch/'];
+const API_TIMEOUT = 5000;
+const CF_WORKER_URL = 'https://yahoo-index-proxy.denis0521.workers.dev';
+const FUGLE_API = 'https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
+
+/* 統一管理 LocalStorage 鍵值與存取方法 */
+const LS = {
+  KEYS: {
+    FK: 'tw_fugle_key', SFK: 'tw_second_fugle_key', THEME: 'tw_theme',
+    CUR_TAB: 'tw_current_tab', TAB_NAMES: 'tw_tab_names', TAB_COUNT: 'tw_tab_count',
+    TICKER: 'tw_show_ticker', FOREIGN_IDX: 'tw_custom_foreign_indices',
+    CACHE_IDX: 'tw_cached_indices', CACHE_TWII: 'tw_cached_twii',
+    STOCK: i => `tw_stock_portfolio_tab_${i}`, RECORD: i => `tw_records_tab_${i}`
+  },
+  get: (k, def) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch(e){ return def; } },
+  getStr: (k, def='') => localStorage.getItem(k) ?? def,
+  set: (k, v) => { try { localStorage.setItem(k, typeof v === 'object' ? JSON.stringify(v) : v); } catch(e){} }
 };
 
-/* ========================================================= 🔧 API 管理引擎 ========================================================= */
-const PROXY_LIST = [
-  'https://api.allorigins.win/raw?url=',
-  'https://corsproxy.io/?',
-  'https://api.codetabs.com/v1/proxy?quest=',
-  'https://thingproxy.freeboard.io/fetch/'
-];
-const API_TIMEOUT = 5000;
-const MAX_CONCURRENT_REQUESTS = 3;
+/* ========================================================= 📊 核心狀態 ========================================================= */
+let currentTab = 0;
+let tabCount = 3;
+let tabStocks = Array.from({length: 5}, () => []);
+let tabRecords = Array.from({length: 5}, () => []);
+let tabNames = ['分頁 1', '分頁 2', '分頁 3', '分頁 4', '分頁 5'];
+let fugleKey='', secondFugleKey='';
+let showTicker = true;
+let currentInterval = 20000;
+let availableIndices = [];
+let cachedGlobalIndices = [];
 
 class KeyRotator {
   constructor(keys) { this.keys = keys.filter(k => k && k.trim() !== ''); this.index = 0; }
-  next() { if (this.keys.length === 0) return null; const k = this.keys[this.index % this.keys.length]; this.index++; return k; }
+  next() { if (this.keys.length === 0) return null; return this.keys[this.index++ % this.keys.length]; }
   get count() { return this.keys.length; }
 }
-
 let globalKeyRotator = null;
-function getKeyRotator() {
-  const keys = [fugleKey, secondFugleKey].filter(k => k && k.trim() !== '');
-  if (!globalKeyRotator || globalKeyRotator.count !== keys.length) {
-    globalKeyRotator = new KeyRotator(keys);
-  }
+const getKeyRotator = () => {
+  const keys = [fugleKey, secondFugleKey].filter(k => k);
+  if (!globalKeyRotator || globalKeyRotator.count !== keys.length) globalKeyRotator = new KeyRotator(keys);
   return globalKeyRotator;
-}
+};
 
-async function fetchWithProxy(targetUrl, proxyIndex = 0) {
-  if (proxyIndex >= PROXY_LIST.length) return null;
-  try {
-    const proxyUrl = PROXY_LIST[proxyIndex] + encodeURIComponent(targetUrl);
-    const resp = await fetch(proxyUrl, { signal: AbortSignal.timeout(API_TIMEOUT), cache: 'no-store' });
-    if (!resp.ok) throw new Error('Proxy error');
-    return resp;
-  } catch (e) {
-    return fetchWithProxy(targetUrl, proxyIndex + 1);
-  }
-}
-
-function trackApiUsage(source) {
-  const today = new Date().toISOString().split('T')[0];
-  const key = `api_usage_${today}_${source}`;
-  const count = (parseInt(localStorage.getItem(key) || '0')) + 1;
-  try { localStorage.setItem(key, String(count)); } catch(e){}
-  return count;
-}
-
-function getApiUsageStats() {
-  const today = new Date().toISOString().split('T')[0];
-  return {
-    fugle: parseInt(localStorage.getItem(`api_usage_${today}_Fugle`) || '0'),
-    yahoo: parseInt(localStorage.getItem(`api_usage_${today}_Yahoo`) || '0')
-  };
-}
-
-function renderApiStats() {
-  const stats = getApiUsageStats();
-  const el = document.getElementById('apiStatsBox');
-  if (el) {
-    el.innerHTML = `<div style="display:flex;justify-content:space-around;text-align:center;font-size:13px;color:var(--t-muted);text-shadow:-1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d);">
-      <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${stats.fugle}</div><div>Fugle</div></div>
-      <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${stats.yahoo}</div><div>Yahoo</div></div>
-    </div>`;
-  }
-}
-
-function toggleKeyVisibility(inputId, btnId) {
-  const input = document.getElementById(inputId);
-  const btn = document.getElementById(btnId);
-  if (input.classList.contains('pwd-mask')) {
-    input.classList.remove('pwd-mask');
-    btn.textContent = '🙈';
-  } else {
-    input.classList.add('pwd-mask');
-    btn.textContent = '👁';
-  }
-}
-
-let cfWorkerUrl = 'https://yahoo-index-proxy.denis0521.workers.dev';
-
-// 國外指數動態管理與初始配置設定
-const DEFAULT_INDICES = [
-  { symbol: '^DJI', name: '🇺🇸 道瓊工業指數' },
-  { symbol: '^IXIC', name: '🇺🇸 那斯達克指數' },
-  { symbol: '^GSPC', name: '🇺🇸 標普500指數' },
-  { symbol: '^SOX', name: '🇺🇸 費城半導體指數' },
-  { symbol: 'TSM', name: '🇹🇼 台積電 ADR' },
-  { symbol: '^N225', name: '🇯🇵 日經225指數' },
-  { symbol: '^KS11', name: '🇰🇷 韓國綜合指數' }
-];
-
-let AVAILABLE_INDICES = [];
-let activeForeignIndices = [];
-
-function loadForeignIndicesConfig() {
-  const stored = localStorage.getItem('tw_custom_foreign_indices');
-  if (stored) {
-    try {
-      AVAILABLE_INDICES = JSON.parse(stored);
-      let updated = false;
-      AVAILABLE_INDICES = AVAILABLE_INDICES.map(idx => {
-        if (idx.name === '道瓊工業指數') { idx.name = '🇺🇸 道瓊工業指數'; updated = true; }
-        if (idx.name === '那斯達克指數') { idx.name = '🇺🇸 那斯達克指數'; updated = true; }
-        if (idx.name === '標普500指數') { idx.name = '🇺🇸 標普500指數'; updated = true; }
-        if (idx.name === '費城半導體指數') { idx.name = '🇺🇸 費城半導體指數'; updated = true; }
-        if (idx.name === '台積電 ADR') { idx.name = '🇹🇼 台積電 ADR'; updated = true; }
-        if (idx.name === '日經225指數') { idx.name = '🇯🇵 日經225指數'; updated = true; }
-        if (idx.name === '韓國綜合指數') { idx.name = '🇰🇷 韓國綜合指數'; updated = true; }
-        return idx;
-      });
-      if (updated) localStorage.setItem('tw_custom_foreign_indices', JSON.stringify(AVAILABLE_INDICES));
-    } catch(e) {
-      AVAILABLE_INDICES = [...DEFAULT_INDICES];
-    }
-  } else {
-    AVAILABLE_INDICES = [...DEFAULT_INDICES];
-    localStorage.setItem('tw_custom_foreign_indices', JSON.stringify(AVAILABLE_INDICES));
-  }
-  activeForeignIndices = AVAILABLE_INDICES.map(idx => idx.symbol);
-}
-
-let currentTab = 0;
-let tabStocks = [[], [], [], [], []];
-let tabRecords = [[], [], [], [], []];
-let tabNames = ['分頁 1', '分頁 2', '分頁 3', '分頁 4', '分頁 5'];
-let tabCount = 3;
-let fugleKey='',secondFugleKey='';
-let currentInterval = 20000;
-let showTicker = true; 
-
-const FK='tw_fugle_key',SFK='tw_second_fugle_key',TK='tw_theme', CUR_TAB_KEY='tw_current_tab', TN_KEY='tw_tab_names', TC_KEY='tw_tab_count', TICKER_KEY='tw_show_ticker';
-const getStockKey = (idx) => `tw_stock_portfolio_tab_${idx}`;
-const getRecordKey = (idx) => `tw_records_tab_${idx}`;
-let cachedGlobalIndices = [];
-const FUGLE='https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
-
+/* ========================================================= 🛠 初始化與生命週期 ========================================================= */
 function loadState(){
-  loadForeignIndicesConfig();
-  try{
-    const f=localStorage.getItem(FK);if(f)fugleKey=f;
-    const sf=localStorage.getItem(SFK);if(sf)secondFugleKey=sf;
-    const ct=localStorage.getItem(CUR_TAB_KEY);if(ct!=null)currentTab=parseInt(ct);
-    const tn=localStorage.getItem(TN_KEY);if(tn) tabNames=JSON.parse(tn);
-    const tc=localStorage.getItem(TC_KEY);if(tc) tabCount=parseInt(tc);
-    
-    // 載入跑馬燈開關狀態
-    const st = localStorage.getItem(TICKER_KEY);
-    if(st !== null) showTicker = (st === 'true');
-    document.getElementById('tickerContainer').style.display = showTicker ? 'flex' : 'none';
-    const tBtn = document.getElementById('tickerToggleBtn');
-    if (tBtn) tBtn.textContent = showTicker ? '📰 財經新聞列：已開啟' : '📰 財經新聞列：已關閉';
+  availableIndices = LS.get(LS.KEYS.FOREIGN_IDX, DEFAULT_INDICES);
+  fugleKey = LS.getStr(LS.KEYS.FK);
+  secondFugleKey = LS.getStr(LS.KEYS.SFK);
+  currentTab = parseInt(LS.getStr(LS.KEYS.CUR_TAB, '0'));
+  tabNames = LS.get(LS.KEYS.TAB_NAMES, tabNames);
+  tabCount = parseInt(LS.getStr(LS.KEYS.TAB_COUNT, '3'));
+  showTicker = LS.getStr(LS.KEYS.TICKER, 'true') === 'true';
 
-    for(let i=0; i<5; i++){
-      const s=localStorage.getItem(getStockKey(i)); if(s) tabStocks[i]=JSON.parse(s);
-      const r=localStorage.getItem(getRecordKey(i)); if(r) tabRecords[i]=JSON.parse(r);
-    }
+  let maxTabs = tabCount === 0 ? 1 : tabCount;
+  if(currentTab >= maxTabs) currentTab = 0;
 
-    // 處理無分頁的情境防呆 (tabCount為0視同以分頁1作為主力)
-    let maxTabs = tabCount === 0 ? 1 : tabCount;
-    if(currentTab >= maxTabs) currentTab = 0;
+  for(let i=0; i<5; i++){
+    tabStocks[i] = LS.get(LS.KEYS.STOCK(i), []);
+    tabRecords[i] = LS.get(LS.KEYS.RECORD(i), []);
+  }
 
-    const t=localStorage.getItem(TK); applyThemeText(t);
-    
-    const cachedIdx = localStorage.getItem('tw_cached_indices');
-    if(cachedIdx) { cachedGlobalIndices = JSON.parse(cachedIdx); if(cachedGlobalIndices.length > 0) renderGlobalIndices(cachedGlobalIndices, false); }
-    
-    const cachedTwiiStr = localStorage.getItem('tw_cached_twii');
-    if (cachedTwiiStr) {
-      const res = JSON.parse(cachedTwiiStr);
-      const idxEl = document.getElementById('idxPrice');
-      const idxChgEl = document.getElementById('idxChange');
-      const idxPctEl = document.getElementById('idxPct');
-      const idxSrcEl = document.getElementById('idxSource');
-      if(idxEl) idxEl.textContent = res.price.toLocaleString('en-US',{maximumFractionDigits:0});
-      if(idxChgEl) { idxChgEl.textContent = (res.change>=0?'+':'')+res.change.toFixed(2); idxChgEl.className = (res.change>=0?'up':'down'); }
-      if(idxPctEl) { idxPctEl.textContent = '('+(res.changePercent>=0?'+':'')+res.changePercent.toFixed(2)+'%)'; idxPctEl.className = (res.changePercent>=0?'up':'down'); }
-      if(idxSrcEl) { idxSrcEl.textContent = 'via ' + res.source + ' (快取)'; }
-    }
-  }catch(e){console.error(e);}
-
-  document.getElementById('fugleKeyInput').value=fugleKey;
-  document.getElementById('secondFugleKeyInput').value=secondFugleKey;
-  document.getElementById('tabCountSelect').value=tabCount;
+  applyThemeText(LS.getStr(LS.KEYS.THEME, 'light'));
   
-  updateKeyStatus(); 
-  renderTabs();
-  renderApiStats();
+  cachedGlobalIndices = LS.get(LS.KEYS.CACHE_IDX, []);
+  if(cachedGlobalIndices.length) renderGlobalIndices(cachedGlobalIndices, true);
+
+  const cachedTwii = LS.get(LS.KEYS.CACHE_TWII, null);
+  if (cachedTwii) updateTwiiDOM(cachedTwii, true);
+
+  document.getElementById('tickerContainer').style.display = showTicker ? 'flex' : 'none';
+  renderTabs(); renderApiStats();
+}
+
+function applyThemeText(t){
+  const body = document.body; const themeBtn = document.getElementById('themeBtn'); const metaTheme = document.getElementById('themeColorMeta');
+  body.className = '';
+  const themes = {
+    'tech': { emoji: '🚀', color: '#1E2330' },
+    'blue-light': { emoji: '💎', color: '#D0DEE8' },
+    'purple-light': { emoji: '🍇', color: '#EDE8F4' },
+    'pink': { emoji: '🌸', color: '#F5E8EC' },
+    'light': { emoji: '☀️', color: '#E8ECF1' }
+  };
+  const theme = themes[t] || themes['light'];
+  if(t !== 'light') body.classList.add(t);
+  themeBtn.textContent = theme.emoji;
+  metaTheme.content = theme.color;
+}
+
+function toggleTheme(){
+  const modes = ['light', 'tech', 'blue-light', 'purple-light', 'pink'];
+  let current = modes.find(m => document.body.classList.contains(m)) || 'light';
+  let next = modes[(modes.indexOf(current) + 1) % modes.length];
+  applyThemeText(next); LS.set(LS.KEYS.THEME, next);
 }
 
 function toggleTicker() {
   showTicker = !showTicker;
   document.getElementById('tickerContainer').style.display = showTicker ? 'flex' : 'none';
-  const btn = document.getElementById('tickerToggleBtn');
-  if(btn) btn.textContent = showTicker ? '📰 財經新聞列：已開啟' : '📰 財經新聞列：已關閉';
-  try { localStorage.setItem(TICKER_KEY, showTicker); } catch(e){}
+  document.getElementById('tickerToggleBtn').textContent = `📰 財經新聞列：${showTicker ? '已開啟' : '已關閉'}`;
+  LS.set(LS.KEYS.TICKER, showTicker);
 }
 
-function applyThemeText(t){
-  const body=document.body; const themeBtn=document.getElementById('themeBtn'); const metaTheme = document.getElementById('themeColorMeta');
-  body.className = '';
-  if(t==='tech'){ body.classList.add('tech'); themeBtn.textContent='🚀'; metaTheme.content='#1E2330'; }
-  else if(t==='blue-light'){ body.classList.add('blue-light'); themeBtn.textContent='💎'; metaTheme.content='#D0DEE8'; }
-  else if(t==='purple-light'){ body.classList.add('purple-light'); themeBtn.textContent='🍇'; metaTheme.content='#EDE8F4'; }
-  else if(t==='pink'){ body.classList.add('pink'); themeBtn.textContent='🌸'; metaTheme.content='#F5E8EC'; }
-  else { themeBtn.textContent='☀️'; metaTheme.content='#E8ECF1'; }
-}
-
-function saveHoldings(){try{localStorage.setItem(getStockKey(currentTab),JSON.stringify(tabStocks[currentTab]));}catch(e){}}
-function saveKeys(){ 
-  fugleKey=document.getElementById('fugleKeyInput').value.trim(); 
-  secondFugleKey=document.getElementById('secondFugleKeyInput').value.trim(); 
-  try{localStorage.setItem(FK,fugleKey);localStorage.setItem(SFK,secondFugleKey);}catch(e){} 
-  globalKeyRotator = null; 
-  updateKeyStatus(); 
-}
-function saveRecords(){try{localStorage.setItem(getRecordKey(currentTab),JSON.stringify(tabRecords[currentTab]));}catch(e){}}
-
-function saveTabCount(){ 
-  const newCount = parseInt(document.getElementById('tabCountSelect').value);
-  if(newCount === tabCount) return;
-  tabCount = newCount; 
-  try{localStorage.setItem(TC_KEY, tabCount);}catch(e){}
-  
-  let maxTabs = tabCount === 0 ? 1 : tabCount;
-  if(currentTab >= maxTabs) { currentTab = 0; try{localStorage.setItem(CUR_TAB_KEY, currentTab);}catch(e){} }
-  renderTabs(); renderAll(); renderHistory(); 
-}
-
-function toggleTheme(){
-  const body=document.body; let nextTheme = 'light';
-  if(body.classList.contains('tech')) nextTheme = 'blue-light';
-  else if(body.classList.contains('blue-light')) nextTheme = 'purple-light';
-  else if(body.classList.contains('purple-light')) nextTheme = 'pink';
-  else if(body.classList.contains('pink')) nextTheme = 'light';
-  else nextTheme = 'tech';
-  applyThemeText(nextTheme); try{localStorage.setItem(TK, nextTheme);}catch(e){}
-}
-
-function switchTab(tabIndex){
-  if(currentTab === tabIndex || tabCount === 0) return;
-  currentTab = tabIndex; try{localStorage.setItem(CUR_TAB_KEY, currentTab);}catch(e){}
+function switchTab(idx){
+  if(currentTab === idx || tabCount === 0) return;
+  currentTab = idx; LS.set(LS.KEYS.CUR_TAB, idx);
   renderTabs(); renderAll(); renderHistory(); forceRefresh();
 }
 
-function renameTab(tabIndex) {
-  const oldName = tabNames[tabIndex] || `分頁 ${tabIndex + 1}`;
-  const newName = prompt('請輸入此分頁的新名稱：', oldName);
+function renameTab(idx) {
+  const newName = prompt('請輸入此分頁的新名稱：', tabNames[idx]);
   if (newName !== null) {
-    const finalName = newName.trim() === '' ? `分頁 ${tabIndex + 1}` : newName.trim();
-    tabNames[tabIndex] = finalName;
-    try { localStorage.setItem(TN_KEY, JSON.stringify(tabNames)); } catch(e){}
-    renderTabs(); showToast(`已更名為「${finalName}」`);
+    tabNames[idx] = newName.trim() || `分頁 ${idx + 1}`;
+    LS.set(LS.KEYS.TAB_NAMES, tabNames);
+    renderTabs(); showToast(`已更名為「${tabNames[idx]}」`);
   }
 }
 
 function renderTabs() {
   const container = document.getElementById('tabsBarContainer');
-  container.innerHTML = '';
-  
-  if (tabCount === 0) {
-    container.style.display = 'none'; // 無分頁時隱藏板塊並讓其它元素往上靠
-    return;
-  }
+  if (tabCount === 0) { container.style.display = 'none'; return; }
   
   container.style.display = 'flex';
-  for(let i=0; i<tabCount; i++){
-    const btn = document.createElement('button');
-    btn.type = 'button'; btn.className = 'tab-btn'; btn.id = `tab${i}`;
-    btn.textContent = tabNames[i] || `分頁 ${i + 1}`;
-    btn.onclick = () => switchTab(i); btn.ondblclick = () => renameTab(i);
-    if(i === currentTab) btn.classList.add('active');
-    container.appendChild(btn);
+  container.innerHTML = tabNames.slice(0, tabCount).map((name, i) => 
+    `<button type="button" class="tab-btn ${i === currentTab ? 'active' : ''}" onclick="switchTab(${i})" ondblclick="renameTab(${i})">${name}</button>`
+  ).join('');
+  
+  const fontSize = tabCount >= 4 ? '14px' : (tabCount === 3 ? '16px' : '18px');
+  container.querySelectorAll('.tab-btn').forEach(b => b.style.fontSize = fontSize);
+}
+
+/* ========================================================= 🖥 DOM 與渲染邏輯優化 (DRY) ========================================================= */
+const formatPrice = p => p == null ? '—' : (Math.abs(p) >= 1000 ? p.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : p.toFixed(2));
+const getSign = n => n >= 0 ? '+' : '';
+const getColorCls = n => n > 0 ? 'up' : (n < 0 ? 'down' : '');
+
+function getStockHtmlInner(s) {
+  const shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
+  const p = s.price; const chg = s.change ?? 0;
+  
+  let tpStr = '—', tpClass = '';
+  if (s.change != null) { 
+    const todayPnl = Math.round(shares * chg); 
+    tpStr = getSign(todayPnl) + todayPnl.toLocaleString(); 
+    tpClass = getColorCls(todayPnl); 
   }
-  const btns = container.querySelectorAll('.tab-btn');
-  if(tabCount >= 4) { btns.forEach(b => b.style.fontSize = '14px'); } 
-  else if(tabCount === 3) { btns.forEach(b => b.style.fontSize = '16px'); } 
-  else { btns.forEach(b => b.style.fontSize = '18px'); }
-}
-
-function updateKeyStatus(){
-  ['fugleKey','secondFugleKey'].forEach((id,i)=>{
-    const el=document.getElementById(id+'Status');if(!el)return;
-    const val=i===0?fugleKey:secondFugleKey;
-    if(val){el.textContent='✓ 已設定';el.className='key-status ok';}
-    else{el.textContent='未設定';el.className='key-status none';}
-  });
-  renderApiStats();
-}
-
-function renderGlobalIndices(indices, isOffline = false) {
-  const container = document.getElementById('idxScrollContainer');
-  const boxes = container.querySelectorAll('.idx-card-box');
-  for(let i = 1; i < boxes.length; i++) boxes[i].remove();
-
-  const offlineTag = isOffline ? '<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>' : '';
-
-  indices.forEach(item => {
-    let displayIndexName = item.name;
-    const matchedIndex = AVAILABLE_INDICES.find(idx => idx.symbol === item.symbol);
-    if (matchedIndex) displayIndexName = matchedIndex.name;
-
-    const card = document.createElement('div'); card.className = 'idx-card-box';
-    const sign = item.pct >= 0 ? '+' : ''; const cls = item.pct >= 0 ? 'up' : 'down';
-    card.innerHTML = `<div class="idx-box-name">${displayIndexName}${offlineTag}</div>
-      <div class="idx-box-price">${item.price.toLocaleString('en-US', {maximumFractionDigits:2})}</div>
-      <div class="idx-box-change-row ${cls}">
-        <span>${sign}${item.changeAmt.toFixed(2)}</span>
-        <span>(${sign}${item.pct.toFixed(2)}%)</span>
-      </div>
-      <div class="idx-box-src">via Yahoo ${isOffline ? 'Cache' : ''}</div>`;
-    container.appendChild(card);
-  });
-}
-
-async function fetchGlobalIndicesFromWorker() {
-  if (!cfWorkerUrl || cfWorkerUrl === '') return;
-  if (navigator.onLine === false) {
-    const cachedIdx = localStorage.getItem('tw_cached_indices');
-    if (cachedIdx) { try { renderGlobalIndices(JSON.parse(cachedIdx), true); } catch(e) {} }
-    return;
+  
+  let totalHtml = '—', totalValForClass = 0;
+  if (p != null) {
+    const mktValue = Math.round(shares * p);
+    if (s.buyPrice != null && s.buyPrice > 0) {
+      const cost = s.buyPrice * shares; const unPnl = Math.round(mktValue - cost); const roi = ((mktValue - cost) / cost) * 100;
+      totalValForClass = unPnl;
+      totalHtml = `<div style="line-height:1.2;font-size:inherit;">${getSign(unPnl)}${unPnl.toLocaleString()}</div>
+      <div style="font-size:0.8em;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${getSign(roi)}${roi.toFixed(2)}%</div>`;
+    } else {
+      totalHtml = `<div style="line-height:1.2;font-size:inherit;" class="neutral">—</div>
+      <div style="font-size:0.8em;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
+    }
   }
 
+  const pClass = p != null ? getColorCls(chg) : '';
+  const cgp = s.changePercent != null ? `${getSign(s.changePercent)}${s.changePercent.toFixed(2)}%` : '—';
+  const cgpClass = s.changePercent != null ? getColorCls(s.changePercent) : '';
+  const cgStr = s.change != null ? `${getSign(chg)}${chg.toFixed(2)}` : '—';
+  const nameHtml = s.name ? `<div class="sym-name" style="font-size:12px; color:var(--t-muted); margin-top:4px; font-weight:normal; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">${s.name}</div>` : '';
+
+  return `
+    <div class="sym-container"><div class="sym">${s.symbol}</div>${nameHtml}</div>
+    <div class="qty-cell">
+      <div style="line-height:1.2;font-size:inherit;">${s.displayQty} ${s.displayUnit}</div>
+      <div style="font-size:0.8em;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}">${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}</div>
+    </div>
+    <div class="price ${pClass}">${formatPrice(p)}</div>
+    <div class="chgp ${cgpClass}">${cgp}</div>
+    <div class="chg ${pClass}">${cgStr}</div>
+    <div class="today-pnl ${tpClass}">${tpStr}</div>
+    <div class="total ${getColorCls(totalValForClass)}">${totalHtml}</div>
+    <div class="act">
+      <button type="button" onclick="openEditModal('${s.id}')">✎</button>
+      <button type="button" class="del-btn" onclick="deleteStock('${s.id}')">✕</button>
+    </div>`;
+}
+
+function renderAll(){
+  const body = document.getElementById('listBody'); const empty = document.getElementById('emptyState');
+  const uiEls = ['tableScroll', 'summaryArea', 'saveArea'].map(id => document.getElementById(id));
+  body.innerHTML = ''; 
+  const stocks = tabStocks[currentTab];
+  
+  if(stocks.length === 0){ 
+    empty.style.display = 'block'; uiEls.forEach(e => e.style.display = 'none'); return; 
+  }
+  
+  empty.style.display = 'none'; uiEls.forEach(e => e.style.display = 'block');
+  
+  stocks.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'srow'; div.dataset.id = s.id;
+    div.innerHTML = getStockHtmlInner(s);
+    body.appendChild(div);
+  });
+  updateSummary();
+}
+
+function renderRow(s) {
+  const el = document.querySelector(`.srow[data-id="${s.id}"]`);
+  if(el) { el.innerHTML = getStockHtmlInner(s); }
+}
+
+function updateSummary(){
+  let pnl = 0, asset = 0, totalUnPnl = 0, hasUnPnl = false;
+  tabStocks[currentTab].forEach(s => {
+    const sh = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
+    pnl += Math.round(sh * (s.change ?? 0)); asset += Math.round(sh * (s.price ?? 0));
+    if (s.buyPrice > 0 && s.price != null) { totalUnPnl += Math.round((s.price - s.buyPrice) * sh); hasUnPnl = true; }
+  });
+  
+  const setHtml = (id, val, cls) => { const e = document.getElementById(id); e.textContent = val; e.className = `val ${cls}`; };
+  setHtml('totalPnl', getSign(pnl) + pnl.toLocaleString(), getColorCls(pnl));
+  setHtml('totalAsset', getSign(asset) + asset.toLocaleString(), 'neutral');
+  setHtml('totalUnrealized', hasUnPnl ? getSign(totalUnPnl) + totalUnPnl.toLocaleString() : '—', hasUnPnl ? getColorCls(totalUnPnl) : 'neutral');
+}
+
+/* ========================================================= 📡 網路請求與資料流 ========================================================= */
+function trackApiUsage(source) {
+  const k = `api_usage_${new Date().toISOString().split('T')[0]}_${source}`;
+  const c = parseInt(LS.getStr(k, '0')) + 1;
+  LS.set(k, String(c)); return c;
+}
+
+function renderApiStats() {
+  const d = new Date().toISOString().split('T')[0];
+  const f = parseInt(LS.getStr(`api_usage_${d}_Fugle`, '0'));
+  const y = parseInt(LS.getStr(`api_usage_${d}_Yahoo`, '0'));
+  const el = document.getElementById('apiStatsBox');
+  if (el) el.innerHTML = `<div style="display:flex;justify-content:space-around;text-align:center;font-size:13px;color:var(--t-muted);text-shadow:-1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d);">
+    <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${f}</div><div>Fugle</div></div>
+    <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${y}</div><div>Yahoo</div></div></div>`;
+}
+
+async function fetchWithProxy(url, index = 0) {
+  if (index >= PROXY_LIST.length) return null;
   try {
-    const workerSymbols = activeForeignIndices.join(',');
-    if (!workerSymbols) {
-      renderGlobalIndices([]);
-      return;
-    }
-    const response = await fetch(`${cfWorkerUrl}/indices?symbols=${encodeURIComponent(workerSymbols)}&_=${Date.now()}`, { 
-      signal: AbortSignal.timeout(API_TIMEOUT),
-      headers: { 'Accept': 'application/json' },
-      cache: 'no-store'
-    });
-    if (response.ok) {
-      const data = await response.json();
-      if (data.indices && data.indices.length > 0) {
-        const parsedIndices = data.indices.map(item => {
-          const price = item.price ?? item.regularMarketPrice ?? item.previousClose ?? 0;
-          const changeAmt = item.change ?? item.regularMarketChange ?? 0;
-          const pct = item.changePercent ?? item.regularMarketChangePercent ?? 0;
-          const name = item.name || item.symbol;
-          return { symbol: item.symbol, name, price, pct, changeAmt };
-        });
-        parsedIndices.sort((a, b) => activeForeignIndices.indexOf(a.symbol) - activeForeignIndices.indexOf(b.symbol));
-        cachedGlobalIndices = parsedIndices;
-        trackApiUsage('Yahoo');
-        try { localStorage.setItem('tw_cached_indices', JSON.stringify(cachedGlobalIndices)); } catch(e){}
-        renderGlobalIndices(cachedGlobalIndices, false);
-      }
-    }
-  } catch (e) {
-    const cachedIdx = localStorage.getItem('tw_cached_indices');
-    if (cachedIdx) { try { renderGlobalIndices(JSON.parse(cachedIdx), true); } catch(e2) {} }
-  }
+    const res = await fetch(PROXY_LIST[index] + encodeURIComponent(url), { signal: AbortSignal.timeout(API_TIMEOUT), cache: 'no-store' });
+    if (!res.ok) throw new Error(); return res;
+  } catch (e) { return fetchWithProxy(url, index + 1); }
 }
 
-async function fetchFugle(symbol){
-  const kr = getKeyRotator();
-  if (kr.count === 0) return null;
+async function fetchFugle(sym){
+  const kr = getKeyRotator(); if (kr.count === 0) return null;
   for (let i = 0; i < kr.count; i++){
-    const currentKey = kr.next();
     try {
-      const resp = await fetch(FUGLE + encodeURIComponent(symbol), {
-        headers: {'X-API-KEY': currentKey, 'X-Requested-With': 'StockPortfolioApp', 'Cache-Control': 'no-cache'},
-        signal: AbortSignal.timeout(API_TIMEOUT),
-        cache: 'no-store'
-      });
-      if (resp.ok) {
-        const d = await resp.json();
+      const res = await fetch(FUGLE_API + encodeURIComponent(sym), { headers: {'X-API-KEY': kr.next()}, signal: AbortSignal.timeout(API_TIMEOUT) });
+      if (res.ok) {
+        const d = await res.json();
         const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
-        if (p != null) {
-          trackApiUsage('Fugle');
-          let fetchedName = d.name || (d.data && d.data.info && d.data.info.name) || '';
-          return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle', name: fetchedName};
+        if (p != null) { trackApiUsage('Fugle'); return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle', name: d.name || ''}; }
+      }
+    } catch(e) {}
+  } return null; 
+}
+
+async function fetchYahoo(sym){
+  const tryFetch = async (suffix) => {
+    try {
+      const u = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(sym)}${suffix}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
+      const res = await fetchWithProxy(u); if (!res) return null;
+      const text = (await res.text()).trim().split('\n');
+      if (text.length < 2) return null;
+      const cols = text.pop().split(',');
+      if (cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
+      const p = parseFloat(cols[4]); const o = parseFloat(cols[1]);
+      const chg = +(p - o).toFixed(2);
+      trackApiUsage('Yahoo'); return {price: p, change: chg, changePercent: +((chg / o) * 100).toFixed(2), source: 'Yahoo', name: ''};
+    } catch(e) { return null; }
+  };
+  return await tryFetch('.TW') || await tryFetch('.TWO');
+}
+
+function updateTwiiDOM(res, isOffline = false) {
+  if(!res) return;
+  const nameBox = document.querySelector('#idxScrollContainer .idx-card-box:first-child .idx-box-name');
+  if(nameBox) nameBox.innerHTML = `🇹🇼 臺灣加權指數${isOffline ? '<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>' : ''}`;
+  
+  const els = { p: document.getElementById('idxPrice'), c: document.getElementById('idxChange'), pct: document.getElementById('idxPct'), s: document.getElementById('idxSource') };
+  if(els.p) els.p.textContent = res.price.toLocaleString('en-US',{maximumFractionDigits:0});
+  if(els.c) { els.c.textContent = getSign(res.change) + res.change.toFixed(2); els.c.className = getColorCls(res.change); }
+  if(els.pct) { els.pct.textContent = `(${getSign(res.changePercent)}${res.changePercent.toFixed(2)}%)`; els.pct.className = getColorCls(res.changePercent); }
+  if(els.s) els.s.textContent = `via ${res.source} ${isOffline ? '(快取)' : new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'})}`;
+}
+
+async function refreshPrices(){
+  if (navigator.onLine === false) { showToast('處於離線狀態，顯示快取資料'); return; }
+  
+  // 1. 更新大盤
+  let idxR = await fetchFugle('IX0001');
+  if (!idxR) {
+    try {
+      const res = await fetchWithProxy(`https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`);
+      if(res) {
+        const text = (await res.text()).trim().split('\n');
+        if(text.length >= 2) {
+          const cols = text.pop().split(',');
+          if(cols[4] !== 'null') {
+            const p = parseFloat(cols[4]), o = parseFloat(cols[1]), chg = +(p - o).toFixed(2);
+            idxR = {price: p, change: chg, changePercent: +((chg/o)*100).toFixed(2), source: 'Yahoo'};
+            trackApiUsage('Yahoo');
+          }
         }
       }
     } catch(e) {}
   }
-  return null; 
-}
+  if(idxR) { updateTwiiDOM(idxR); LS.set(LS.KEYS.CACHE_TWII, idxR); }
 
-async function fetchYahoo(symbol){
-  const tryFetch = async (suffix) => {
-    try {
-      const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(symbol)}${suffix}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
-      const resp = await fetchWithProxy(yahooUrl);
-      if (!resp) return null;
-      const text = await resp.text();
-      const lines = text.trim().split('\n');
-      if (lines.length < 2) return null;
-      const cols = lines[lines.length - 1].split(',');
-      if (cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
-      const price = parseFloat(cols[4]);
-      const open = parseFloat(cols[1]);
-      const chg = +(price - open).toFixed(2);
-      const pct = +((chg / open) * 100).toFixed(2);
-      trackApiUsage('Yahoo');
-      return {price, change: chg, changePercent: pct, source: 'Yahoo', name: ''};
-    } catch(e) { return null; }
-  };
-  let res = await tryFetch('.TW');
-  if (!res) res = await tryFetch('.TWO');
-  return res;
-}
-
-async function fetchWeightedIndex(){
-  const kr = getKeyRotator();
-  if (kr.count > 0){
-    for (let i = 0; i < kr.count; i++){
-      try {
-        const resp = await fetch(FUGLE + 'IX0001', {
-          headers: {'X-API-KEY': kr.next(), 'X-Requested-With': 'StockPortfolioApp', 'Cache-Control': 'no-cache'},
-          signal: AbortSignal.timeout(API_TIMEOUT),
-          cache: 'no-store'
-        });
-        if (resp.ok) {
-          const d = await resp.json();
-          const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
-          if (p != null) {
-            trackApiUsage('Fugle');
-            return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle'};
-          }
-        }
-      } catch(e) {}
-    }
-  }
-  
+  // 2. 更新國外指數
   try {
-    const yahooUrl = `https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
-    const resp = await fetchWithProxy(yahooUrl);
-    if (resp) {
-      const text = await resp.text();
-      const lines = text.trim().split('\n');
-      if (lines.length >= 2) {
-        const cols = lines[lines.length - 1].split(',');
-        if (cols.length >= 6 && cols[4] !== 'null' && cols[1] !== 'null') {
-          const price = parseFloat(cols[4]);
-          const open = parseFloat(cols[1]);
-          const chg = +(price - open).toFixed(2);
-          const pct = +((chg / open) * 100).toFixed(2);
-          trackApiUsage('Yahoo');
-          return {price, change: chg, changePercent: pct, source: 'Yahoo'};
+    const syms = availableIndices.map(i => i.symbol).join(',');
+    if(syms) {
+      const res = await fetch(`${CF_WORKER_URL}/indices?symbols=${encodeURIComponent(syms)}&_=${Date.now()}`, { signal: AbortSignal.timeout(API_TIMEOUT) });
+      if (res.ok) {
+        const data = await res.json();
+        if(data.indices) {
+          cachedGlobalIndices = data.indices.map(item => ({
+            symbol: item.symbol, name: item.name || item.symbol,
+            price: item.price ?? item.regularMarketPrice ?? item.previousClose ?? 0,
+            changeAmt: item.change ?? item.regularMarketChange ?? 0,
+            pct: item.changePercent ?? item.regularMarketChangePercent ?? 0
+          })).sort((a,b) => syms.indexOf(a.symbol) - syms.indexOf(b.symbol));
+          LS.set(LS.KEYS.CACHE_IDX, cachedGlobalIndices); trackApiUsage('Yahoo');
+          renderGlobalIndices(cachedGlobalIndices, false);
         }
       }
-    }
+    } else { renderGlobalIndices([]); }
   } catch(e) {}
 
-  return null;
-}
-
-function isAnyMarketOpen() {
-  const now = new Date(); const day = now.getDay(); const hour = now.getHours(); const min = now.getMinutes();
-  if (day === 0 || day === 6) return false;
-  const time = hour + min / 60;
-  if (time >= 8 && time <= 14) return true;
-  if (time >= 15 || time <= 5) return true;
-  return false;
-}
-
-async function refreshPrices(){
-  const isOffline = navigator.onLine === false;
-  if (isOffline) { 
-    showToast('目前處於離線狀態，顯示快取資料'); 
-    const twNameBox = document.querySelector('#idxScrollContainer .idx-card-box:first-child .idx-box-name');
-    if (twNameBox && !twNameBox.innerHTML.includes('(離線)')) {
-      twNameBox.innerHTML = `🇹🇼 臺灣加權指數<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>`;
-    }
-    return;
-  } else {
-    const twNameBox = document.querySelector('#idxScrollContainer .idx-card-box:first-child .idx-box-name');
-    if (twNameBox) twNameBox.innerHTML = `🇹🇼 臺灣加權指數`;
-  }
-
-  const idxR = fetchWeightedIndex();
-  const idxEl = document.getElementById('idxPrice'); const idxChgEl = document.getElementById('idxChange');
-  const idxPctEl = document.getElementById('idxPct'); const idxSrcEl = document.getElementById('idxSource');
+  // 3. 更新持股
+  if (tabStocks[currentTab].length === 0) { renderApiStats(); return; }
+  const uniqueSyms = [...new Set(tabStocks[currentTab].map(s => s.symbol))];
+  let hasUpdates = false;
   
-  if (idxR){
-    idxR.then(res => {
-      if(res) {
-        idxEl.textContent=res.price.toLocaleString('en-US',{maximumFractionDigits:0});
-        idxChgEl.textContent=(res.change>=0?'+':'')+res.change.toFixed(2); idxChgEl.className=(res.change>=0?'up':'down');
-        idxPctEl.textContent='('+(res.changePercent>=0?'+':'')+res.changePercent.toFixed(2)+'%)'; idxPctEl.className=(res.changePercent>=0?'up':'down');
-        idxSrcEl.textContent='via '+res.source+' '+new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'});
-        try { localStorage.setItem('tw_cached_twii', JSON.stringify(res)); } catch(e){}
-      }
-    });
-  }
-  fetchGlobalIndicesFromWorker();
-  
-  const currentStocks = tabStocks[currentTab];
-  if (currentStocks.length === 0) return;
-  const uniqueSymbols = [...new Set(currentStocks.map(s => s.symbol))];
-  const batchSize = MAX_CONCURRENT_REQUESTS;
-  
-  let hasUpdates = false; 
-  
-  for (let i = 0; i < uniqueSymbols.length; i += batchSize) {
-    const batch = uniqueSymbols.slice(i, i + batchSize);
-    const promises = batch.map(async (sym) => {
-      let r = await fetchFugle(sym);
-      if (!r) r = await fetchYahoo(sym);
+  for (let i = 0; i < uniqueSyms.length; i += 3) {
+    const batch = uniqueSyms.slice(i, i + 3);
+    const promises = batch.map(async sym => {
+      let r = await fetchFugle(sym) || await fetchYahoo(sym);
       return { sym, r };
     });
-    
     const results = await Promise.allSettled(promises);
-    results.forEach((result) => {
-      if (result.status === 'fulfilled') {
-        const { sym, r } = result.value;
-        if (r) {
-          hasUpdates = true;
-          const now = new Date();
-          const uTime = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-          for (let idx = 0; idx < 5; idx++) {
-            tabStocks[idx].filter(s => s.symbol === sym).forEach(s => {
-              s.price = r.price; s.change = r.change; s.changePercent = r.changePercent; s.source = r.source;
-              if (r.name && !s.name) s.name = r.name; 
-              s.updateTime = uTime;
-              if (idx === currentTab) renderRow(s);
-            });
-          }
+    
+    results.forEach(res => {
+      if(res.status === 'fulfilled' && res.value.r) {
+        hasUpdates = true; const {sym, r} = res.value;
+        for (let idx = 0; idx < 5; idx++) {
+          tabStocks[idx].filter(s => s.symbol === sym).forEach(s => {
+            s.price = r.price; s.change = r.change; s.changePercent = r.changePercent;
+            if(r.name && !s.name) s.name = r.name;
+            if (idx === currentTab) renderRow(s);
+          });
         }
       }
     });
   }
   
   if (hasUpdates) {
-    for (let i = 0; i < 5; i++) {
-      try { localStorage.setItem(getStockKey(i), JSON.stringify(tabStocks[i])); } catch(e) {}
-    }
+    for (let i = 0; i < 5; i++) LS.set(LS.KEYS.STOCK(i), tabStocks[i]);
+    updateSummary();
   }
   
-  updateSummary();
-  adjustPollingInterval();
+  const isOpen = () => { const t = new Date(); const d = t.getDay(), h = t.getHours() + t.getMinutes()/60; return d!==0 && d!==6 && ((h>=8 && h<=14) || h>=15 || h<=5); };
+  currentInterval = isOpen() ? (getKeyRotator().count === 2 ? 10000 : 20000) : 60000;
+  if(window.heartbeatWorker) heartbeatWorker.postMessage({ action: 'start', interval: currentInterval });
   renderApiStats();
 }
 
-function adjustPollingInterval() {
-  const kr = getKeyRotator(); const keyCount = kr.count; 
-  let newInterval = 20000;
+function renderGlobalIndices(indices, isOffline = false) {
+  const container = document.getElementById('idxScrollContainer');
+  Array.from(container.children).slice(1).forEach(e => e.remove());
   
-  if (!isAnyMarketOpen()) { newInterval = 60000; } 
-  else if (keyCount === 2) { newInterval = 10000; }
-  
-  if (newInterval !== currentInterval) { 
-    currentInterval = newInterval; 
-    if(window.heartbeatWorker) heartbeatWorker.postMessage({ action: 'start', interval: currentInterval });
-  }
+  indices.forEach(item => {
+    const matched = availableIndices.find(idx => idx.symbol === item.symbol);
+    const name = matched ? matched.name : item.name;
+    const cls = getColorCls(item.pct);
+    const html = `<div class="idx-card-box">
+      <div class="idx-box-name">${name}${isOffline ? '<span style="color:var(--t-muted);font-size:12px;margin-left:6px;opacity:0.8;">(離線)</span>' : ''}</div>
+      <div class="idx-box-price">${item.price.toLocaleString('en-US', {maximumFractionDigits:2})}</div>
+      <div class="idx-box-change-row ${cls}"><span>${getSign(item.changeAmt)}${item.changeAmt.toFixed(2)}</span><span>(${getSign(item.pct)}${item.pct.toFixed(2)}%)</span></div>
+      <div class="idx-box-src">via Yahoo ${isOffline ? 'Cache' : ''}</div></div>`;
+    container.insertAdjacentHTML('beforeend', html);
+  });
 }
 
-function renderRow(s){
-  const el=document.querySelector('.srow[data-id="'+s.id+'"]');if(!el)return;
-  const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
-  let p = s.price; let chg = s.change ?? 0;
-  const symCont = el.querySelector('.sym-container');
-  if(symCont){ 
-    symCont.querySelector('.sym').textContent=s.symbol; 
-    let nameEl = symCont.querySelector('.sym-name');
-    if(s.name) {
-      if(!nameEl) {
-        nameEl = document.createElement('div');
-        nameEl.className = 'sym-name';
-        nameEl.style.cssText = 'font-size:12px; color:var(--t-muted); margin-top:4px; font-weight:normal; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;';
-        symCont.appendChild(nameEl);
-      }
-      nameEl.textContent = s.name;
-    } else if (nameEl) {
-      nameEl.remove();
-    }
-  }
-  const qn=el.querySelector('.qty-cell');
-  if(qn){
-    qn.innerHTML=`<div style="line-height:1.2;font-size:inherit;">${s.displayQty} ${s.displayUnit}</div>
-    <div style="font-size:0.8em;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}">${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}</div>`;
-  }
-  const pEl=el.querySelector('.price');
-  if(p!=null){ pEl.textContent=formatPrice(p); pEl.className='price '+(chg>=0?'up':'down'); }
-  const cp=el.querySelector('.chgp');
-  if(s.changePercent!=null){cp.textContent=(s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%';cp.className='chgp '+(s.changePercent>=0?'up':'down');}
-  const cg=el.querySelector('.chg');
-  if(s.change!=null){cg.textContent=(chg>=0?'+':'')+chg.toFixed(2);cg.className='chg '+(chg>=0?'up':'down');}
-  const tp = el.querySelector('.today-pnl');
-  if(s.change!=null){ const todayPnl = Math.round(shares * chg); tp.textContent = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString(); tp.className = 'today-pnl ' + (todayPnl >= 0 ? 'up' : 'down'); }
-  let totalHtml = '—'; let totalValForClass = 0;
-  if (p != null) {
-    const mktValue = Math.round(shares * p);
-    if (s.buyPrice != null && s.buyPrice > 0) {
-      const cost = s.buyPrice * shares; const unPnl = Math.round(mktValue - cost); const roi = ((mktValue - cost) / cost) * 100;
-      totalValForClass = unPnl;
-      totalHtml = `<div style="line-height:1.2;font-size:inherit;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
-      <div style="font-size:0.8em;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`;
-    } else {
-      totalValForClass = 0;
-      totalHtml = `<div style="line-height:1.2;font-size:inherit;" class="neutral">—</div>
-      <div style="font-size:0.8em;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
-    }
-  }
-  el.querySelector('.total').innerHTML = totalHtml;
-  el.querySelector('.total').className = 'total ' + (totalValForClass !== 0 ? (totalValForClass >= 0 ? 'up' : 'down') : '');
-}
-
-function renderAll(){
-  const body=document.getElementById('listBody'); const empty=document.getElementById('emptyState');
-  const tableScroll=document.getElementById('tableScroll'); const sumArea = document.getElementById('summaryArea'); const saveArea = document.getElementById('saveArea');
-  body.innerHTML=''; const currentStocks = tabStocks[currentTab];
-  if(currentStocks.length===0){ empty.style.display='block';tableScroll.style.display='none';sumArea.style.display='none';saveArea.style.display='none';return; }
-  empty.style.display='none';tableScroll.style.display='block';sumArea.style.display='block';saveArea.style.display='block';
-  for(const s of currentStocks){
-    const div=document.createElement('div');div.className='srow';div.dataset.id=s.id;
-    const shares=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
-    let p = s.price; let chg = s.change ?? 0;
-    let pStr = '—'; if(p!=null) pStr = formatPrice(p);
-    const cgp = s.changePercent!=null ? (s.changePercent>=0?'+':'')+s.changePercent.toFixed(2)+'%' : '—';
-    let cgStr = '—'; if(s.change!=null) cgStr = (chg>=0?'+':'') + chg.toFixed(2);
-    let tpStr = '—'; let tpClass = '';
-    if (s.change != null) { const todayPnl = Math.round(shares * chg); tpStr = (todayPnl >= 0 ? '+' : '') + todayPnl.toLocaleString(); tpClass = todayPnl >= 0 ? 'up' : 'down'; }
-    let totalHtml = '—'; let totalValForClass = 0;
-    if (p != null) {
-      const mktValue = Math.round(shares * p);
-      if (s.buyPrice != null && s.buyPrice > 0) {
-        const cost = s.buyPrice * shares; const unPnl = Math.round(mktValue - cost); const roi = ((mktValue - cost) / cost) * 100;
-        totalValForClass = unPnl;
-        totalHtml = `<div style="line-height:1.2;font-size:inherit;">${unPnl >= 0 ? '+' : ''}${unPnl.toLocaleString()}</div>
-        <div style="font-size:0.8em;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${roi >= 0 ? '+' : ''}${roi.toFixed(2)}%</div>`;
-      } else {
-        totalValForClass = 0;
-        totalHtml = `<div style="line-height:1.2;font-size:inherit;" class="neutral">—</div>
-        <div style="font-size:0.8em;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
-      }
-    }
-    div.innerHTML= '<div class="sym-container"><div class="sym">'+s.symbol+'</div>'+
-    (s.name ? '<div class="sym-name" style="font-size:12px; color:var(--t-muted); margin-top:4px; font-weight:normal; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:100%;">'+s.name+'</div>' : '') +
-    '</div>'+
-    '<div class="qty-cell"><div style="line-height:1.2;font-size:inherit;">'+s.displayQty+' '+s.displayUnit+'</div><div style="font-size:0.8em;color:var(--t-muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'">'+(s.buyPrice ? '均價 '+s.buyPrice : '未設均價')+'</div></div>'+
-    '<div class="price '+(p!=null?(chg>=0?'up':'down'):'')+'">'+pStr+'</div>'+
-    '<div class="chgp '+(s.changePercent!=null?(s.changePercent>=0?'up':'down'):'')+'">'+cgp+'</div>'+
-    '<div class="chg '+(s.change!=null?(chg>=0?'up':'down'):'')+'">'+cgStr+'</div>'+
-    '<div class="today-pnl '+tpClass+'">'+tpStr+'</div>'+
-    '<div class="total '+(totalValForClass!==0?(totalValForClass>=0?'up':'down'):'')+'">'+totalHtml+'</div>'+
-    '<div class="act"><button type="button" onclick="openEditModal(\''+s.id+'\')">✎</button><button type="button" class="del-btn" onclick="deleteStock(\''+s.id+'\')">✕</button></div>';
-    body.appendChild(div);
-  }
-  updateSummary();
-}
-
-function updateSummary(){
-  let pnl=0, asset=0, totalUnPnl=0; let hasUnPnl = false;
-  const currentStocks = tabStocks[currentTab];
-  for(const s of currentStocks){
-    const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
-    let p=s.price??0, c=s.change??0;
-    pnl += Math.round(sh * c); asset += Math.round(sh * p);
-    if (s.buyPrice != null && s.price != null && s.buyPrice > 0) { totalUnPnl += Math.round((s.price - s.buyPrice) * sh); hasUnPnl = true; }
-  }
-  const pe=document.getElementById('totalPnl');pe.textContent=(pnl>=0?'+':'')+pnl.toLocaleString();pe.className='val '+(pnl>=0?'up':'down');
-  const ae = document.getElementById('totalAsset');ae.textContent = (asset>=0?'+':'')+asset.toLocaleString();ae.className = 'val neutral';
-  const ue = document.getElementById('totalUnrealized');
-  if(hasUnPnl) { ue.textContent = (totalUnPnl >= 0 ? '+' : '') + totalUnPnl.toLocaleString(); ue.className = 'val ' + (totalUnPnl >= 0 ? 'up' : 'down'); }
-  else { ue.textContent = '—'; ue.className = 'val neutral'; }
-}
-
+/* ========================================================= 🖱 互動與資料修改 ========================================================= */
+const closeModalById = id => document.getElementById(id).classList.remove('show');
+let toastTimer = null;
+const showToast = msg => { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2000); };
 function toggleSummary(e) {
   if(e) e.stopPropagation();
-  const details = document.getElementById('summaryDetails'); const toggleBtn = document.getElementById('sumToggleBtn');
-  if (details.style.display === 'none') { details.style.display = 'block'; toggleBtn.style.display = 'none'; }
-  else { details.style.display = 'none'; toggleBtn.style.display = 'block'; }
+  const d = document.getElementById('summaryDetails'), b = document.getElementById('sumToggleBtn');
+  const isHidden = d.style.display === 'none';
+  d.style.display = isHidden ? 'block' : 'none'; b.style.display = isHidden ? 'none' : 'block';
 }
 
-function openAddModal() {
-  document.getElementById('addModalOverlay').classList.add('show');
-  setTimeout(() => document.getElementById('symInput').focus(), 100);
-}
-function closeAddModal() {
-  document.getElementById('addModalOverlay').classList.remove('show');
-}
-
+function openAddModal() { document.getElementById('addModalOverlay').classList.add('show'); setTimeout(() => document.getElementById('symInput').focus(), 100); }
 function addStock(){
-  let sym=document.getElementById('symInput').value.trim().toUpperCase();
-  sym = sym.replace(/[^A-Z0-9]/g, '');
-  const qty=parseInt(document.getElementById('qtyInput').value);
-  const unit=document.getElementById('unitSelect').value;
-  const bpRaw = document.getElementById('buyPriceInput').value; const bp = parseFloat(bpRaw);
-  const buyPrice = isNaN(bp) || bp <= 0 ? null : bp;
-  if(!sym||!qty||qty<1){showToast('請輸入代號與數量');return}
-  const currentStocks = tabStocks[currentTab];
-  if(currentStocks.some(s=>s.symbol===sym)){showToast('該股票已存在於此分頁');return}
+  const sym = document.getElementById('symInput').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const qty = parseInt(document.getElementById('qtyInput').value);
+  const unit = document.getElementById('unitSelect').value;
+  const bp = parseFloat(document.getElementById('buyPriceInput').value);
+  if(!sym || !qty || qty < 1) return showToast('請輸入代號與數量');
+  if(tabStocks[currentTab].some(s => s.symbol === sym)) return showToast('該股票已存在於此分頁');
   
-  const stockName = STOCK_DICT[sym] || '';
-
-  const id='s_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
-  currentStocks.push({id,symbol:sym, name: stockName, displayQty:qty,displayUnit:unit,buyPrice:buyPrice,shares:unit==='張'?qty*1000:qty,price:null,change:null,changePercent:null});
-  saveHoldings();renderAll();
-  document.getElementById('symInput').value=''; document.getElementById('qtyInput').value=''; document.getElementById('buyPriceInput').value='';
-  showToast('已新增 '+sym); 
-  closeAddModal();
-  forceRefresh();
+  tabStocks[currentTab].push({
+    id: 's_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), symbol: sym, name: STOCK_DICT[sym] || '',
+    displayQty: qty, displayUnit: unit, buyPrice: isNaN(bp) || bp <= 0 ? null : bp,
+    shares: unit === '張' ? qty * 1000 : qty, price: null, change: null, changePercent: null
+  });
+  LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll();
+  ['symInput', 'qtyInput', 'buyPriceInput'].forEach(id => document.getElementById(id).value = '');
+  showToast(`已新增 ${sym}`); closeModalById('addModalOverlay'); forceRefresh();
 }
 
 function deleteStock(id){
-  if(!confirm('確定刪除？'))return;
-  tabStocks[currentTab]=tabStocks[currentTab].filter(s=>s.id!==id);saveHoldings();renderAll();showToast('記錄已刪除');
+  if(!confirm('確定刪除？')) return;
+  tabStocks[currentTab] = tabStocks[currentTab].filter(s => s.id !== id);
+  LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll(); showToast('記錄已刪除');
 }
 
 function openEditModal(id) {
-  const s = tabStocks[currentTab].find(x => x.id === id);
-  if (!s) return;
-  document.getElementById('editId').value = s.id;
-  document.getElementById('editSymInput').value = s.symbol;
-  document.getElementById('editNameInput').value = s.name || '';
-  document.getElementById('editQtyInput').value = s.displayQty;
-  document.getElementById('editUnitSelect').value = s.displayUnit;
-  document.getElementById('editBuyPriceInput').value = s.buyPrice || '';
+  const s = tabStocks[currentTab].find(x => x.id === id); if (!s) return;
+  document.getElementById('editId').value = s.id; document.getElementById('editSymInput').value = s.symbol;
+  document.getElementById('editNameInput').value = s.name || ''; document.getElementById('editQtyInput').value = s.displayQty;
+  document.getElementById('editUnitSelect').value = s.displayUnit; document.getElementById('editBuyPriceInput').value = s.buyPrice || '';
   document.getElementById('editModalOverlay').classList.add('show');
 }
-
-function closeEditModal() { document.getElementById('editModalOverlay').classList.remove('show'); }
-
 function saveEditStock() {
-  const id = document.getElementById('editId').value;
-  const s = tabStocks[currentTab].find(x => x.id === id);
-  if (!s) return;
-  const ns = document.getElementById('editSymInput').value.trim().toUpperCase();
-  const cleanSym = ns.replace(/[^A-Z0-9]/g, '');
-  if (cleanSym) { s.symbol = cleanSym; s.price = null; s.change = null; s.changePercent = null; s.source = null; s.updateTime = null; }
-  
+  const s = tabStocks[currentTab].find(x => x.id === document.getElementById('editId').value); if (!s) return;
+  const sym = document.getElementById('editSymInput').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (sym && sym !== s.symbol) { s.symbol = sym; s.price = s.change = s.changePercent = null; }
   s.name = document.getElementById('editNameInput').value.trim();
-  
   const nq = parseInt(document.getElementById('editQtyInput').value);
-  if (nq > 0) { s.displayQty = nq; s.shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty; }
+  if (nq > 0) s.displayQty = nq;
   s.displayUnit = document.getElementById('editUnitSelect').value;
   s.shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
-  const nbp = document.getElementById('editBuyPriceInput').value; const bpNum = parseFloat(nbp);
-  s.buyPrice = (isNaN(bpNum) || bpNum <= 0) ? null : bpNum;
-  saveHoldings(); renderAll(); closeEditModal(); showToast('已修改'); forceRefresh();
+  const bp = parseFloat(document.getElementById('editBuyPriceInput').value);
+  s.buyPrice = isNaN(bp) || bp <= 0 ? null : bp;
+  LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll(); closeModalById('editModalOverlay'); showToast('已修改'); forceRefresh();
 }
 
 function saveDailyPnl(){
-  let pnl=0,asset=0; const currentStocks = tabStocks[currentTab];
-  for(const s of currentStocks){
-    const sh=s.displayUnit==='張'?s.displayQty*1000:s.displayQty;
-    let p=s.price??0, c=s.change??0; pnl += Math.round(sh * c); asset += Math.round(sh * p);
-  }
-  const n=new Date();
-  const ds=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
-  const ts=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
-  const currentRecords = tabRecords[currentTab];
-  currentRecords.unshift({date:ds,time:ts,totalPnl:pnl,totalAsset:asset,timestamp:n.getTime()});
-  if(currentRecords.length>50) tabRecords[currentTab]=currentRecords.slice(0,50);
-  saveRecords();renderHistory(); showToast('已存儲今日損益：'+(pnl>=0?'+':'')+pnl.toLocaleString());
+  let pnl = 0, asset = 0;
+  tabStocks[currentTab].forEach(s => {
+    const sh = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
+    pnl += Math.round(sh * (s.change ?? 0)); asset += Math.round(sh * (s.price ?? 0));
+  });
+  const n = new Date(), ds = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`, ts = `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+  tabRecords[currentTab].unshift({date: ds, time: ts, totalPnl: pnl, totalAsset: asset, timestamp: n.getTime()});
+  if(tabRecords[currentTab].length > 50) tabRecords[currentTab].length = 50;
+  LS.set(LS.KEYS.RECORD(currentTab), tabRecords[currentTab]); renderHistory(); showToast(`已存儲今日損益：${getSign(pnl)}${pnl.toLocaleString()}`);
 }
 
-function deleteHistory(timestamp) {
+function deleteHistory(ts) {
   if(!confirm('確定刪除此筆記錄？')) return;
-  tabRecords[currentTab] = tabRecords[currentTab].filter(r => r.timestamp !== timestamp);
-  saveRecords();renderHistory();showToast('記錄已刪除');
+  tabRecords[currentTab] = tabRecords[currentTab].filter(r => r.timestamp !== ts);
+  LS.set(LS.KEYS.RECORD(currentTab), tabRecords[currentTab]); renderHistory(); showToast('記錄已刪除');
 }
 
 function renderHistory(){
-  const hb = document.getElementById('historyBody');
-  if(!hb) return;
-  hb.innerHTML = '';
-  const currentRecords = tabRecords[currentTab];
-  if(currentRecords.length === 0){
-    hb.innerHTML = '<div class="hist-empty">尚無記錄</div>';
-    return;
-  }
-  for(const r of currentRecords){
-    const div = document.createElement('div');
-    div.className = 'hist-item';
-    div.style.border = "1px solid var(--protrude-d)";
-    div.style.borderTop = "1px solid var(--protrude-l)";
-    div.style.borderLeft = "1px solid var(--protrude-l)";
-    const pnlStr = (r.totalPnl >= 0 ? '+' : '') + r.totalPnl.toLocaleString();
-    const pnlClass = r.totalPnl >= 0 ? 'up' : 'down';
-    div.innerHTML = `
-      <div class="hist-item-left">
-        <span class="hdate">${r.date} ${r.time}</span>
-        <span class="hval ${pnlClass}">${pnlStr}</span>
-      </div>
+  const hb = document.getElementById('historyBody'); if(!hb) return;
+  const recs = tabRecords[currentTab];
+  if(recs.length === 0) return hb.innerHTML = '<div class="hist-empty">尚無記錄</div>';
+  hb.innerHTML = recs.map(r => `
+    <div class="hist-item" style="border: 1px solid var(--protrude-d); border-top: 1px solid var(--protrude-l); border-left: 1px solid var(--protrude-l);">
+      <div class="hist-item-left"><span class="hdate">${r.date} ${r.time}</span><span class="hval ${getColorCls(r.totalPnl)}">${getSign(r.totalPnl)}${r.totalPnl.toLocaleString()}</span></div>
       <button type="button" class="del-hist-btn" onclick="deleteHistory(${r.timestamp})">刪除</button>
-    `;
-    hb.appendChild(div);
-  }
+    </div>`).join('');
 }
 
 function openModal(){
-  document.getElementById('fugleKeyInput').value=fugleKey;
-  document.getElementById('secondFugleKeyInput').value=secondFugleKey;
-  document.getElementById('tabCountSelect').value=tabCount;
+  document.getElementById('fugleKeyInput').value = fugleKey; document.getElementById('secondFugleKeyInput').value = secondFugleKey;
+  document.getElementById('tabCountSelect').value = tabCount;
+  document.getElementById('tickerToggleBtn').textContent = `📰 財經新聞列：${showTicker ? '已開啟' : '已關閉'}`;
   
-  const tBtn = document.getElementById('tickerToggleBtn');
-  if (tBtn) tBtn.textContent = showTicker ? '📰 財經新聞列：已開啟' : '📰 財經新聞列：已關閉';
-  
-  updateKeyStatus(); renderApiStats(); document.getElementById('modalOverlay').classList.add('show');
-}
-
-function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
-
-function saveAndCloseModal(){
-  saveKeys(); saveTabCount(); 
-  document.getElementById('modalOverlay').classList.remove('show'); 
-  showToast('設定已儲存'); 
-  forceRefresh(); 
-}
-
-function openManual() { document.getElementById('manualOverlay').classList.add('show'); }
-function closeManual() { document.getElementById('manualOverlay').classList.remove('show'); }
-
-function openForeignIdxModal() {
-  renderForeignIdxConfigList();
-  document.getElementById('foreignIdxOverlay').classList.add('show');
-}
-
-function closeForeignIdxModal() {
-  document.getElementById('foreignIdxOverlay').classList.remove('show');
-  loadForeignIndicesConfig();
-  fetchGlobalIndicesFromWorker();
-}
-
-function renderForeignIdxConfigList() {
-  const container = document.getElementById('foreignIdxListContainer');
-  if (!container) return;
-  container.innerHTML = '';
-
-  if (AVAILABLE_INDICES.length === 0) {
-    container.innerHTML = '<div style="text-align:center; color:var(--t-muted); font-weight:600; padding:20px; font-size:14px;">目前無自選指數，請由上方新增</div>';
-    return;
-  }
-
-  AVAILABLE_INDICES.forEach((idx, index) => {
-    const row = document.createElement('div');
-    row.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:10px 14px; margin-bottom:8px; background:var(--bg-card); box-shadow:var(--shadow-soft); border-radius:8px; border:1px solid var(--border-light);";
-    
-    row.innerHTML = `
-      <div style="text-align:left; flex:1; min-width:0; padding-right:8px;">
-        <div style="font-weight:700; color:var(--t-main); font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${idx.name}</div>
-        <div style="font-size:12px; color:var(--t-muted); font-weight:600;">${idx.symbol}</div>
-      </div>
-      <button type="button" onclick="deleteForeignIdx(${index})" style="padding:6px 10px; font-size:12px; color:var(--up); box-shadow:var(--shadow-soft); border:1px solid var(--border-light); border-radius:6px;">✕</button>
-    `;
-    container.appendChild(row);
+  ['fugleKey','secondFugleKey'].forEach((id, i) => {
+    const el = document.getElementById(`${id}Status`), val = i===0 ? fugleKey : secondFugleKey;
+    el.textContent = val ? '✓ 已設定' : '未設定'; el.className = `key-status ${val ? 'ok' : 'none'}`;
   });
+  renderApiStats(); document.getElementById('modalOverlay').classList.add('show');
+}
+function saveAndCloseModal(){
+  fugleKey = document.getElementById('fugleKeyInput').value.trim(); LS.set(LS.KEYS.FK, fugleKey);
+  secondFugleKey = document.getElementById('secondFugleKeyInput').value.trim(); LS.set(LS.KEYS.SFK, secondFugleKey);
+  globalKeyRotator = null;
+  const newCount = parseInt(document.getElementById('tabCountSelect').value);
+  if(newCount !== tabCount) {
+    tabCount = newCount; LS.set(LS.KEYS.TAB_COUNT, tabCount);
+    if(currentTab >= (tabCount || 1)) { currentTab = 0; LS.set(LS.KEYS.CUR_TAB, 0); }
+    renderTabs(); renderAll(); renderHistory();
+  }
+  closeModalById('modalOverlay'); showToast('設定已儲存'); forceRefresh();
+}
+function toggleKeyVisibility(inId, btnId) {
+  const i = document.getElementById(inId), b = document.getElementById(btnId);
+  i.classList.toggle('pwd-mask'); b.textContent = i.classList.contains('pwd-mask') ? '👁' : '🙈';
 }
 
+function openForeignIdxModal() { renderForeignIdxConfigList(); document.getElementById('foreignIdxOverlay').classList.add('show'); }
+function closeForeignIdxModal() { closeModalById('foreignIdxOverlay'); availableIndices = LS.get(LS.KEYS.FOREIGN_IDX, DEFAULT_INDICES); forceRefresh(); }
+function renderForeignIdxConfigList() {
+  const c = document.getElementById('foreignIdxListContainer');
+  if(!availableIndices.length) return c.innerHTML = '<div style="text-align:center; color:var(--t-muted); font-weight:600; padding:20px; font-size:14px;">無自選指數</div>';
+  c.innerHTML = availableIndices.map((idx, i) => `
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; margin-bottom:8px; background:var(--bg-card); box-shadow:var(--shadow-soft); border-radius:8px; border:1px solid var(--border-light);">
+      <div style="text-align:left; flex:1; min-width:0; padding-right:8px;"><div style="font-weight:700; color:var(--t-main); font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${idx.name}</div><div style="font-size:12px; color:var(--t-muted); font-weight:600;">${idx.symbol}</div></div>
+      <button type="button" onclick="deleteForeignIdx(${i})" style="padding:6px 10px; font-size:12px; color:var(--up); box-shadow:var(--shadow-soft); border:1px solid var(--border-light); border-radius:6px;">✕</button>
+    </div>`).join('');
+}
 function addForeignIdx() {
-  const symInp = document.getElementById('newIdxSymbol');
-  const nameInp = document.getElementById('newIdxName');
-  let symbol = symInp.value.trim().toUpperCase();
-  const name = nameInp.value.trim();
-
-  if (!symbol || !name) {
-    showToast('請輸入代號與自訂名稱');
-    return;
-  }
-
-  if (['DJI', 'IXIC', 'GSPC', 'SOX', 'N225', 'KS11'].includes(symbol)) {
-    symbol = '^' + symbol;
-  }
-
-  if (AVAILABLE_INDICES.some(idx => idx.symbol === symbol)) {
-    showToast('此指數代號已存在於清單中');
-    return;
-  }
-
-  AVAILABLE_INDICES.push({ symbol, name });
-  localStorage.setItem('tw_custom_foreign_indices', JSON.stringify(AVAILABLE_INDICES));
-  
-  symInp.value = '';
-  nameInp.value = '';
-  renderForeignIdxConfigList();
-  showToast(`已新增 ${name}`);
+  let sym = document.getElementById('newIdxSymbol').value.trim().toUpperCase(), name = document.getElementById('newIdxName').value.trim();
+  if(!sym || !name) return showToast('請輸入代號與名稱');
+  if(['DJI','IXIC','GSPC','SOX','N225','KS11'].includes(sym)) sym = '^' + sym;
+  if(availableIndices.some(i => i.symbol === sym)) return showToast('已存在清單中');
+  availableIndices.push({symbol: sym, name}); LS.set(LS.KEYS.FOREIGN_IDX, availableIndices);
+  document.getElementById('newIdxSymbol').value = ''; document.getElementById('newIdxName').value = '';
+  renderForeignIdxConfigList(); showToast(`已新增 ${name}`);
 }
-
-function deleteForeignIdx(index) {
-  const target = AVAILABLE_INDICES[index];
-  if (!target) return;
-  
-  if (confirm(`確定要刪除「${target.name} (${target.symbol})」嗎？`)) {
-    AVAILABLE_INDICES.splice(index, 1);
-    localStorage.setItem('tw_custom_foreign_indices', JSON.stringify(AVAILABLE_INDICES));
-    renderForeignIdxConfigList();
-    showToast('已刪除該自選項目');
-  }
+function deleteForeignIdx(i) {
+  if(!confirm(`確定要刪除「${availableIndices[i].name}」嗎？`)) return;
+  availableIndices.splice(i, 1); LS.set(LS.KEYS.FOREIGN_IDX, availableIndices); renderForeignIdxConfigList(); showToast('已刪除');
 }
-
-function formatPrice(p){
-  if(p==null)return '—';
-  if(Math.abs(p)>=1000)return p.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-  return p.toFixed(2);
-}
-
-let toastTimer=null;
-function showToast(msg){ const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show'); clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2000); }
 
 function exportData() {
-  const dataToExport = {
-    tabStocks: [localStorage.getItem(getStockKey(0)), localStorage.getItem(getStockKey(1)), localStorage.getItem(getStockKey(2)), localStorage.getItem(getStockKey(3)), localStorage.getItem(getStockKey(4))],
-    tabRecords: [localStorage.getItem(getRecordKey(0)), localStorage.getItem(getRecordKey(1)), localStorage.getItem(getRecordKey(2)), localStorage.getItem(getRecordKey(3)), localStorage.getItem(getRecordKey(4))],
-    tabNames: localStorage.getItem(TN_KEY), fugleKey: localStorage.getItem(FK), secondFugleKey: localStorage.getItem(SFK), theme: localStorage.getItem(TK), tabCount: localStorage.getItem(TC_KEY),
-    customForeignIndices: localStorage.getItem('tw_custom_foreign_indices')
-  };
-  const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const downloadAnchorElement = document.createElement('a');
-  const d = new Date(); const dateString = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
-  downloadAnchorElement.setAttribute("href", url); downloadAnchorElement.setAttribute("download", "stock_backup_" + dateString + ".json");
-  document.body.appendChild(downloadAnchorElement); downloadAnchorElement.click(); document.body.removeChild(downloadAnchorElement); URL.revokeObjectURL(url);
-  showToast('✅ 備份檔案已成功下載');
+  const d = { tabStocks: [], tabRecords: [], tabNames: LS.getStr(LS.KEYS.TAB_NAMES), fugleKey, secondFugleKey, theme: LS.getStr(LS.KEYS.THEME), tabCount, customForeignIndices: LS.getStr(LS.KEYS.FOREIGN_IDX) };
+  for(let i=0; i<5; i++) { d.tabStocks.push(LS.getStr(LS.KEYS.STOCK(i))); d.tabRecords.push(LS.getStr(LS.KEYS.RECORD(i))); }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(d, null, 2)], {type:"application/json"}));
+  const date = new Date(); a.download = `stock_backup_${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}.json`;
+  a.click(); URL.revokeObjectURL(a.href); showToast('✅ 備份已下載');
 }
-
-function triggerImport() { document.getElementById('importFile').click(); }
-
-function importData(event) {
-  const file = event.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
+function importData(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
     try {
-      const data = JSON.parse(e.target.result);
-      if(confirm('⚠️ 警告：這將會覆蓋您目前的所有資料！\n確定要還原備份嗎？')) {
-        if (data.tabStocks) { data.tabStocks.forEach((val, i) => { if(val) localStorage.setItem(getStockKey(i), val); }); }
-        if (data.tabRecords) { data.tabRecords.forEach((val, i) => { if(val) localStorage.setItem(getRecordKey(i), val); }); }
-        if (data.tabNames) localStorage.setItem(TN_KEY, data.tabNames);
-        if (data.fugleKey) localStorage.setItem(FK, data.fugleKey);
-        if (data.secondFugleKey) localStorage.setItem(SFK, data.secondFugleKey);
-        if (data.theme) localStorage.setItem(TK, data.theme);
-        if (data.tabCount) localStorage.setItem(TC_KEY, data.tabCount);
-        
-        if (data.customForeignIndices) {
-          localStorage.setItem('tw_custom_foreign_indices', data.customForeignIndices);
-        } else {
-          localStorage.setItem('tw_custom_foreign_indices', JSON.stringify(DEFAULT_INDICES));
-        }
-        
-        alert('🎉 備份還原成功！'); location.reload();
-      }
-    } catch (err) { alert('❌ 檔案格式錯誤，無法還原資料。'); }
+      const d = JSON.parse(ev.target.result);
+      if(!confirm('⚠️ 將覆蓋所有資料，確定還原？')) return;
+      if (d.tabStocks) d.tabStocks.forEach((v, i) => { if(v) localStorage.setItem(LS.KEYS.STOCK(i), v); });
+      if (d.tabRecords) d.tabRecords.forEach((v, i) => { if(v) localStorage.setItem(LS.KEYS.RECORD(i), v); });
+      ['tabNames', 'fugleKey', 'secondFugleKey', 'theme', 'tabCount'].forEach(k => { if(d[k]) LS.set(LS.KEYS[k.toUpperCase()], d[k]); });
+      LS.set(LS.KEYS.FOREIGN_IDX, d.customForeignIndices || JSON.stringify(DEFAULT_INDICES));
+      alert('🎉 還原成功！'); location.reload();
+    } catch(err) { alert('❌ 檔案格式錯誤。'); }
     document.getElementById('importFile').value = '';
   };
-  reader.readAsText(file);
+  r.readAsText(file);
 }
 
-// 檢查並顯示一次性更新提示
-function checkUpdateNotice() {
-  const noticeKey = 'tw_update_notice_news_tabs'; // 使用特定功能命名作為 key
-  if (!localStorage.getItem(noticeKey)) {
-    // 稍微延遲彈出，讓底層畫面先渲染完畢，視覺體驗更好
-    setTimeout(() => {
-      document.getElementById('updateNoticeOverlay').classList.add('show');
-    }, 600);
-  }
-}
-
-// 關閉更新提示並記錄到 localStorage
-function closeUpdateNotice() {
-  const noticeKey = 'tw_update_notice_news_tabs';
-  localStorage.setItem(noticeKey, 'true'); // 寫入標記，以後不再顯示
-  document.getElementById('updateNoticeOverlay').classList.remove('show');
-}
-
-let lastRefreshTime = 0;
-let lastSuccessTime = 0;
-let isRefreshing = false;
-
-const workerCode = `
-  let timer = null;
-  self.onmessage = function(e) {
-    if (e.data.action === 'start') {
-      if (timer) clearInterval(timer);
-      timer = setInterval(() => { self.postMessage('tick'); }, e.data.interval);
-    } else if (e.data.action === 'stop') {
-      if (timer) clearInterval(timer);
-    }
-  };
-`;
-const workerBlob = new Blob([workerCode], { type: 'application/javascript' });
+/* ========================================================= 🔄 後台輪詢與生命週期 ========================================================= */
+let lastRefreshTime = 0, isRefreshing = false, lastSuccessTime = 0;
+const workerBlob = new Blob([`let t=null;self.onmessage=e=>{if(e.data.action==='start'){clearInterval(t);t=setInterval(()=>self.postMessage('tick'),e.data.interval)}else if(e.data.action==='stop')clearInterval(t)};`], {type:'application/javascript'});
 window.heartbeatWorker = new Worker(URL.createObjectURL(workerBlob));
+heartbeatWorker.onmessage = () => refresh();
 
-heartbeatWorker.onmessage = function(e) {
-  if (e.data === 'tick') {
-    refresh();
-  }
-};
-
-function forceRefresh() {
-  globalKeyRotator = null; 
-  lastRefreshTime = 0;     
-  isRefreshing = false;    
-  refresh();
-}
-
+function forceRefresh() { globalKeyRotator = null; lastRefreshTime = 0; isRefreshing = false; refresh(); }
 async function refresh() {
   const now = Date.now();
-  if (isRefreshing && now - lastRefreshTime > 8000) { isRefreshing = false; }
+  if (isRefreshing && now - lastRefreshTime > 8000) isRefreshing = false;
   if (isRefreshing || now - lastRefreshTime < 2000) return;
-  
-  isRefreshing = true;
-  lastRefreshTime = now;
-  try { 
-    await refreshPrices(); 
-    lastSuccessTime = Date.now(); 
-  } 
-  catch(e) { console.error('Refresh Error:', e); } 
-  finally { isRefreshing = false; }
+  isRefreshing = true; lastRefreshTime = now;
+  try { await refreshPrices(); lastSuccessTime = Date.now(); } catch(e){} finally { isRefreshing = false; }
 }
 
-function handleTouchWakeup() {
-  const now = Date.now();
-  if (now - lastSuccessTime > 15000 && !isRefreshing) {
-    forceRefresh();
-  }
-}
-document.addEventListener('touchend', handleTouchWakeup, { passive: true });
-document.addEventListener('click', handleTouchWakeup, { passive: true });
+const handleTouchWakeup = () => { if(Date.now() - lastSuccessTime > 15000 && !isRefreshing) forceRefresh(); };
+document.addEventListener('touchend', handleTouchWakeup, {passive: true});
+document.addEventListener('click', handleTouchWakeup, {passive: true});
 
-// 載入財經跑馬燈資料
 async function loadFinanceNews() {
-  const workerUrl = 'https://finance-news-api.denis0521.workers.dev/';
-  const tickerContainer = document.getElementById('js-ticker');
+  const c = document.getElementById('js-ticker');
   try {
-    const response = await fetch(workerUrl);
-    if (!response.ok) throw new Error('網路回應不正確');
-    const newsData = await response.json();
-    
-    if (newsData.length === 0) { 
-      tickerContainer.innerHTML = '<span class="ticker-item">目前暫無新聞</span>'; 
-      return; 
-    }
-    
-    let tickerHtml = '';
-    newsData.forEach(item => { 
-      tickerHtml += `<a href="${item.link}" target="_blank" class="ticker-item"><span class="ticker-source">${item.source}</span>${item.title}</a>`; 
-    });
-    
-    tickerContainer.innerHTML = tickerHtml + tickerHtml; 
-    
-    const totalLength = tickerContainer.textContent.length;
-    // 速度調整：數值越小跑越快。原為0.12，改為0.18使速度更慢
-    const speedFactor = 0.18; 
-    tickerContainer.style.animationDuration = `${totalLength * speedFactor}s`;
-  } catch (error) {
-    tickerContainer.innerHTML = '<span class="ticker-item" style="color:var(--t-muted);">無法載入即時新聞，請稍後再試</span>';
-  }
+    const res = await fetch('https://finance-news-api.denis0521.workers.dev/');
+    if(!res.ok) throw new Error();
+    const data = await res.json();
+    if(!data.length) return c.innerHTML = '<span class="ticker-item">目前暫無新聞</span>';
+    const html = data.map(i => `<a href="${i.link}" target="_blank" class="ticker-item"><span class="ticker-source">${i.source}</span>${i.title}</a>`).join('');
+    c.innerHTML = html + html;
+    c.style.animationDuration = `${c.textContent.length * 0.18}s`;
+  } catch(e) { c.innerHTML = '<span class="ticker-item" style="color:var(--t-muted);">無法載入即時新聞，請稍後再試</span>'; }
 }
 
-// 初始化載入
+/* ========================================================= 🚀 啟動 ========================================================= */
 loadState(); renderAll(); renderHistory();
+setTimeout(forceRefresh, 500);
+heartbeatWorker.postMessage({action: 'start', interval: currentInterval});
 
-setTimeout(forceRefresh, 500);  
+['focus', 'pageshow'].forEach(e => window.addEventListener(e, forceRefresh));
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') forceRefresh(); });
+document.addEventListener('DOMContentLoaded', loadFinanceNews);
 
-heartbeatWorker.postMessage({ action: 'start', interval: currentInterval });
+const kd = (id, next, action) => { document.getElementById(id).addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); if(next) document.getElementById(next).focus(); else if(action) action(); } }); };
+kd('symInput', 'qtyInput'); kd('qtyInput', 'buyPriceInput'); kd('buyPriceInput', null, addStock);
 
-window.addEventListener('focus', forceRefresh);
-window.addEventListener('pageshow', forceRefresh);
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') forceRefresh();
+['addModalOverlay', 'modalOverlay', 'manualOverlay', 'editModalOverlay'].forEach(id => {
+  document.getElementById(id).addEventListener('click', function(e) { if(e.target === this) this.classList.remove('show'); });
 });
+document.getElementById('foreignIdxOverlay').addEventListener('click', function(e){ if(e.target===this) closeForeignIdxModal(); });
 
-document.addEventListener('DOMContentLoaded', () => {
-  loadFinanceNews();
-  checkUpdateNotice(); // 網頁載入完成後執行檢查
-});
-
-document.getElementById('symInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); } });
-document.getElementById('qtyInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('buyPriceInput').focus(); } });
-document.getElementById('buyPriceInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); addStock(); } });
-
-document.getElementById('addModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
-document.getElementById('foreignIdxOverlay').addEventListener('click',function(e){if(e.target===this)closeForeignIdxModal();});
-document.getElementById('updateNoticeOverlay').addEventListener('click',function(e){if(e.target===this)closeUpdateNotice()});
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('Service Worker 註冊成功，範疇為:', reg.scope))
-      .catch(err => console.error('Service Worker 註冊失敗:', err));
-  });
-}
-
-console.log('股票庫存管理 V4.14.4 已啟動');
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+console.log(`股票庫存管理 ${APP_VER} 已啟動`);
 </script>
 </body>
 </html>
