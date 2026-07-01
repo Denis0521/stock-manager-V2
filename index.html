@@ -561,6 +561,28 @@ body.tech #modalOverlay .modal .btn-close-icon {
   </div>
 </div>
 
+<div class="modal-overlay" id="updateNoticeOverlay" style="z-index: 1200;">
+  <div class="modal">
+    <button type="button" class="btn-close-icon" onclick="closeUpdateNotice()">✕</button>
+    <h2>🎉 系統升級通知</h2>
+    <div class="manual-content" style="margin-top: 10px;">
+      <p>感謝您的使用！本次更新帶來了兩項實用的新功能：</p>
+      
+      <div class="info-box" style="margin-top: 16px;">
+        <h3 style="margin: 0 0 6px; font-size: 17px;">📰 即時財經新聞跑馬燈</h3>
+        <p style="margin: 0; font-size: 15px; font-weight: normal; color: var(--t-main);">我們在畫面上方加入了各家媒體的即時財經新聞，讓您掌握最新市場動態。（若您偏好乾淨的版面，可隨時至「進階設定」中將其關閉。）</p>
+      </div>
+
+      <div class="info-box">
+        <h3 style="margin: 0 0 6px; font-size: 17px;">📱 極簡「無分頁」模式</h3>
+        <p style="margin: 0; font-size: 15px; font-weight: normal; color: var(--t-main);">針對不需要多個帳戶或長短線分流的使用者，現在可以在進階設定的「分頁數量」中選擇「無分頁」，讓您的投資組合介面更加直覺清爽！</p>
+      </div>
+    </div>
+    
+    <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 12px; background: var(--accent); color: #fff; text-shadow: none;" onclick="closeUpdateNotice()">🚀 我知道了，開始體驗</button>
+  </div>
+</div>
+
 <script>
 /* ========================================================= 🔧 熱門股票與ETF簡稱字典 ========================================================= */
 const STOCK_DICT = {
@@ -1511,6 +1533,24 @@ function importData(event) {
   reader.readAsText(file);
 }
 
+// 檢查並顯示一次性更新提示
+function checkUpdateNotice() {
+  const noticeKey = 'tw_update_notice_news_tabs'; // 使用特定功能命名作為 key
+  if (!localStorage.getItem(noticeKey)) {
+    // 稍微延遲彈出，讓底層畫面先渲染完畢，視覺體驗更好
+    setTimeout(() => {
+      document.getElementById('updateNoticeOverlay').classList.add('show');
+    }, 600);
+  }
+}
+
+// 關閉更新提示並記錄到 localStorage
+function closeUpdateNotice() {
+  const noticeKey = 'tw_update_notice_news_tabs';
+  localStorage.setItem(noticeKey, 'true'); // 寫入標記，以後不再顯示
+  document.getElementById('updateNoticeOverlay').classList.remove('show');
+}
+
 let lastRefreshTime = 0;
 let lastSuccessTime = 0;
 let isRefreshing = false;
@@ -1609,7 +1649,10 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') forceRefresh();
 });
 
-document.addEventListener('DOMContentLoaded', loadFinanceNews);
+document.addEventListener('DOMContentLoaded', () => {
+  loadFinanceNews();
+  checkUpdateNotice(); // 網頁載入完成後執行檢查
+});
 
 document.getElementById('symInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('qtyInput').focus(); } });
 document.getElementById('qtyInput').addEventListener('keydown',e=>{ if(e.key==='Enter') { e.preventDefault(); document.getElementById('buyPriceInput').focus(); } });
@@ -1620,6 +1663,7 @@ document.getElementById('modalOverlay').addEventListener('click',function(e){if(
 document.getElementById('manualOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('editModalOverlay').addEventListener('click',function(e){if(e.target===this)this.classList.remove('show')});
 document.getElementById('foreignIdxOverlay').addEventListener('click',function(e){if(e.target===this)closeForeignIdxModal();});
+document.getElementById('updateNoticeOverlay').addEventListener('click',function(e){if(e.target===this)closeUpdateNotice()});
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
