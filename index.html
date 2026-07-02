@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="股票庫存管理">
-<meta name="theme-color" id="themeColorMeta" content="#0F172A">
+<meta name="theme-color" id="themeColorMeta" content="#f0f2f6">
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
@@ -19,25 +19,16 @@ if(localStorage.getItem('tw_app_version') !== APP_VER) {
 }
 </script>
 <style>
-/* ========================================================= 🚀 核心變數引擎 (Deep Ocean 主題) ========================================================= */
+/* ========================================================= 🚀 核心變數引擎 ========================================================= */
 :root { 
-  --bg: #0F172A; 
-  --bg-card: #1E293B; 
-  --s-light: #334155; 
-  --s-dark: #020617; 
-  --t-main: #F1F5F9; 
-  --t-muted: #94A3B8; 
-  --up: #F87171; 
-  --down: #4ADE80; 
-  --engrave-l: rgba(255,255,255,0.05); 
-  --engrave-d: rgba(0,0,0,0.3); 
-  --protrude-l: rgba(255,255,255,0.1); 
-  --protrude-d: rgba(0,0,0,0.5); 
-  --accent: #38BDF8; 
-  --border-light: #334155; 
-  --shadow-soft: 4px 4px 10px rgba(0,0,0,0.4), -4px -4px 10px rgba(255,255,255,0.02);
-  --shadow-strong: 6px 6px 16px rgba(0,0,0,0.6), -6px -6px 16px rgba(255,255,255,0.03);
-  --shadow-inset: inset 4px 4px 8px rgba(0,0,0,0.4), inset -4px -4px 8px rgba(255,255,255,0.02);
+  --bg: #E8ECF1; --bg-card: #FFFFFF; --s-light: #FFFFFF; --s-dark: #B8C4D0; 
+  --t-main: #1A2332; --t-muted: #6B7B8D; --up: #DC2626; --down: #16A34A; 
+  --engrave-l: rgba(255,255,255,0.9); --engrave-d: rgba(0,0,0,0.12); 
+  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.06); 
+  --accent: #2563EB; --border-light: #D1D8E0; 
+  --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
+  --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
+  --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 body.tech { 
   --bg: #1E2330; --bg-card: #2D3344; --s-light: #2D3344; --s-dark: #151820; 
@@ -79,6 +70,59 @@ body.pink {
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
+/* ✨ 高端拼色主題 (Premium Color Block) ✨ */
+body.color-block { 
+  --bg: #F4F2EC; /* 質感燕麥白背景 */
+  --bg-card: #FFFFFF; /* 純淨白卡片 */
+  --s-light: transparent; 
+  --s-dark: transparent; 
+  --t-main: #2C3539; /* 槍灰主字體 */
+  --t-muted: #7E8A96; 
+  --up: #E03131; 
+  --down: #0CA678; 
+  --engrave-l: transparent; --engrave-d: transparent; /* 取消雕刻字體陰影，追求扁平現代感 */
+  --protrude-l: transparent; --protrude-d: transparent; 
+  --accent: #B28247; /* 奢華香檳金點綴 */
+  --border-light: #E6E2D8; 
+  /* 專業的扁平化與微陰影 */
+  --shadow-soft: 0 4px 12px rgba(44, 53, 57, 0.05);
+  --shadow-strong: 0 8px 24px rgba(44, 53, 57, 0.08);
+  --shadow-inset: inset 0 2px 6px rgba(44, 53, 57, 0.04);
+}
+/* 針對拼色主題的特定覆寫：實現板塊切割視覺 */
+body.color-block .header {
+  background: #1B242C; /* 深邃海軍藍頂部板塊 */
+  border-bottom: 3px solid var(--accent); /* 金色腰線 */
+  border-radius: 0 0 16px 16px;
+}
+body.color-block .header h1 { color: #FFFFFF; }
+body.color-block .ticker-item { color: #F4F2EC; font-weight: 500; }
+body.color-block .header .ticker-source { border-color: #4A5B69; color: #A6B4C2; }
+body.color-block .header button {
+  background: #2A3642; color: #FFFFFF; border: 1px solid #3E4C5A;
+}
+body.color-block .header .btn-add-hdr { color: #E8C38B; }
+body.color-block .table-scroll { border-top: 4px solid #1B242C; } /* 黑色頂部拼塊 */
+body.color-block .summary { border-left: 4px solid var(--accent); } /* 金色側邊拼塊 */
+body.color-block .history .hist-item { 
+  border: 1px solid var(--border-light); 
+  border-left: 4px solid #7E8A96; /* 灰色側邊拼塊 */
+}
+body.color-block .tab-btn {
+  background: #EAE6DB; color: #7E8A96; border: 1px solid #D9D4C7; border-bottom: none;
+}
+body.color-block .tab-btn.active {
+  background: var(--bg-card); color: #1B242C; border-top: 3px solid var(--accent);
+}
+body.color-block input, body.color-block select {
+  background: #FAFAF8; border: 1px solid #D9D4C7;
+}
+body.color-block button {
+  border: 1px solid var(--border-light); background: #FFFFFF;
+}
+body.color-block button:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.06); }
+body.color-block button:active { background: #F4F2EC; transform: translateY(0); box-shadow: none; border-color: var(--accent); }
+body.color-block .modal { border-top: 6px solid #1B242C; }
 
 /* ========================================================= 🌐 基礎排版 ========================================================= */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -98,7 +142,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .news-ticker-container { margin: 8px 0 0 0; width: 100%; box-sizing: border-box; background: transparent; border-radius: 6px; box-shadow: none; border: none; display: flex; align-items: center; height: 34px; overflow: hidden; transition: all 0.4s ease; }
 .ticker-scroll-area { flex: 1; overflow: hidden; position: relative; }
 .ticker-wrap { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker linear infinite; }
-.ticker-item { display: inline-block; padding: 0 20px; color: var(--accent); text-decoration: none; font-weight: 700; font-size: 15px; }
+.ticker-item { display: inline-block; padding: 0 20px; color: #2563EB; text-decoration: none; font-weight: 700; font-size: 15px; }
 body.tech .ticker-item { color: #60A5FA; }
 .ticker-item:hover { text-decoration: underline; }
 .ticker-source { color: var(--t-muted); font-size: 11px; margin-right: 6px; border: 1px solid var(--border-light); padding: 2px 4px; border-radius: 4px; }
@@ -128,46 +172,49 @@ button:active { transform: translateY(0); box-shadow: var(--shadow-inset); color
   display: flex;
   padding: 0 8px;
   margin: 8px 10px 0;
-  gap: 4px; 
-  align-items: flex-end; 
+  gap: 4px; /* ✨ 頁籤之間的間隙 */
+  align-items: flex-end; /* 讓未啟動的低高度頁籤靠底部對齊 */
 }
 
 .tab-btn {
   flex: 1;
-  height: 36px; 
+  height: 36px; /* 未啟動時較矮 */
   padding: 0 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  background: linear-gradient(to bottom, #334155 0%, #1E293B 100%);
+  /* ✨ 模擬 Windows 經典立體漸層效果 */
+  background: linear-gradient(to bottom, var(--s-light) 0%, var(--bg) 100%);
   color: var(--t-muted);
   font-weight: 600;
   cursor: pointer;
   position: relative;
-  top: 1px; 
+  top: 1px; /* 往下擠壓 1px 覆蓋到 table-scroll 的邊框上 */
   z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #0F172A;
+  border: 1px solid var(--border-light);
   border-radius: 8px 8px 0 0;
+  /* ✨ 頂部內發光，增加立體泡泡感 */
   box-shadow: inset 0 2px 2px var(--protrude-l);
-  transition: color 0.2s, filter 0.2s; 
+  transition: color 0.2s, filter 0.2s; /* 關閉高度動畫避免抖動 */
 }
 
 .tab-btn:hover {
   color: var(--t-main);
-  filter: brightness(1.05); 
+  filter: brightness(1.05); /* 懸停微亮 */
 }
 
 .tab-btn.active {
-  background: var(--bg-card); 
+  background: var(--bg-card); /* 啟動時變成與下方區塊相同的單色背景 */
   color: var(--accent);
   font-weight: 800;
-  height: 44px; 
+  height: 44px; /* ✨ 啟動時變得特別高 */
   z-index: 3;
+  /* ✨ 利用背景色的 border 完美蓋掉下方元素的頂部邊框，達成無縫融合 */
   border-bottom: 2px solid var(--bg-card); 
-  box-shadow: none; 
+  box-shadow: none; /* 移除內高光，變成平面融入內容 */
 }
 
 /* ========================================================= 📈 內容區塊排版 ========================================================= */
@@ -594,12 +641,14 @@ function loadState(){
 function applyThemeText(t){
   const body = document.body; const themeBtn = document.getElementById('themeBtn'); const metaTheme = document.getElementById('themeColorMeta');
   body.className = '';
+  // ✨ 加入高端拼色主題：color-block
   const themes = {
     'tech': { emoji: '🚀', color: '#1E2330' },
     'blue-light': { emoji: '💎', color: '#D0DEE8' },
     'purple-light': { emoji: '🍇', color: '#EDE8F4' },
     'pink': { emoji: '🌸', color: '#F5E8EC' },
-    'light': { emoji: '☀️', color: '#0F172A' }
+    'color-block': { emoji: '🧩', color: '#1B242C' },
+    'light': { emoji: '☀️', color: '#E8ECF1' }
   };
   const theme = themes[t] || themes['light'];
   if(t !== 'light') body.classList.add(t);
@@ -608,7 +657,8 @@ function applyThemeText(t){
 }
 
 function toggleTheme(){
-  const modes = ['light', 'tech', 'blue-light', 'purple-light', 'pink'];
+  // ✨ 新增 color-block 進入輪替順序
+  const modes = ['light', 'tech', 'blue-light', 'purple-light', 'pink', 'color-block'];
   let current = modes.find(m => document.body.classList.contains(m)) || 'light';
   let next = modes[(modes.indexOf(current) + 1) % modes.length];
   applyThemeText(next); LS.set(LS.KEYS.THEME, next);
