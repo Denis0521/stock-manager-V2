@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = '4.20.0'; // 系統全面優化：效能重構、集中商業邏輯、加強 DOM 渲染與安全性防護，新增玻璃珠按鈕
+const APP_VER = '4.20.1'; // 系統全面優化：效能重構、集中商業邏輯、加強 DOM 渲染與安全性防護，新增玻璃珠按鈕
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
