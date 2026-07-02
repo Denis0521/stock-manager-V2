@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = '4.20.5'; // 更新版本號以清除舊快取
+const APP_VER = '4.20.6'; // 優化灰色/棕色精確拼色與使用說明擴充
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -46,9 +46,6 @@ body.blue-light {
   --engrave-l: rgba(255,255,255,0.95); --engrave-d: rgba(0,0,0,0.25); 
   --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.15); 
   --accent: #1E40AF; --border-light: #A8B8C8; 
-  --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
-  --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
-  --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 body.purple-light { 
   --bg: #EAE6EF; --bg-card: #FDFBFF; --s-light: #FDFBFF; --s-dark: #C9B8D5; 
@@ -56,9 +53,6 @@ body.purple-light {
   --engrave-l: rgba(255,255,255,1); --engrave-d: rgba(0,0,0,0.10); 
   --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.05); 
   --accent: #7A5CAF; --border-light: #D6C8E0; 
-  --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
-  --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
-  --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 body.pink { 
   --bg: #F4E8EC; --bg-card: #FFFBFB; --s-light: #FFFBFB; --s-dark: #D4B8C1; 
@@ -66,31 +60,28 @@ body.pink {
   --engrave-l: rgba(255,255,255,1); --engrave-d: rgba(0,0,0,0.08); 
   --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.04); 
   --accent: #C24D7B; --border-light: #E6D0D8; 
-  --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
-  --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
-  --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
-/* 棕色主題：柔和護眼、極深高對比文字與立體感 */
+/* ================= 棕色主題：提取自 #7A4526，搭配奶茶淺色 ================= */
 body.brown-light { 
-  --bg: #F2EDE9; --bg-card: #FDFBF7; --s-light: #FDFBF7; --s-dark: #C4B5AE; 
-  --t-main: #2D1A11; --t-muted: #6B4E3D; --up: #D9465B; --down: #2D8A70; 
-  --engrave-l: rgba(255,255,255,1); --engrave-d: rgba(0,0,0,0.12); 
-  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.06); 
-  --accent: #6E3F1F; --border-light: #DCD0C7; 
-  --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
-  --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
-  --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
+  --bg: #F5EFEA; --bg-card: #FDFBFA; --s-light: #FFFFFF; --s-dark: #D4C9C1; 
+  --t-main: #4A2A17; /* 基於原圖色加深，確保極高對比與清晰度 */
+  --t-muted: #7A4526; /* 採用原圖純色作為次要文字與圖標 */
+  --up: #D9465B; --down: #2D8A70; 
+  --engrave-l: rgba(255,255,255,1); --engrave-d: rgba(122,69,38,0.15); 
+  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(122,69,38,0.08); 
+  --accent: #7A4526; /* 採用原圖純色作為強調色 */
+  --border-light: #E8DFD8; 
 }
-/* 灰色主題：極簡俐落、極深炭灰文字與立體感 */
+/* ================= 灰色主題：提取自 #979A9F，搭配極簡淺灰 ================= */
 body.gray-light { 
-  --bg: #EBEDF0; --bg-card: #F7F8F9; --s-light: #FFFFFF; --s-dark: #A9B1BD; 
-  --t-main: #111418; --t-muted: #4B525C; --up: #D9465B; --down: #2D8A70; 
-  --engrave-l: rgba(255,255,255,1); --engrave-d: rgba(0,0,0,0.12); 
-  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.06); 
-  --accent: #2C3642; --border-light: #C4CAD2; 
-  --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
-  --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
-  --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
+  --bg: #EAECEF; --bg-card: #F8F9FA; --s-light: #FFFFFF; --s-dark: #BDC1C6; 
+  --t-main: #2C3137; /* 基於原圖色加深，確保文字極度銳利 */
+  --t-muted: #6B6F75; /* 加深原圖灰階，提升副標清晰度 */
+  --up: #D9465B; --down: #2D8A70; 
+  --engrave-l: rgba(255,255,255,1); --engrave-d: rgba(151,154,159,0.25); 
+  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(151,154,159,0.12); 
+  --accent: #5E646E; /* 採用比原圖稍深一階的灰階作為主按鈕，確保反白字清晰 */
+  --border-light: #D1D4D8; 
 }
 
 /* ========================================================= 🌐 基礎排版 ========================================================= */
@@ -289,10 +280,11 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 .down { color: var(--down) !important; text-shadow: none !important; }
 .neutral { color: var(--t-main) !important; text-shadow: none !important; }
 
-.manual-content { text-align: left; font-size: 16px; line-height: 1.8; color: var(--t-main); }
-.manual-content h3 { font-size: 18px; margin: 16px 0 8px; color: var(--accent); text-align: left; }
-.manual-content p, .manual-content li { margin-bottom: 10px; }
+.manual-content { text-align: left; font-size: 15px; line-height: 1.7; color: var(--t-main); }
+.manual-content h3 { font-size: 17px; margin: 18px 0 8px; color: var(--accent); text-align: left; padding-bottom: 4px; border-bottom: 1px solid var(--border-light); }
+.manual-content p, .manual-content li { margin-bottom: 8px; }
 .manual-content ul { padding-left: 20px; margin-bottom: 12px; }
+.manual-content strong { color: var(--t-main); font-weight: 800; }
 
 .settings-row { display: flex; gap: 12px; margin-bottom: 16px; align-items: stretch; }
 .btn-manual-row { flex: 1; padding: 8px 10px; font-size: 15px; color: var(--accent); margin: 0; white-space: nowrap; background: var(--bg-card); border-radius: 8px; box-shadow: var(--shadow-soft); border: 1px solid var(--border-light); font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -346,8 +338,8 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
   .idx-card-box { min-width: 200px; padding: 8px 20px; }
   .idx-box-name, .idx-box-price { font-size: 20px; } 
   .idx-box-change-row { font-size: 18px; }
-  .manual-content { font-size: 18px; }
-  .manual-content h3 { font-size: 20px; }
+  .manual-content { font-size: 17px; }
+  .manual-content h3 { font-size: 19px; }
   .btn-manual-row { font-size: 17px; padding: 10px 10px; } 
 }
 </style>
@@ -472,7 +464,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
     <h2>進階設定</h2>
     <div style="max-width: 85%; margin: 0 auto;">
       <div class="settings-row">
-        <button type="button" class="btn-manual-row" onclick="$('manualOverlay').classList.add('show')">📖 使用說明</button>
+        <button type="button" class="btn-manual-row" onclick="$('manualOverlay').classList.add('show')">📖 系統使用說明</button>
         <div class="tab-count-wrapper">
           <div class="tab-count-label">分頁數量</div>
           <select id="tabCountSelect">
@@ -519,7 +511,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.20.5</div>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.20.6</div>
     </div>
   </div>
 </div>
@@ -545,16 +537,30 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
   <div class="modal">
     <h2>📖 系統使用說明</h2>
     <div class="manual-content">
-      <h3>一、基本操作</h3>
-      <p>輸入股票代號、張/股數及買入均價。系統會自動計算總現值與損益。內建台灣熱門 ETF 字典會自動帶入簡稱，可隨時修改。</p>
-      <h3>二、分頁與新聞</h3>
-      <p>最多可開啟 5 個分頁（雙擊標籤可重命名），新聞跑馬燈可於設定中關閉。</p>
-      <h3>三、API 雙 Key 引擎</h3>
-      <p>建議填入兩組 Fugle API Key，輪替使用能將更新速度提升至 10 秒，且大幅降低斷線率。</p>
-      <h3>四、本地儲存與備份</h3>
-      <p>資料 100% 存於手機，請務必定期手動匯出備份檔案！</p>
+      <h3>一、基本操作與名詞解釋</h3>
+      <ul>
+        <li><strong>新增持股：</strong>點擊「+新增」，輸入股票代號（系統內建熱門 ETF 字典會自動帶入名稱）、持有數量及買入均價。</li>
+        <li><strong>總損益 (ROI)：</strong>系統會依據您填寫的「買入均價」與現價自動計算總未實現損益與報酬率(%)。未填寫均價則僅計算今日損益。</li>
+      </ul>
+      
+      <h3>二、群組分頁與介面功能</h3>
+      <ul>
+        <li><strong>多群組管理：</strong>進階設定中最多可開啟 5 個獨立分頁（雙擊標籤可自訂名稱），方便將「存股」、「短線」分開管理。</li>
+        <li><strong>即時新聞：</strong>首頁上方跑馬燈會即時抓取財經新聞，可於設定中關閉以節省畫面空間。</li>
+      </ul>
+
+      <h3>三、🔑 Fugle API 雙引擎設定原則</h3>
+      <ul>
+        <li><strong>為什麼需要 API Key？</strong>本系統為純前端架構，依賴「富果 (Fugle) 開發者 API」直接向您的設備傳送即時股價。請前往 Fugle 官網免費註冊並取得 API Token。</li>
+        <li><strong>雙 Key 輪替優勢：</strong>Fugle 免費版有「每分鐘 60 次」的請求限制。若您的持股較多，強烈建議申請並填寫<strong>兩組不同的 API Key</strong>（主要與備用）。系統會自動交替使用，突破單一 Key 限制，將更新速度提升至 10 秒/次，並大幅降低斷線率。</li>
+        <li><strong>盤後節能：</strong>台股收盤後（13:30 後），系統會自動放慢更新頻率至 60 秒/次，以節省您的 API 額度消耗。</li>
+      </ul>
+
+      <h3>四、⚠️ 資料安全與備份</h3>
+      <p>您的所有持股資料、歷史記錄及 API Key 皆<strong> 100% 儲存於您目前使用的設備瀏覽器中（Local Storage）</strong>。我們沒有伺服器，無法看見您的資料，但也無法幫您復原。</p>
+      <p><strong>強烈建議：</strong>請務必養成習慣，定期點擊進階設定內的「<strong>📥 匯出</strong>」將資料下載備份！</p>
     </div>
-    <button type="button" class="modal-close" onclick="closeModalById('manualOverlay')">關閉</button>
+    <button type="button" class="modal-close" onclick="closeModalById('manualOverlay')" style="margin-top: 10px;">關閉</button>
   </div>
 </div>
 
@@ -642,8 +648,8 @@ function applyThemeText(t){
     'blue-light': { emoji: '💎', color: '#D0DEE8' },
     'purple-light': { emoji: '🍇', color: '#EAE6EF' },
     'pink': { emoji: '🌸', color: '#F4E8EC' },
-    'brown-light': { emoji: '☕', color: '#F2EDE9' },
-    'gray-light': { emoji: '📓', color: '#EBEDF0' },
+    'brown-light': { emoji: '☕', color: '#F5EFEA' },
+    'gray-light': { emoji: '📓', color: '#EAECEF' },
     'light': { emoji: '☀️', color: '#E8ECF1' }
   };
   const theme = themes[t] || themes['light'];
