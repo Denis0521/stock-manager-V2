@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = '4.20.6'; // 優化灰色/棕色精確拼色與使用說明擴充
+const APP_VER = '4.20.7'; // 優化灰色主題，加深對比區分淺色主題
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -64,24 +64,27 @@ body.pink {
 /* ================= 棕色主題：提取自 #7A4526，搭配奶茶淺色 ================= */
 body.brown-light { 
   --bg: #F5EFEA; --bg-card: #FDFBFA; --s-light: #FFFFFF; --s-dark: #D4C9C1; 
-  --t-main: #4A2A17; /* 基於原圖色加深，確保極高對比與清晰度 */
-  --t-muted: #7A4526; /* 採用原圖純色作為次要文字與圖標 */
+  --t-main: #4A2A17; 
+  --t-muted: #7A4526; 
   --up: #D9465B; --down: #2D8A70; 
   --engrave-l: rgba(255,255,255,1); --engrave-d: rgba(122,69,38,0.15); 
   --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(122,69,38,0.08); 
-  --accent: #7A4526; /* 採用原圖純色作為強調色 */
+  --accent: #7A4526; 
   --border-light: #E8DFD8; 
 }
-/* ================= 灰色主題：提取自 #979A9F，搭配極簡淺灰 ================= */
+/* ================= 灰色主題：加深金屬感/清水模質感，顯著區分淺色 ================= */
 body.gray-light { 
-  --bg: #EAECEF; --bg-card: #F8F9FA; --s-light: #FFFFFF; --s-dark: #BDC1C6; 
-  --t-main: #2C3137; /* 基於原圖色加深，確保文字極度銳利 */
-  --t-muted: #6B6F75; /* 加深原圖灰階，提升副標清晰度 */
+  --bg: #BFC5CC; /* 加深底色，呈現水泥灰 */
+  --bg-card: #D3D9E0; /* 卡片色也同步加深，避開白色 */
+  --s-light: #E5EBF2; /* 陰影亮部 */
+  --s-dark: #9199A3; /* 陰影暗部 */
+  --t-main: #1D232A; /* 極度銳利的深黑灰 */
+  --t-muted: #535C66; /* 次要文字加深確保對比度 */
   --up: #D9465B; --down: #2D8A70; 
-  --engrave-l: rgba(255,255,255,1); --engrave-d: rgba(151,154,159,0.25); 
-  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(151,154,159,0.12); 
-  --accent: #5E646E; /* 採用比原圖稍深一階的灰階作為主按鈕，確保反白字清晰 */
-  --border-light: #D1D4D8; 
+  --engrave-l: rgba(255,255,255,0.6); --engrave-d: rgba(0,0,0,0.15); 
+  --protrude-l: rgba(255,255,255,0.7); --protrude-d: rgba(0,0,0,0.12); 
+  --accent: #373F47; /* 更沉穩的主按鈕色 */
+  --border-light: #A4ABB3; /* 邊框色加深 */
 }
 
 /* ========================================================= 🌐 基礎排版 ========================================================= */
@@ -511,7 +514,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.20.6</div>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.20.7</div>
     </div>
   </div>
 </div>
@@ -649,7 +652,7 @@ function applyThemeText(t){
     'purple-light': { emoji: '🍇', color: '#EAE6EF' },
     'pink': { emoji: '🌸', color: '#F4E8EC' },
     'brown-light': { emoji: '☕', color: '#F5EFEA' },
-    'gray-light': { emoji: '📓', color: '#EAECEF' },
+    'gray-light': { emoji: '📓', color: '#BFC5CC' }, // 配合新加深的底色
     'light': { emoji: '☀️', color: '#E8ECF1' }
   };
   const theme = themes[t] || themes['light'];
