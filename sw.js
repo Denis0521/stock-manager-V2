@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stock-app-v4.20.3';
+const CACHE_NAME = 'stock-app-v4.20.5';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
