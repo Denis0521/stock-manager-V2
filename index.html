@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = '4.17.0'; // 版本升級：外圓角頁籤、高度縮減、字型加大刻字
+const APP_VER = '4.18.0'; // 版本升級：修復黑點破圖、增加頁籤間距、支援 4~5 分頁完美顯示
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -113,18 +113,18 @@ button:active { transform: translateY(0); box-shadow: var(--shadow-inset); color
 .form-row button { font-size: 16px; letter-spacing: 2px; padding-left: 18px; }
 .btn-save { width: calc(100% - 20px); padding: 14px; font-size: 17px; margin: 8px 10px; }
 
-/* ========================================================= 📂 外圓角頁籤模式 ========================================================= */
+/* ========================================================= 📂 修正版：間隙圓角頁籤模式 ========================================================= */
 .tabs-bar {
   display: flex;
-  padding: 0 12px; /* 留出外側空間給外圓角 */
+  padding: 0 4px; /* 留一點左右空間 */
   margin: 8px 10px 0; /* 向上靠攏，間隔改為 8px */
-  gap: 0; /* 頁籤無縫緊貼，利用 z-index 管理交疊 */
+  gap: 6px; /* ✨ 頁籤之間拉開間隙 */
   border-bottom: 2px solid var(--border-light);
 }
 
 .tab-btn {
   flex: 1;
-  padding: 6px 2px; /* 高度縮減：降低 padding，原本 14px 改為 6px */
+  padding: 10px 2px; /* 高度縮減適中，避免太扁 */
   line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
@@ -135,54 +135,34 @@ button:active { transform: translateY(0); box-shadow: var(--shadow-inset); color
   cursor: pointer;
   transition: all 0.25s ease;
   position: relative;
-  top: 2px; /* 完美蓋住底部框線 */
+  top: 2px; /* 往下推，剛好蓋住底部的 border-bottom 實現無縫感 */
   z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px 12px 0 0; /* ✨ 上邊內圓角 */
-  text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); /* ✨ 加大字體的刻字效果 */
+  border-radius: 12px 12px 0 0; /* ✨ 乾淨的上邊內圓角 */
+  border: 1px solid transparent; /* 預留邊框空間，避免切換 active 時畫面跳動 */
+  border-bottom: none;
+  text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); /* 大字體刻字效果 */
 }
 
-/* ✨ 下邊外圓角 - 利用虛擬元素與 box-shadow 挖出圓弧 */
-.tab-btn::before, .tab-btn::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  width: 12px;
-  height: 12px;
-  pointer-events: none;
-  transition: box-shadow 0.25s ease;
-}
-.tab-btn::before {
-  left: -12px;
-  border-bottom-right-radius: 12px;
-  box-shadow: 6px 6px 0 6px var(--engrave-d);
-}
-.tab-btn::after {
-  right: -12px;
-  border-bottom-left-radius: 12px;
-  box-shadow: -6px 6px 0 6px var(--engrave-d);
-}
-
-/* 懸停與啟動狀態的顏色交疊處理 */
+/* 懸停與啟動狀態處理 */
 .tab-btn:hover {
   color: var(--t-main);
   background: var(--protrude-d);
   z-index: 2;
 }
-.tab-btn:hover::before { box-shadow: 6px 6px 0 6px var(--protrude-d); }
-.tab-btn:hover::after { box-shadow: -6px 6px 0 6px var(--protrude-d); }
 
 .tab-btn.active {
   background: var(--bg-card);
   color: var(--accent);
   font-weight: 800;
   text-shadow: none; /* 啟動時清除內凹刻字，呈現清晰浮起感 */
-  z-index: 3; /* 啟動的頁籤浮在最上層，外圓角漂亮地覆蓋其他頁籤 */
+  z-index: 3;
+  border-color: var(--border-light); /* 啟動時給予左右上細框，與下方卡片呼應 */
+  border-bottom: 2px solid var(--bg-card); /* 徹底吃掉 tabs-bar 的底線 */
+  margin-bottom: -2px; /* 補齊 border 的視覺誤差 */
 }
-.tab-btn.active::before { box-shadow: 6px 6px 0 6px var(--bg-card); }
-.tab-btn.active::after { box-shadow: -6px 6px 0 6px var(--bg-card); }
 
 /* ========================================================= 📈 內容區塊排版 ========================================================= */
 /* 統一所有板塊間隙為 8px 10px，達到向上靠攏效果 */
@@ -484,7 +464,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.17.0</div>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.18.0</div>
     </div>
   </div>
 </div>
@@ -652,11 +632,11 @@ function renderTabs() {
   
   container.style.display = 'flex';
   container.innerHTML = tabNames.slice(0, tabCount).map((name, i) => 
-    `<div class="tab-btn ${i === currentTab ? 'active' : ''}" onclick="switchTab(${i})" ondblclick="renameTab(${i})">${name}</div>`
+    `<button type="button" class="tab-btn ${i === currentTab ? 'active' : ''}" onclick="switchTab(${i})" ondblclick="renameTab(${i})">${name}</button>`
   ).join('');
   
-  // ✨ 字型尺寸加大以搭配更扁的頁籤高度
-  const fontSize = tabCount >= 4 ? '16px' : (tabCount === 3 ? '18px' : '20px');
+  // ✨ 強化字型縮放：確保 4 到 5 個分頁時，字體不會太大導致破圖或被隱藏
+  const fontSize = tabCount === 5 ? '14px' : (tabCount === 4 ? '15px' : (tabCount === 3 ? '17px' : '19px'));
   container.querySelectorAll('.tab-btn').forEach(b => b.style.fontSize = fontSize);
 }
 
