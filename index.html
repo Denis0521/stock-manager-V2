@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = '4.20.3'; // 更新版本號以清除舊快取
+const APP_VER = '4.20.4'; // 更新版本號以清除舊快取
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -50,7 +50,6 @@ body.blue-light {
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
-/* 紫色主題：柔和護眼色系 */
 body.purple-light { 
   --bg: #EAE6EF; --bg-card: #FDFBFF; --s-light: #FDFBFF; --s-dark: #C9B8D5; 
   --t-main: #3D2D4D; --t-muted: #7A6A8C; --up: #D9465B; --down: #2D8A70; 
@@ -61,13 +60,34 @@ body.purple-light {
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
-/* 粉色主題：柔和護眼色系 */
 body.pink { 
   --bg: #F4E8EC; --bg-card: #FFFBFB; --s-light: #FFFBFB; --s-dark: #D4B8C1; 
   --t-main: #5C3241; --t-muted: #946574; --up: #D9465B; --down: #2D8A70; 
   --engrave-l: rgba(255,255,255,1); --engrave-d: rgba(0,0,0,0.08); 
   --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.04); 
   --accent: #C24D7B; --border-light: #E6D0D8; 
+  --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
+  --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
+  --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
+}
+/* 棕色主題：柔和護眼、高對比文字 */
+body.brown-light { 
+  --bg: #F2EDE9; --bg-card: #FDFBF7; --s-light: #FDFBF7; --s-dark: #D4CACA; 
+  --t-main: #4A3B32; --t-muted: #7A6556; --up: #D9465B; --down: #2D8A70; 
+  --engrave-l: rgba(255,255,255,1); --engrave-d: rgba(0,0,0,0.08); 
+  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.04); 
+  --accent: #8C5A35; --border-light: #E3D9D1; 
+  --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
+  --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
+  --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
+}
+/* 灰色主題：極簡俐落、高對比文字 */
+body.gray-light { 
+  --bg: #EBEDF0; --bg-card: #F7F8F9; --s-light: #FFFFFF; --s-dark: #C5C9D1; 
+  --t-main: #2D3136; --t-muted: #646A73; --up: #D9465B; --down: #2D8A70; 
+  --engrave-l: rgba(255,255,255,1); --engrave-d: rgba(0,0,0,0.08); 
+  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.04); 
+  --accent: #4B5563; --border-light: #D0D5DB; 
   --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
@@ -499,7 +519,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.20.3</div>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.20.4</div>
     </div>
   </div>
 </div>
@@ -622,6 +642,8 @@ function applyThemeText(t){
     'blue-light': { emoji: '💎', color: '#D0DEE8' },
     'purple-light': { emoji: '🍇', color: '#EAE6EF' },
     'pink': { emoji: '🌸', color: '#F4E8EC' },
+    'brown-light': { emoji: '☕', color: '#F2EDE9' },
+    'gray-light': { emoji: '📓', color: '#EBEDF0' },
     'light': { emoji: '☀️', color: '#E8ECF1' }
   };
   const theme = themes[t] || themes['light'];
@@ -631,7 +653,8 @@ function applyThemeText(t){
 }
 
 function toggleTheme(){
-  const modes = ['light', 'tech', 'blue-light', 'purple-light', 'pink'];
+  // 增加新主題輪替
+  const modes = ['light', 'tech', 'blue-light', 'purple-light', 'pink', 'brown-light', 'gray-light'];
   let current = modes.find(m => document.body.classList.contains(m)) || 'light';
   let next = modes[(modes.indexOf(current) + 1) % modes.length];
   applyThemeText(next); LS.set(LS.KEYS.THEME, next);
