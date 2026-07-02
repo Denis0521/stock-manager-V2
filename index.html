@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = '4.15.0'; // 版本微升級：實裝扁平頁籤模式
+const APP_VER = '4.16.0'; // 版本升級：梯形精緻頁籤、統一間隙靠攏
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -36,8 +36,6 @@ body.tech {
   --engrave-l: rgba(255,255,255,0.12); --engrave-d: rgba(0,0,0,0.5); 
   --protrude-l: rgba(255,255,255,0.18); --protrude-d: rgba(0,0,0,0.35); 
   --accent: #60A5FA; --border-light: #3D4556; 
-  
-  /* 🚀 增強微背光：調高透明度與擴散範圍 */
   --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light), 0 0 12px rgba(96, 165, 250, 0.4);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light), 0 0 24px rgba(96, 165, 250, 0.8);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light), inset 0 0 12px rgba(96, 165, 250, 0.4);
@@ -87,8 +85,8 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .header h1 { font-size: 20px; font-weight: 700; color: var(--t-main); user-select: none; margin-left: 6px; }
 .header-top .hdr-right { display: flex; gap: 6px; }
 
-/* 跑馬燈樣式 */
-.news-ticker-container { margin: 16px 0 0 0; width: 100%; box-sizing: border-box; background: transparent; border-radius: 6px; box-shadow: none; border: none; display: flex; align-items: center; height: 34px; overflow: hidden; transition: all 0.4s ease; }
+/* 跑馬燈樣式 - 向上靠攏將 margin 改為 8px */
+.news-ticker-container { margin: 8px 0 0 0; width: 100%; box-sizing: border-box; background: transparent; border-radius: 6px; box-shadow: none; border: none; display: flex; align-items: center; height: 34px; overflow: hidden; transition: all 0.4s ease; }
 .ticker-scroll-area { flex: 1; overflow: hidden; position: relative; }
 .ticker-wrap { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker linear infinite; }
 .ticker-item { display: inline-block; padding: 0 20px; color: #2563EB; text-decoration: none; font-weight: 700; font-size: 15px; }
@@ -115,34 +113,35 @@ button:active { transform: translateY(0); box-shadow: var(--shadow-inset); color
 .form-row button { font-size: 16px; letter-spacing: 2px; padding-left: 18px; }
 .btn-save { width: calc(100% - 20px); padding: 14px; font-size: 17px; margin: 8px 10px; }
 
-/* ========================================================= 📂 頁籤模式專用樣式 ========================================================= */
+/* ========================================================= 📂 精緻梯形頁籤模式 ========================================================= */
 .tabs-bar {
   display: flex;
-  padding: 0 12px;
-  margin: 16px 10px 0;
-  gap: 4px;
+  padding: 0 8px; /* 兩側微調讓梯形有延展空間 */
+  margin: 8px 10px 0; /* 統一為 8px 間隙 */
+  gap: 2px; /* 梯形之間的微小縫隙 */
   border-bottom: 2px solid var(--border-light);
 }
 
 .tab-btn {
   flex: 1;
-  padding: 12px 6px;
-  font-size: 16px;
+  padding: 14px 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  background: var(--engrave-d);
-  border: 2px solid transparent;
-  border-radius: 12px 12px 0 0;
+  background: var(--engrave-d); /* 陰刻微暗底色 */
   color: var(--t-muted);
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.25s ease;
   position: relative;
-  top: 2px;
+  top: 2px; /* 完美蓋住底部框線 */
   display: flex;
   align-items: center;
   justify-content: center;
+  /* ✨ 精緻梯形裁切 */
+  clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 100%, 0 100%);
+  /* ✨ 內凹刻字效果 */
+  text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d);
 }
 
 .tab-btn:hover {
@@ -153,11 +152,13 @@ button:active { transform: translateY(0); box-shadow: var(--shadow-inset); color
 .tab-btn.active {
   background: var(--bg-card);
   color: var(--accent);
-  border-color: var(--border-light);
-  border-bottom-color: var(--bg-card);
   font-weight: 800;
+  /* 啟動時清除內凹刻字，呈現清晰浮起感 */
+  text-shadow: none; 
 }
 
+/* ========================================================= 📈 內容區塊排版 ========================================================= */
+/* 統一所有板塊間隙為 8px 10px */
 .idx-scroll-container { margin: 8px 10px; overflow-x: auto; display: flex; gap: 0; padding: 2px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
 .idx-card-box { flex: 0 0 auto; min-width: 160px; padding: 2px 16px; scroll-snap-align: start; border-right: 1px solid var(--s-dark); text-align: left; }
@@ -167,7 +168,7 @@ button:active { transform: translateY(0); box-shadow: var(--shadow-inset); color
 .idx-box-change-row { display: flex; align-items: center; justify-content: flex-start; gap: 6px; font-size: 16px; font-weight: 600; white-space: nowrap; }
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 0; opacity: 0.7; }
 
-.table-scroll { margin: 8px 10px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; }
+.table-scroll { margin: 0 10px 8px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; border-top-left-radius: 0; border-top-right-radius: 0; }
 .list-wrap { min-width: 670px; } 
 .list-header, .srow { grid-template-columns: 110px 95px 75px 75px 75px 85px 105px 70px; } 
 .list-header { display: grid; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 17px; color: var(--t-muted); font-weight: 600; }
@@ -256,7 +257,6 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
   body { max-width: 480px; margin: 0 auto; }
   input, select { font-size: 16px; }
   .srow, .srow .sym, .srow .chgp { font-size: 17px; }
-  .tab-btn { font-size: 15px; padding: 8px 4px; }
   .btn-manual-row { font-size: 14px; padding: 8px 6px; } 
 }
 @media (min-width: 768px) {
@@ -264,7 +264,6 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
   .header h1 { font-size: 26px; margin-left: 10px; }
   .header .btn-theme, .header .btn-adv, .header .btn-add-hdr { font-size: 18px; padding: 12px 20px; }
   .card-title { font-size: 18px; }
-  .tab-btn { font-size: 18px; padding: 14px 10px; }
   .list-wrap { min-width: 100%; }
   .list-header, .srow { grid-template-columns: 1.4fr 1.3fr 1fr 1fr 1fr 1.2fr 1.4fr 1fr; }
   .list-header { font-size: 18px; }
@@ -326,7 +325,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
 
 <div class="tabs-bar" id="tabsBarContainer"></div>
 
-<div class="table-scroll" id="tableScroll" style="display:none; margin-top: 0; border-top-left-radius: 0; border-top-right-radius: 0;">
+<div class="table-scroll" id="tableScroll" style="display:none;">
   <div class="list-wrap" id="listContainer">
     <div class="list-header">
       <div>代號</div><div>庫存/均價</div><div>現價</div><div>幅度</div><div>漲跌</div><div>今日損益</div><div>總損益</div><div>動作</div>
@@ -458,7 +457,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.15.0</div>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.16.0</div>
     </div>
   </div>
 </div>
@@ -629,7 +628,8 @@ function renderTabs() {
     `<div class="tab-btn ${i === currentTab ? 'active' : ''}" onclick="switchTab(${i})" ondblclick="renameTab(${i})">${name}</div>`
   ).join('');
   
-  const fontSize = tabCount >= 4 ? '14px' : (tabCount === 3 ? '16px' : '18px');
+  // ✨ 字型尺寸動態放大
+  const fontSize = tabCount >= 4 ? '15px' : (tabCount === 3 ? '17px' : '19px');
   container.querySelectorAll('.tab-btn').forEach(b => b.style.fontSize = fontSize);
 }
 
