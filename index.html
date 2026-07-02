@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = '4.16.0'; // 版本升級：梯形精緻頁籤、統一間隙靠攏
+const APP_VER = '4.17.0'; // 版本升級：外圓角頁籤、高度縮減、字型加大刻字
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -113,52 +113,79 @@ button:active { transform: translateY(0); box-shadow: var(--shadow-inset); color
 .form-row button { font-size: 16px; letter-spacing: 2px; padding-left: 18px; }
 .btn-save { width: calc(100% - 20px); padding: 14px; font-size: 17px; margin: 8px 10px; }
 
-/* ========================================================= 📂 精緻梯形頁籤模式 ========================================================= */
+/* ========================================================= 📂 外圓角頁籤模式 ========================================================= */
 .tabs-bar {
   display: flex;
-  padding: 0 8px; /* 兩側微調讓梯形有延展空間 */
-  margin: 8px 10px 0; /* 統一為 8px 間隙 */
-  gap: 2px; /* 梯形之間的微小縫隙 */
+  padding: 0 12px; /* 留出外側空間給外圓角 */
+  margin: 8px 10px 0; /* 向上靠攏，間隔改為 8px */
+  gap: 0; /* 頁籤無縫緊貼，利用 z-index 管理交疊 */
   border-bottom: 2px solid var(--border-light);
 }
 
 .tab-btn {
   flex: 1;
-  padding: 14px 4px;
+  padding: 6px 2px; /* 高度縮減：降低 padding，原本 14px 改為 6px */
+  line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  background: var(--engrave-d); /* 陰刻微暗底色 */
+  background: var(--engrave-d); 
   color: var(--t-muted);
   font-weight: 700;
   cursor: pointer;
   transition: all 0.25s ease;
   position: relative;
   top: 2px; /* 完美蓋住底部框線 */
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* ✨ 精緻梯形裁切 */
-  clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 100%, 0 100%);
-  /* ✨ 內凹刻字效果 */
-  text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d);
+  border-radius: 12px 12px 0 0; /* ✨ 上邊內圓角 */
+  text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); /* ✨ 加大字體的刻字效果 */
 }
 
+/* ✨ 下邊外圓角 - 利用虛擬元素與 box-shadow 挖出圓弧 */
+.tab-btn::before, .tab-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
+  transition: box-shadow 0.25s ease;
+}
+.tab-btn::before {
+  left: -12px;
+  border-bottom-right-radius: 12px;
+  box-shadow: 6px 6px 0 6px var(--engrave-d);
+}
+.tab-btn::after {
+  right: -12px;
+  border-bottom-left-radius: 12px;
+  box-shadow: -6px 6px 0 6px var(--engrave-d);
+}
+
+/* 懸停與啟動狀態的顏色交疊處理 */
 .tab-btn:hover {
   color: var(--t-main);
   background: var(--protrude-d);
+  z-index: 2;
 }
+.tab-btn:hover::before { box-shadow: 6px 6px 0 6px var(--protrude-d); }
+.tab-btn:hover::after { box-shadow: -6px 6px 0 6px var(--protrude-d); }
 
 .tab-btn.active {
   background: var(--bg-card);
   color: var(--accent);
   font-weight: 800;
-  /* 啟動時清除內凹刻字，呈現清晰浮起感 */
-  text-shadow: none; 
+  text-shadow: none; /* 啟動時清除內凹刻字，呈現清晰浮起感 */
+  z-index: 3; /* 啟動的頁籤浮在最上層，外圓角漂亮地覆蓋其他頁籤 */
 }
+.tab-btn.active::before { box-shadow: 6px 6px 0 6px var(--bg-card); }
+.tab-btn.active::after { box-shadow: -6px 6px 0 6px var(--bg-card); }
 
 /* ========================================================= 📈 內容區塊排版 ========================================================= */
-/* 統一所有板塊間隙為 8px 10px */
+/* 統一所有板塊間隙為 8px 10px，達到向上靠攏效果 */
 .idx-scroll-container { margin: 8px 10px; overflow-x: auto; display: flex; gap: 0; padding: 2px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
 .idx-card-box { flex: 0 0 auto; min-width: 160px; padding: 2px 16px; scroll-snap-align: start; border-right: 1px solid var(--s-dark); text-align: left; }
@@ -457,7 +484,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.16.0</div>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.17.0</div>
     </div>
   </div>
 </div>
@@ -628,8 +655,8 @@ function renderTabs() {
     `<div class="tab-btn ${i === currentTab ? 'active' : ''}" onclick="switchTab(${i})" ondblclick="renameTab(${i})">${name}</div>`
   ).join('');
   
-  // ✨ 字型尺寸動態放大
-  const fontSize = tabCount >= 4 ? '15px' : (tabCount === 3 ? '17px' : '19px');
+  // ✨ 字型尺寸加大以搭配更扁的頁籤高度
+  const fontSize = tabCount >= 4 ? '16px' : (tabCount === 3 ? '18px' : '20px');
   container.querySelectorAll('.tab-btn').forEach(b => b.style.fontSize = fontSize);
 }
 

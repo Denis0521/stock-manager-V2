@@ -1,5 +1,5 @@
-// 請將版本號更新為與 index.html 一致的 4.16.0
-const CACHE_NAME = 'stock-portfolio-v4.16.0'; 
+// 請將版本號更新為與 index.html 一致的 4.17.0
+const CACHE_NAME = 'stock-portfolio-v4.17.0'; 
 const urlsToCache = [
   './',
   './index.html',
