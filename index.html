@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = '4.20.2'; // 優化：總損益欄位靠左對齊防重疊、動作按鈕升級為圓形玻璃珠
+const APP_VER = '4.20.3'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -74,8 +74,91 @@ body.pink {
 /* ========================================================= 🌐 基礎排版 ========================================================= */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif; background:var(--bg); color:var(--t-main); padding:0 0 60px; min-height:100vh; font-size:15px; overflow-x:hidden; transition:background-color 0.4s ease, color 0.4s ease}
-input,select,button{font-family:inherit;font-size:inherit;outline:none;text-align:center}
 
+/* ========================================================= 💎 全域透明橢圓/圓形玻璃珠系統 (強制覆寫所有按鈕/輸入框) ========================================================= */
+
+/* 1. 所有輸入框與下拉選單：橢圓形、內凹玻璃感 */
+input, select, .tab-count-wrapper { 
+  border-radius: 50px !important; 
+  background: transparent !important; 
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid var(--border-light) !important; 
+  box-shadow: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light) !important; 
+  color: var(--t-main); 
+  font-weight: 600; 
+  padding: 12px 20px !important;
+  transition: all 0.3s ease;
+  text-align: center;
+  appearance: none; /* 移除系統預設下拉箭頭樣式確保外觀一致 */
+}
+input:focus, select:focus {
+  outline: none;
+  box-shadow: inset 6px 6px 12px var(--s-dark), inset -6px -6px 12px var(--s-light), 0 0 10px rgba(37,99,235,0.3) !important;
+  border-color: var(--accent) !important;
+}
+
+/* 2. 所有按鈕：橢圓形、外凸玻璃感、無填色 */
+button {
+  background: transparent !important;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: 50px !important;
+  border: 1px solid var(--border-light) !important;
+  box-shadow: 
+    inset 0 4px 6px var(--protrude-l), 
+    inset 0 -4px 6px var(--protrude-d),
+    4px 4px 8px var(--s-dark),
+    -4px -4px 8px var(--s-light) !important;
+  color: var(--t-main);
+  font-weight: 800;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-shadow: none !important;
+}
+button:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: inset 0 6px 10px var(--protrude-l), inset 0 -4px 6px var(--protrude-d), 6px 6px 12px var(--s-dark), -4px -4px 10px var(--s-light) !important;
+}
+button:active {
+  transform: translateY(2px) !important;
+  box-shadow: inset 0 2px 4px var(--protrude-d), inset 0 -1px 2px var(--protrude-l), 2px 2px 4px var(--s-dark), -2px -2px 4px var(--s-light) !important;
+}
+
+/* 3. 特殊按鈕強制正圓形 (編輯/刪除/密碼眼/關閉等) */
+.btn-glass-circle, .btn-close-icon, #keyToggle1, #keyToggle2, button[onclick="addForeignIdx()"] {
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
+  padding: 0 !important;
+  flex-shrink: 0;
+}
+
+/* 4. 確保特定語意按鈕的文字顏色依然醒目 */
+.btn-add-hdr, .btn-glass-circle.del, button[onclick*="delete"] { color: var(--up) !important; font-weight: 900 !important; }
+.btn-glass-circle.edit, button[onclick="addStock()"], button[onclick="saveEditStock()"], button[onclick="openForeignIdxModal()"] { color: var(--accent) !important; font-weight: 900 !important; }
+#modalOverlay .modal button { color: var(--t-main); } /* 修正深色模式下特定按鈕的字體色 */
+body.tech #modalOverlay .modal button { color: #F8FAFC !important; }
+body.tech button[onclick="addStock()"], body.tech button[onclick="saveEditStock()"], body.tech button[onclick="openForeignIdxModal()"] { color: var(--accent) !important; }
+
+/* 5. 分頁按鈕(非 button 標籤) 的膠囊玻璃樣式 */
+.tab-btn { 
+  flex: 1; min-width: 70px; height: 38px; padding: 0 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+  background: transparent !important; color: var(--t-muted); font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; 
+  border: 1px solid var(--border-light); border-radius: 50px !important; 
+  box-shadow: inset 0 3px 5px var(--protrude-l), inset 0 -3px 5px var(--protrude-d), 3px 3px 6px var(--s-dark), -3px -3px 6px var(--s-light) !important; 
+  transition: all 0.2s; 
+}
+.tab-btn:hover { color: var(--t-main); transform: translateY(-1px); }
+.tab-btn.active { 
+  color: var(--accent); font-weight: 800; border: 1px solid var(--accent); 
+  box-shadow: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light) !important; transform: translateY(1px); 
+}
+
+/* ========================================================= 區塊排版與其他細節 ========================================================= */
 .header, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .backup-box { 
   background: var(--bg-card); box-shadow: var(--shadow-soft); border-radius: 12px; transition: background-color 0.4s ease, box-shadow 0.4s ease; border: 1px solid var(--border-light);
 }
@@ -84,85 +167,8 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .header h1 { font-size: 20px; font-weight: 700; color: var(--t-main); user-select: none; margin-left: 6px; }
 .header-top .hdr-right { display: flex; gap: 6px; align-items: center; }
 
-/* ========================================================= 💎 頂部與圓形按鈕：透明無填色玻璃珠 ========================================================= */
-.header-top .btn-theme, 
-.header-top .btn-adv, 
-.header-top .btn-add-hdr { 
-  padding: 6px 16px; 
-  font-size: 16px !important; 
-  font-weight: 800;
-  white-space: nowrap;
-  border-radius: 50px; 
-  background: transparent;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border: 1px solid var(--border-light);
-  box-shadow: 
-    inset 0 4px 6px var(--protrude-l), 
-    inset 0 -4px 6px var(--protrude-d),
-    3px 4px 8px var(--s-dark),
-    -2px -2px 6px var(--s-light) !important;
-  color: var(--t-main);
-  text-shadow: none !important; 
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.header-top .btn-add-hdr { color: var(--up); }
-
-.header-top .btn-theme:hover, 
-.header-top .btn-adv:hover, 
-.header-top .btn-add-hdr:hover {
-  transform: translateY(-2px);
-  box-shadow: inset 0 5px 8px var(--protrude-l), inset 0 -3px 5px var(--protrude-d), 5px 6px 12px var(--s-dark), -3px -3px 8px var(--s-light) !important;
-}
-
-.header-top .btn-theme:active, 
-.header-top .btn-adv:active, 
-.header-top .btn-add-hdr:active {
-  transform: translateY(1px);
-  box-shadow: inset 0 3px 6px var(--protrude-d), inset 0 -2px 4px var(--protrude-l), 1px 2px 3px var(--s-dark) !important;
-}
-
-/* 🔘 圓形玻璃珠按鈕 (編輯/刪除) */
-.btn-glass-circle {
-  width: 34px !important;
-  height: 34px !important;
-  padding: 0 !important;
-  border-radius: 50% !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px !important;
-  font-weight: 800;
-  background: transparent;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border: 1px solid var(--border-light) !important;
-  box-shadow: 
-    inset 0 3px 5px var(--protrude-l), 
-    inset 0 -3px 5px var(--protrude-d),
-    2px 3px 5px var(--s-dark),
-    -1px -1px 3px var(--s-light) !important;
-  text-shadow: none !important;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  flex-shrink: 0;
-}
-.btn-glass-circle.del { color: var(--up) !important; }
-.btn-glass-circle.edit { color: var(--accent) !important; }
-
-.btn-glass-circle:hover {
-  transform: translateY(-2px);
-  box-shadow: inset 0 4px 6px var(--protrude-l), inset 0 -2px 4px var(--protrude-d), 3px 4px 8px var(--s-dark), -2px -2px 6px var(--s-light) !important;
-}
-.btn-glass-circle:active {
-  transform: translateY(1px);
-  box-shadow: inset 0 2px 4px var(--protrude-d), inset 0 -1px 2px var(--protrude-l), 1px 1px 2px var(--s-dark) !important;
-}
+/* 頂部按鈕尺寸調整 */
+.header-top .btn-theme, .header-top .btn-adv, .header-top .btn-add-hdr { padding: 6px 16px !important; font-size: 16px !important; }
 
 .news-ticker-container { margin: 8px 0 0 0; width: 100%; box-sizing: border-box; background: transparent; border-radius: 6px; box-shadow: none; border: none; display: flex; align-items: center; height: 34px; overflow: hidden; transition: all 0.4s ease; }
 .ticker-scroll-area { flex: 1; overflow: hidden; position: relative; }
@@ -178,54 +184,18 @@ body.tech .ticker-item { color: #60A5FA; }
 .form-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
 .form-row:last-child { margin-bottom: 0; }
 
-input, select { flex: 1; min-width: 0; padding: 12px 16px; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 50px; box-shadow: var(--shadow-inset); color: var(--t-main); font-weight: 600; text-align: left; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); transition: background-color 0.4s ease, box-shadow 0.4s ease; }
 input::placeholder { color: var(--t-muted); text-shadow: none; font-weight: normal; }
-.form-row select { flex: 0 0 85px; padding: 12px 8px; text-align: center; }
-.form-row .sym-inp { flex: 0 0 100px; }
+.form-row select, #unitSelect, #editUnitSelect { flex: 0 0 100px !important; padding: 12px 10px !important; text-align: center; }
 
-/* 其他一般按鈕 (排除 header 與 玻璃珠按鈕)：橢圓無填色玻璃珠 */
-button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):not(.btn-close-icon) { 
-  background: transparent; 
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border: 1px solid var(--border-light); 
-  border-radius: 50px; 
-  padding: 10px 16px; 
-  box-shadow: 
-    inset 0 4px 6px var(--protrude-l), 
-    inset 0 -4px 6px var(--protrude-d),
-    3px 4px 8px var(--s-dark),
-    -2px -2px 6px var(--s-light);
-  color: var(--t-main); 
-  font-weight: 600; 
-  cursor: pointer; 
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
-  text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-}
-button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):not(.btn-close-icon):hover { 
-  transform: translateY(-2px); 
-  box-shadow: inset 0 5px 8px var(--protrude-l), inset 0 -3px 5px var(--protrude-d), 5px 6px 12px var(--s-dark), -3px -3px 8px var(--s-light); 
-}
-button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):not(.btn-close-icon):active { 
-  transform: translateY(1px); 
-  box-shadow: inset 0 3px 6px var(--protrude-d), inset 0 -2px 4px var(--protrude-l), 1px 2px 3px var(--s-dark); 
-  color: var(--accent); 
-  border-color: var(--accent); 
-}
-.form-row button { font-size: 16px; letter-spacing: 2px; padding-left: 18px; }
-.btn-save { width: calc(100% - 20px); padding: 14px; font-size: 17px; margin: 8px 10px; }
+/* 各類按鈕與輸入框的間距與尺寸修正 */
+.btn-save { width: calc(100% - 20px) !important; padding: 14px !important; font-size: 17px !important; margin: 8px 10px !important; }
+.btn-backup { flex: 1; padding: 12px !important; font-size: 15px !important; }
+.btn-manual-row { flex: 1; padding: 12px 10px !important; font-size: 15px !important; margin: 0 !important; white-space: nowrap; }
+.modal-close { width: 100% !important; padding: 14px !important; font-size: 17px !important; margin-top: 10px; }
 
-/* ========================================================= 📂 膠囊型頁籤模式 ========================================================= */
-.tabs-bar { display: flex; padding: 0 8px; margin: 8px 10px 0; gap: 8px; align-items: center; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.tabs-bar { display: flex; padding: 0 8px 4px; margin: 8px 10px 0; gap: 8px; align-items: center; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .tabs-bar::-webkit-scrollbar { height: 0; }
-.tab-btn { flex: 1; min-width: 70px; height: 38px; padding: 0 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: transparent; color: var(--t-muted); font-weight: 600; cursor: pointer; position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-light); border-radius: 50px; box-shadow: inset 0 2px 4px var(--protrude-l), inset 0 -2px 4px var(--protrude-d); transition: all 0.2s; }
-.tab-btn:hover { color: var(--t-main); box-shadow: inset 0 3px 5px var(--protrude-l), inset 0 -3px 5px var(--protrude-d); }
-.tab-btn.active { background: transparent; color: var(--accent); font-weight: 800; z-index: 3; border: 1px solid var(--accent); box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2), inset 0 2px 4px var(--protrude-d); }
 
-/* ========================================================= 📈 內容區塊排版 ========================================================= */
 .idx-scroll-container { margin: 8px 10px; overflow-x: auto; display: flex; gap: 0; padding: 2px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
 .idx-card-box { flex: 0 0 auto; min-width: 160px; padding: 2px 16px; scroll-snap-align: start; border-right: 1px solid var(--s-dark); text-align: left; }
@@ -237,20 +207,14 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):no
 
 .table-scroll { margin: 0 10px 8px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; border-radius: 12px; position: relative; z-index: 2; }
 .list-wrap { min-width: 670px; } 
-
-/* 調整 Grid，給總損益靠左的空間，給動作按鈕足夠的寬度 */
-.list-header, .srow { grid-template-columns: 110px 95px 75px 75px 75px 85px 95px 80px; } 
+.list-header, .srow { grid-template-columns: 110px 95px 75px 75px 75px 85px 95px 90px; } 
 .list-header { display: grid; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 17px; color: var(--t-muted); font-weight: 600; }
 .srow { display: grid; align-items: stretch; border-bottom: 1px solid var(--s-dark); font-size: 17px; }
 .srow:last-child { border-bottom: none; }
 .list-header > div, .srow > div { padding: 6px 4px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; white-space: nowrap; } 
 .list-header > div:nth-child(1), .srow > div:nth-child(1) { align-items: flex-start; text-align: left; position: sticky; left: 0; z-index: 2; background: var(--bg-card); padding-left: 8px; }
 .list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after { content: ''; position: absolute; top: 0; bottom: 0; right: -6px; width: 6px; background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; }
-
-/* 總損益欄位 (第7欄) - 靠左對齊防重疊 */
 .list-header > div:nth-child(7), .srow > div:nth-child(7) { align-items: flex-start; text-align: left; padding-left: 8px; }
-
-/* 動作按鈕區塊 (第8欄) */
 .list-header > div:nth-child(8) { align-items: center; justify-content: center; padding-left: 4px; }
 .srow > div:nth-child(8) { flex-direction: row; align-items: center; justify-content: center; gap: 8px; padding-left: 4px; }
 
@@ -281,7 +245,7 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):no
 #manualOverlay, #editModalOverlay, #foreignIdxOverlay, #addModalOverlay { z-index: 1100; }
 .modal h2 { font-size: 20px; margin-bottom: 16px; text-align: center; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
 .modal label { display: block; font-size: 15px; color: var(--t-muted); margin: 12px 0 6px; font-weight: 600; text-align: left; }
-.modal-close { width: 100%; padding: 14px; font-size: 17px; }
+
 .key-status { font-size: 12px; padding: 4px 10px; border-radius: 12px; display: inline-block; margin-top: 6px; font-weight: 600; }
 .key-status.ok { background: transparent; box-shadow: inset 0 2px 4px var(--protrude-d); color: var(--up); border: 1px solid var(--border-light); }
 .key-status.none { background: transparent; box-shadow: inset 0 2px 4px var(--protrude-d); color: var(--t-muted); border: 1px solid var(--border-light); }
@@ -291,7 +255,7 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 .backup-box { padding: 16px; margin: 8px 0 0; }
 .backup-title { font-size: 16px; font-weight: 700; color: var(--t-muted); margin-bottom: 12px; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); text-align: left; }
 .backup-btns { display: flex; gap: 12px; }
-.btn-backup { flex: 1; padding: 8px 12px; font-size: 15px; }
+
 .v-box { text-align: center; font-size: 13px; color: var(--t-muted); margin-top: 24px; font-weight: 600; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
 .up { color: var(--up) !important; text-shadow: none !important; }
 .down { color: var(--down) !important; text-shadow: none !important; }
@@ -303,38 +267,32 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 .manual-content ul { padding-left: 20px; margin-bottom: 12px; }
 
 .settings-row { display: flex; gap: 12px; margin-bottom: 16px; align-items: stretch; }
-.btn-manual-row { flex: 1; padding: 8px 10px; font-size: 15px; color: var(--accent); margin: 0; white-space: nowrap; background: transparent; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border-radius: 50px; box-shadow: inset 0 4px 6px var(--protrude-l), inset 0 -4px 6px var(--protrude-d), 3px 4px 8px var(--s-dark), -2px -2px 6px var(--s-light); border: 1px solid var(--border-light); font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
-.btn-manual-row:hover { transform: translateY(-2px); box-shadow: inset 0 5px 8px var(--protrude-l), inset 0 -3px 5px var(--protrude-d), 5px 6px 12px var(--s-dark), -3px -3px 8px var(--s-light); }
-.btn-manual-row:active { transform: translateY(1px); box-shadow: inset 0 3px 6px var(--protrude-d), inset 0 -2px 4px var(--protrude-l), 1px 2px 3px var(--s-dark); }
-.tab-count-wrapper { flex: 1; display: flex; flex-direction: column; justify-content: center; background: transparent; border-radius: 50px; box-shadow: inset 0 2px 4px var(--protrude-d); padding: 4px 16px; border: 1px solid var(--border-light); }
-.tab-count-label { font-size: 12px; color: var(--t-muted); font-weight: 600; margin-bottom: 2px; text-align: left; }
-.tab-count-wrapper select { width: 100%; box-shadow: none; padding: 2px 0; background: transparent; font-size: 15px; border: none; }
+.tab-count-wrapper { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 8px 16px !important; }
+.tab-count-label { font-size: 12px; color: var(--t-muted); font-weight: 600; margin-bottom: 4px; text-align: center; }
+.tab-count-wrapper select { width: 100%; box-shadow: none !important; padding: 0 !important; background: transparent !important; border: none !important; font-size: 15px; }
+
 .api-section { margin-bottom: 16px; } 
 .api-link-box { text-align: center; margin-bottom: 16px; padding: 10px; background: transparent; border-radius: 12px; box-shadow: inset 0 2px 4px var(--protrude-l), inset 0 -2px 4px var(--protrude-d); border: 1px solid var(--border-light); }
 
 .modal.fullscreen-modal { width: 100vw !important; max-width: 100vw !important; height: 100vh !important; max-height: 100vh !important; border-radius: 0; padding: 18px 20px 20px !important; margin: 0 !important; border: none; box-sizing: border-box; z-index: 999; }
-.btn-close-icon { position: absolute; top: 15px; right: 15px; background: transparent !important; box-shadow: none !important; color: var(--t-muted); font-size: 24px; width: 40px; height: 40px; padding: 0; display: flex; justify-content: center; align-items: center; border-radius: 50%; text-shadow: none !important; cursor: pointer; border: none !important; }
-.btn-close-icon:hover { color: var(--t-main); transform: scale(1.1); }
+.btn-close-icon { position: absolute; top: 15px; right: 15px; }
+.btn-close-icon:hover { transform: scale(1.1) !important; }
 .pwd-mask { -webkit-text-security: disc; text-security: disc; }
-
-#modalOverlay .modal button, #modalOverlay .modal a.btn-link, #modalOverlay .modal .btn-manual-row, #modalOverlay .modal .btn-close-icon { color: #000 !important; }
-body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link, body.tech #modalOverlay .modal .btn-manual-row, body.tech #modalOverlay .modal .btn-close-icon { color: #F8FAFC !important; }
 
 @media (max-width: 360px) {
   .header h1 { font-size: 16px; margin-left: 2px; }
-  .header-top .btn-theme, .header-top .btn-adv, .header-top .btn-add-hdr { padding: 4px 12px; font-size: 14px !important; }
+  .header-top .btn-theme, .header-top .btn-adv, .header-top .btn-add-hdr { padding: 4px 12px !important; font-size: 14px !important; }
   .header-top .hdr-right { gap: 4px; }
 }
 @media (max-width: 767px) {
   body { max-width: 480px; margin: 0 auto; }
   input, select { font-size: 16px; }
   .srow, .srow .sym, .srow .chgp { font-size: 17px; }
-  .btn-manual-row { font-size: 14px; padding: 8px 6px; } 
 }
 @media (min-width: 768px) {
   body { font-size: 16px; }
   .header h1 { font-size: 26px; margin-left: 10px; }
-  .header-top .btn-theme, .header-top .btn-adv, .header-top .btn-add-hdr { font-size: 18px !important; padding: 10px 22px; }
+  .header-top .btn-theme, .header-top .btn-adv, .header-top .btn-add-hdr { font-size: 18px !important; padding: 10px 22px !important; }
   .card-title { font-size: 18px; }
   .list-wrap { min-width: 100%; }
   .list-header, .srow { grid-template-columns: 1.4fr 1.3fr 1fr 1fr 1fr 1.2fr 1.2fr 1fr; }
@@ -348,15 +306,12 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
   .modal { max-width: 560px; padding: 32px; }
   .modal h2 { font-size: 24px; }
   .modal label { font-size: 17px; }
-  .modal-close { font-size: 19px; padding: 16px; }
-  .btn-backup { font-size: 17px; padding: 10px 14px; }
   .v-box { font-size: 15px; }
   .idx-card-box { min-width: 200px; padding: 8px 20px; }
   .idx-box-name, .idx-box-price { font-size: 20px; } 
   .idx-box-change-row { font-size: 18px; }
   .manual-content { font-size: 18px; }
   .manual-content h3 { font-size: 20px; }
-  .btn-manual-row { font-size: 17px; padding: 10px 10px; } 
 }
 </style>
 <link rel="manifest" href="manifest.json">
@@ -434,6 +389,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
 
 <div class="toast" id="toast"></div>
 
+<!-- 移除所有按鈕原本的內聯背景色 (style="background:...")，讓全局透明玻璃珠生效 -->
 <div class="modal-overlay" id="addModalOverlay">
   <div class="modal">
     <h2>新增持股</h2>
@@ -442,12 +398,12 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
     <label>數量</label>
     <div style="display:flex; gap:10px; margin-bottom: 10px;">
       <input type="number" id="qtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" autocomplete="off" style="flex:1;">
-      <select id="unitSelect" style="flex:0 0 90px;"><option value="張">張</option><option value="股">股</option></select>
+      <select id="unitSelect"><option value="張">張</option><option value="股">股</option></select>
     </div>
     <label>買入均價 (選填)</label>
     <input type="number" id="buyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="off" style="margin-bottom: 10px;">
     <div style="display: flex; gap: 12px; margin-top: 20px;">
-      <button type="button" class="modal-close" onclick="addStock()" style="flex:1; color:var(--accent); font-weight:800; text-shadow:none; margin:0;">確認新增</button>
+      <button type="button" class="modal-close" onclick="addStock()" style="flex:1; margin:0;">確認新增</button>
       <button type="button" class="modal-close" onclick="closeModalById('addModalOverlay')" style="flex:1; margin:0;">取消</button>
     </div>
   </div>
@@ -468,7 +424,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
     <label>買入均價 (留空不計算總損益)</label>
     <input type="number" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="off" style="margin-bottom: 10px;">
     <div style="display: flex; gap: 12px; margin-top: 20px;">
-      <button type="button" class="modal-close" onclick="saveEditStock()" style="flex:1; color:var(--accent); font-weight:800; text-shadow:none; margin:0;">💾 確認儲存</button>
+      <button type="button" class="modal-close" onclick="saveEditStock()" style="flex:1; margin:0;">💾 確認儲存</button>
       <button type="button" class="modal-close" onclick="closeModalById('editModalOverlay')" style="flex:1; margin:0;">取消</button>
     </div>
   </div>
@@ -494,26 +450,26 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
         </div>
       </div>
       <div class="api-section">
-        <button type="button" id="tickerToggleBtn" onclick="toggleTicker()" style="width: 100%; padding: 8px 12px; font-size: 15px; margin-bottom: 16px;">📰 財經新聞列：</button>
+        <button type="button" id="tickerToggleBtn" onclick="toggleTicker()" style="width: 100%; padding: 12px 12px; font-size: 15px; margin-bottom: 16px;">📰 財經新聞列：</button>
         <div class="api-link-box">
           <a class="btn-link" href="https://developer.fugle.tw/docs/key/" target="_blank">🔗 申請 Fugle API Key</a>
         </div>
         <label>🔑 Fugle API Key（主要）</label>
         <div style="display:flex;gap:8px;align-items:stretch;">
           <input type="text" id="fugleKeyInput" class="pwd-mask" placeholder="輸入第一組 Key" autocomplete="off" spellcheck="false" style="flex:1;">
-          <button type="button" onclick="toggleKeyVisibility('fugleKeyInput','keyToggle1')" id="keyToggle1" style="flex:0 0 44px;font-size:16px;">👁</button>
+          <button type="button" onclick="toggleKeyVisibility('fugleKeyInput','keyToggle1')" id="keyToggle1">👁</button>
         </div>
         <div><span class="key-status none" id="fugleKeyStatus">未設定</span></div>
         <label>🔑 Fugle API Key 2（備用）</label>
         <div style="display:flex;gap:8px;align-items:stretch;">
           <input type="text" id="secondFugleKeyInput" class="pwd-mask" placeholder="輸入第二組 Key" autocomplete="off" spellcheck="false" style="flex:1;">
-          <button type="button" onclick="toggleKeyVisibility('secondFugleKeyInput','keyToggle2')" id="keyToggle2" style="flex:0 0 44px;font-size:16px;">👁</button>
+          <button type="button" onclick="toggleKeyVisibility('secondFugleKeyInput','keyToggle2')" id="keyToggle2">👁</button>
         </div>
         <div><span class="key-status none" id="secondFugleKeyStatus">未設定</span></div>
         <div style="margin-top:16px;padding:12px;background:var(--bg-card);border-radius:12px;box-shadow:var(--shadow-inset); border:1px solid var(--border-light);">
           <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--t-muted); margin-bottom:8px; padding:0 4px;">
             <span>📊 今日 API 使用量</span>
-            <button type="button" onclick="openForeignIdxModal()" style="padding:4px 12px; font-size:12px; color:var(--accent); white-space:nowrap; flex-shrink:0;">⚙️ 國外指數</button>
+            <button type="button" onclick="openForeignIdxModal()" style="padding:6px 16px; font-size:13px; white-space:nowrap;">⚙️ 國外指數</button>
           </div>
           <div id="apiStatsBox"></div>
         </div>
@@ -526,7 +482,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
           <input type="file" id="importFile" style="display:none" onchange="importData(event)">
         </div>
       </div>
-      <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
+      <button type="button" class="modal-close" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
       <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.20.2</div>
     </div>
   </div>
@@ -538,9 +494,9 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
     <div class="card" style="margin: 0 0 16px 0; padding: 10px; background:transparent; box-shadow: inset 0 2px 4px var(--protrude-d); border:1px solid var(--border-light);">
       <div class="card-title" style="font-size:14px; margin-bottom:6px;">新增自選指數</div>
       <div class="form-row">
-        <input type="text" id="newIdxSymbol" placeholder="代號 (如: ^SOX)" style="font-size:14px; padding:8px 16px;">
-        <input type="text" id="newIdxName" placeholder="自訂名稱 (含國旗)" style="font-size:14px; padding:8px 16px;">
-        <button type="button" onclick="addForeignIdx()" style="flex:0 0 44px; padding:0; font-size:20px; color:var(--accent); font-weight:bold;">＋</button>
+        <input type="text" id="newIdxSymbol" placeholder="代號 (如: ^SOX)" style="font-size:14px;">
+        <input type="text" id="newIdxName" placeholder="自訂名稱 (含國旗)" style="font-size:14px;">
+        <button type="button" onclick="addForeignIdx()">＋</button>
       </div>
     </div>
     <label>目前列表</label>
@@ -1106,7 +1062,7 @@ function renderForeignIdxConfigList() {
   c.innerHTML = availableIndices.map((idx, i) => `
     <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; margin-bottom:8px; background:var(--bg-card); box-shadow:var(--shadow-soft); border-radius:8px; border:1px solid var(--border-light);">
       <div style="text-align:left; flex:1; min-width:0; padding-right:8px;"><div style="font-weight:700; color:var(--t-main); font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(idx.name)}</div><div style="font-size:12px; color:var(--t-muted); font-weight:600;">${escapeHTML(idx.symbol)}</div></div>
-      <button type="button" class="btn-glass-circle del" style="width:28px!important; height:28px!important; font-size:14px!important;" onclick="deleteForeignIdx(${i})">✕</button>
+      <button type="button" class="btn-glass-circle del" onclick="deleteForeignIdx(${i})">✕</button>
     </div>`).join('');
 }
 
