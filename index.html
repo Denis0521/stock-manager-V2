@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = '4.20.0'; // 系統全面優化：效能重構、集中商業邏輯、加強 DOM 渲染與安全性防護
+const APP_VER = '4.20.0'; // 系統全面優化：效能重構、集中商業邏輯、加強 DOM 渲染與安全性防護，新增玻璃珠按鈕
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -82,7 +82,59 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .header { box-shadow: var(--shadow-strong); border-bottom: 2px solid var(--s-dark); border-radius: 0 0 16px 16px; padding: 12px 10px 4px 10px; display: flex; flex-direction: column; position: sticky; top: 0; z-index: 100; transition: all 0.4s ease; }
 .header-top { display: flex; align-items: center; justify-content: space-between; width: 100%; }
 .header h1 { font-size: 20px; font-weight: 700; color: var(--t-main); user-select: none; margin-left: 6px; }
-.header-top .hdr-right { display: flex; gap: 6px; }
+.header-top .hdr-right { display: flex; gap: 6px; align-items: center; }
+
+/* ========================================================= 💎 頂部按鈕：橢圓形玻璃珠風格 ========================================================= */
+.header-top .btn-theme, 
+.header-top .btn-adv, 
+.header-top .btn-add-hdr { 
+  padding: 6px 16px; 
+  font-size: 16px !important; 
+  font-weight: 800;
+  white-space: nowrap;
+  border-radius: 30px; 
+  background: linear-gradient(135deg, var(--s-light) 0%, transparent 100%);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid var(--border-light);
+  box-shadow: 
+    inset 0 4px 6px var(--protrude-l), 
+    inset 0 -4px 6px var(--protrude-d),
+    3px 4px 8px var(--s-dark),
+    -2px -2px 6px var(--s-light) !important;
+  color: var(--t-main);
+  text-shadow: none !important; 
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-top .btn-add-hdr { color: var(--up); }
+
+.header-top .btn-theme:hover, 
+.header-top .btn-adv:hover, 
+.header-top .btn-add-hdr:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+  box-shadow: 
+    inset 0 5px 8px var(--protrude-l), 
+    inset 0 -3px 5px var(--protrude-d),
+    5px 6px 12px var(--s-dark),
+    -3px -3px 8px var(--s-light) !important;
+}
+
+.header-top .btn-theme:active, 
+.header-top .btn-adv:active, 
+.header-top .btn-add-hdr:active {
+  transform: translateY(1px);
+  filter: brightness(0.95);
+  box-shadow: 
+    inset 0 3px 6px var(--protrude-d),
+    inset 0 -2px 4px var(--protrude-l),
+    1px 2px 3px var(--s-dark) !important;
+}
 
 .news-ticker-container { margin: 8px 0 0 0; width: 100%; box-sizing: border-box; background: transparent; border-radius: 6px; box-shadow: none; border: none; display: flex; align-items: center; height: 34px; overflow: hidden; transition: all 0.4s ease; }
 .ticker-scroll-area { flex: 1; overflow: hidden; position: relative; }
@@ -103,11 +155,10 @@ input::placeholder { color: var(--t-muted); text-shadow: none; font-weight: norm
 .form-row select { flex: 0 0 68px; padding: 12px 4px; text-align: center; }
 .form-row .sym-inp { flex: 0 0 90px; }
 
-button { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; padding: 10px 16px; box-shadow: var(--shadow-soft); color: var(--t-main); font-weight: 600; cursor: pointer; transition: all 0.25s ease; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); display: flex; align-items: center; justify-content: center; }
-button:hover { transform: translateY(-1px); box-shadow: var(--shadow-strong); }
-button:active { transform: translateY(0); box-shadow: var(--shadow-inset); color: var(--accent); border-color: var(--accent); }
-.btn-theme, .btn-adv, .btn-add-hdr { padding: 10px 14px; font-size: 16px; white-space: nowrap; font-weight: 700; }
-.btn-add-hdr { color: var(--up); text-shadow: none; } 
+/* 其他一般按鈕 (排除 header 內的特效按鈕) */
+button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr) { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; padding: 10px 16px; box-shadow: var(--shadow-soft); color: var(--t-main); font-weight: 600; cursor: pointer; transition: all 0.25s ease; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); display: flex; align-items: center; justify-content: center; }
+button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):hover { transform: translateY(-1px); box-shadow: var(--shadow-strong); }
+button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):active { transform: translateY(0); box-shadow: var(--shadow-inset); color: var(--accent); border-color: var(--accent); }
 .form-row button { font-size: 16px; letter-spacing: 2px; padding-left: 18px; }
 .btn-save { width: calc(100% - 20px); padding: 14px; font-size: 17px; margin: 8px 10px; }
 
@@ -208,7 +259,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
 
 @media (max-width: 360px) {
   .header h1 { font-size: 16px; margin-left: 2px; }
-  .btn-theme, .btn-adv, .btn-add-hdr { padding: 8px 10px; font-size: 15px; }
+  .header-top .btn-theme, .header-top .btn-adv, .header-top .btn-add-hdr { padding: 4px 12px; font-size: 14px !important; }
   .header-top .hdr-right { gap: 4px; }
 }
 @media (max-width: 767px) {
@@ -220,13 +271,13 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
 @media (min-width: 768px) {
   body { font-size: 16px; }
   .header h1 { font-size: 26px; margin-left: 10px; }
-  .header .btn-theme, .header .btn-adv, .header .btn-add-hdr { font-size: 18px; padding: 12px 20px; }
+  .header-top .btn-theme, .header-top .btn-adv, .header-top .btn-add-hdr { font-size: 18px !important; padding: 10px 22px; }
   .card-title { font-size: 18px; }
   .list-wrap { min-width: 100%; }
   .list-header, .srow { grid-template-columns: 1.4fr 1.3fr 1fr 1fr 1fr 1.2fr 1.4fr 1fr; }
   .list-header { font-size: 18px; }
   .srow, .srow .sym, .srow .chgp { font-size: 19px; }
-  .srow .act button { padding: 8px 14px; font-size: 17px; }
+  .srow .act button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr) { padding: 8px 14px; font-size: 17px; }
   .sum-row .lab { font-size: 19px; }
   .sum-row .val { font-size: 24px; }
   .sum-toggle-btn { font-size: 17px; }
