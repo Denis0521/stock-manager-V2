@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = '4.14.5'; // 版本微升級，標記邏輯優化版
+const APP_VER = '4.15.0'; // 版本微升級：實裝扁平頁籤模式
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -79,7 +79,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC
 input,select,button{font-family:inherit;font-size:inherit;outline:none;text-align:center}
 
 /* 卡片與元件框架 */
-.header, .tabs-bar, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .backup-box { 
+.header, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .backup-box { 
   background: var(--bg-card); box-shadow: var(--shadow-soft); border-radius: 12px; transition: background-color 0.4s ease, box-shadow 0.4s ease; border: 1px solid var(--border-light);
 }
 .header { box-shadow: var(--shadow-strong); border-bottom: 2px solid var(--s-dark); border-radius: 0 0 16px 16px; padding: 12px 10px 4px 10px; display: flex; flex-direction: column; position: sticky; top: 0; z-index: 100; transition: all 0.4s ease; }
@@ -97,7 +97,6 @@ body.tech .ticker-item { color: #60A5FA; }
 .ticker-source { color: var(--t-muted); font-size: 11px; margin-right: 6px; border: 1px solid var(--border-light); padding: 2px 4px; border-radius: 4px; }
 @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
 
-.tabs-bar { padding: 6px 10px; margin: 8px 10px; gap: 8px; display: flex; }
 .card { padding: 12px 16px; margin: 8px 10px; }
 .card-title { font-size: 16px; color: var(--t-muted); margin-bottom: 8px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; text-align: left; }
 .form-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
@@ -108,14 +107,56 @@ input::placeholder { color: var(--t-muted); text-shadow: none; font-weight: norm
 .form-row select { flex: 0 0 68px; padding: 12px 4px; text-align: center; }
 .form-row .sym-inp { flex: 0 0 90px; }
 
-button, .tab-btn { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; padding: 10px 16px; box-shadow: var(--shadow-soft); color: var(--t-main); font-weight: 600; cursor: pointer; transition: all 0.25s ease; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); display: flex; align-items: center; justify-content: center; }
-button:hover, .tab-btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-strong); }
-button:active, .tab-btn.active { transform: translateY(0); box-shadow: var(--shadow-inset); color: var(--accent); border-color: var(--accent); }
-.tab-btn { flex: 1; padding: 10px 6px; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+button { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; padding: 10px 16px; box-shadow: var(--shadow-soft); color: var(--t-main); font-weight: 600; cursor: pointer; transition: all 0.25s ease; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); display: flex; align-items: center; justify-content: center; }
+button:hover { transform: translateY(-1px); box-shadow: var(--shadow-strong); }
+button:active { transform: translateY(0); box-shadow: var(--shadow-inset); color: var(--accent); border-color: var(--accent); }
 .btn-theme, .btn-adv, .btn-add-hdr { padding: 10px 14px; font-size: 16px; white-space: nowrap; font-weight: 700; }
 .btn-add-hdr { color: var(--up); text-shadow: none; } 
 .form-row button { font-size: 16px; letter-spacing: 2px; padding-left: 18px; }
 .btn-save { width: calc(100% - 20px); padding: 14px; font-size: 17px; margin: 8px 10px; }
+
+/* ========================================================= 📂 頁籤模式專用樣式 ========================================================= */
+.tabs-bar {
+  display: flex;
+  padding: 0 12px;
+  margin: 16px 10px 0;
+  gap: 4px;
+  border-bottom: 2px solid var(--border-light);
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 12px 6px;
+  font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: var(--engrave-d);
+  border: 2px solid transparent;
+  border-radius: 12px 12px 0 0;
+  color: var(--t-muted);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tab-btn:hover {
+  color: var(--t-main);
+  background: var(--protrude-d);
+}
+
+.tab-btn.active {
+  background: var(--bg-card);
+  color: var(--accent);
+  border-color: var(--border-light);
+  border-bottom-color: var(--bg-card);
+  font-weight: 800;
+}
 
 .idx-scroll-container { margin: 8px 10px; overflow-x: auto; display: flex; gap: 0; padding: 2px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
@@ -271,8 +312,6 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
   </div>
 </div>
 
-<div class="tabs-bar" id="tabsBarContainer"></div>
-
 <div class="idx-scroll-container" id="idxScrollContainer">
   <div class="idx-card-box">
     <div class="idx-box-name">🇹🇼 臺灣加權指數</div>
@@ -285,7 +324,9 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
   </div>
 </div>
 
-<div class="table-scroll" id="tableScroll" style="display:none;">
+<div class="tabs-bar" id="tabsBarContainer"></div>
+
+<div class="table-scroll" id="tableScroll" style="display:none; margin-top: 0; border-top-left-radius: 0; border-top-right-radius: 0;">
   <div class="list-wrap" id="listContainer">
     <div class="list-header">
       <div>代號</div><div>庫存/均價</div><div>現價</div><div>幅度</div><div>漲跌</div><div>今日損益</div><div>總損益</div><div>動作</div>
@@ -417,7 +458,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.14.5</div>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.15.0</div>
     </div>
   </div>
 </div>
@@ -585,7 +626,7 @@ function renderTabs() {
   
   container.style.display = 'flex';
   container.innerHTML = tabNames.slice(0, tabCount).map((name, i) => 
-    `<button type="button" class="tab-btn ${i === currentTab ? 'active' : ''}" onclick="switchTab(${i})" ondblclick="renameTab(${i})">${name}</button>`
+    `<div class="tab-btn ${i === currentTab ? 'active' : ''}" onclick="switchTab(${i})" ondblclick="renameTab(${i})">${name}</div>`
   ).join('');
   
   const fontSize = tabCount >= 4 ? '14px' : (tabCount === 3 ? '16px' : '18px');
