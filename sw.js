@@ -1,5 +1,5 @@
-// 請將版本號更新為與 index.html 一致的 4.19.0
-const CACHE_NAME = 'stock-portfolio-v4.19.0'; 
+// 請將版本號更新為與 index.html 一致的 4.20.0
+const CACHE_NAME = 'stock-portfolio-v4.20.0'; 
 const urlsToCache = [
   './',
   './index.html',
@@ -19,11 +19,9 @@ self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
+        cacheNames
+          .filter(cacheName => cacheName !== CACHE_NAME)
+          .map(cacheName => caches.delete(cacheName))
       );
     })
   );
@@ -33,28 +31,29 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const requestUrl = new URL(event.request.url);
   
-  // API 請求不進快取
-  const isApiRequest = requestUrl.hostname.includes('api.fugle.tw') || 
-                       requestUrl.hostname.includes('finance.yahoo.com') || 
-                       requestUrl.hostname.includes('allorigins.win') || 
-                       requestUrl.hostname.includes('denis0521.workers.dev') || 
-                       requestUrl.hostname.includes('corsproxy.io') ||
-                       requestUrl.hostname.includes('codetabs.com') ||
-                       requestUrl.hostname.includes('thingproxy.freeboard.io');
+  // API 請求不進快取，保持資料即時性
+  const apiHosts = [
+    'api.fugle.tw', 'finance.yahoo.com', 'allorigins.win', 
+    'denis0521.workers.dev', 'corsproxy.io', 'codetabs.com', 'thingproxy.freeboard.io'
+  ];
+  
+  const isApiRequest = apiHosts.some(host => requestUrl.hostname.includes(host));
 
   if (isApiRequest) {
     event.respondWith(fetch(event.request));
     return;
   }
 
+  // 靜態資源使用 Cache First, Network Fallback 策略
   event.respondWith(
-    fetch(event.request).then(response => {
-      return caches.open(CACHE_NAME).then(cache => {
-        cache.put(event.request, response.clone());
-        return response;
+    caches.match(event.request).then(cachedResponse => {
+      if (cachedResponse) return cachedResponse;
+      return fetch(event.request).then(response => {
+        return caches.open(CACHE_NAME).then(cache => {
+          cache.put(event.request, response.clone());
+          return response;
+        });
       });
-    }).catch(() => {
-      return caches.match(event.request);
-    })
+    }).catch(() => caches.match(event.request))
   );
 });
