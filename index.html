@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = '4.20.1'; // 系統全面優化：效能重構、集中商業邏輯、加強 DOM 渲染與安全性防護，新增玻璃珠按鈕
+const APP_VER = '4.20.2'; // 優化：總損益欄位靠左對齊防重疊、動作按鈕升級為圓形玻璃珠
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -84,7 +84,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .header h1 { font-size: 20px; font-weight: 700; color: var(--t-main); user-select: none; margin-left: 6px; }
 .header-top .hdr-right { display: flex; gap: 6px; align-items: center; }
 
-/* ========================================================= 💎 頂部按鈕：橢圓形玻璃珠風格 ========================================================= */
+/* ========================================================= 💎 頂部與圓形按鈕：玻璃珠風格 ========================================================= */
 .header-top .btn-theme, 
 .header-top .btn-adv, 
 .header-top .btn-add-hdr { 
@@ -118,11 +118,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .header-top .btn-add-hdr:hover {
   transform: translateY(-2px);
   filter: brightness(1.08);
-  box-shadow: 
-    inset 0 5px 8px var(--protrude-l), 
-    inset 0 -3px 5px var(--protrude-d),
-    5px 6px 12px var(--s-dark),
-    -3px -3px 8px var(--s-light) !important;
+  box-shadow: inset 0 5px 8px var(--protrude-l), inset 0 -3px 5px var(--protrude-d), 5px 6px 12px var(--s-dark), -3px -3px 8px var(--s-light) !important;
 }
 
 .header-top .btn-theme:active, 
@@ -130,10 +126,46 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .header-top .btn-add-hdr:active {
   transform: translateY(1px);
   filter: brightness(0.95);
+  box-shadow: inset 0 3px 6px var(--protrude-d), inset 0 -2px 4px var(--protrude-l), 1px 2px 3px var(--s-dark) !important;
+}
+
+/* 🔘 圓形玻璃珠按鈕 (編輯/刪除) */
+.btn-glass-circle {
+  width: 34px !important;
+  height: 34px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px !important;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--s-light) 0%, transparent 100%);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid var(--border-light) !important;
   box-shadow: 
-    inset 0 3px 6px var(--protrude-d),
-    inset 0 -2px 4px var(--protrude-l),
-    1px 2px 3px var(--s-dark) !important;
+    inset 0 3px 5px var(--protrude-l), 
+    inset 0 -3px 5px var(--protrude-d),
+    2px 3px 5px var(--s-dark),
+    -1px -1px 3px var(--s-light) !important;
+  text-shadow: none !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.btn-glass-circle.del { color: var(--up) !important; }
+.btn-glass-circle.edit { color: var(--accent) !important; }
+
+.btn-glass-circle:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+  box-shadow: inset 0 4px 6px var(--protrude-l), inset 0 -2px 4px var(--protrude-d), 3px 4px 8px var(--s-dark), -2px -2px 6px var(--s-light) !important;
+}
+.btn-glass-circle:active {
+  transform: translateY(1px);
+  filter: brightness(0.95);
+  box-shadow: inset 0 2px 4px var(--protrude-d), inset 0 -1px 2px var(--protrude-l), 1px 1px 2px var(--s-dark) !important;
 }
 
 .news-ticker-container { margin: 8px 0 0 0; width: 100%; box-sizing: border-box; background: transparent; border-radius: 6px; box-shadow: none; border: none; display: flex; align-items: center; height: 34px; overflow: hidden; transition: all 0.4s ease; }
@@ -155,10 +187,10 @@ input::placeholder { color: var(--t-muted); text-shadow: none; font-weight: norm
 .form-row select { flex: 0 0 68px; padding: 12px 4px; text-align: center; }
 .form-row .sym-inp { flex: 0 0 90px; }
 
-/* 其他一般按鈕 (排除 header 內的特效按鈕) */
-button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr) { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; padding: 10px 16px; box-shadow: var(--shadow-soft); color: var(--t-main); font-weight: 600; cursor: pointer; transition: all 0.25s ease; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); display: flex; align-items: center; justify-content: center; }
-button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):hover { transform: translateY(-1px); box-shadow: var(--shadow-strong); }
-button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):active { transform: translateY(0); box-shadow: var(--shadow-inset); color: var(--accent); border-color: var(--accent); }
+/* 其他一般按鈕 (排除 header 與 玻璃珠按鈕) */
+button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle) { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; padding: 10px 16px; box-shadow: var(--shadow-soft); color: var(--t-main); font-weight: 600; cursor: pointer; transition: all 0.25s ease; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); display: flex; align-items: center; justify-content: center; }
+button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):hover { transform: translateY(-1px); box-shadow: var(--shadow-strong); }
+button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):active { transform: translateY(0); box-shadow: var(--shadow-inset); color: var(--accent); border-color: var(--accent); }
 .form-row button { font-size: 16px; letter-spacing: 2px; padding-left: 18px; }
 .btn-save { width: calc(100% - 20px); padding: 14px; font-size: 17px; margin: 8px 10px; }
 
@@ -180,15 +212,23 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):active { transform: trans
 
 .table-scroll { margin: 0 10px 8px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; border-top-left-radius: 0; border-top-right-radius: 0; position: relative; z-index: 2; }
 .list-wrap { min-width: 670px; } 
-.list-header, .srow { grid-template-columns: 110px 95px 75px 75px 75px 85px 105px 70px; } 
+
+/* 調整 Grid，給總損益靠左的空間，給動作按鈕足夠的寬度 */
+.list-header, .srow { grid-template-columns: 110px 95px 75px 75px 75px 85px 95px 80px; } 
 .list-header { display: grid; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 17px; color: var(--t-muted); font-weight: 600; }
 .srow { display: grid; align-items: stretch; border-bottom: 1px solid var(--s-dark); font-size: 17px; }
 .srow:last-child { border-bottom: none; }
 .list-header > div, .srow > div { padding: 6px 4px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; white-space: nowrap; } 
 .list-header > div:nth-child(1), .srow > div:nth-child(1) { align-items: flex-start; text-align: left; position: sticky; left: 0; z-index: 2; background: var(--bg-card); padding-left: 8px; }
 .list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after { content: ''; position: absolute; top: 0; bottom: 0; right: -6px; width: 6px; background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; }
-.list-header > div:nth-child(8) { align-items: center; justify-content: center; padding-left: 10px; }
-.srow > div:nth-child(8) { flex-direction: row; align-items: center; justify-content: center; gap: 4px; padding-left: 10px; }
+
+/* 總損益欄位 (第7欄) - 靠左對齊防重疊 */
+.list-header > div:nth-child(7), .srow > div:nth-child(7) { align-items: flex-start; text-align: left; padding-left: 8px; }
+
+/* 動作按鈕區塊 (第8欄) */
+.list-header > div:nth-child(8) { align-items: center; justify-content: center; padding-left: 4px; }
+.srow > div:nth-child(8) { flex-direction: row; align-items: center; justify-content: center; gap: 8px; padding-left: 4px; }
+
 .sym-container { align-items: flex-start !important; line-height: 1.1 !important; width: 100%; max-width: 112px; display: flex; flex-direction: column; justify-content: center; }
 .srow .sym { font-weight: 800; font-size: 17px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; }
 .srow .qty-cell { font-weight: 600; color: var(--t-main); overflow: hidden; width: 100%; }
@@ -196,7 +236,6 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):active { transform: trans
 .srow .chgp { font-size: 17px; font-weight: 700; }
 .srow .chg, .srow .today-pnl { font-weight: 700; }
 .srow .total { font-weight: 700; overflow: hidden; width: 100%; }
-.srow .act button { padding: 6px 10px; font-size: 15px; border-radius: 6px; }
 
 .summary { padding: 12px 16px; margin: 8px 10px; }
 .sum-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
@@ -209,7 +248,6 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):active { transform: trans
 .hist-item-left { display: flex; align-items: baseline; gap: 12px; }
 .hist-item .hdate { color: var(--t-muted); font-size: 14px; font-weight: 600; }
 .hist-item .hval { font-weight: 800; font-size: 17px; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
-.del-hist-btn { padding: 6px 12px; font-size: 14px; border-radius: 8px; }
 .hist-empty { color: var(--t-muted); font-size: 15px; text-align: center; padding: 20px; font-weight: 600; }
 
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 999; align-items: flex-start; justify-content: center; }
@@ -274,16 +312,14 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
   .header-top .btn-theme, .header-top .btn-adv, .header-top .btn-add-hdr { font-size: 18px !important; padding: 10px 22px; }
   .card-title { font-size: 18px; }
   .list-wrap { min-width: 100%; }
-  .list-header, .srow { grid-template-columns: 1.4fr 1.3fr 1fr 1fr 1fr 1.2fr 1.4fr 1fr; }
+  .list-header, .srow { grid-template-columns: 1.4fr 1.3fr 1fr 1fr 1fr 1.2fr 1.2fr 1fr; }
   .list-header { font-size: 18px; }
   .srow, .srow .sym, .srow .chgp { font-size: 19px; }
-  .srow .act button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr) { padding: 8px 14px; font-size: 17px; }
   .sum-row .lab { font-size: 19px; }
   .sum-row .val { font-size: 24px; }
   .sum-toggle-btn { font-size: 17px; }
   .hist-item .hdate { font-size: 16px; }
   .hist-item .hval { font-size: 19px; }
-  .del-hist-btn { font-size: 16px; padding: 8px 16px; }
   .modal { max-width: 560px; padding: 32px; }
   .modal h2 { font-size: 24px; }
   .modal label { font-size: 17px; }
@@ -466,7 +502,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.20.0</div>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V4.20.2</div>
     </div>
   </div>
 </div>
@@ -676,11 +712,11 @@ function getStockHtmlInner(s) {
   if (p != null) {
     if (info.hasCost) {
       totalValForClass = info.unPnl;
-      totalHtml = `<div style="line-height:1.2;font-size:inherit;">${getSign(info.unPnl)}${info.unPnl.toLocaleString()}</div>
-      <div style="font-size:0.8em;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${getSign(info.roi)}${info.roi.toFixed(2)}%</div>`;
+      totalHtml = `<div style="line-height:1.2;font-size:inherit;width:100%;">${getSign(info.unPnl)}${info.unPnl.toLocaleString()}</div>
+      <div style="font-size:0.8em;opacity:0.85;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;">${getSign(info.roi)}${info.roi.toFixed(2)}%</div>`;
     } else {
-      totalHtml = `<div style="line-height:1.2;font-size:inherit;" class="neutral">—</div>
-      <div style="font-size:0.8em;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" class="neutral">點擊 ✎ 設均價</div>`;
+      totalHtml = `<div style="line-height:1.2;font-size:inherit;width:100%;" class="neutral">—</div>
+      <div style="font-size:0.8em;opacity:0.6;margin-top:2px;font-weight:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;" class="neutral">點擊 ✎ 設均價</div>`;
     }
   }
 
@@ -703,8 +739,8 @@ function getStockHtmlInner(s) {
     <div class="today-pnl ${tpClass}">${tpStr}</div>
     <div class="total ${getColorCls(totalValForClass)}">${totalHtml}</div>
     <div class="act">
-      <button type="button" onclick="openEditModal('${s.id}')">✎</button>
-      <button type="button" class="del-btn" onclick="deleteStock('${s.id}')">✕</button>
+      <button type="button" class="btn-glass-circle edit" onclick="openEditModal('${s.id}')">✎</button>
+      <button type="button" class="btn-glass-circle del" onclick="deleteStock('${s.id}')">✕</button>
     </div>`;
 }
 
@@ -1002,7 +1038,7 @@ function renderHistory(){
   hb.innerHTML = recs.map(r => `
     <div class="hist-item" style="border: 1px solid var(--protrude-d); border-top: 1px solid var(--protrude-l); border-left: 1px solid var(--protrude-l);">
       <div class="hist-item-left"><span class="hdate">${r.date} ${r.time}</span><span class="hval ${getColorCls(r.totalPnl)}">${getSign(r.totalPnl)}${r.totalPnl.toLocaleString()}</span></div>
-      <button type="button" class="del-hist-btn" onclick="deleteHistory(${r.timestamp})">刪除</button>
+      <button type="button" class="btn-glass-circle del" onclick="deleteHistory(${r.timestamp})">✕</button>
     </div>`).join('');
 }
 
@@ -1045,7 +1081,7 @@ function renderForeignIdxConfigList() {
   c.innerHTML = availableIndices.map((idx, i) => `
     <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; margin-bottom:8px; background:var(--bg-card); box-shadow:var(--shadow-soft); border-radius:8px; border:1px solid var(--border-light);">
       <div style="text-align:left; flex:1; min-width:0; padding-right:8px;"><div style="font-weight:700; color:var(--t-main); font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(idx.name)}</div><div style="font-size:12px; color:var(--t-muted); font-weight:600;">${escapeHTML(idx.symbol)}</div></div>
-      <button type="button" onclick="deleteForeignIdx(${i})" style="padding:6px 10px; font-size:12px; color:var(--up); box-shadow:var(--shadow-soft); border:1px solid var(--border-light); border-radius:6px;">✕</button>
+      <button type="button" class="btn-glass-circle del" style="width:28px!important; height:28px!important; font-size:14px!important;" onclick="deleteForeignIdx(${i})">✕</button>
     </div>`).join('');
 }
 
