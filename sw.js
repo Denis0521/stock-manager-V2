@@ -1,5 +1,5 @@
 // 版本號與 index.html 必須同步，以觸發快取更新
-const CACHE_NAME = 'stock-portfolio-v4.20.3'; 
+const CACHE_NAME = 'stock-portfolio-v4.20.2'; 
 const urlsToCache = [
   './',
   './index.html',
