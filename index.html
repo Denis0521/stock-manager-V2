@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = '3.10.3'; 
+const APP_VER = 'V7.03'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -108,7 +108,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .btn-glass-circle:hover { transform: translateY(-2px); filter: brightness(1.08); box-shadow: inset 0 4px 6px var(--protrude-l), inset 0 -2px 4px var(--protrude-d), 3px 4px 8px var(--s-dark), -2px -2px 6px var(--s-light) !important; }
 .btn-glass-circle:active { transform: translateY(1px); filter: brightness(0.95); box-shadow: inset 0 2px 4px var(--protrude-d), inset 0 -1px 2px var(--protrude-l), 1px 1px 2px var(--s-dark) !important; }
 
-/* 跑馬燈與漂浮陰影效果 */
+/* 跑馬燈與漂浮效果 (已移除陰影) */
 .news-ticker-container { margin: 8px 0 0 0; width: 100%; box-sizing: border-box; background: transparent; border-radius: 6px; box-shadow: none; border: none; display: flex; align-items: center; height: 42px; overflow: hidden; transition: all 0.4s ease; }
 .ticker-scroll-area { flex: 1; overflow: hidden; position: relative; }
 .ticker-wrap { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker linear infinite; }
@@ -119,12 +119,10 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
   text-decoration: none; 
   font-weight: 700; 
   font-size: 17px; 
-  text-shadow: 1px 2px 4px var(--s-dark), -1px -1px 2px var(--s-light); /* 漂浮陰影 */
   transition: all 0.3s ease;
 }
 .ticker-item:hover { 
-  text-decoration: none; 
-  text-shadow: 3px 4px 8px var(--s-dark), -2px -2px 4px var(--s-light); /* 懸停時陰影加深漂浮 */
+  text-decoration: underline; 
   transform: translateY(-2px);
 }
 .ticker-source { color: var(--t-muted); font-size: 13px; margin-right: 6px; border: 1px solid var(--border-light); padding: 2px 4px; border-radius: 4px; text-shadow: none; }
@@ -451,7 +449,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V3.10.3</div>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V7.03</div>
     </div>
   </div>
 </div>
