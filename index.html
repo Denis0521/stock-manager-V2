@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.04'; 
+const APP_VER = 'V7.05'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -86,24 +86,42 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 }
 .header { box-shadow: var(--shadow-strong); border-bottom: 2px solid var(--s-dark); border-radius: 0 0 16px 16px; padding: 12px 10px 4px 10px; display: flex; flex-direction: column; position: sticky; top: 0; z-index: 100; transition: all 0.4s ease; }
 .header-top { display: flex; align-items: center; justify-content: space-between; width: 100%; }
-.header h1 { font-size: 20px; font-weight: 700; color: var(--t-main); user-select: none; margin-left: 6px; display: flex; align-items: center; gap: 8px; }
+.header h1 { font-size: 20px; font-weight: 700; color: var(--t-main); user-select: none; margin-left: 6px; display: flex; align-items: center; gap: 10px; }
+
+/* 股票管理立體文字樣式與加大一級 */
+.title-text {
+  font-size: 24px; /* 加大一級 */
+  font-weight: 800;
+  color: var(--t-main);
+  /* 多層次陰影創造真實3D凸出感 */
+  text-shadow: 
+    1px 1px 0px var(--border-light),
+    2px 2px 0px var(--s-dark),
+    3px 3px 5px rgba(0, 0, 0, 0.15);
+}
+body.tech .title-text {
+  text-shadow: 
+    1px 1px 0px #151820,
+    2px 2px 0px #0e1015,
+    3px 3px 6px rgba(0, 0, 0, 0.6);
+}
 
 /* 黃色玻璃珠與刻字效果 */
 .glass-bead {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 25%, #ffffff 0%, #ffe066 20%, #f5a623 60%, #b36b00 100%);
   box-shadow: 
     inset -3px -3px 6px rgba(102, 51, 0, 0.5),
     inset 3px 3px 6px rgba(255, 255, 255, 0.8),
     0 4px 6px var(--s-dark);
-  color: #7b2c00; /* 深咖/暗紅色刻字，彷彿硃砂 */
+  color: #7b2c00; 
   text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5), -1px -1px 0px rgba(0, 0, 0, 0.4);
-  font-size: 18px;
+  font-size: 19px;
   font-weight: bold;
   flex-shrink: 0;
   line-height: 1;
@@ -309,7 +327,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
 
 <div class="header">
   <div class="header-top">
-    <h1><span class="glass-bead">ཛཾ</span> 股票管理</h1>
+    <h1><span class="glass-bead">ཛཾ</span><span class="title-text">股票管理</span></h1>
     <div class="hdr-right">
       <button type="button" class="btn-add-hdr" onclick="openAddModal()">+新增</button>
       <button type="button" class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙</button>
@@ -471,7 +489,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V7.04</div>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V7.05</div>
     </div>
   </div>
 </div>
