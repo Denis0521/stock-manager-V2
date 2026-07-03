@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stock-app-v4.20.7'; // 更新快取版本，確保使用者拿到最新 CSS
+const CACHE_NAME = 'stock-app-v4.20.7-ticker'; // 更新快取版本，確保使用者拿到最新 CSS
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

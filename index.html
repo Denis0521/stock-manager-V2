@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = '4.20.7'; // 優化灰色主題，加深對比區分淺色主題
+const APP_VER = '4.20.7'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -61,30 +61,19 @@ body.pink {
   --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.04); 
   --accent: #C24D7B; --border-light: #E6D0D8; 
 }
-/* ================= 棕色主題：提取自 #7A4526，搭配奶茶淺色 ================= */
 body.brown-light { 
   --bg: #F5EFEA; --bg-card: #FDFBFA; --s-light: #FFFFFF; --s-dark: #D4C9C1; 
-  --t-main: #4A2A17; 
-  --t-muted: #7A4526; 
-  --up: #D9465B; --down: #2D8A70; 
+  --t-main: #4A2A17; --t-muted: #7A4526; --up: #D9465B; --down: #2D8A70; 
   --engrave-l: rgba(255,255,255,1); --engrave-d: rgba(122,69,38,0.15); 
   --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(122,69,38,0.08); 
-  --accent: #7A4526; 
-  --border-light: #E8DFD8; 
+  --accent: #7A4526; --border-light: #E8DFD8; 
 }
-/* ================= 灰色主題：加深金屬感/清水模質感，顯著區分淺色 ================= */
 body.gray-light { 
-  --bg: #BFC5CC; /* 加深底色，呈現水泥灰 */
-  --bg-card: #D3D9E0; /* 卡片色也同步加深，避開白色 */
-  --s-light: #E5EBF2; /* 陰影亮部 */
-  --s-dark: #9199A3; /* 陰影暗部 */
-  --t-main: #1D232A; /* 極度銳利的深黑灰 */
-  --t-muted: #535C66; /* 次要文字加深確保對比度 */
-  --up: #D9465B; --down: #2D8A70; 
+  --bg: #BFC5CC; --bg-card: #D3D9E0; --s-light: #E5EBF2; --s-dark: #9199A3; 
+  --t-main: #1D232A; --t-muted: #535C66; --up: #D9465B; --down: #2D8A70; 
   --engrave-l: rgba(255,255,255,0.6); --engrave-d: rgba(0,0,0,0.15); 
   --protrude-l: rgba(255,255,255,0.7); --protrude-d: rgba(0,0,0,0.12); 
-  --accent: #373F47; /* 更沉穩的主按鈕色 */
-  --border-light: #A4ABB3; /* 邊框色加深 */
+  --accent: #373F47; --border-light: #A4ABB3; 
 }
 
 /* ========================================================= 🌐 基礎排版 ========================================================= */
@@ -100,96 +89,45 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .header h1 { font-size: 20px; font-weight: 700; color: var(--t-main); user-select: none; margin-left: 6px; }
 .header-top .hdr-right { display: flex; gap: 6px; align-items: center; }
 
-/* ========================================================= 💎 頂部與圓形按鈕：玻璃珠風格 ========================================================= */
+/* ========================================================= 💎 頂部與圓形按鈕 ========================================================= */
 .header-top .btn-theme, 
 .header-top .btn-adv, 
 .header-top .btn-add-hdr { 
-  padding: 6px 16px; 
-  font-size: 16px !important; 
-  font-weight: 800;
-  white-space: nowrap;
-  border-radius: 30px; 
-  background: linear-gradient(135deg, var(--s-light) 0%, transparent 100%);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border: 1px solid var(--border-light);
-  box-shadow: 
-    inset 0 4px 6px var(--protrude-l), 
-    inset 0 -4px 6px var(--protrude-d),
-    3px 4px 8px var(--s-dark),
-    -2px -2px 6px var(--s-light) !important;
-  color: var(--t-main);
-  text-shadow: none !important; 
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 6px 16px; font-size: 16px !important; font-weight: 800; white-space: nowrap; border-radius: 30px; 
+  background: linear-gradient(135deg, var(--s-light) 0%, transparent 100%); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px solid var(--border-light);
+  box-shadow: inset 0 4px 6px var(--protrude-l), inset 0 -4px 6px var(--protrude-d), 3px 4px 8px var(--s-dark), -2px -2px 6px var(--s-light) !important;
+  color: var(--t-main); text-shadow: none !important; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; display: flex; align-items: center; justify-content: center;
 }
-
 .header-top .btn-add-hdr { color: var(--up); }
+.header-top .btn-theme:hover, .header-top .btn-adv:hover, .header-top .btn-add-hdr:hover { transform: translateY(-2px); filter: brightness(1.08); box-shadow: inset 0 5px 8px var(--protrude-l), inset 0 -3px 5px var(--protrude-d), 5px 6px 12px var(--s-dark), -3px -3px 8px var(--s-light) !important; }
+.header-top .btn-theme:active, .header-top .btn-adv:active, .header-top .btn-add-hdr:active { transform: translateY(1px); filter: brightness(0.95); box-shadow: inset 0 3px 6px var(--protrude-d), inset 0 -2px 4px var(--protrude-l), 1px 2px 3px var(--s-dark) !important; }
 
-.header-top .btn-theme:hover, 
-.header-top .btn-adv:hover, 
-.header-top .btn-add-hdr:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.08);
-  box-shadow: inset 0 5px 8px var(--protrude-l), inset 0 -3px 5px var(--protrude-d), 5px 6px 12px var(--s-dark), -3px -3px 8px var(--s-light) !important;
-}
-
-.header-top .btn-theme:active, 
-.header-top .btn-adv:active, 
-.header-top .btn-add-hdr:active {
-  transform: translateY(1px);
-  filter: brightness(0.95);
-  box-shadow: inset 0 3px 6px var(--protrude-d), inset 0 -2px 4px var(--protrude-l), 1px 2px 3px var(--s-dark) !important;
-}
-
-/* 🔘 圓形玻璃珠按鈕 (編輯/刪除) */
-.btn-glass-circle {
-  width: 34px !important;
-  height: 34px !important;
-  padding: 0 !important;
-  border-radius: 50% !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px !important;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--s-light) 0%, transparent 100%);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border: 1px solid var(--border-light) !important;
-  box-shadow: 
-    inset 0 3px 5px var(--protrude-l), 
-    inset 0 -3px 5px var(--protrude-d),
-    2px 3px 5px var(--s-dark),
-    -1px -1px 3px var(--s-light) !important;
-  text-shadow: none !important;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  flex-shrink: 0;
-}
+.btn-glass-circle { width: 34px !important; height: 34px !important; padding: 0 !important; border-radius: 50% !important; display: flex; align-items: center; justify-content: center; font-size: 16px !important; font-weight: 800; background: linear-gradient(135deg, var(--s-light) 0%, transparent 100%); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px solid var(--border-light) !important; box-shadow: inset 0 3px 5px var(--protrude-l), inset 0 -3px 5px var(--protrude-d), 2px 3px 5px var(--s-dark), -1px -1px 3px var(--s-light) !important; text-shadow: none !important; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; flex-shrink: 0; }
 .btn-glass-circle.del { color: var(--up) !important; }
 .btn-glass-circle.edit { color: var(--accent) !important; }
+.btn-glass-circle:hover { transform: translateY(-2px); filter: brightness(1.08); box-shadow: inset 0 4px 6px var(--protrude-l), inset 0 -2px 4px var(--protrude-d), 3px 4px 8px var(--s-dark), -2px -2px 6px var(--s-light) !important; }
+.btn-glass-circle:active { transform: translateY(1px); filter: brightness(0.95); box-shadow: inset 0 2px 4px var(--protrude-d), inset 0 -1px 2px var(--protrude-l), 1px 1px 2px var(--s-dark) !important; }
 
-.btn-glass-circle:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.08);
-  box-shadow: inset 0 4px 6px var(--protrude-l), inset 0 -2px 4px var(--protrude-d), 3px 4px 8px var(--s-dark), -2px -2px 6px var(--s-light) !important;
-}
-.btn-glass-circle:active {
-  transform: translateY(1px);
-  filter: brightness(0.95);
-  box-shadow: inset 0 2px 4px var(--protrude-d), inset 0 -1px 2px var(--protrude-l), 1px 1px 2px var(--s-dark) !important;
-}
-
-.news-ticker-container { margin: 8px 0 0 0; width: 100%; box-sizing: border-box; background: transparent; border-radius: 6px; box-shadow: none; border: none; display: flex; align-items: center; height: 34px; overflow: hidden; transition: all 0.4s ease; }
+/* 跑馬燈與漂浮陰影效果 */
+.news-ticker-container { margin: 8px 0 0 0; width: 100%; box-sizing: border-box; background: transparent; border-radius: 6px; box-shadow: none; border: none; display: flex; align-items: center; height: 42px; overflow: hidden; transition: all 0.4s ease; }
 .ticker-scroll-area { flex: 1; overflow: hidden; position: relative; }
 .ticker-wrap { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker linear infinite; }
-.ticker-item { display: inline-block; padding: 0 20px; color: var(--accent); text-decoration: none; font-weight: 700; font-size: 15px; }
-.ticker-item:hover { text-decoration: underline; }
-.ticker-source { color: var(--t-muted); font-size: 11px; margin-right: 6px; border: 1px solid var(--border-light); padding: 2px 4px; border-radius: 4px; }
+.ticker-item { 
+  display: inline-block; 
+  padding: 0 20px; 
+  color: var(--accent); 
+  text-decoration: none; 
+  font-weight: 700; 
+  font-size: 17px; 
+  text-shadow: 1px 2px 4px var(--s-dark), -1px -1px 2px var(--s-light); /* 漂浮陰影 */
+  transition: all 0.3s ease;
+}
+.ticker-item:hover { 
+  text-decoration: none; 
+  text-shadow: 3px 4px 8px var(--s-dark), -2px -2px 4px var(--s-light); /* 懸停時陰影加深漂浮 */
+  transform: translateY(-2px);
+}
+.ticker-source { color: var(--t-muted); font-size: 13px; margin-right: 6px; border: 1px solid var(--border-light); padding: 2px 4px; border-radius: 4px; text-shadow: none; }
 @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
 
 .card { padding: 12px 16px; margin: 8px 10px; }
@@ -202,7 +140,6 @@ input::placeholder { color: var(--t-muted); text-shadow: none; font-weight: norm
 .form-row select { flex: 0 0 68px; padding: 12px 4px; text-align: center; }
 .form-row .sym-inp { flex: 0 0 90px; }
 
-/* 其他一般按鈕 (排除 header 與 玻璃珠按鈕) */
 button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle) { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; padding: 10px 16px; box-shadow: var(--shadow-soft); color: var(--t-main); font-weight: 600; cursor: pointer; transition: all 0.25s ease; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); display: flex; align-items: center; justify-content: center; }
 button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):hover { transform: translateY(-1px); box-shadow: var(--shadow-strong); }
 button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):active { transform: translateY(0); box-shadow: var(--shadow-inset); color: var(--accent); border-color: var(--accent); }
@@ -652,7 +589,7 @@ function applyThemeText(t){
     'purple-light': { emoji: '🍇', color: '#EAE6EF' },
     'pink': { emoji: '🌸', color: '#F4E8EC' },
     'brown-light': { emoji: '☕', color: '#F5EFEA' },
-    'gray-light': { emoji: '📓', color: '#BFC5CC' }, // 配合新加深的底色
+    'gray-light': { emoji: '📓', color: '#BFC5CC' },
     'light': { emoji: '☀️', color: '#E8ECF1' }
   };
   const theme = themes[t] || themes['light'];
