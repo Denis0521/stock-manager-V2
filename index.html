@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.05'; 
+const APP_VER = 'V7.06'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -88,10 +88,10 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .header-top { display: flex; align-items: center; justify-content: space-between; width: 100%; }
 .header h1 { font-size: 20px; font-weight: 700; color: var(--t-main); user-select: none; margin-left: 6px; display: flex; align-items: center; gap: 10px; }
 
-/* 股票管理立體文字樣式與加大一級 */
+/* 股票管理立體文字樣式與調整大小/粗細 */
 .title-text {
-  font-size: 24px; /* 加大一級 */
-  font-weight: 800;
+  font-size: 22px; /* 改為 22px */
+  font-weight: normal; /* 不加粗 */
   color: var(--t-main);
   /* 多層次陰影創造真實3D凸出感 */
   text-shadow: 
@@ -489,7 +489,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V7.05</div>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V7.06</div>
     </div>
   </div>
 </div>
