@@ -1,9 +1,9 @@
-const CACHE_NAME = 'stock-app-V7.07'; // 更新快取版本，確保使用者拿到最新內容
+const CACHE_NAME = 'stock-app-V7.08'; // 更新快取版本
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
-  './icon-512.png' // 如果你有圖示的話，確保檔名正確
+  './icon-512.png'
 ];
 
 // 安裝階段：將核心資源存入快取
@@ -36,14 +36,13 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// 攔截請求：採用 Network-First (優先網路，失敗則用快取) 策略，確保能拿到最新的 API 資料
+// 攔截請求：採用 Network-First 策略
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   
   event.respondWith(
     fetch(event.request)
       .then(response => {
-        // 如果是我們自己網站的資源，順便更新快取
         if (response && response.status === 200 && response.type === 'basic') {
           const responseToCache = response.clone();
           caches.open(CACHE_NAME).then(cache => {
@@ -53,7 +52,6 @@ self.addEventListener('fetch', event => {
         return response;
       })
       .catch(() => {
-        // 斷線時從快取尋找
         return caches.match(event.request);
       })
   );
