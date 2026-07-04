@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.10'; 
+const APP_VER = 'V7.06'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -90,9 +90,10 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 
 /* 股票管理立體文字樣式與調整大小/粗細 */
 .title-text {
-  font-size: 22px;
-  font-weight: normal;
+  font-size: 22px; /* 改為 22px */
+  font-weight: normal; /* 不加粗 */
   color: var(--t-main);
+  /* 多層次陰影創造真實3D凸出感 */
   text-shadow: 
     1px 1px 0px var(--border-light),
     2px 2px 0px var(--s-dark),
@@ -147,7 +148,7 @@ body.tech .title-text {
 .btn-glass-circle:hover { transform: translateY(-2px); filter: brightness(1.08); box-shadow: inset 0 4px 6px var(--protrude-l), inset 0 -2px 4px var(--protrude-d), 3px 4px 8px var(--s-dark), -2px -2px 6px var(--s-light) !important; }
 .btn-glass-circle:active { transform: translateY(1px); filter: brightness(0.95); box-shadow: inset 0 2px 4px var(--protrude-d), inset 0 -1px 2px var(--protrude-l), 1px 1px 2px var(--s-dark) !important; }
 
-/* 跑馬燈與漂浮效果 */
+/* 跑馬燈與漂浮效果 (已移除陰影) */
 .news-ticker-container { margin: 8px 0 0 0; width: 100%; box-sizing: border-box; background: transparent; border-radius: 6px; box-shadow: none; border: none; display: flex; align-items: center; height: 42px; overflow: hidden; transition: all 0.4s ease; }
 .ticker-scroll-area { flex: 1; overflow: hidden; position: relative; }
 .ticker-wrap { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker linear infinite; }
@@ -160,7 +161,10 @@ body.tech .title-text {
   font-size: 17px; 
   transition: all 0.3s ease;
 }
-.ticker-item:hover { text-decoration: underline; transform: translateY(-2px); }
+.ticker-item:hover { 
+  text-decoration: underline; 
+  transform: translateY(-2px);
+}
 .ticker-source { color: var(--t-muted); font-size: 13px; margin-right: 6px; border: 1px solid var(--border-light); padding: 2px 4px; border-radius: 4px; text-shadow: none; }
 @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
 
@@ -235,7 +239,7 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 999; align-items: flex-start; justify-content: center; }
 .modal-overlay.show { display: flex; }
 .modal { position: relative; border-radius: 20px; padding: 24px 20px; width: calc(100% - 28px); max-width: 400px; max-height: calc(100% - 40px); overflow-y: auto; background: var(--bg-card); box-shadow: 0 25px 50px rgba(0,0,0,0.5), var(--shadow-strong); border: 1px solid var(--border-light); margin-top: 20px; }
-#manualOverlay, #editModalOverlay, #foreignIdxOverlay, #addModalOverlay, #historyModalOverlay { z-index: 1100; }
+#manualOverlay, #editModalOverlay, #foreignIdxOverlay, #addModalOverlay { z-index: 1100; }
 .modal h2 { font-size: 20px; margin-bottom: 16px; text-align: center; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
 .modal label { display: block; font-size: 15px; color: var(--t-muted); margin: 12px 0 6px; font-weight: 600; text-align: left; }
 .modal-close { width: 100%; padding: 14px; font-size: 17px; }
@@ -273,7 +277,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 .modal.fullscreen-modal { width: 100vw !important; max-width: 100vw !important; height: 100vh !important; max-height: 100vh !important; border-radius: 0; padding: 18px 20px 20px !important; margin: 0 !important; border: none; box-sizing: border-box; z-index: 999; }
 .btn-close-icon { position: absolute; top: 15px; right: 15px; background: transparent !important; box-shadow: none !important; color: var(--t-muted); font-size: 24px; width: 40px; height: 40px; padding: 0; display: flex; justify-content: center; align-items: center; border-radius: 50%; text-shadow: none !important; cursor: pointer; border: none !important; }
 .btn-close-icon:hover { color: var(--t-main); transform: scale(1.1); }
-/* ✅ 此處遮罩屬性，讓瀏覽器以為是一般輸入框，但外觀會呈現密碼樣式 */
 .pwd-mask { -webkit-text-security: disc; text-security: disc; }
 
 #modalOverlay .modal button, #modalOverlay .modal a.btn-link, #modalOverlay .modal .btn-manual-row, #modalOverlay .modal .btn-close-icon { color: #000 !important; }
@@ -383,22 +386,15 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
 </div>
 
 <div class="summary-btn-box">
-  <button type="button" class="btn-save" id="historyBtn" style="display:none;" onclick="openHistoryModal()">📅 每日損益記錄</button>
+  <button type="button" class="btn-save" id="saveArea" style="display:none;" onclick="saveDailyPnl()">💾 存儲今日損益總計</button>
+</div>
+
+<div class="history">
+  <div class="card-title" style="margin:0 0 4px">歷史記錄</div>
+  <div id="historyBody"><div class="hist-empty">尚無記錄</div></div>
 </div>
 
 <div class="toast" id="toast"></div>
-
-<div class="modal-overlay" id="historyModalOverlay">
-  <div class="modal">
-    <button type="button" class="btn-close-icon" onclick="closeModalById('historyModalOverlay')">✕</button>
-    <h2>近30交易日損益記錄</h2>
-    <div style="text-align:center; color:var(--t-muted); font-size:16px; margin-top:-10px; margin-bottom:16px;">（交易日13:40自動儲存）</div>
-    <div id="historyBody" style="max-height: 50vh; overflow-y: auto; margin-bottom: 16px;">
-      <div class="hist-empty">尚無記錄</div>
-    </div>
-    <button type="button" class="modal-close danger-btn" onclick="clearAllHistory()" style="width:100%; background:var(--up); color:#fff; text-shadow:none; margin:0;">🗑️ 清空全部記錄</button>
-  </div>
-</div>
 
 <div class="modal-overlay" id="addModalOverlay">
   <div class="modal">
@@ -484,28 +480,16 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
           <div id="apiStatsBox"></div>
         </div>
       </div>
-      
-      <div class="backup-box" style="background:transparent; box-shadow:none; border:none; padding:10px 0; border-top:1px dashed var(--border-light); margin-top:16px; padding-top:16px;">
-        <div class="backup-title" style="text-align:center; font-size:18px; margin-bottom:12px;">☁️ 雲端自動備份與還原</div>
-        <div style="margin-bottom:12px;">
-          <input type="text" id="cloudKeyInput" class="pwd-mask" placeholder="請輸入專屬密鑰 (如: 手機+生日)" autocomplete="new-password" spellcheck="false" style="width:100%; padding:12px; border:1px solid var(--border-light); border-radius:8px; font-size:15px; text-align:center; background:var(--bg-card); color:var(--t-main); box-shadow:var(--shadow-inset);">
-        </div>
-        <div class="backup-btns" style="display:flex; gap:12px;">
-          <button type="button" class="btn-backup" style="background:#28a745; color:white; border:none; box-shadow:var(--shadow-soft);" onclick="manuallyBindAndBackup()">🔗 確認綁定</button>
-          <button type="button" class="btn-backup" style="background:#007bff; color:white; border:none; box-shadow:var(--shadow-soft);" onclick="downloadAndRestoreCloud()">📥 雲端還原</button>
-        </div>
-      </div>
-
-      <div class="backup-box" style="background:transparent; box-shadow:none; border:none; padding:10px 0; border-top:1px dashed var(--border-light); margin-top:16px; padding-top:16px;">
-        <div class="backup-title" style="text-align:center;">本地 JSON 檔案備份</div>
+      <div class="backup-box" style="background:transparent; box-shadow:none; border:none; padding:10px 0;">
+        <div class="backup-title">資料備份與還原</div>
         <div class="backup-btns">
-          <button type="button" class="btn-backup" onclick="exportData()">📥 匯出檔案</button>
-          <button type="button" class="btn-backup" onclick="$('importFile').click()">📤 還原檔案</button>
+          <button type="button" class="btn-backup" onclick="exportData()">📥 匯出</button>
+          <button type="button" class="btn-backup" onclick="$('importFile').click()">📤 還原</button>
           <input type="file" id="importFile" style="display:none" onchange="importData(event)">
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V7.10</div>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V7.06</div>
     </div>
   </div>
 </div>
@@ -550,141 +534,15 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
         <li><strong>盤後節能：</strong>台股收盤後（13:30 後），系統會自動放慢更新頻率至 60 秒/次，以節省您的 API 額度消耗。</li>
       </ul>
 
-      <h3>四、⚠️ 本地安全與手動備份</h3>
-      <p>您的所有持股資料、歷史記錄及 API Key 皆<strong> 100% 儲存於您目前使用的設備瀏覽器中（Local Storage）</strong>。我們沒有伺服器，無法直接看見您的資料。</p>
-      
-      <h3>五、☁️ 雲端自動同步功能</h3>
-      <ul>
-        <li><strong>綁定密鑰：</strong>於進階設定內輸入專屬密鑰（推薦：手機號碼 + 生日 4 碼），點擊「確認綁定」即可啟動。</li>
-        <li><strong>無感自動同步：</strong>綁定成功後，無論您是在網頁中手動<b>新增股票</b>、<b>刪除持股</b>、<b>編輯均價數量</b>，或是下午 13:40 系統自動結算儲存每日歷史損益時，系統皆會即時在背景，安全加密覆蓋備份至雲端空間。</li>
-        <li><strong>跨裝置/清除快取還原：</strong>當您更換手機或清除瀏覽器快取導致資料遺失時，只需在相同欄位輸入一模一樣的密鑰並點擊「雲端還原」，所有持股與設定將秒速完美歸位。</li>
-      </ul>
+      <h3>四、⚠️ 資料安全與備份</h3>
+      <p>您的所有持股資料、歷史記錄及 API Key 皆<strong> 100% 儲存於您目前使用的設備瀏覽器中（Local Storage）</strong>。我們沒有伺服器，無法看見您的資料，但也無法幫您復原。</p>
+      <p><strong>強烈建議：</strong>請務必養成習慣，定期點擊進階設定內的「<strong>📥 匯出</strong>」將資料下載備份！</p>
     </div>
     <button type="button" class="modal-close" onclick="closeModalById('manualOverlay')" style="margin-top: 10px;">關閉</button>
   </div>
 </div>
 
 <script>
-/* ========================================================= ☁️ 大眾極簡雲端備份引擎 ========================================================= */
-const BACKUP_WORKER_URL = "https://stock-backup-api.denis0521.workers.dev";
-
-async function generateCloudKey(rawInput) {
-  if (!rawInput) return null;
-  const cleanInput = rawInput.trim().replace(/[^0-9a-zA-Z]/g, '');
-  if (cleanInput.length < 4) return null;
-
-  const salt = "_MySecretStockApp2026_Salt!!";
-  const secretString = cleanInput + salt;
-
-  const msgBuffer = new TextEncoder().encode(secretString);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-async function autoCloudBackupSilent() {
-  const savedUserKey = localStorage.getItem('tw_saved_user_key');
-  if (!savedUserKey) return;
-
-  const cloudKey = await generateCloudKey(savedUserKey);
-  if (!cloudKey) return;
-
-  const backupData = {
-    tabStocks: [],
-    tabRecords: [],
-    tabNames: LS.getStr(LS.KEYS.TAB_NAMES),
-    fugleKey: typeof fugleKey !== 'undefined' ? fugleKey : LS.getStr(LS.KEYS.FK),
-    secondFugleKey: typeof secondFugleKey !== 'undefined' ? secondFugleKey : LS.getStr(LS.KEYS.SFK),
-    theme: LS.getStr(LS.KEYS.THEME),
-    tabCount: typeof tabCount !== 'undefined' ? tabCount : 1,
-    customForeignIndices: LS.getStr(LS.KEYS.FOREIGN_IDX)
-  };
-  for(let i = 0; i < 5; i++) {
-    backupData.tabStocks.push(LS.getStr(LS.KEYS.STOCK(i)));
-    backupData.tabRecords.push(LS.getStr(LS.KEYS.RECORD(i)));
-  }
-
-  try {
-    await fetch(`${BACKUP_WORKER_URL}?code=${cloudKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(backupData)
-    });
-    console.log("☁️ 雲端同步備份已在背景自動完成。");
-  } catch (e) {
-    console.error("☁️ 雲端自動同步失敗：", e);
-  }
-}
-
-// ✅ 關閉彈出提醒，改為流暢的 Toast 通知
-async function manuallyBindAndBackup() {
-  const input = document.getElementById('cloudKeyInput').value;
-  if (input.replace(/[^0-9a-zA-Z]/g, '').length < 4) {
-    showToast("❌ 請輸入有效的備份密鑰");
-    return;
-  }
-  
-  localStorage.setItem('tw_saved_user_key', input);
-  showToast("⏳ 雲端同步中...");
-  
-  await autoCloudBackupSilent();
-  showToast("☁️ 雲端備份金鑰綁定成功！");
-}
-
-// ✅ 完全關閉多餘彈出，寫入後立刻強制刷新頁面，確保刪除記錄完美復活
-async function downloadAndRestoreCloud() {
-  const input = document.getElementById('cloudKeyInput').value;
-  const cloudKey = await generateCloudKey(input);
-  
-  if (!cloudKey) {
-    showToast("❌ 請先輸入您的備份密鑰");
-    return;
-  }
-
-  showToast("⏳ 正在自雲端抓取備份...");
-
-  try {
-    const response = await fetch(`${BACKUP_WORKER_URL}?code=${cloudKey}`);
-    
-    if (response.status === 404) {
-      showToast("❌ 找不到您的備份資料，密鑰可能錯誤");
-      return;
-    }
-    
-    if (response.ok) {
-      const d = await response.json();
-      
-      if (d.tabStocks) d.tabStocks.forEach((v, i) => { if(v) localStorage.setItem(LS.KEYS.STOCK(i), v); });
-      if (d.tabRecords) d.tabRecords.forEach((v, i) => { if(v) localStorage.setItem(LS.KEYS.RECORD(i), v); });
-      if (d.tabNames) localStorage.setItem(LS.KEYS.TAB_NAMES, d.tabNames);
-      if (d.fugleKey) localStorage.setItem(LS.KEYS.FK, d.fugleKey);
-      if (d.secondFugleKey) localStorage.setItem(LS.KEYS.SFK, d.secondFugleKey);
-      if (d.theme) localStorage.setItem(LS.KEYS.THEME, d.theme);
-      if (d.tabCount) localStorage.setItem(LS.KEYS.TAB_COUNT, d.tabCount);
-      if (d.customForeignIndices) localStorage.setItem(LS.KEYS.FOREIGN_IDX, d.customForeignIndices);
-      
-      localStorage.setItem('tw_saved_user_key', input);
-      
-      showToast("🎉 還原成功，重新載入中...");
-      setTimeout(() => {
-        window.location.reload(true);
-      }, 800);
-    }
-  } catch (e) {
-    showToast("❌ 連線至雲端伺服器失敗");
-  }
-}
-
-// 初始化時自動填入已保存之密鑰
-document.addEventListener("DOMContentLoaded", () => {
-  setTimeout(() => {
-    const saved = localStorage.getItem('tw_saved_user_key');
-    if (saved && document.getElementById('cloudKeyInput')) {
-      document.getElementById('cloudKeyInput').value = saved;
-    }
-  }, 1000);
-});
-
 /* ========================================================= 🔧 工具與字典 ========================================================= */
 const $ = id => document.getElementById(id);
 const escapeHTML = str => String(str).replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag] || tag));
@@ -758,9 +616,6 @@ function loadState(){
 
   $('tickerContainer').style.display = showTicker ? 'flex' : 'none';
   renderTabs(); renderApiStats();
-  
-  checkAutoSave();
-  setInterval(checkAutoSave, 60000);
 }
 
 function applyThemeText(t){
@@ -798,7 +653,7 @@ function toggleTicker() {
 function switchTab(idx){
   if(currentTab === idx || tabCount === 0) return;
   currentTab = idx; LS.set(LS.KEYS.CUR_TAB, idx);
-  renderTabs(); renderAll(); forceRefresh();
+  renderTabs(); renderAll(); renderHistory(); forceRefresh();
 }
 
 function renameTab(idx) {
@@ -823,7 +678,7 @@ function renderTabs() {
   container.querySelectorAll('.tab-btn').forEach(b => b.style.fontSize = fontSize);
 }
 
-/* ========================================================= 🖥 核心業務邏輯與渲染 ========================================================= */
+/* ========================================================= 🖥 核心業務邏輯與渲染 (DRY) ========================================================= */
 const formatPrice = p => p == null ? '—' : (Math.abs(p) >= 1000 ? p.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : p.toFixed(2));
 const getSign = n => n >= 0 ? '+' : '';
 const getColorCls = n => n > 0 ? 'up' : (n < 0 ? 'down' : '');
@@ -894,7 +749,7 @@ function getStockHtmlInner(s) {
 
 function renderAll(){
   const body = $('listBody'); const empty = $('emptyState');
-  const uiEls = ['tableScroll', 'summaryArea', 'historyBtn'].map($);
+  const uiEls = ['tableScroll', 'summaryArea', 'saveArea'].map($);
   
   const stocks = tabStocks[currentTab];
   if(stocks.length === 0){ 
@@ -1130,12 +985,13 @@ function addStock(){
   });
   LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll();
   ['symInput', 'qtyInput', 'buyPriceInput'].forEach(id => $(id).value = '');
-  showToast(`已新增 ${sym}`); closeModalById('addModalOverlay'); forceRefresh(); autoCloudBackupSilent();
+  showToast(`已新增 ${sym}`); closeModalById('addModalOverlay'); forceRefresh();
 }
 
 function deleteStock(id){
+  if(!confirm('確定刪除？')) return;
   tabStocks[currentTab] = tabStocks[currentTab].filter(s => s.id !== id);
-  LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll(); showToast('記錄已刪除'); autoCloudBackupSilent();
+  LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll(); showToast('記錄已刪除');
 }
 
 function openEditModal(id) {
@@ -1157,63 +1013,25 @@ function saveEditStock() {
   s.shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
   const bp = parseFloat($('editBuyPriceInput').value);
   s.buyPrice = isNaN(bp) || bp <= 0 ? null : bp;
-  LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll(); closeModalById('editModalOverlay'); showToast('已修改'); forceRefresh(); autoCloudBackupSilent();
+  LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll(); closeModalById('editModalOverlay'); showToast('已修改'); forceRefresh();
 }
 
-// === 自動儲存歷史記錄機制 ===
-function checkAutoSave() {
-  const now = new Date();
-  const dayOfWeek = now.getDay();
-  const hours = now.getHours();
-  const minutes = now.getMinutes();
-
-  if (dayOfWeek >= 1 && dayOfWeek <= 5 && (hours > 13 || (hours === 13 && minutes >= 40))) {
-    const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-    let savedAny = false;
-    
-    for(let i=0; i<5; i++) {
-       if(tabStocks[i].length === 0) continue;
-       
-       const alreadySaved = tabRecords[i].some(r => r.date === todayStr);
-       if (!alreadySaved) {
-          let pnl = 0, asset = 0;
-          tabStocks[i].forEach(s => {
-            const info = calcStockInfo(s);
-            pnl += info.todayPnl; asset += info.mktValue;
-          });
-          const ts = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-          
-          tabRecords[i].unshift({date: todayStr, time: ts, totalPnl: pnl, totalAsset: asset, timestamp: now.getTime()});
-          if(tabRecords[i].length > 30) tabRecords[i].length = 30;
-          LS.set(LS.KEYS.RECORD(i), tabRecords[i]);
-          savedAny = true;
-       }
-    }
-    
-    if (savedAny && $('historyModalOverlay').classList.contains('show')) {
-       renderHistory();
-    }
-    if (savedAny) { autoCloudBackupSilent(); }
-  }
-}
-
-function openHistoryModal() {
-  renderHistory();
-  $('historyModalOverlay').classList.add('show');
-}
-
-function clearAllHistory() {
-  tabRecords[currentTab] = [];
-  LS.set(LS.KEYS.RECORD(currentTab), tabRecords[currentTab]);
-  renderHistory();
-  showToast('已清空全部記錄');
-  autoCloudBackupSilent();
+function saveDailyPnl(){
+  let pnl = 0, asset = 0;
+  tabStocks[currentTab].forEach(s => {
+    const info = calcStockInfo(s);
+    pnl += info.todayPnl; asset += info.mktValue;
+  });
+  const n = new Date(), ds = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`, ts = `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+  tabRecords[currentTab].unshift({date: ds, time: ts, totalPnl: pnl, totalAsset: asset, timestamp: n.getTime()});
+  if(tabRecords[currentTab].length > 50) tabRecords[currentTab].length = 50;
+  LS.set(LS.KEYS.RECORD(currentTab), tabRecords[currentTab]); renderHistory(); showToast(`已存儲今日損益：${getSign(pnl)}${pnl.toLocaleString()}`);
 }
 
 function deleteHistory(ts) {
+  if(!confirm('確定刪除此筆記錄？')) return;
   tabRecords[currentTab] = tabRecords[currentTab].filter(r => r.timestamp !== ts);
   LS.set(LS.KEYS.RECORD(currentTab), tabRecords[currentTab]); renderHistory(); showToast('記錄已刪除');
-  autoCloudBackupSilent();
 }
 
 function renderHistory(){
@@ -1247,7 +1065,7 @@ function saveAndCloseModal(){
   if(newCount !== tabCount) {
     tabCount = newCount; LS.set(LS.KEYS.TAB_COUNT, tabCount);
     if(currentTab >= (tabCount || 1)) { currentTab = 0; LS.set(LS.KEYS.CUR_TAB, 0); }
-    renderTabs(); renderAll(); 
+    renderTabs(); renderAll(); renderHistory();
   }
   closeModalById('modalOverlay'); showToast('設定已儲存'); forceRefresh();
 }
@@ -1304,8 +1122,8 @@ function importData(e) {
       if (d.tabRecords) d.tabRecords.forEach((v, i) => { if(v) localStorage.setItem(LS.KEYS.RECORD(i), v); });
       ['tabNames', 'fugleKey', 'secondFugleKey', 'theme', 'tabCount'].forEach(k => { if(d[k]) LS.set(LS.KEYS[k.toUpperCase()], d[k]); });
       LS.set(LS.KEYS.FOREIGN_IDX, d.customForeignIndices || JSON.stringify(DEFAULT_INDICES));
-      showToast('🎉 還原成功！'); location.reload();
-    } catch(err) { showToast('❌ 檔案格式錯誤。'); }
+      alert('🎉 還原成功！'); location.reload();
+    } catch(err) { alert('❌ 檔案格式錯誤。'); }
     $('importFile').value = '';
   };
   r.readAsText(file);
@@ -1344,7 +1162,7 @@ async function loadFinanceNews() {
 }
 
 /* ========================================================= 🚀 啟動 ========================================================= */
-loadState(); renderAll();
+loadState(); renderAll(); renderHistory();
 setTimeout(forceRefresh, 500);
 heartbeatWorker.postMessage({action: 'start', interval: currentInterval});
 
@@ -1355,8 +1173,7 @@ document.addEventListener('DOMContentLoaded', loadFinanceNews);
 const kd = (id, next, action) => { $(id).addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); if(next) $(next).focus(); else if(action) action(); } }); };
 kd('symInput', 'qtyInput'); kd('qtyInput', 'buyPriceInput'); kd('buyPriceInput', null, addStock);
 
-// 註冊所有彈出視窗的點擊背景關閉事件
-['addModalOverlay', 'modalOverlay', 'manualOverlay', 'editModalOverlay', 'foreignIdxOverlay', 'historyModalOverlay'].forEach(id => {
+['addModalOverlay', 'modalOverlay', 'manualOverlay', 'editModalOverlay', 'foreignIdxOverlay'].forEach(id => {
   const el = $(id);
   if (el) el.addEventListener('click', function(e) { 
     if(e.target === this) {
