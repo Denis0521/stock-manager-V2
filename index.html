@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.06'; 
+const APP_VER = 'V7.08'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -90,10 +90,9 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 
 /* 股票管理立體文字樣式與調整大小/粗細 */
 .title-text {
-  font-size: 22px; /* 改為 22px */
-  font-weight: normal; /* 不加粗 */
+  font-size: 22px;
+  font-weight: normal;
   color: var(--t-main);
-  /* 多層次陰影創造真實3D凸出感 */
   text-shadow: 
     1px 1px 0px var(--border-light),
     2px 2px 0px var(--s-dark),
@@ -239,7 +238,7 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 999; align-items: flex-start; justify-content: center; }
 .modal-overlay.show { display: flex; }
 .modal { position: relative; border-radius: 20px; padding: 24px 20px; width: calc(100% - 28px); max-width: 400px; max-height: calc(100% - 40px); overflow-y: auto; background: var(--bg-card); box-shadow: 0 25px 50px rgba(0,0,0,0.5), var(--shadow-strong); border: 1px solid var(--border-light); margin-top: 20px; }
-#manualOverlay, #editModalOverlay, #foreignIdxOverlay, #addModalOverlay { z-index: 1100; }
+#manualOverlay, #editModalOverlay, #foreignIdxOverlay, #addModalOverlay, #historyModalOverlay { z-index: 1100; }
 .modal h2 { font-size: 20px; margin-bottom: 16px; text-align: center; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
 .modal label { display: block; font-size: 15px; color: var(--t-muted); margin: 12px 0 6px; font-weight: 600; text-align: left; }
 .modal-close { width: 100%; padding: 14px; font-size: 17px; }
@@ -386,15 +385,23 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
 </div>
 
 <div class="summary-btn-box">
-  <button type="button" class="btn-save" id="saveArea" style="display:none;" onclick="saveDailyPnl()">💾 存儲今日損益總計</button>
-</div>
-
-<div class="history">
-  <div class="card-title" style="margin:0 0 4px">歷史記錄</div>
-  <div id="historyBody"><div class="hist-empty">尚無記錄</div></div>
+  <button type="button" class="btn-save" id="historyBtn" style="display:none;" onclick="openHistoryModal()">📅 每日損益記錄</button>
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- 歷史記錄彈出視窗 -->
+<div class="modal-overlay" id="historyModalOverlay">
+  <div class="modal">
+    <button type="button" class="btn-close-icon" onclick="closeModalById('historyModalOverlay')">✕</button>
+    <h2>近30交易日損益記錄</h2>
+    <div style="text-align:center; color:var(--t-muted); font-size:16px; margin-top:-10px; margin-bottom:16px;">（交易日13:40自動儲存）</div>
+    <div id="historyBody" style="max-height: 50vh; overflow-y: auto; margin-bottom: 16px;">
+      <div class="hist-empty">尚無記錄</div>
+    </div>
+    <button type="button" class="modal-close danger-btn" onclick="clearAllHistory()" style="width:100%; background:var(--up); color:#fff; text-shadow:none; margin:0;">🗑️ 清空全部記錄</button>
+  </div>
+</div>
 
 <div class="modal-overlay" id="addModalOverlay">
   <div class="modal">
@@ -489,7 +496,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V7.06</div>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V7.08</div>
     </div>
   </div>
 </div>
@@ -616,6 +623,10 @@ function loadState(){
 
   $('tickerContainer').style.display = showTicker ? 'flex' : 'none';
   renderTabs(); renderApiStats();
+  
+  // 啟動自動儲存檢查機制
+  checkAutoSave();
+  setInterval(checkAutoSave, 60000);
 }
 
 function applyThemeText(t){
@@ -653,7 +664,7 @@ function toggleTicker() {
 function switchTab(idx){
   if(currentTab === idx || tabCount === 0) return;
   currentTab = idx; LS.set(LS.KEYS.CUR_TAB, idx);
-  renderTabs(); renderAll(); renderHistory(); forceRefresh();
+  renderTabs(); renderAll(); forceRefresh();
 }
 
 function renameTab(idx) {
@@ -749,7 +760,7 @@ function getStockHtmlInner(s) {
 
 function renderAll(){
   const body = $('listBody'); const empty = $('emptyState');
-  const uiEls = ['tableScroll', 'summaryArea', 'saveArea'].map($);
+  const uiEls = ['tableScroll', 'summaryArea', 'historyBtn'].map($);
   
   const stocks = tabStocks[currentTab];
   if(stocks.length === 0){ 
@@ -1016,16 +1027,57 @@ function saveEditStock() {
   LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll(); closeModalById('editModalOverlay'); showToast('已修改'); forceRefresh();
 }
 
-function saveDailyPnl(){
-  let pnl = 0, asset = 0;
-  tabStocks[currentTab].forEach(s => {
-    const info = calcStockInfo(s);
-    pnl += info.todayPnl; asset += info.mktValue;
-  });
-  const n = new Date(), ds = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`, ts = `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
-  tabRecords[currentTab].unshift({date: ds, time: ts, totalPnl: pnl, totalAsset: asset, timestamp: n.getTime()});
-  if(tabRecords[currentTab].length > 50) tabRecords[currentTab].length = 50;
-  LS.set(LS.KEYS.RECORD(currentTab), tabRecords[currentTab]); renderHistory(); showToast(`已存儲今日損益：${getSign(pnl)}${pnl.toLocaleString()}`);
+// === 自動儲存歷史記錄機制 ===
+function checkAutoSave() {
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+
+  // 判斷是否為週一至週五，且時間過了 13:40
+  if (dayOfWeek >= 1 && dayOfWeek <= 5 && (hours > 13 || (hours === 13 && minutes >= 40))) {
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    let savedAny = false;
+    
+    // 將五個分頁的資料都檢查並儲存
+    for(let i=0; i<5; i++) {
+       if(tabStocks[i].length === 0) continue; // 空分頁不紀錄
+       
+       const alreadySaved = tabRecords[i].some(r => r.date === todayStr);
+       if (!alreadySaved) {
+          let pnl = 0, asset = 0;
+          tabStocks[i].forEach(s => {
+            const info = calcStockInfo(s);
+            pnl += info.todayPnl; asset += info.mktValue;
+          });
+          const ts = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+          
+          tabRecords[i].unshift({date: todayStr, time: ts, totalPnl: pnl, totalAsset: asset, timestamp: now.getTime()});
+          
+          // 保持 30 日記錄
+          if(tabRecords[i].length > 30) tabRecords[i].length = 30;
+          LS.set(LS.KEYS.RECORD(i), tabRecords[i]);
+          savedAny = true;
+       }
+    }
+    
+    if (savedAny && $('historyModalOverlay').classList.contains('show')) {
+       renderHistory(); // 如果當時開著歷史視窗，順便幫他更新
+    }
+  }
+}
+
+function openHistoryModal() {
+  renderHistory();
+  $('historyModalOverlay').classList.add('show');
+}
+
+function clearAllHistory() {
+  if(!confirm('確定要清空目前分頁的所有歷史記錄嗎？')) return;
+  tabRecords[currentTab] = [];
+  LS.set(LS.KEYS.RECORD(currentTab), tabRecords[currentTab]);
+  renderHistory();
+  showToast('已清空全部記錄');
 }
 
 function deleteHistory(ts) {
@@ -1065,7 +1117,7 @@ function saveAndCloseModal(){
   if(newCount !== tabCount) {
     tabCount = newCount; LS.set(LS.KEYS.TAB_COUNT, tabCount);
     if(currentTab >= (tabCount || 1)) { currentTab = 0; LS.set(LS.KEYS.CUR_TAB, 0); }
-    renderTabs(); renderAll(); renderHistory();
+    renderTabs(); renderAll(); 
   }
   closeModalById('modalOverlay'); showToast('設定已儲存'); forceRefresh();
 }
@@ -1162,7 +1214,7 @@ async function loadFinanceNews() {
 }
 
 /* ========================================================= 🚀 啟動 ========================================================= */
-loadState(); renderAll(); renderHistory();
+loadState(); renderAll();
 setTimeout(forceRefresh, 500);
 heartbeatWorker.postMessage({action: 'start', interval: currentInterval});
 
@@ -1173,7 +1225,8 @@ document.addEventListener('DOMContentLoaded', loadFinanceNews);
 const kd = (id, next, action) => { $(id).addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); if(next) $(next).focus(); else if(action) action(); } }); };
 kd('symInput', 'qtyInput'); kd('qtyInput', 'buyPriceInput'); kd('buyPriceInput', null, addStock);
 
-['addModalOverlay', 'modalOverlay', 'manualOverlay', 'editModalOverlay', 'foreignIdxOverlay'].forEach(id => {
+// 註冊所有彈出視窗的點擊背景關閉事件
+['addModalOverlay', 'modalOverlay', 'manualOverlay', 'editModalOverlay', 'foreignIdxOverlay', 'historyModalOverlay'].forEach(id => {
   const el = $(id);
   if (el) el.addEventListener('click', function(e) { 
     if(e.target === this) {
