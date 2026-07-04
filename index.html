@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.11'; 
+const APP_VER = 'V7.12'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -141,14 +141,14 @@ body.tech .title-text {
 .header-top .btn-theme:hover, .header-top .btn-adv:hover, .header-top .btn-add-hdr:hover { transform: translateY(-2px); filter: brightness(1.08); box-shadow: inset 0 5px 8px var(--protrude-l), inset 0 -3px 5px var(--protrude-d), 5px 6px 12px var(--s-dark), -3px -3px 8px var(--s-light) !important; }
 .header-top .btn-theme:active, .header-top .btn-adv:active, .header-top .btn-add-hdr:active { transform: translateY(1px); filter: brightness(0.95); box-shadow: inset 0 3px 6px var(--protrude-d), inset 0 -2px 4px var(--protrude-l), 1px 2px 3px var(--s-dark) !important; }
 
-/* 🌟 修改點：動作按鈕縮小 */
+/* 動作按鈕縮小 */
 .btn-glass-circle { width: 28px !important; height: 28px !important; padding: 0 !important; border-radius: 50% !important; display: flex; align-items: center; justify-content: center; font-size: 14px !important; font-weight: 800; background: linear-gradient(135deg, var(--s-light) 0%, transparent 100%); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px solid var(--border-light) !important; box-shadow: inset 0 3px 5px var(--protrude-l), inset 0 -3px 5px var(--protrude-d), 2px 3px 5px var(--s-dark), -1px -1px 3px var(--s-light) !important; text-shadow: none !important; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; flex-shrink: 0; }
 .btn-glass-circle.del { color: var(--up) !important; }
 .btn-glass-circle.edit { color: var(--accent) !important; }
 .btn-glass-circle:hover { transform: translateY(-2px); filter: brightness(1.08); box-shadow: inset 0 4px 6px var(--protrude-l), inset 0 -2px 4px var(--protrude-d), 3px 4px 8px var(--s-dark), -2px -2px 6px var(--s-light) !important; }
 .btn-glass-circle:active { transform: translateY(1px); filter: brightness(0.95); box-shadow: inset 0 2px 4px var(--protrude-d), inset 0 -1px 2px var(--protrude-l), 1px 1px 2px var(--s-dark) !important; }
 
-/* 跑馬燈與漂浮效果 (間距一致為 6px) */
+/* 跑馬燈與漂浮效果 */
 .news-ticker-container { margin: 6px 0 0 0; width: 100%; box-sizing: border-box; background: transparent; border-radius: 6px; box-shadow: none; border: none; display: flex; align-items: center; height: 42px; overflow: hidden; transition: all 0.4s ease; }
 .ticker-scroll-area { flex: 1; overflow: hidden; position: relative; }
 .ticker-wrap { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker linear infinite; }
@@ -196,24 +196,33 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
 .idx-card-box { flex: 0 0 auto; min-width: 140px; padding: 2px 10px; scroll-snap-align: start; border-right: 1px solid var(--s-dark); text-align: left; }
 .idx-card-box:last-child { border-right: none; }
-.idx-box-name { font-size: 16px; color: var(--t-muted); font-weight: 600; margin-top: 2px; line-height: 1.3; } 
-.idx-box-price { font-size: 16px; font-weight: 700; margin: 1px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
-.idx-box-change-row { display: flex; align-items: center; justify-content: flex-start; gap: 6px; font-size: 14px; font-weight: 600; white-space: nowrap; }
+
+/* 🌟 修改點：指數數字靠右 */
+.idx-box-name { font-size: 16px; color: var(--t-muted); font-weight: 600; margin-top: 2px; line-height: 1.3; text-align: left; } 
+.idx-box-price { font-size: 16px; font-weight: 700; margin: 1px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); text-align: right; }
+.idx-box-change-row { display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 14px; font-weight: 600; white-space: nowrap; }
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 0; opacity: 0.7; }
 
 .table-scroll { margin: 0 10px 6px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; border-top-left-radius: 0; border-top-right-radius: 0; position: relative; z-index: 2; }
 .list-wrap { min-width: 670px; } 
 
 .list-header, .srow { grid-template-columns: 110px 95px 75px 75px 75px 95px 110px 80px; } 
-.list-header { display: grid; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 15px; color: var(--t-muted); font-weight: 600; }
-.srow { display: grid; align-items: stretch; border-bottom: 1px solid var(--s-dark); font-size: 15px; }
+
+/* 🌟 修改點：明細板塊標題全部居中 */
+.list-header > div, .srow > div { padding: 6px 4px; display: flex; flex-direction: column; justify-content: center; white-space: nowrap; }
+.list-header > div { align-items: center !important; text-align: center !important; font-size: 15px; color: var(--t-muted); font-weight: 600; border-bottom: 2px solid var(--s-dark); }
+
+/* 資料列預設靠右 */
+.srow { border-bottom: 1px solid var(--s-dark); font-size: 15px; }
 .srow:last-child { border-bottom: none; }
-.list-header > div, .srow > div { padding: 6px 4px; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; white-space: nowrap; } 
-.list-header > div:nth-child(1), .srow > div:nth-child(1) { align-items: flex-start; text-align: left; position: sticky; left: 0; z-index: 2; background: var(--bg-card); padding-left: 8px; }
+.srow > div { align-items: flex-end; text-align: right; }
+
+/* 第一欄 (代號) 凍結 */
+.list-header > div:nth-child(1), .srow > div:nth-child(1) { position: sticky; left: 0; z-index: 2; background: var(--bg-card); }
+.srow > div:nth-child(1) { align-items: flex-start; text-align: left; padding-left: 8px; }
 .list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after { content: ''; position: absolute; top: 0; bottom: 0; right: -6px; width: 6px; background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; }
 
-.list-header > div:nth-child(7), .srow > div:nth-child(7) { align-items: flex-start; text-align: left; padding-left: 8px; }
-.list-header > div:nth-child(8) { align-items: center; justify-content: center; padding-left: 4px; }
+/* 動作按鈕置中 */
 .srow > div:nth-child(8) { flex-direction: row; align-items: center; justify-content: center; gap: 8px; padding-left: 4px; }
 
 .sym-container { align-items: flex-start !important; line-height: 1.1 !important; width: 100%; max-width: 112px; display: flex; flex-direction: column; justify-content: center; }
@@ -226,7 +235,7 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .srow .chg, .srow .today-pnl { font-weight: 800; }
 .srow .qty-cell, .srow .total { width: 100%; }
 
-/* 🌟 修改點：總損益欄位向右對齊 */
+/* 總損益靠右對齊 */
 .total-main { line-height: 1.2; font-size: 15px; width: 100%; overflow: hidden; text-align: right; font-weight: 800; }
 .total-sub { font-size: 13.6px; opacity: 0.85; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: right; }
 
@@ -238,8 +247,6 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .summary { padding: 12px 16px; margin: 6px 10px; }
 .sum-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
 .sum-row .lab { color: var(--t-muted); font-size: 17px; font-weight: 600; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
-
-/* 🌟 修改點：總計板塊數字再縮小一階 (16px) */
 .sum-row .val { font-size: 16px; font-weight: 800; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
 
 .sum-divider { height: 2px; background: var(--s-dark); opacity: 0.5; margin: 6px 0; border-radius: 2px; }
@@ -321,8 +328,6 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
   .qty-sub, .total-sub { font-size: 15.2px; }
 
   .sum-row .lab { font-size: 19px; }
-  
-  /* 桌機版總計板塊數字再縮小一階 (20px) */
   .sum-row .val { font-size: 20px; }
   
   .sum-toggle-btn { font-size: 17px; }
@@ -520,7 +525,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V7.11</div>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V7.12</div>
     </div>
   </div>
 </div>
