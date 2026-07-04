@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stock-app-V7.08'; // 更新快取版本
+const CACHE_NAME = 'stock-app-V7.09'; // 配合 index 更新快取版本，強制刷新
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
