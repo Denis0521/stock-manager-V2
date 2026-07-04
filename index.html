@@ -7,15 +7,17 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="股票庫存管理">
-<meta name="theme-color" id="themeColorMeta" content="#1C305C">
+<meta name="theme-color" id="themeColorMeta" content="#223A66">
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.08'; 
+// 強制清除快取與舊版 SW 引擎
+const APP_VER = 'V7.09'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
-  setTimeout(() => location.reload(true), 200);
+  if('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister())); }
+  setTimeout(() => location.reload(true), 300);
 }
 </script>
 <style>
@@ -31,14 +33,14 @@ if(localStorage.getItem('tw_app_version') !== APP_VER) {
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 
-/* 💎 貴族寶石主題 (較淡的藍寶石、鑽石、紅寶石) */
+/* 💎 貴族寶石主題 (更淡的明亮藍寶石) */
 body.noble { 
-  --bg: #1C305C; /* 較淡的皇家藍寶石 */
-  --bg-card: #243B6E; /* 內層藍寶石 */
-  --s-light: #2D4A8A; /* 寶石切面亮部 */
-  --s-dark: #122040; /* 寶石切面暗部 */
+  --bg: #223A66; /* 更明亮、偏淡的藍寶石底色 */
+  --bg-card: #2B4A82; /* 內層明亮藍寶石 */
+  --s-light: #375DA3; /* 寶石切面亮部 */
+  --s-dark: #1A2C4D; /* 寶石切面暗部 */
   --t-main: #F8FAFC; /* 鑽石白 */
-  --t-muted: #A0B2CD; /* 鉑金灰 */
+  --t-muted: #ADC1DF; /* 鉑金灰，對比度調高 */
   --up: #FF2A6D; /* 紅寶石紅 */
   --down: #05FFA1; /* 祖母綠 */
   --engrave-l: rgba(255,255,255,0.15); 
@@ -110,7 +112,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .header-top { display: flex; align-items: center; justify-content: space-between; width: 100%; }
 .header h1 { font-size: 20px; font-weight: 700; color: var(--t-main); user-select: none; margin-left: 6px; display: flex; align-items: center; gap: 10px; }
 
-/* 股票管理立體文字樣式與調整大小/粗細 */
+/* 股票管理立體文字樣式與調整大小/粗細 (維持經典風格，所有主題共用) */
 .title-text {
   font-size: 22px; 
   font-weight: normal; 
@@ -124,7 +126,7 @@ body.tech .title-text {
   text-shadow: 1px 1px 0px #151820, 2px 2px 0px #0e1015, 3px 3px 6px rgba(0, 0, 0, 0.6);
 }
 
-/* 黃色玻璃珠與刻字效果 (統一所有主題維持經典黃金珠) */
+/* 黃色財神珠與刻字效果 (維持經典黃金珠，所有主題共用) */
 .glass-bead {
   display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%;
   background: radial-gradient(circle at 35% 25%, #ffffff 0%, #ffe066 20%, #f5a623 60%, #b36b00 100%);
@@ -488,7 +490,7 @@ body.noble #modalOverlay .modal button, body.noble #modalOverlay .modal a.btn-li
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V7.08</div>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V7.09</div>
     </div>
   </div>
 </div>
@@ -622,7 +624,7 @@ function applyThemeText(t){
   const body = document.body;
   body.className = '';
   const themes = {
-    'noble': { emoji: '💎', color: '#1C305C' },
+    'noble': { emoji: '💎', color: '#223A66' },
     'tech': { emoji: '🚀', color: '#1E2330' },
     'blue-light': { emoji: '🧊', color: '#D0DEE8' },
     'purple-light': { emoji: '🍇', color: '#EAE6EF' },
@@ -638,7 +640,6 @@ function applyThemeText(t){
 }
 
 function toggleTheme(){
-  // 加入 noble 到主題輪替清單
   const modes = ['noble', 'tech', 'light', 'blue-light', 'purple-light', 'pink', 'brown-light', 'gray-light'];
   let current = modes.find(m => document.body.classList.contains(m));
   if (!current && document.body.className === '') current = 'light';
