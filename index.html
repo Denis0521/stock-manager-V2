@@ -7,17 +7,15 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="股票庫存管理">
-<meta name="theme-color" id="themeColorMeta" content="#223A66">
+<meta name="theme-color" id="themeColorMeta" content="#f0f2f6">
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-// 強制清除快取與舊版 SW 引擎 (V7.10)
-const APP_VER = 'V7.10'; 
+const APP_VER = 'V7.06'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
-  if('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister())); }
-  setTimeout(() => location.reload(true), 300);
+  setTimeout(() => location.reload(true), 200);
 }
 </script>
 <style>
@@ -32,28 +30,6 @@ if(localStorage.getItem('tw_app_version') !== APP_VER) {
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
-
-/* 💎 貴族寶石主題 (更淡的明亮藍寶石) */
-body.noble { 
-  --bg: #223A66; /* 更明亮、偏淡的藍寶石底色 */
-  --bg-card: #2B4A82; /* 內層明亮藍寶石 */
-  --s-light: #375DA3; /* 寶石切面亮部 */
-  --s-dark: #1A2C4D; /* 寶石切面暗部 */
-  --t-main: #F8FAFC; /* 鑽石白 */
-  --t-muted: #ADC1DF; /* 鉑金灰，對比度調高 */
-  --up: #FF2A6D; /* 紅寶石紅 */
-  --down: #05FFA1; /* 祖母綠 */
-  --engrave-l: rgba(255,255,255,0.15); 
-  --engrave-d: rgba(0,0,0,0.6); 
-  --protrude-l: rgba(212, 175, 55, 0.35); /* 點綴黃金光澤 */
-  --protrude-d: rgba(0,0,0,0.5); 
-  --accent: #D4AF37; /* 黃金/財富色 */
-  --border-light: rgba(212, 175, 55, 0.4); /* 金色鑲邊 */
-  --shadow-soft: 4px 4px 10px var(--s-dark), -4px -4px 10px var(--s-light), 0 0 10px rgba(212,175,55,0.15);
-  --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light), 0 0 18px rgba(212,175,55,0.3);
-  --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light), inset 0 0 12px rgba(212,175,55,0.1);
-}
-
 body.tech { 
   --bg: #1E2330; --bg-card: #2D3344; --s-light: #2D3344; --s-dark: #151820; 
   --t-main: #F8FAFC; --t-muted: #94A3B8; --up: #FF5252; --down: #4ADE80; 
@@ -112,33 +88,51 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .header-top { display: flex; align-items: center; justify-content: space-between; width: 100%; }
 .header h1 { font-size: 20px; font-weight: 700; color: var(--t-main); user-select: none; margin-left: 6px; display: flex; align-items: center; gap: 10px; }
 
-/* 股票管理立體文字樣式與調整大小/粗細 (維持經典風格，所有主題共用) */
+/* 股票管理立體文字樣式與調整大小/粗細 */
 .title-text {
-  font-size: 22px; 
-  font-weight: normal; 
+  font-size: 22px; /* 改為 22px */
+  font-weight: normal; /* 不加粗 */
   color: var(--t-main);
+  /* 多層次陰影創造真實3D凸出感 */
   text-shadow: 
     1px 1px 0px var(--border-light),
     2px 2px 0px var(--s-dark),
     3px 3px 5px rgba(0, 0, 0, 0.15);
 }
 body.tech .title-text {
-  text-shadow: 1px 1px 0px #151820, 2px 2px 0px #0e1015, 3px 3px 6px rgba(0, 0, 0, 0.6);
+  text-shadow: 
+    1px 1px 0px #151820,
+    2px 2px 0px #0e1015,
+    3px 3px 6px rgba(0, 0, 0, 0.6);
 }
 
-/* 黃色財神珠與刻字效果 (維持經典黃金珠，所有主題共用) */
+/* 黃色玻璃珠與刻字效果 */
 .glass-bead {
-  display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
   background: radial-gradient(circle at 35% 25%, #ffffff 0%, #ffe066 20%, #f5a623 60%, #b36b00 100%);
-  box-shadow: inset -3px -3px 6px rgba(102, 51, 0, 0.5), inset 3px 3px 6px rgba(255, 255, 255, 0.8), 0 4px 6px var(--s-dark);
-  color: #7b2c00; text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5), -1px -1px 0px rgba(0, 0, 0, 0.4);
-  font-size: 19px; font-weight: bold; flex-shrink: 0; line-height: 1;
+  box-shadow: 
+    inset -3px -3px 6px rgba(102, 51, 0, 0.5),
+    inset 3px 3px 6px rgba(255, 255, 255, 0.8),
+    0 4px 6px var(--s-dark);
+  color: #7b2c00; 
+  text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5), -1px -1px 0px rgba(0, 0, 0, 0.4);
+  font-size: 19px;
+  font-weight: bold;
+  flex-shrink: 0;
+  line-height: 1;
 }
 
 .header-top .hdr-right { display: flex; gap: 6px; align-items: center; }
 
 /* ========================================================= 💎 頂部與圓形按鈕 ========================================================= */
-.header-top .btn-theme, .header-top .btn-adv, .header-top .btn-add-hdr { 
+.header-top .btn-theme, 
+.header-top .btn-adv, 
+.header-top .btn-add-hdr { 
   padding: 6px 16px; font-size: 16px !important; font-weight: 800; white-space: nowrap; border-radius: 30px; 
   background: linear-gradient(135deg, var(--s-light) 0%, transparent 100%); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px solid var(--border-light);
   box-shadow: inset 0 4px 6px var(--protrude-l), inset 0 -4px 6px var(--protrude-d), 3px 4px 8px var(--s-dark), -2px -2px 6px var(--s-light) !important;
@@ -154,12 +148,23 @@ body.tech .title-text {
 .btn-glass-circle:hover { transform: translateY(-2px); filter: brightness(1.08); box-shadow: inset 0 4px 6px var(--protrude-l), inset 0 -2px 4px var(--protrude-d), 3px 4px 8px var(--s-dark), -2px -2px 6px var(--s-light) !important; }
 .btn-glass-circle:active { transform: translateY(1px); filter: brightness(0.95); box-shadow: inset 0 2px 4px var(--protrude-d), inset 0 -1px 2px var(--protrude-l), 1px 1px 2px var(--s-dark) !important; }
 
-/* 跑馬燈與漂浮效果 */
+/* 跑馬燈與漂浮效果 (已移除陰影) */
 .news-ticker-container { margin: 8px 0 0 0; width: 100%; box-sizing: border-box; background: transparent; border-radius: 6px; box-shadow: none; border: none; display: flex; align-items: center; height: 42px; overflow: hidden; transition: all 0.4s ease; }
 .ticker-scroll-area { flex: 1; overflow: hidden; position: relative; }
 .ticker-wrap { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker linear infinite; }
-.ticker-item { display: inline-block; padding: 0 20px; color: var(--accent); text-decoration: none; font-weight: 700; font-size: 17px; transition: all 0.3s ease; }
-.ticker-item:hover { text-decoration: underline; transform: translateY(-2px); }
+.ticker-item { 
+  display: inline-block; 
+  padding: 0 20px; 
+  color: var(--accent); 
+  text-decoration: none; 
+  font-weight: 700; 
+  font-size: 17px; 
+  transition: all 0.3s ease;
+}
+.ticker-item:hover { 
+  text-decoration: underline; 
+  transform: translateY(-2px);
+}
 .ticker-source { color: var(--t-muted); font-size: 13px; margin-right: 6px; border: 1px solid var(--border-light); padding: 2px 4px; border-radius: 4px; text-shadow: none; }
 @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
 
@@ -249,13 +254,8 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 .backup-btns { display: flex; gap: 12px; }
 .btn-backup { flex: 1; padding: 8px 12px; font-size: 15px; }
 .v-box { text-align: center; font-size: 13px; color: var(--t-muted); margin-top: 24px; font-weight: 600; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
-
-/* 💎 貴族主題專屬紅綠光輝 */
 .up { color: var(--up) !important; text-shadow: none !important; }
 .down { color: var(--down) !important; text-shadow: none !important; }
-body.noble .up { color: var(--up) !important; text-shadow: 0 0 10px rgba(255, 42, 109, 0.5) !important; }
-body.noble .down { color: var(--down) !important; text-shadow: 0 0 10px rgba(5, 255, 161, 0.4) !important; }
-
 .neutral { color: var(--t-main) !important; text-shadow: none !important; }
 
 .manual-content { text-align: left; font-size: 15px; line-height: 1.7; color: var(--t-main); }
@@ -281,7 +281,6 @@ body.noble .down { color: var(--down) !important; text-shadow: 0 0 10px rgba(5, 
 
 #modalOverlay .modal button, #modalOverlay .modal a.btn-link, #modalOverlay .modal .btn-manual-row, #modalOverlay .modal .btn-close-icon { color: #000 !important; }
 body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link, body.tech #modalOverlay .modal .btn-manual-row, body.tech #modalOverlay .modal .btn-close-icon { color: #F8FAFC !important; }
-body.noble #modalOverlay .modal button, body.noble #modalOverlay .modal a.btn-link, body.noble #modalOverlay .modal .btn-manual-row, body.noble #modalOverlay .modal .btn-close-icon { color: #F8FAFC !important; }
 
 @media (max-width: 360px) {
   .header h1 { font-size: 16px; margin-left: 2px; }
@@ -331,7 +330,7 @@ body.noble #modalOverlay .modal button, body.noble #modalOverlay .modal a.btn-li
     <h1><span class="glass-bead">ཛཾ</span><span class="title-text">股票管理</span></h1>
     <div class="hdr-right">
       <button type="button" class="btn-add-hdr" onclick="openAddModal()">+新增</button>
-      <button type="button" class="btn-theme" onclick="toggleTheme()" id="themeBtn">💎</button>
+      <button type="button" class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙</button>
       <button type="button" class="btn-adv" onclick="openModal()">進階</button>
     </div>
   </div>
@@ -490,7 +489,7 @@ body.noble #modalOverlay .modal button, body.noble #modalOverlay .modal a.btn-li
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V7.10</div>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V7.06</div>
     </div>
   </div>
 </div>
@@ -607,8 +606,7 @@ function loadState(){
     tabRecords[i] = LS.get(LS.KEYS.RECORD(i), []);
   }
 
-  // 將預設主題改為貴族寶石 (noble)
-  applyThemeText(LS.getStr(LS.KEYS.THEME, 'noble'));
+  applyThemeText(LS.getStr(LS.KEYS.THEME, 'light'));
   
   cachedGlobalIndices = LS.get(LS.KEYS.CACHE_IDX, []);
   if(cachedGlobalIndices.length) renderGlobalIndices(cachedGlobalIndices, true);
@@ -624,25 +622,23 @@ function applyThemeText(t){
   const body = document.body;
   body.className = '';
   const themes = {
-    'noble': { emoji: '💎', color: '#223A66' },
     'tech': { emoji: '🚀', color: '#1E2330' },
-    'blue-light': { emoji: '🧊', color: '#D0DEE8' },
+    'blue-light': { emoji: '💎', color: '#D0DEE8' },
     'purple-light': { emoji: '🍇', color: '#EAE6EF' },
     'pink': { emoji: '🌸', color: '#F4E8EC' },
     'brown-light': { emoji: '☕', color: '#F5EFEA' },
     'gray-light': { emoji: '📓', color: '#BFC5CC' },
     'light': { emoji: '☀️', color: '#E8ECF1' }
   };
-  const theme = themes[t] || themes['noble'];
+  const theme = themes[t] || themes['light'];
   if(t !== 'light') body.classList.add(t);
   $('themeBtn').textContent = theme.emoji;
   $('themeColorMeta').content = theme.color;
 }
 
 function toggleTheme(){
-  const modes = ['noble', 'tech', 'light', 'blue-light', 'purple-light', 'pink', 'brown-light', 'gray-light'];
-  let current = modes.find(m => document.body.classList.contains(m));
-  if (!current && document.body.className === '') current = 'light';
+  const modes = ['light', 'tech', 'blue-light', 'purple-light', 'pink', 'brown-light', 'gray-light'];
+  let current = modes.find(m => document.body.classList.contains(m)) || 'light';
   let next = modes[(modes.indexOf(current) + 1) % modes.length];
   applyThemeText(next); LS.set(LS.KEYS.THEME, next);
 }
