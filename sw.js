@@ -1,9 +1,9 @@
-const CACHE_NAME = 'stock-app-V7.06'; // 更新快取版本，確保使用者拿到最新內容
+const CACHE_NAME = 'stock-app-V7.07'; // 快取已升級至最新版本
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
-  './icon-512.png' // 如果你有圖示的話，確保檔名正確
+  './icon-512.png'
 ];
 
 // 安裝階段：將核心資源存入快取
