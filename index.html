@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.09'; 
+const APP_VER = 'V7.10'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -204,7 +204,9 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .table-scroll { margin: 0 10px 8px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; border-top-left-radius: 0; border-top-right-radius: 0; position: relative; z-index: 2; }
 .list-wrap { min-width: 670px; } 
 
-.list-header, .srow { grid-template-columns: 110px 95px 75px 75px 75px 85px 95px 80px; } 
+/* 🌟 修改點：將「今日損益」(95px) 與「總損益」(110px) 欄位加寬 */
+.list-header, .srow { grid-template-columns: 110px 95px 75px 75px 75px 95px 110px 80px; } 
+
 /* 列表頭部數字、代號字級全部縮小一階 (15px) */
 .list-header { display: grid; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 15px; color: var(--t-muted); font-weight: 600; }
 .srow { display: grid; align-items: stretch; border-bottom: 1px solid var(--s-dark); font-size: 15px; } /* 整體縮小至 15px */
@@ -237,7 +239,10 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .summary { padding: 12px 16px; margin: 8px 10px; }
 .sum-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
 .sum-row .lab { color: var(--t-muted); font-size: 17px; font-weight: 600; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
-.sum-row .val { font-size: 20px; font-weight: 800; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
+
+/* 🌟 修改點：總計板塊數字縮小一階 (20px -> 18px) */
+.sum-row .val { font-size: 18px; font-weight: 800; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
+
 .sum-divider { height: 2px; background: var(--s-dark); opacity: 0.5; margin: 6px 0; border-radius: 2px; }
 .sum-toggle-btn { text-align: center; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 6px; padding-top: 4px; color: var(--t-muted); text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); }
 .history { margin: 8px 10px; }
@@ -308,7 +313,9 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
   .header-top .btn-theme, .header-top .btn-adv, .header-top .btn-add-hdr { font-size: 18px !important; padding: 10px 22px; }
   .card-title { font-size: 18px; }
   .list-wrap { min-width: 100%; }
-  .list-header, .srow { grid-template-columns: 1.4fr 1.3fr 1fr 1fr 1fr 1.2fr 1.2fr 1fr; }
+  
+  /* 🌟 修改點：桌機版也一併加寬今日損益與總損益的佔比 (1.2fr -> 1.3fr 與 1.4fr) */
+  .list-header, .srow { grid-template-columns: 1.4fr 1.3fr 1fr 1fr 1fr 1.3fr 1.4fr 1fr; }
   
   /* 桌機端字級同樣縮小一階，從 19px 降為 17px */
   .list-header { font-size: 16px; }
@@ -318,7 +325,10 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
   .qty-sub, .total-sub { font-size: 15.2px; }
 
   .sum-row .lab { font-size: 19px; }
-  .sum-row .val { font-size: 24px; }
+  
+  /* 🌟 修改點：桌機版總計板塊數字縮小一階 (24px -> 22px) */
+  .sum-row .val { font-size: 22px; }
+  
   .sum-toggle-btn { font-size: 17px; }
   .hist-item .hdate { font-size: 16px; }
   .hist-item .hval { font-size: 19px; }
@@ -515,7 +525,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V7.09</div>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V7.10</div>
     </div>
   </div>
 </div>
