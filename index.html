@@ -487,8 +487,21 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
           <div id="apiStatsBox"></div>
         </div>
       </div>
+    
+      <div class="backup-box" style="background:transparent; box-shadow:none; border:none; padding:10px 0; border-top:1px dashed var(--b-border, #ccc); margin-top:10px; padding-top:15px;">
+        <div class="backup-title">☁️ 大眾極簡雲端備份</div>
+        <div style="font-size:11px; color:var(--t-muted, #666); margin-bottom:8px; text-align:left; line-height:1.4;">
+          輸入手機號碼+生日4碼（如 09123456781025），此後任何資料異動（新增/修改股票、每日收盤自動儲存歷史紀錄）皆會<b>自動、無感同步至雲端</b>。換手機時輸入相同密鑰即可秒速回復！
+        </div>
+        <div style="display:flex; gap:8px; margin-bottom:8px; width:100%;">
+          <input type="password" id="cloudKeyInput" placeholder="請輸入 手機+生日 共14碼" style="flex:1; padding:8px; border:1px solid var(--b-border, #ddd); border-radius:6px; font-size:13px; background:var(--bg-card); color:var(--text);">
+          <button type="button" class="btn-backup" style="background:#28a745; color:white; font-size:12px; min-width:90px;" onclick="manuallyBindAndBackup()">確認綁定</button>
+        </div>
+        <button type="button" class="btn-backup" style="width:100%; background:#007bff; color:white; font-size:13px; padding:8px;" onclick="downloadAndRestoreCloud()">📥 自雲端回復所有持股與歷史紀錄</button>
+      </div>
+
       <div class="backup-box" style="background:transparent; box-shadow:none; border:none; padding:10px 0;">
-        <div class="backup-title">資料備份與還原</div>
+        <div class="backup-title">本地 JSON 檔案備份</div>
         <div class="backup-btns">
           <button type="button" class="btn-backup" onclick="exportData()">📥 匯出</button>
           <button type="button" class="btn-backup" onclick="$('importFile').click()">📤 還原</button>
@@ -996,13 +1009,13 @@ function addStock(){
   });
   LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll();
   ['symInput', 'qtyInput', 'buyPriceInput'].forEach(id => $(id).value = '');
-  showToast(`已新增 ${sym}`); closeModalById('addModalOverlay'); forceRefresh();
+  showToast(`已新增 ${sym}`); closeModalById('addModalOverlay'); forceRefresh(); autoCloudBackupSilent();
 }
 
 function deleteStock(id){
   if(!confirm('確定刪除？')) return;
   tabStocks[currentTab] = tabStocks[currentTab].filter(s => s.id !== id);
-  LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll(); showToast('記錄已刪除');
+  LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll(); showToast('記錄已刪除'); autoCloudBackupSilent();
 }
 
 function openEditModal(id) {
@@ -1024,7 +1037,7 @@ function saveEditStock() {
   s.shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
   const bp = parseFloat($('editBuyPriceInput').value);
   s.buyPrice = isNaN(bp) || bp <= 0 ? null : bp;
-  LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll(); closeModalById('editModalOverlay'); showToast('已修改'); forceRefresh();
+  LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll(); closeModalById('editModalOverlay'); showToast('已修改'); forceRefresh(); autoCloudBackupSilent();
 }
 
 // === 自動儲存歷史記錄機制 ===
@@ -1064,6 +1077,7 @@ function checkAutoSave() {
     if (savedAny && $('historyModalOverlay').classList.contains('show')) {
        renderHistory(); // 如果當時開著歷史視窗，順便幫他更新
     }
+    if (savedAny) { autoCloudBackupSilent(); }
   }
 }
 
@@ -1212,6 +1226,123 @@ async function loadFinanceNews() {
     c.style.animationDuration = `${c.textContent.length * 0.18}s`;
   } catch(e) { c.innerHTML = '<span class="ticker-item" style="color:var(--t-muted);">無法載入即時新聞，請稍後再試</span>'; }
 }
+
+
+/* ========================================================= ☁️ 大眾極簡雲端備份引擎 ========================================================= */
+const BACKUP_WORKER_URL = "https://stock-backup-api.denis0521.workers.dev";
+
+async function generateCloudKey(rawInput) {
+  if (!rawInput) return null;
+  const cleanInput = rawInput.trim().replace(/[^0-9]/g, '');
+  if (cleanInput.length < 10) return null;
+
+  const salt = "_MySecretStockApp2026_Salt!!";
+  const secretString = cleanInput + salt;
+
+  const msgBuffer = new TextEncoder().encode(secretString);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function autoCloudBackupSilent() {
+  const savedUserKey = localStorage.getItem('tw_saved_user_key');
+  if (!savedUserKey) return;
+
+  const cloudKey = await generateCloudKey(savedUserKey);
+  if (!cloudKey) return;
+
+  const backupData = {
+    tabStocks: [],
+    tabRecords: [],
+    tabNames: LS.getStr(LS.KEYS.TAB_NAMES),
+    fugleKey: typeof fugleKey !== 'undefined' ? fugleKey : LS.getStr(LS.KEYS.FK),
+    secondFugleKey: typeof secondFugleKey !== 'undefined' ? secondFugleKey : LS.getStr(LS.KEYS.SFK),
+    theme: LS.getStr(LS.KEYS.THEME),
+    tabCount: typeof tabCount !== 'undefined' ? tabCount : 1,
+    customForeignIndices: LS.getStr(LS.KEYS.FOREIGN_IDX)
+  };
+  for(let i = 0; i < 5; i++) {
+    backupData.tabStocks.push(LS.getStr(LS.KEYS.STOCK(i)));
+    backupData.tabRecords.push(LS.getStr(LS.KEYS.RECORD(i)));
+  }
+
+  try {
+    await fetch(`${BACKUP_WORKER_URL}?code=${cloudKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(backupData)
+    });
+    console.log("☁️ 雲端同步備份已在背景自動完成。");
+  } catch (e) {
+    console.error("☁️ 雲端自動同步失敗：", e);
+  }
+}
+
+async function manuallyBindAndBackup() {
+  const input = document.getElementById('cloudKeyInput').value;
+  if (input.replace(/[^0-9]/g, '').length < 10) {
+    alert("❌ 請輸入正確的手機號碼 + 生日數字（例如：09123456781025）");
+    return;
+  }
+  
+  localStorage.setItem('tw_saved_user_key', input);
+  showToast("⏳ 正在同步至雲端...");
+  
+  await autoCloudBackupSilent();
+  alert("🎉 雲端備份金鑰綁定成功！此後無論是新增、修改股票或自動結算損益，系統皆會自動同步備份到雲端。");
+}
+
+async function downloadAndRestoreCloud() {
+  const input = document.getElementById('cloudKeyInput').value;
+  const cloudKey = await generateCloudKey(input);
+  
+  if (!cloudKey) {
+    alert("❌ 請先輸入您當初設定的手機號碼 + 生日數字");
+    return;
+  }
+
+  if (!confirm("⚠️ 確定要從雲端還原嗎？這將會完全覆蓋此手機目前的持股資料與記錄！")) return;
+
+  try {
+    const response = await fetch(`${BACKUP_WORKER_URL}?code=${cloudKey}`);
+    
+    if (response.status === 404) {
+      alert("❌ 找不到您的雲端備份資料，請確認輸入的手機與生日是否正確。");
+      return;
+    }
+    
+    if (response.ok) {
+      const d = await response.json();
+      
+      if (d.tabStocks) d.tabStocks.forEach((v, i) => { if(v) localStorage.setItem(LS.KEYS.STOCK(i), v); });
+      if (d.tabRecords) d.tabRecords.forEach((v, i) => { if(v) localStorage.setItem(LS.KEYS.RECORD(i), v); });
+      if (d.tabNames) localStorage.setItem(LS.KEYS.TAB_NAMES, d.tabNames);
+      if (d.fugleKey) localStorage.setItem(LS.KEYS.FK, d.fugleKey);
+      if (d.secondFugleKey) localStorage.setItem(LS.KEYS.SFK, d.secondFugleKey);
+      if (d.theme) localStorage.setItem(LS.KEYS.THEME, d.theme);
+      if (d.tabCount) localStorage.setItem(LS.KEYS.TAB_COUNT, d.tabCount);
+      if (d.customForeignIndices) localStorage.setItem(LS.KEYS.FOREIGN_IDX, d.customForeignIndices);
+      
+      localStorage.setItem('tw_saved_user_key', input);
+      
+      alert("🎉 雲端資料還原成功！網頁即將重新整理。");
+      location.reload();
+    }
+  } catch (e) {
+    alert("❌ 連線至雲端伺服器失敗，請檢查網路。");
+  }
+}
+
+// 初始化時自動填入已保存之密鑰
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(() => {
+    const saved = localStorage.getItem('tw_saved_user_key');
+    if (saved && document.getElementById('cloudKeyInput')) {
+      document.getElementById('cloudKeyInput').value = saved;
+    }
+  }, 1000);
+});
 
 /* ========================================================= 🚀 啟動 ========================================================= */
 loadState(); renderAll();
