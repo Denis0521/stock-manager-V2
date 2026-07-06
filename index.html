@@ -122,6 +122,20 @@ body.tech .title-text {
   font-weight: bold;
   flex-shrink: 0;
   line-height: 1;
+  
+  /* 💫 旋轉動畫引擎設定 */
+  transform-style: preserve-3d;
+  animation: bead-spin 5s linear infinite;
+}
+
+/* 🔄 3D 傾斜自轉關鍵影格：中軸右傾 30 度，由右往左（逆時針）旋轉 */
+@keyframes bead-spin {
+  0% {
+    transform: rotateZ(30deg) rotateY(0deg);
+  }
+  100% {
+    transform: rotateZ(30deg) rotateY(-360deg);
+  }
 }
 
 .header-top .hdr-right { display: flex; gap: 6px; align-items: center; }
@@ -1160,7 +1174,7 @@ function deleteForeignIdx(i) {
   availableIndices.splice(i, 1); LS.set(LS.KEYS.FOREIGN_IDX, availableIndices); renderForeignIdxConfigList(); showToast('已刪除');
 }
 
-/* 修改點：優化資料匯出邏輯，明確指定輸出值 */
+/* 數據匯出優化 */
 function exportData() {
   const d = { 
     tabStocks: Array.from({length: 5}, (_, i) => LS.get(LS.KEYS.STOCK(i), [])),
@@ -1182,7 +1196,7 @@ function exportData() {
   showToast('✅ 備份已下載');
 }
 
-/* 修改點：修復還原時 k.toUpperCase() 對應錯誤的問題 */
+/* 數據還原修復 */
 function importData(e) {
   const file = e.target.files[0]; if (!file) return;
   const r = new FileReader();
