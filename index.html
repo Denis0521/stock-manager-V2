@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.13'; 
+const APP_VER = 'V7.14'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -104,6 +104,7 @@ body.tech .title-text {
     3px 3px 6px rgba(0, 0, 0, 0.6);
 }
 
+/* ========================================================= 🌟 3D 真實球體引擎 ========================================================= */
 .glass-bead {
   display: inline-flex;
   align-items: center;
@@ -111,31 +112,53 @@ body.tech .title-text {
   width: 34px;
   height: 34px;
   border-radius: 50%;
+  /* 固定背景與光澤，模擬實體圓球 */
   background: radial-gradient(circle at 35% 25%, #ffffff 0%, #ffe066 20%, #f5a623 60%, #b36b00 100%);
   box-shadow: 
     inset -3px -3px 6px rgba(102, 51, 0, 0.5),
     inset 3px 3px 6px rgba(255, 255, 255, 0.8),
     0 4px 6px var(--s-dark);
+  flex-shrink: 0;
+  position: relative;
+  /* 隱藏轉出圓邊界外的文字，完美契合球體邊緣 */
+  overflow: hidden;
+  transform: translateZ(0);
+}
+
+/* 內部3D自轉容器 */
+.bead-inner {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+  /* 動畫引擎綁定：5秒一圈、由右至左 */
+  animation: sphere-spin 5s linear infinite;
+}
+
+/* 文字本體設定 */
+.bead-text {
+  position: absolute;
   color: #7b2c00; 
   text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5), -1px -1px 0px rgba(0, 0, 0, 0.4);
   font-size: 19px;
   font-weight: bold;
-  flex-shrink: 0;
   line-height: 1;
-  
-  /* 💫 旋轉動畫引擎設定 */
-  transform-style: preserve-3d;
-  animation: bead-spin 5s linear infinite;
+  /* 轉到球體背面時隱藏 */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
-/* 🔄 3D 傾斜自轉關鍵影格：中軸右傾 30 度，由右往左（逆時針）旋轉 */
-@keyframes bead-spin {
-  0% {
-    transform: rotateZ(30deg) rotateY(0deg);
-  }
-  100% {
-    transform: rotateZ(30deg) rotateY(-360deg);
-  }
+/* 將文字推至球體表面 (半徑約 16px) */
+.bead-text.front { transform: translateZ(16px); }
+/* 備用面文字：貼在對側背面 */
+.bead-text.back { transform: rotateY(180deg) translateZ(16px); }
+
+/* 🔄 傾斜 15 度並自轉 */
+@keyframes sphere-spin {
+  0%   { transform: rotateZ(15deg) rotateY(0deg); }
+  100% { transform: rotateZ(15deg) rotateY(-360deg); }
 }
 
 .header-top .hdr-right { display: flex; gap: 6px; align-items: center; }
@@ -354,7 +377,15 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
 
 <div class="header">
   <div class="header-top">
-    <h1><span class="glass-bead">ཛཾ</span><span class="title-text">股票管理</span></h1>
+    <h1>
+      <span class="glass-bead">
+        <span class="bead-inner">
+          <span class="bead-text front">ཛཾ</span>
+          <span class="bead-text back">ཛཾ</span>
+        </span>
+      </span>
+      <span class="title-text">股票管理</span>
+    </h1>
     <div class="hdr-right">
       <button type="button" class="btn-add-hdr" onclick="openAddModal()">+新增</button>
       <button type="button" class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙</button>
@@ -523,7 +554,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V7.13</div>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V7.14</div>
     </div>
   </div>
 </div>
