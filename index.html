@@ -118,7 +118,7 @@ body.tech .title-text {
     0 4px 6px var(--s-dark);
   color: #7b2c00; 
   text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5), -1px -1px 0px rgba(0, 0, 0, 0.4);
-  font-size: 26px; /* 已修改為 26px */
+  font-size: 19px;
   font-weight: bold;
   flex-shrink: 0;
   line-height: 1;
@@ -197,9 +197,10 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 0; opacity: 0.7; }
 
 .table-scroll { margin: 0 10px 6px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; border-top-left-radius: 0; border-top-right-radius: 0; position: relative; z-index: 2; }
-.list-wrap { min-width: 670px; } 
+.list-wrap { min-width: 1040px; } /* 加寬容器以容納 12 欄 */
 
-.list-header, .srow { grid-template-columns: 110px 95px 75px 75px 75px 95px 110px 80px; } 
+/* 設定 12 欄的 Grid 配置 */
+.list-header, .srow { grid-template-columns: 110px 95px 75px 75px 75px 95px 110px 75px 75px 75px 75px 80px; } 
 .list-header { display: grid; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 17px; color: var(--t-muted); font-weight: 600; }
 .srow { display: grid; align-items: stretch; border-bottom: 1px solid var(--s-dark); font-size: 17px; }
 .srow:last-child { border-bottom: none; }
@@ -210,8 +211,9 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 /* 總損益相關欄位向右對齊 (第7欄) */
 .list-header > div:nth-child(7), .srow > div:nth-child(7) { align-items: flex-end; text-align: right; padding-right: 4px; }
 
-.list-header > div:nth-child(8) { align-items: center; justify-content: center; padding-left: 4px; }
-.srow > div:nth-child(8) { flex-direction: row; align-items: center; justify-content: center; gap: 8px; padding-left: 4px; }
+/* 動作按鈕置中 (移到第 12 欄) */
+.list-header > div:nth-child(12) { align-items: center; justify-content: center; padding-left: 4px; }
+.srow > div:nth-child(12) { flex-direction: row; align-items: center; justify-content: center; gap: 8px; padding-left: 4px; }
 
 .sym-container { align-items: flex-start !important; line-height: 1.1 !important; width: 100%; max-width: 112px; display: flex; flex-direction: column; justify-content: center; }
 
@@ -305,7 +307,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
   .card-title { font-size: 18px; }
   .list-wrap { min-width: 100%; }
   
-  .list-header, .srow { grid-template-columns: 1.4fr 1.3fr 1fr 1fr 1fr 1.3fr 1.4fr 1fr; }
+  .list-header, .srow { grid-template-columns: 1.4fr 1.3fr 1fr 1fr 1fr 1.3fr 1.4fr 1fr 1fr 1fr 1fr 1fr; }
   
   .list-header { font-size: 18px; }
   .srow, .srow .sym, .srow .chgp, .qty-main, .total-main { font-size: 18px; }
@@ -373,7 +375,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
 <div class="table-scroll" id="tableScroll" style="display:none;">
   <div class="list-wrap" id="listContainer">
     <div class="list-header">
-      <div>代號</div><div>庫存/均價</div><div>現價</div><div>幅度</div><div>漲跌</div><div>今日損益</div><div>總損益</div><div>動作</div>
+      <div>代號</div><div>庫存/均價</div><div>現價</div><div>幅度</div><div>漲跌</div><div>今日損益</div><div>總損益</div><div>5日幅</div><div>20日幅</div><div>60日幅</div><div>120日幅</div><div>動作</div>
     </div>
     <div id="listBody"></div>
   </div>
@@ -592,6 +594,7 @@ const LS = {
 let currentTab = 0, tabCount = 3, showTicker = true, currentInterval = 20000;
 let tabStocks = Array.from({length: 5}, () => []), tabRecords = Array.from({length: 5}, () => []), tabNames = [];
 let fugleKey='', secondFugleKey='', availableIndices = [], cachedGlobalIndices = [];
+let histCache = {}; // 全域歷史價格快取字典
 
 class KeyRotator {
   constructor(keys) { this.keys = keys.filter(k => k && k.trim() !== ''); this.index = 0; }
@@ -753,6 +756,16 @@ function getStockHtmlInner(s) {
   const safeName = escapeHTML(s.name || '');
   const nameHtml = safeName ? `<div class="sym-name">${safeName}</div>` : '';
 
+  // === 👇 新增 4 個區間漲跌幅欄位的渲染邏輯 👇 ===
+  const genPctStr = val => val != null && !isNaN(val) ? `${getSign(val)}${val.toFixed(2)}%` : '—';
+  const genPctCls = val => val != null && !isNaN(val) ? getColorCls(val) : '';
+
+  const pct5Str = genPctStr(s.pct5), pct5Class = genPctCls(s.pct5);
+  const pct20Str = genPctStr(s.pct20), pct20Class = genPctCls(s.pct20);
+  const pct60Str = genPctStr(s.pct60), pct60Class = genPctCls(s.pct60);
+  const pct120Str = genPctStr(s.pct120), pct120Class = genPctCls(s.pct120);
+  // === 👆 新增 4 個區間漲跌幅欄位的渲染邏輯 👆 ===
+
   return `
     <div class="sym-container"><div class="sym">${escapeHTML(s.symbol)}</div>${nameHtml}</div>
     <div class="qty-cell">
@@ -764,6 +777,10 @@ function getStockHtmlInner(s) {
     <div class="chg ${pClass}">${cgStr}</div>
     <div class="today-pnl ${tpClass}">${tpStr}</div>
     <div class="total ${getColorCls(totalValForClass)}">${totalHtml}</div>
+    <div class="${pct5Class}" style="font-weight: 800; font-size: 15px;">${pct5Str}</div>
+    <div class="${pct20Class}" style="font-weight: 800; font-size: 15px;">${pct20Str}</div>
+    <div class="${pct60Class}" style="font-weight: 800; font-size: 15px;">${pct60Str}</div>
+    <div class="${pct120Class}" style="font-weight: 800; font-size: 15px;">${pct120Str}</div>
     <div class="act">
       <button type="button" class="btn-glass-circle edit" onclick="openEditModal('${s.id}')">✎</button>
       <button type="button" class="btn-glass-circle del" onclick="deleteStock('${s.id}')">✕</button>
@@ -851,6 +868,7 @@ async function fetchFugle(sym){
   } return null; 
 }
 
+// 取得最新報價用
 async function fetchYahoo(sym){
   const tryFetch = async (suffix) => {
     try {
@@ -863,6 +881,31 @@ async function fetchYahoo(sym){
       const p = parseFloat(cols[4]); const o = parseFloat(cols[1]);
       const chg = +(p - o).toFixed(2);
       trackApiUsage('Yahoo'); return {price: p, change: chg, changePercent: +((chg / o) * 100).toFixed(2), source: 'Yahoo', name: ''};
+    } catch(e) { return null; }
+  };
+  return await tryFetch('.TW') || await tryFetch('.TWO');
+}
+
+// 🌟 新增：抓取過去 1 年歷史收盤價
+async function fetchHistoryData(sym) {
+  const tryFetch = async (suffix) => {
+    try {
+      const u = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}${suffix}?interval=1d&range=1y`;
+      const res = await fetchWithProxy(u);
+      if (!res) return null;
+      const d = await res.json();
+      if (!d.chart.result) return null;
+      // 過濾掉空值，確保取得的都是有效收盤價陣列
+      const closes = d.chart.result[0].indicators.quote[0].close.filter(c => c != null);
+      const L = closes.length;
+      if(L === 0) return null;
+      // 回傳 5、20、60、120 交易日之前的收盤基準價
+      return {
+        d5: closes[Math.max(0, L - 1 - 5)],
+        d20: closes[Math.max(0, L - 1 - 20)],
+        d60: closes[Math.max(0, L - 1 - 60)],
+        d120: closes[Math.max(0, L - 1 - 120)]
+      };
     } catch(e) { return null; }
   };
   return await tryFetch('.TW') || await tryFetch('.TWO');
@@ -929,20 +972,41 @@ async function refreshPrices(){
   for (let i = 0; i < uniqueSyms.length; i += 3) {
     const batch = uniqueSyms.slice(i, i + 3);
     const promises = batch.map(async sym => {
+      // 1. 抓取最新現價 (Fugle 或 Yahoo)
       let r = await fetchFugle(sym) || await fetchYahoo(sym);
-      return { sym, r };
+      
+      // 2. 檢查全域快取是否有歷史基準價格，沒有的話就抓一次
+      let hist = histCache[sym];
+      if (!hist) {
+        hist = await fetchHistoryData(sym);
+        if (hist) histCache[sym] = hist;
+      }
+      return { sym, r, hist };
     });
     const results = await Promise.allSettled(promises);
     
     results.forEach(res => {
-      if(res.status === 'fulfilled' && res.value.r) {
-        hasUpdates = true; const {sym, r} = res.value;
-        for (let idx = 0; idx < 5; idx++) {
-          tabStocks[idx].filter(s => s.symbol === sym).forEach(s => {
-            s.price = r.price; s.change = r.change; s.changePercent = r.changePercent;
-            if(r.name && !s.name) s.name = r.name;
-            if (idx === currentTab) renderRow(s);
-          });
+      if(res.status === 'fulfilled') {
+        const {sym, r, hist} = res.value;
+        if (r || hist) {
+          hasUpdates = true; 
+          for (let idx = 0; idx < 5; idx++) {
+            tabStocks[idx].filter(s => s.symbol === sym).forEach(s => {
+              // 更新最新報價
+              if (r) {
+                s.price = r.price; s.change = r.change; s.changePercent = r.changePercent;
+                if(r.name && !s.name) s.name = r.name;
+              }
+              // 計算並更新歷史區間漲跌幅
+              if (hist && s.price != null) {
+                s.pct5 = ((s.price - hist.d5) / hist.d5) * 100;
+                s.pct20 = ((s.price - hist.d20) / hist.d20) * 100;
+                s.pct60 = ((s.price - hist.d60) / hist.d60) * 100;
+                s.pct120 = ((s.price - hist.d120) / hist.d120) * 100;
+              }
+              if (idx === currentTab) renderRow(s);
+            });
+          }
         }
       }
     });
@@ -1160,7 +1224,6 @@ function deleteForeignIdx(i) {
   availableIndices.splice(i, 1); LS.set(LS.KEYS.FOREIGN_IDX, availableIndices); renderForeignIdxConfigList(); showToast('已刪除');
 }
 
-/* 修改點：優化資料匯出邏輯，明確指定輸出值 */
 function exportData() {
   const d = { 
     tabStocks: Array.from({length: 5}, (_, i) => LS.get(LS.KEYS.STOCK(i), [])),
@@ -1182,7 +1245,6 @@ function exportData() {
   showToast('✅ 備份已下載');
 }
 
-/* 修改點：修復還原時 k.toUpperCase() 對應錯誤的問題 */
 function importData(e) {
   const file = e.target.files[0]; if (!file) return;
   const r = new FileReader();
