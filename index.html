@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.17'; 
+const APP_VER = 'V7.18'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -485,11 +485,11 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
     <h2 style="margin-bottom: 12px; font-size: 18px;">進階設定</h2>
     <div style="max-width: 90%; margin: 0 auto;">
       
-      <div class="settings-row" style="margin-bottom: 10px;">
-        <button type="button" class="btn-manual-row" onclick="$('manualOverlay').classList.add('show')" style="padding: 6px;">📖 系統使用說明</button>
-        <div class="tab-count-wrapper" style="padding: 2px 10px;">
-          <div class="tab-count-label" style="margin-bottom:0;">分頁數量</div>
-          <select id="tabCountSelect" style="font-size: 14px;">
+      <div class="settings-row" style="margin-bottom: 8px;">
+        <button type="button" class="btn-manual-row" onclick="$('manualOverlay').classList.add('show')" style="height: 40px; padding: 0; font-size: 15px;">📖 系統使用說明</button>
+        <div class="tab-count-wrapper" style="height: 40px; padding: 0 10px; flex-direction: row; align-items: center; gap: 6px;">
+          <div class="tab-count-label" style="margin-bottom: 0; font-size: 13px; white-space: nowrap;">分頁數量</div>
+          <select id="tabCountSelect" style="font-size: 14px; padding: 0; flex: 1;">
             <option value="0">無分頁</option>
             <option value="1">1 個分頁</option>
             <option value="2">2 個分頁</option>
@@ -501,10 +501,10 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
       </div>
       
       <div class="api-section" style="margin-bottom: 10px;">
-        <button type="button" id="tickerToggleBtn" onclick="toggleTicker()" style="width: 100%; padding: 8px; font-size: 14px; margin-bottom: 8px;">📰 財經新聞列：</button>
-        <button type="button" id="histToggleBtnAdvanced" onclick="toggleHistCols()" style="width: 100%; padding: 8px; font-size: 14px; margin-bottom: 8px;">📊 漲跌幅 (歷史)：</button>
+        <button type="button" id="tickerToggleBtn" onclick="toggleTicker()" style="width: 100%; height: 40px; padding: 0; font-size: 15px; margin-bottom: 8px;">📰 財經新聞列：</button>
+        <button type="button" id="histToggleBtnAdvanced" onclick="toggleHistCols()" style="width: 100%; height: 40px; padding: 0; font-size: 15px; margin-bottom: 8px;">📊 漲跌幅 (歷史)：</button>
         
-        <div class="api-link-box" style="margin-bottom: 10px; padding: 6px;">
+        <div class="api-link-box" style="margin-bottom: 8px; padding: 6px;">
           <a class="btn-link" href="https://developer.fugle.tw/docs/key/" target="_blank" style="font-size: 14px;">🔗 申請 Fugle API Key</a>
         </div>
         
@@ -512,21 +512,21 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
           <label style="margin:0; font-size:13px;">🔑 Fugle Key (主)</label>
           <span class="key-status none" id="fugleKeyStatus" style="margin:0; padding:2px 6px; font-size:11px;">未設定</span>
         </div>
-        <div style="display:flex;gap:8px;align-items:stretch; margin-bottom:8px;">
-          <input type="text" id="fugleKeyInput" class="pwd-mask" placeholder="輸入第一組 Key" autocomplete="off" spellcheck="false" style="flex:1; padding:8px;">
-          <button type="button" onclick="toggleKeyVisibility('fugleKeyInput','keyToggle1')" id="keyToggle1" style="flex:0 0 44px;font-size:16px;">👁</button>
+        <div style="display:flex; gap:8px; align-items:stretch; margin-bottom:8px;">
+          <input type="text" id="fugleKeyInput" class="pwd-mask" placeholder="輸入第一組 Key" autocomplete="off" spellcheck="false" style="flex:1; height: 40px; padding: 0 12px; box-sizing: border-box;">
+          <button type="button" onclick="toggleKeyVisibility('fugleKeyInput','keyToggle1')" id="keyToggle1" style="flex:0 0 44px; height: 40px; padding: 0; font-size:16px;">👁</button>
         </div>
         
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
           <label style="margin:0; font-size:13px;">🔑 Fugle Key (備)</label>
           <span class="key-status none" id="secondFugleKeyStatus" style="margin:0; padding:2px 6px; font-size:11px;">未設定</span>
         </div>
-        <div style="display:flex;gap:8px;align-items:stretch;">
-          <input type="text" id="secondFugleKeyInput" class="pwd-mask" placeholder="輸入第二組 Key" autocomplete="off" spellcheck="false" style="flex:1; padding:8px;">
-          <button type="button" onclick="toggleKeyVisibility('secondFugleKeyInput','keyToggle2')" id="keyToggle2" style="flex:0 0 44px;font-size:16px;">👁</button>
+        <div style="display:flex; gap:8px; align-items:stretch;">
+          <input type="text" id="secondFugleKeyInput" class="pwd-mask" placeholder="輸入第二組 Key" autocomplete="off" spellcheck="false" style="flex:1; height: 40px; padding: 0 12px; box-sizing: border-box;">
+          <button type="button" onclick="toggleKeyVisibility('secondFugleKeyInput','keyToggle2')" id="keyToggle2" style="flex:0 0 44px; height: 40px; padding: 0; font-size:16px;">👁</button>
         </div>
         
-        <div style="margin-top:10px;padding:8px;background:var(--bg-card);border-radius:10px;box-shadow:var(--shadow-inset); border:1px solid var(--border-light);">
+        <div style="margin-top:10px; padding:8px; background:var(--bg-card); border-radius:10px; box-shadow:var(--shadow-inset); border:1px solid var(--border-light);">
           <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--t-muted); margin-bottom:6px; padding:0 4px;">
             <span>📊 今日 API 使用量</span>
             <button type="button" onclick="openForeignIdxModal()" style="padding:4px 8px; font-size:11px; box-shadow:var(--shadow-soft); border:1px solid var(--border-light); border-radius:6px; color:var(--accent); white-space:nowrap; flex-shrink:0;">⚙️ 國外指數</button>
@@ -535,17 +535,17 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
         </div>
       </div>
       
-      <div class="backup-box" style="background:transparent; box-shadow:none; border:none; padding:4px 0 0;">
+      <div class="backup-box" style="background:transparent; box-shadow:none; border:none; padding:0;">
         <div class="backup-title" style="margin-bottom:8px; font-size:14px;">資料備份與還原</div>
         <div class="backup-btns" style="gap: 8px;">
-          <button type="button" class="btn-backup" onclick="exportData()" style="padding:6px; font-size: 14px;">📥 匯出</button>
-          <button type="button" class="btn-backup" onclick="$('importFile').click()" style="padding:6px; font-size: 14px;">📤 還原</button>
+          <button type="button" class="btn-backup" onclick="exportData()" style="height: 40px; padding: 0; font-size: 15px;">📥 匯出</button>
+          <button type="button" class="btn-backup" onclick="$('importFile').click()" style="height: 40px; padding: 0; font-size: 15px;">📤 還原</button>
           <input type="file" id="importFile" style="display:none" onchange="importData(event)">
         </div>
       </div>
       
-      <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; padding: 8px; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.17</div>
+      <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.18</div>
     </div>
   </div>
 </div>
@@ -1221,8 +1221,9 @@ function renderHistory(){
 function openModal(){
   $('fugleKeyInput').value = fugleKey; $('secondFugleKeyInput').value = secondFugleKey;
   $('tabCountSelect').value = tabCount;
+  
   $('tickerToggleBtn').textContent = `📰 財經新聞列：${showTicker ? '已開啟' : '已關閉'}`;
-  applyHistColsState(); // 確保進階設定內的按鈕文字正確
+  applyHistColsState(); 
   
   ['fugleKey','secondFugleKey'].forEach((id, i) => {
     const el = $(`${id}Status`), val = i===0 ? fugleKey : secondFugleKey;
