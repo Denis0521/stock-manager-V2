@@ -206,11 +206,11 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 /* 🌟 智慧伸縮寬度設定與欄寬調整 */
 .list-wrap { min-width: 680px; transition: min-width 0.3s ease; }
 
-/* 🌟 控制收放的 11/7 欄 Grid 配置 (因應次級字體放大 2px，重新調整欄寬比例) */
+/* 🌟 控制收放的 11/7 欄 Grid 配置 (因應次級與歷史欄位加大，調整歷史區段欄位比例分配，每個歷史欄位從 80px 加寬至 84px) */
 .list-header, .srow { grid-template-columns: 110px 105px 125px 110px 110px 125px 80px; transition: grid-template-columns 0.3s ease; } 
 
-body.show-hist .list-wrap { min-width: 1080px; }
-body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 110px 105px 125px 110px 110px 125px 80px 80px 80px 80px 80px; }
+body.show-hist .list-wrap { min-width: 1100px; }
+body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 110px 105px 125px 110px 110px 125px 84px 84px 84px 84px 80px; }
 
 .hist-col { display: none !important; }
 body.show-hist .hist-col { display: flex !important; }
@@ -338,12 +338,12 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   
   /* 🌟 電腦版也同步等比例加大分配欄寬 */
   .list-header, .srow { grid-template-columns: 1.4fr 1.5fr 1.7fr 1.5fr 1.5fr 1.7fr 1fr; }
-  body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 1.4fr 1.5fr 1.7fr 1.5fr 1.5fr 1.7fr 1.1fr 1.1fr 1.1fr 1.1fr 1.1fr; }
+  body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 1.4fr 1.5fr 1.7fr 1.5fr 1.5fr 1.7fr 1.15fr 1.15fr 1.15fr 1.15fr 1.1fr; }
   
   .list-header { font-size: 18px; }
   .srow, .srow .sym, .srow .chgp, .qty-main, .total-main { font-size: 18px; }
   
-  /* 🌟 電腦版次級文字 (15.2px -> 17.2px) */
+  /* 🌟 電腦版次級文字與歷史區塊文字 (15.2px -> 17.2px) */
   .qty-sub, .total-sub, .price-sub, .change-sub { font-size: 17.2px; }
 
   .sum-row .lab { font-size: 19px; }
@@ -851,6 +851,7 @@ function getStockHtmlInner(s) {
   const pct60Str = genPctStr(s.pct60), pct60Class = genPctCls(s.pct60);
   const pct120Str = genPctStr(s.pct120), pct120Class = genPctCls(s.pct120);
 
+  /* 🌟 將 5日、20日、60日、120日幅的行內字體大小設置為 16px */
   return `
     <div class="sym-container"><div class="sym">${escapeHTML(s.symbol)}</div>${nameHtml}</div>
     <div class="qty-cell">
@@ -861,10 +862,10 @@ function getStockHtmlInner(s) {
     <div style="width:100%; display:flex; flex-direction:column; align-items:flex-end; justify-content:center;">${changeHtml}</div>
     <div class="today-pnl ${getColorCls(info.todayPnl)}">${s.change != null ? getSign(info.todayPnl) + info.todayPnl.toLocaleString() : '—'}</div>
     <div class="total ${getColorCls(totalValForClass)}">${totalHtml}</div>
-    <div class="hist-col ${pct5Class}" style="font-weight: 800; font-size: 15px;">${pct5Str}</div>
-    <div class="hist-col ${pct20Class}" style="font-weight: 800; font-size: 15px;">${pct20Str}</div>
-    <div class="hist-col ${pct60Class}" style="font-weight: 800; font-size: 15px;">${pct60Str}</div>
-    <div class="hist-col ${pct120Class}" style="font-weight: 800; font-size: 15px;">${pct120Str}</div>
+    <div class="hist-col ${pct5Class}" style="font-weight: 800; font-size: 16px;">${pct5Str}</div>
+    <div class="hist-col ${pct20Class}" style="font-weight: 800; font-size: 16px;">${pct20Str}</div>
+    <div class="hist-col ${pct60Class}" style="font-weight: 800; font-size: 16px;">${pct60Str}</div>
+    <div class="hist-col ${pct120Class}" style="font-weight: 800; font-size: 16px;">${pct120Str}</div>
     <div class="act">
       <button type="button" class="btn-glass-circle edit" onclick="openEditModal('${s.id}')">✎</button>
       <button type="button" class="btn-glass-circle del" onclick="deleteStock('${s.id}')">✕</button>
