@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.12'; 
+const APP_VER = 'V7.15'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -186,7 +186,7 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .tab-btn:hover { color: var(--t-main); filter: brightness(1.05); opacity: 0.85; }
 .tab-btn.active { background: var(--bg-card); color: var(--accent); font-weight: 800; height: 36px; z-index: 3; border-bottom: 2px solid var(--bg-card); box-shadow: none; opacity: 1; }
 
-/* ========================================================= 📈 內容區塊排版 ========================================================= */
+/* ========================================================= 📈 內容區塊排版與 Grid 調整 ========================================================= */
 .idx-scroll-container { margin: 6px 10px; overflow-x: auto; display: flex; gap: 0; padding: 2px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
 .idx-card-box { flex: 0 0 auto; min-width: 140px; padding: 2px 10px; scroll-snap-align: start; border-right: 1px solid var(--s-dark); text-align: left; }
@@ -197,10 +197,19 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 0; opacity: 0.7; }
 
 .table-scroll { margin: 0 10px 6px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; border-top-left-radius: 0; border-top-right-radius: 0; position: relative; z-index: 2; }
-.list-wrap { min-width: 1040px; } /* 加寬容器以容納 12 欄 */
+.list-wrap { min-width: 1040px; transition: min-width 0.3s ease; }
 
-/* 設定 12 欄的 Grid 配置 */
-.list-header, .srow { grid-template-columns: 110px 95px 75px 75px 75px 95px 110px 75px 75px 75px 75px 80px; } 
+/* 🌟 控制收放的 12/8 欄 Grid 配置 */
+/* 預設（收起狀態）： 8 欄配置，總寬度較小 */
+.list-header, .srow { grid-template-columns: 110px 95px 75px 75px 75px 95px 110px 80px; transition: grid-template-columns 0.3s ease; } 
+
+/* 展開狀態： 12 欄配置，完整列出 5, 20, 60, 120 日幅 */
+body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 110px 95px 75px 75px 75px 95px 110px 75px 75px 75px 75px 80px; }
+
+/* 區間欄位 CSS 定義：收合時完全隱藏 */
+.hist-col { display: none !important; }
+body.show-hist .hist-col { display: flex !important; }
+
 .list-header { display: grid; align-items: stretch; border-bottom: 2px solid var(--s-dark); font-size: 17px; color: var(--t-muted); font-weight: 600; }
 .srow { display: grid; align-items: stretch; border-bottom: 1px solid var(--s-dark); font-size: 17px; }
 .srow:last-child { border-bottom: none; }
@@ -208,12 +217,12 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .list-header > div:nth-child(1), .srow > div:nth-child(1) { align-items: flex-start; text-align: left; position: sticky; left: 0; z-index: 2; background: var(--bg-card); padding-left: 8px; }
 .list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after { content: ''; position: absolute; top: 0; bottom: 0; right: -6px; width: 6px; background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; }
 
-/* 總損益相關欄位向右對齊 (第7欄) */
+/* 總損益相關欄位向右對齊 */
 .list-header > div:nth-child(7), .srow > div:nth-child(7) { align-items: flex-end; text-align: right; padding-right: 4px; }
 
-/* 動作按鈕置中 (移到第 12 欄) */
-.list-header > div:nth-child(12) { align-items: center; justify-content: center; padding-left: 4px; }
-.srow > div:nth-child(12) { flex-direction: row; align-items: center; justify-content: center; gap: 8px; padding-left: 4px; }
+/* 動作按鈕置中 (非歷史視窗下第 8 欄, 歷史視窗下第 12 欄) */
+.list-header > div:last-child { align-items: center; justify-content: center; padding-left: 4px; }
+.srow > div:last-child { flex-direction: row; align-items: center; justify-content: center; gap: 8px; padding-left: 4px; }
 
 .sym-container { align-items: flex-start !important; line-height: 1.1 !important; width: 100%; max-width: 112px; display: flex; flex-direction: column; justify-content: center; }
 
@@ -292,6 +301,88 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 #modalOverlay .modal button, #modalOverlay .modal a.btn-link, #modalOverlay .modal .btn-manual-row, #modalOverlay .modal .btn-close-icon { color: #000 !important; }
 body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link, body.tech #modalOverlay .modal .btn-manual-row, body.tech #modalOverlay .modal .btn-close-icon { color: #F8FAFC !important; }
 
+/* ========================================================= 🎛️ 側邊區間切換開關 (Neumorphic Switch) ========================================================= */
+.side-toggle-container {
+  position: fixed;
+  right: 12px;
+  top: 55%;
+  transform: translateY(-50%);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-card);
+  padding: 12px 6px;
+  border-radius: 16px;
+  box-shadow: var(--shadow-strong);
+  border: 1px solid var(--border-light);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.switch-label {
+  font-size: 11px;
+  color: var(--t-muted);
+  font-weight: 800;
+  writing-mode: vertical-lr;
+  letter-spacing: 3px;
+  user-select: none;
+  text-align: center;
+  margin-bottom: 2px;
+  text-shadow: 1px 1px 1px var(--engrave-l);
+}
+body.tech .switch-label { text-shadow: none; }
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 28px;
+  height: 52px;
+}
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--s-dark);
+  transition: .3s;
+  border-radius: 28px;
+  box-shadow: var(--shadow-inset);
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: var(--bg-card);
+  transition: .3s;
+  border-radius: 50%;
+  box-shadow: var(--shadow-soft);
+}
+input:checked + .slider {
+  background-color: var(--accent);
+}
+input:checked + .slider:before {
+  transform: translateY(-24px); /* 向上移動 slider */
+}
+
+/* 螢幕太小時，半透明側邊元件以防阻擋視線，Hover 時恢復不透明 */
+@media (max-width: 500px) {
+  .side-toggle-container {
+    right: 4px;
+    padding: 8px 4px;
+    opacity: 0.85;
+  }
+  .side-toggle-container:hover {
+    opacity: 1;
+  }
+}
+
 @media (max-width: 360px) {
   .header h1 { font-size: 16px; margin-left: 2px; }
   .header-top .btn-theme, .header-top .btn-adv, .header-top .btn-add-hdr { padding: 4px 12px; font-size: 14px !important; }
@@ -305,9 +396,15 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
   .header h1 { font-size: 26px; margin-left: 10px; }
   .header-top .btn-theme, .header-top .btn-adv, .header-top .btn-add-hdr { font-size: 18px !important; padding: 10px 22px; }
   .card-title { font-size: 18px; }
+  
+  /* 🌟 電腦端 12/8 欄 Grid 配置 */
   .list-wrap { min-width: 100%; }
   
-  .list-header, .srow { grid-template-columns: 1.4fr 1.3fr 1fr 1fr 1fr 1.3fr 1.4fr 1fr 1fr 1fr 1fr 1fr; }
+  /* 預設 8 欄 */
+  .list-header, .srow { grid-template-columns: 1.4fr 1.3fr 1fr 1fr 1fr 1.3fr 1.4fr 1fr; }
+  
+  /* 展開 12 欄 */
+  body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 1.4fr 1.3fr 1fr 1fr 1fr 1.3fr 1.4fr 1fr 1fr 1fr 1fr 1fr; }
   
   .list-header { font-size: 18px; }
   .srow, .srow .sym, .srow .chgp, .qty-main, .total-main { font-size: 18px; }
@@ -370,12 +467,22 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
   </div>
 </div>
 
+<div class="side-toggle-container" id="sideToggleContainer">
+  <div class="switch-label">統計區間</div>
+  <label class="switch">
+    <input type="checkbox" id="histToggleSwitch" onchange="toggleHistCols()">
+    <span class="slider"></span>
+  </label>
+</div>
+
 <div class="tabs-bar" id="tabsBarContainer"></div>
 
 <div class="table-scroll" id="tableScroll" style="display:none;">
   <div class="list-wrap" id="listContainer">
     <div class="list-header">
-      <div>代號</div><div>庫存/均價</div><div>現價</div><div>幅度</div><div>漲跌</div><div>今日損益</div><div>總損益</div><div>5日幅</div><div>20日幅</div><div>60日幅</div><div>120日幅</div><div>動作</div>
+      <div>代號</div><div>庫存/均價</div><div>現價</div><div>幅度</div><div>漲跌</div><div>今日損益</div><div>總損益</div>
+      <div class="hist-col">5日幅</div><div class="hist-col">20日幅</div><div class="hist-col">60日幅</div><div class="hist-col">120日幅</div>
+      <div>動作</div>
     </div>
     <div id="listBody"></div>
   </div>
@@ -511,7 +618,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V7.12</div>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V7.15</div>
     </div>
   </div>
 </div>
@@ -596,6 +703,8 @@ let tabStocks = Array.from({length: 5}, () => []), tabRecords = Array.from({leng
 let fugleKey='', secondFugleKey='', availableIndices = [], cachedGlobalIndices = [];
 let histCache = {}; // 全域歷史價格快取字典
 
+let showHistCols = false; // 🌟 歷史區間統計欄位顯示狀態
+
 class KeyRotator {
   constructor(keys) { this.keys = keys.filter(k => k && k.trim() !== ''); this.index = 0; }
   next() { if (this.keys.length === 0) return null; return this.keys[this.index++ % this.keys.length]; }
@@ -640,6 +749,10 @@ function loadState(){
   $('tickerContainer').style.display = showTicker ? 'flex' : 'none';
   renderTabs(); renderApiStats();
   
+  // 🌟 初始化側邊統計區間開關狀態
+  showHistCols = LS.getStr('tw_show_hist', 'false') === 'true';
+  applyHistColsState();
+  
   checkAutoSave();
   setInterval(checkAutoSave, 60000);
 }
@@ -660,6 +773,9 @@ function applyThemeText(t){
   if(t !== 'light') body.classList.add(t);
   $('themeBtn').textContent = theme.emoji;
   $('themeColorMeta').content = theme.color;
+  
+  // 確保 show-hist 狀態不被主題切換覆蓋
+  applyHistColsState();
 }
 
 function toggleTheme(){
@@ -704,7 +820,27 @@ function renderTabs() {
   container.querySelectorAll('.tab-btn').forEach(b => b.style.fontSize = fontSize);
 }
 
-/* ========================================================= 🖥 核心業務邏輯與渲染 (DRY) ========================================================= */
+/* ========================================================= 🌟 側邊統計開關切換邏輯 ========================================================= */
+function applyHistColsState() {
+  const sw = $('histToggleSwitch');
+  if (sw) sw.checked = showHistCols;
+  if (showHistCols) {
+    document.body.classList.add('show-hist');
+  } else {
+    document.body.classList.remove('show-hist');
+  }
+}
+
+function toggleHistCols() {
+  const sw = $('histToggleSwitch');
+  if (sw) {
+    showHistCols = sw.checked;
+    LS.set('tw_show_hist', String(showHistCols));
+    applyHistColsState();
+  }
+}
+
+/* ========================================================= 🖥 核心業務邏輯與渲染 ========================================================= */
 const formatPrice = p => p == null ? '—' : (Math.abs(p) >= 1000 ? p.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : p.toFixed(2));
 const getSign = n => n >= 0 ? '+' : '';
 const getColorCls = n => n > 0 ? 'up' : (n < 0 ? 'down' : '');
@@ -756,7 +892,7 @@ function getStockHtmlInner(s) {
   const safeName = escapeHTML(s.name || '');
   const nameHtml = safeName ? `<div class="sym-name">${safeName}</div>` : '';
 
-  // === 👇 新增 4 個區間漲跌幅欄位的渲染邏輯 👇 ===
+  // === 🌟 區間漲跌幅渲染 (加入 hist-col class) ===
   const genPctStr = val => val != null && !isNaN(val) ? `${getSign(val)}${val.toFixed(2)}%` : '—';
   const genPctCls = val => val != null && !isNaN(val) ? getColorCls(val) : '';
 
@@ -764,7 +900,6 @@ function getStockHtmlInner(s) {
   const pct20Str = genPctStr(s.pct20), pct20Class = genPctCls(s.pct20);
   const pct60Str = genPctStr(s.pct60), pct60Class = genPctCls(s.pct60);
   const pct120Str = genPctStr(s.pct120), pct120Class = genPctCls(s.pct120);
-  // === 👆 新增 4 個區間漲跌幅欄位的渲染邏輯 👆 ===
 
   return `
     <div class="sym-container"><div class="sym">${escapeHTML(s.symbol)}</div>${nameHtml}</div>
@@ -777,10 +912,10 @@ function getStockHtmlInner(s) {
     <div class="chg ${pClass}">${cgStr}</div>
     <div class="today-pnl ${tpClass}">${tpStr}</div>
     <div class="total ${getColorCls(totalValForClass)}">${totalHtml}</div>
-    <div class="${pct5Class}" style="font-weight: 800; font-size: 15px;">${pct5Str}</div>
-    <div class="${pct20Class}" style="font-weight: 800; font-size: 15px;">${pct20Str}</div>
-    <div class="${pct60Class}" style="font-weight: 800; font-size: 15px;">${pct60Str}</div>
-    <div class="${pct120Class}" style="font-weight: 800; font-size: 15px;">${pct120Str}</div>
+    <div class="hist-col ${pct5Class}" style="font-weight: 800; font-size: 15px;">${pct5Str}</div>
+    <div class="hist-col ${pct20Class}" style="font-weight: 800; font-size: 15px;">${pct20Str}</div>
+    <div class="hist-col ${pct60Class}" style="font-weight: 800; font-size: 15px;">${pct60Str}</div>
+    <div class="hist-col ${pct120Class}" style="font-weight: 800; font-size: 15px;">${pct120Str}</div>
     <div class="act">
       <button type="button" class="btn-glass-circle edit" onclick="openEditModal('${s.id}')">✎</button>
       <button type="button" class="btn-glass-circle del" onclick="deleteStock('${s.id}')">✕</button>
@@ -886,7 +1021,7 @@ async function fetchYahoo(sym){
   return await tryFetch('.TW') || await tryFetch('.TWO');
 }
 
-// 🌟 新增：抓取過去 1 年歷史收盤價
+// 🌟 抓取過去 1 年歷史收盤價，並嚴格檢查上市天數
 async function fetchHistoryData(sym) {
   const tryFetch = async (suffix) => {
     try {
@@ -899,12 +1034,12 @@ async function fetchHistoryData(sym) {
       const closes = d.chart.result[0].indicators.quote[0].close.filter(c => c != null);
       const L = closes.length;
       if(L === 0) return null;
-      // 回傳 5、20、60、120 交易日之前的收盤基準價
+      // 🌟 修正：判斷總交易天數，不滿足對應天數（如新上市股）時，直接回傳 null (空) 避免失真
       return {
-        d5: closes[Math.max(0, L - 1 - 5)],
-        d20: closes[Math.max(0, L - 1 - 20)],
-        d60: closes[Math.max(0, L - 1 - 60)],
-        d120: closes[Math.max(0, L - 1 - 120)]
+        d5: L > 5 ? closes[L - 1 - 5] : null,
+        d20: L > 20 ? closes[L - 1 - 20] : null,
+        d60: L > 60 ? closes[L - 1 - 60] : null,
+        d120: L > 120 ? closes[L - 1 - 120] : null
       };
     } catch(e) { return null; }
   };
@@ -997,12 +1132,12 @@ async function refreshPrices(){
                 s.price = r.price; s.change = r.change; s.changePercent = r.changePercent;
                 if(r.name && !s.name) s.name = r.name;
               }
-              // 計算並更新歷史區間漲跌幅
+              // 計算並更新歷史區間漲跌幅（天數不足則留白 null）
               if (hist && s.price != null) {
-                s.pct5 = ((s.price - hist.d5) / hist.d5) * 100;
-                s.pct20 = ((s.price - hist.d20) / hist.d20) * 100;
-                s.pct60 = ((s.price - hist.d60) / hist.d60) * 100;
-                s.pct120 = ((s.price - hist.d120) / hist.d120) * 100;
+                s.pct5 = hist.d5 != null ? ((s.price - hist.d5) / hist.d5) * 100 : null;
+                s.pct20 = hist.d20 != null ? ((s.price - hist.d20) / hist.d20) * 100 : null;
+                s.pct60 = hist.d60 != null ? ((s.price - hist.d60) / hist.d60) * 100 : null;
+                s.pct120 = hist.d120 != null ? ((s.price - hist.d120) / hist.d120) * 100 : null;
               }
               if (idx === currentTab) renderRow(s);
             });
