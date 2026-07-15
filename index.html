@@ -187,25 +187,16 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .tab-btn.active { background: var(--bg-card); color: var(--accent); font-weight: 800; height: 36px; z-index: 3; border-bottom: 2px solid var(--bg-card); box-shadow: none; opacity: 1; }
 
 /* ========================================================= 📈 內容區塊排版與 Grid 調整 ========================================================= */
-.idx-scroll-container { margin: 6px 10px; overflow-x: auto; display: flex; gap: 0; padding: 2px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
-.idx-scroll-container::-webkit-scrollbar { height: 0; }
-.idx-card-box { flex: 0 0 auto; min-width: 140px; padding: 2px 10px; scroll-snap-align: start; border-right: 1px solid var(--s-dark); text-align: left; }
-.idx-card-box:last-child { border-right: none; }
-.idx-box-name { font-size: 16px; color: var(--t-muted); font-weight: 600; margin-top: 2px; line-height: 1.3; } 
-.idx-box-price { font-size: 17px; font-weight: 700; margin: 1px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); text-align: right; }
-.idx-box-change-row { display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 14px; font-weight: 600; white-space: nowrap; }
-.idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 0; opacity: 0.7; }
-
 .table-scroll { margin: 0 10px 6px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; border-top-left-radius: 0; border-top-right-radius: 0; position: relative; z-index: 2; }
 
-/* 🌟 智能伸縮寬度設定 */
-.list-wrap { min-width: 640px; transition: min-width 0.3s ease; }
+/* 🌟 智慧伸縮寬度設定與欄寬調整 */
+.list-wrap { min-width: 680px; transition: min-width 0.3s ease; }
 
-/* 🌟 控制收放的 11/7 欄 Grid 配置 */
-.list-header, .srow { grid-template-columns: 110px 95px 115px 95px 95px 110px 80px; transition: grid-template-columns 0.3s ease; } 
+/* 🌟 控制收放的 11/7 欄 Grid 配置 (因應次級字體放大 2px，重新調整欄寬比例) */
+.list-header, .srow { grid-template-columns: 110px 105px 125px 110px 110px 125px 80px; transition: grid-template-columns 0.3s ease; } 
 
-body.show-hist .list-wrap { min-width: 980px; }
-body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 110px 95px 115px 95px 95px 110px 75px 75px 75px 75px 80px; }
+body.show-hist .list-wrap { min-width: 1080px; }
+body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 110px 105px 125px 110px 110px 125px 80px 80px 80px 80px 80px; }
 
 .hist-col { display: none !important; }
 body.show-hist .hist-col { display: flex !important; }
@@ -226,22 +217,31 @@ body.show-hist .hist-col { display: flex !important; }
 /* 🌟 明細欄位數字全數粗體 */
 .srow .sym { font-weight: 800; font-size: 17px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; }
 .qty-main { line-height: 1.2; font-size: 17px; font-weight: 800; }
-.qty-sub { font-size: 13.6px; color: var(--t-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+
+/* 🌟 次級文字加大 2px (13.6px -> 15.6px) */
+.qty-sub { font-size: 15.6px; color: var(--t-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
 
 .price-container { width: 100%; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; line-height: 1.2; }
 .srow .price { font-weight: 800; font-size: 17px; }
-.price-sub { font-size: 13.6px; color: var(--t-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: right; font-weight: 800; }
+
+/* 🌟 次級文字加大 2px (13.6px -> 15.6px) */
+.price-sub { font-size: 15.6px; color: var(--t-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: right; font-weight: 800; }
 
 .change-container { width: 100%; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; line-height: 1.2; }
 .srow .chg { font-weight: 800; font-size: 17px; }
-.change-sub { font-size: 13.6px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: right; font-weight: 800; }
+
+/* 🌟 次級文字加大 2px (13.6px -> 15.6px) */
+.change-sub { font-size: 15.6px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: right; font-weight: 800; }
 
 .srow .today-pnl { font-weight: 800; font-size: 17px; }
 .srow .qty-cell, .srow .total { width: 100%; }
 
 .total-main { line-height: 1.2; font-size: 17px; width: 100%; overflow: hidden; text-align: right; font-weight: 800; }
-.total-sub { font-size: 13.6px; opacity: 0.85; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: right; font-weight: 800; }
 
+/* 🌟 次級文字加大 2px (13.6px -> 15.6px) */
+.total-sub { font-size: 15.6px; opacity: 0.85; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: right; font-weight: 800; }
+
+/* 代號下方的股票簡稱 (維持原 12px 不變，避免擠壓) */
 .sym-name { font-size: 12px; color: var(--t-muted); margin-top: 4px; font-weight: normal; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
 .total-sub.neutral { opacity: 0.6; font-weight: 800; }
 
@@ -259,6 +259,15 @@ body.show-hist .hist-col { display: flex !important; }
 .hist-item .hdate { color: var(--t-muted); font-size: 14px; font-weight: 600; }
 .hist-item .hval { font-weight: 800; font-size: 17px; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
 .hist-empty { color: var(--t-muted); font-size: 15px; text-align: center; padding: 20px; font-weight: 600; }
+
+.idx-scroll-container { margin: 6px 10px; overflow-x: auto; display: flex; gap: 0; padding: 2px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+.idx-scroll-container::-webkit-scrollbar { height: 0; }
+.idx-card-box { flex: 0 0 auto; min-width: 140px; padding: 2px 10px; scroll-snap-align: start; border-right: 1px solid var(--s-dark); text-align: left; }
+.idx-card-box:last-child { border-right: none; }
+.idx-box-name { font-size: 16px; color: var(--t-muted); font-weight: 600; margin-top: 2px; line-height: 1.3; } 
+.idx-box-price { font-size: 17px; font-weight: 700; margin: 1px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); text-align: right; }
+.idx-box-change-row { display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 14px; font-weight: 600; white-space: nowrap; }
+.idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 0; opacity: 0.7; }
 
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 999; align-items: flex-start; justify-content: center; }
 .modal-overlay.show { display: flex; }
@@ -321,12 +330,16 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   .card-title { font-size: 18px; }
   
   .list-wrap { min-width: 100%; }
-  .list-header, .srow { grid-template-columns: 1.4fr 1.3fr 1.5fr 1.3fr 1.3fr 1.4fr 1fr; }
-  body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 1.4fr 1.3fr 1.5fr 1.3fr 1.3fr 1.4fr 1fr 1fr 1fr 1fr 1fr; }
+  
+  /* 🌟 電腦版也同步等比例加大分配欄寬 */
+  .list-header, .srow { grid-template-columns: 1.4fr 1.5fr 1.7fr 1.5fr 1.5fr 1.7fr 1fr; }
+  body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 1.4fr 1.5fr 1.7fr 1.5fr 1.5fr 1.7fr 1.1fr 1.1fr 1.1fr 1.1fr 1.1fr; }
   
   .list-header { font-size: 18px; }
   .srow, .srow .sym, .srow .chgp, .qty-main, .total-main { font-size: 18px; }
-  .qty-sub, .total-sub { font-size: 15.2px; }
+  
+  /* 🌟 電腦版次級文字 (15.2px -> 17.2px) */
+  .qty-sub, .total-sub, .price-sub, .change-sub { font-size: 17.2px; }
 
   .sum-row .lab { font-size: 19px; }
   .sum-row .val { font-size: 20px; }
