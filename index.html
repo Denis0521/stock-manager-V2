@@ -186,6 +186,20 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .tab-btn:hover { color: var(--t-main); filter: brightness(1.05); opacity: 0.85; }
 .tab-btn.active { background: var(--bg-card); color: var(--accent); font-weight: 800; height: 36px; z-index: 3; border-bottom: 2px solid var(--bg-card); box-shadow: none; opacity: 1; }
 
+/* ========================================================= 📈 指數滑動卡片區調整 ========================================================= */
+.idx-scroll-container { margin: 6px 10px; overflow-x: auto; display: flex; gap: 0; padding: 2px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+.idx-scroll-container::-webkit-scrollbar { height: 0; }
+
+/* 🌟 指數卡片欄位寬度加寬 (min-width 140px -> 175px)，保障大數字不折行 */
+.idx-card-box { flex: 0 0 auto; min-width: 175px; padding: 4px 12px; scroll-snap-align: start; border-right: 1px solid var(--s-dark); text-align: left; }
+.idx-card-box:last-child { border-right: none; }
+.idx-box-name { font-size: 16px; color: var(--t-muted); font-weight: 600; margin-top: 2px; line-height: 1.3; } 
+.idx-box-price { font-size: 17px; font-weight: 700; margin: 1px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); text-align: right; }
+
+/* 🌟 指數列第二行數字加大至 15.6px (原 14px) */
+.idx-box-change-row { display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 15.6px; font-weight: 700; white-space: nowrap; }
+.idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 1px; opacity: 0.7; }
+
 /* ========================================================= 📈 內容區塊排版與 Grid 調整 ========================================================= */
 .table-scroll { margin: 0 10px 6px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; border-top-left-radius: 0; border-top-right-radius: 0; position: relative; z-index: 2; }
 
@@ -241,7 +255,7 @@ body.show-hist .hist-col { display: flex !important; }
 /* 🌟 次級文字加大 2px (13.6px -> 15.6px) */
 .total-sub { font-size: 15.6px; opacity: 0.85; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: right; font-weight: 800; }
 
-/* 代號下方的股票簡稱 (維持原 12px 不變，避免擠壓) */
+/* 代號下方的股票簡稱 (維持原 12px 不變) */
 .sym-name { font-size: 12px; color: var(--t-muted); margin-top: 4px; font-weight: normal; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
 .total-sub.neutral { opacity: 0.6; font-weight: 800; }
 
@@ -259,15 +273,6 @@ body.show-hist .hist-col { display: flex !important; }
 .hist-item .hdate { color: var(--t-muted); font-size: 14px; font-weight: 600; }
 .hist-item .hval { font-weight: 800; font-size: 17px; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
 .hist-empty { color: var(--t-muted); font-size: 15px; text-align: center; padding: 20px; font-weight: 600; }
-
-.idx-scroll-container { margin: 6px 10px; overflow-x: auto; display: flex; gap: 0; padding: 2px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
-.idx-scroll-container::-webkit-scrollbar { height: 0; }
-.idx-card-box { flex: 0 0 auto; min-width: 140px; padding: 2px 10px; scroll-snap-align: start; border-right: 1px solid var(--s-dark); text-align: left; }
-.idx-card-box:last-child { border-right: none; }
-.idx-box-name { font-size: 16px; color: var(--t-muted); font-weight: 600; margin-top: 2px; line-height: 1.3; } 
-.idx-box-price { font-size: 17px; font-weight: 700; margin: 1px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); text-align: right; }
-.idx-box-change-row { display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 14px; font-weight: 600; white-space: nowrap; }
-.idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 0; opacity: 0.7; }
 
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 999; align-items: flex-start; justify-content: center; }
 .modal-overlay.show { display: flex; }
@@ -353,9 +358,12 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   .btn-backup { font-size: 17px; padding: 10px 14px; }
   .v-box { font-size: 15px; }
 
-  .idx-card-box { min-width: 180px; padding: 6px 16px; }
+  /* 🌟 電腦版指數卡片同步寬度擴展 */
+  .idx-card-box { min-width: 210px; padding: 6px 16px; }
   .idx-box-name, .idx-box-price { font-size: 18px; } 
-  .idx-box-change-row { font-size: 16px; }
+  
+  /* 🌟 電腦版指數列第二行加大 */
+  .idx-box-change-row { font-size: 17.2px; }
 
   .manual-content { font-size: 17px; }
   .manual-content h3 { font-size: 19px; }
