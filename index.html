@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.18'; 
+const APP_VER = 'V7.21'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -199,17 +199,14 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .table-scroll { margin: 0 10px 6px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; border-top-left-radius: 0; border-top-right-radius: 0; position: relative; z-index: 2; }
 
 /* 🌟 智能伸縮寬度設定 */
-.list-wrap { min-width: 715px; transition: min-width 0.3s ease; }
+.list-wrap { min-width: 640px; transition: min-width 0.3s ease; }
 
-/* 🌟 控制收放的 12/8 欄 Grid 配置 */
-/* 預設（收起狀態）： 8 欄配置，總寬度 715px */
-.list-header, .srow { grid-template-columns: 110px 95px 75px 75px 75px 95px 110px 80px; transition: grid-template-columns 0.3s ease; } 
+/* 🌟 控制收放的 11/7 欄 Grid 配置 */
+.list-header, .srow { grid-template-columns: 110px 95px 115px 95px 95px 110px 80px; transition: grid-template-columns 0.3s ease; } 
 
-/* 展開狀態： 12 欄配置，總寬度延展至 1015px */
-body.show-hist .list-wrap { min-width: 1015px; }
-body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 110px 95px 75px 75px 75px 95px 110px 75px 75px 75px 75px 80px; }
+body.show-hist .list-wrap { min-width: 980px; }
+body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 110px 95px 115px 95px 95px 110px 75px 75px 75px 75px 80px; }
 
-/* 區間欄位 CSS 定義：收合時完全隱藏 */
 .hist-col { display: none !important; }
 body.show-hist .hist-col { display: flex !important; }
 
@@ -220,28 +217,33 @@ body.show-hist .hist-col { display: flex !important; }
 .list-header > div:nth-child(1), .srow > div:nth-child(1) { align-items: flex-start; text-align: left; position: sticky; left: 0; z-index: 2; background: var(--bg-card); padding-left: 8px; }
 .list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after { content: ''; position: absolute; top: 0; bottom: 0; right: -6px; width: 6px; background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; }
 
-/* 總損益相關欄位向右對齊 */
-.list-header > div:nth-child(7), .srow > div:nth-child(7) { align-items: flex-end; text-align: right; padding-right: 4px; }
-
-/* 動作按鈕置中 */
+.list-header > div:nth-child(6), .srow > div:nth-child(6) { align-items: flex-end; text-align: right; padding-right: 4px; }
 .list-header > div:last-child { align-items: center; justify-content: center; padding-left: 4px; }
 .srow > div:last-child { flex-direction: row; align-items: center; justify-content: center; gap: 8px; padding-left: 4px; }
 
 .sym-container { align-items: flex-start !important; line-height: 1.1 !important; width: 100%; max-width: 112px; display: flex; flex-direction: column; justify-content: center; }
 
+/* 🌟 明細欄位數字全數粗體 */
 .srow .sym { font-weight: 800; font-size: 17px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; }
 .qty-main { line-height: 1.2; font-size: 17px; font-weight: 800; }
-.srow .price { font-weight: 800; }
-.srow .chgp { font-size: 17px; font-weight: 800; }
-.srow .chg, .srow .today-pnl { font-weight: 800; }
+.qty-sub { font-size: 13.6px; color: var(--t-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
+
+.price-container { width: 100%; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; line-height: 1.2; }
+.srow .price { font-weight: 800; font-size: 17px; }
+.price-sub { font-size: 13.6px; color: var(--t-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: right; font-weight: 800; }
+
+.change-container { width: 100%; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; line-height: 1.2; }
+.srow .chg { font-weight: 800; font-size: 17px; }
+.change-sub { font-size: 13.6px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: right; font-weight: 800; }
+
+.srow .today-pnl { font-weight: 800; font-size: 17px; }
 .srow .qty-cell, .srow .total { width: 100%; }
 
 .total-main { line-height: 1.2; font-size: 17px; width: 100%; overflow: hidden; text-align: right; font-weight: 800; }
-.total-sub { font-size: 13.6px; opacity: 0.85; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: right; }
+.total-sub { font-size: 13.6px; opacity: 0.85; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: right; font-weight: 800; }
 
 .sym-name { font-size: 12px; color: var(--t-muted); margin-top: 4px; font-weight: normal; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
-.qty-sub { font-size: 13.6px; color: var(--t-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.total-sub.neutral { opacity: 0.6; font-weight: normal; }
+.total-sub.neutral { opacity: 0.6; font-weight: 800; }
 
 .summary { padding: 12px 16px; margin: 6px 10px; }
 .sum-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
@@ -270,7 +272,7 @@ body.show-hist .hist-col { display: flex !important; }
 .key-status.none { background: var(--bg-card); box-shadow: var(--shadow-inset); color: var(--t-muted); border: 1px solid var(--border-light); }
 .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--t-main); color: var(--bg-card); padding: 12px 24px; border-radius: 30px; font-size: 15px; font-weight: bold; z-index: 9999; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
 .toast.show { opacity: 1; }
-a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
+
 .backup-box { padding: 16px; margin: 6px 0 0; }
 .backup-title { font-size: 16px; font-weight: 700; color: var(--t-muted); margin-bottom: 12px; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); text-align: left; }
 .backup-btns { display: flex; gap: 12px; }
@@ -294,16 +296,15 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 .tab-count-label { font-size: 12px; color: var(--t-muted); font-weight: 600; margin-bottom: 2px; text-align: left; }
 .tab-count-wrapper select { width: 100%; box-shadow: none; padding: 2px 0; background: transparent; font-size: 15px; border: none; }
 .api-section { margin-bottom: 16px; } 
-.api-link-box { text-align: center; margin-bottom: 16px; padding: 10px; background: var(--bg-card); border-radius: 8px; box-shadow: var(--shadow-soft); border: 1px solid var(--border-light); }
 
-/* 🌟 進階視窗極致瘦身：減少間距以適應單一畫面 */
+/* 🌟 進階視窗極致瘦身與統一 40px 高度 */
 .modal.fullscreen-modal { width: 100vw !important; max-width: 100vw !important; height: 100vh !important; max-height: 100vh !important; border-radius: 0; padding: 12px 16px 16px !important; margin: 0 !important; border: none; box-sizing: border-box; z-index: 999; overflow-y: auto;}
 .btn-close-icon { position: absolute; top: 10px; right: 10px; background: transparent !important; box-shadow: none !important; color: var(--t-muted); font-size: 24px; width: 40px; height: 40px; padding: 0; display: flex; justify-content: center; align-items: center; border-radius: 50%; text-shadow: none !important; cursor: pointer; border: none !important; }
 .btn-close-icon:hover { color: var(--t-main); transform: scale(1.1); }
 .pwd-mask { -webkit-text-security: disc; text-security: disc; }
 
-#modalOverlay .modal button, #modalOverlay .modal a.btn-link, #modalOverlay .modal .btn-manual-row, #modalOverlay .modal .btn-close-icon { color: #000 !important; }
-body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link, body.tech #modalOverlay .modal .btn-manual-row, body.tech #modalOverlay .modal .btn-close-icon { color: #F8FAFC !important; }
+#modalOverlay .modal button, #modalOverlay .modal .btn-link, #modalOverlay .modal .btn-manual-row, #modalOverlay .modal .btn-close-icon { color: #000 !important; }
+body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link, body.tech #modalOverlay .modal .btn-manual-row, body.tech #modalOverlay .modal .btn-close-icon { color: #F8FAFC !important; }
 
 @media (max-width: 360px) {
   .header h1 { font-size: 16px; margin-left: 2px; }
@@ -319,23 +320,16 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
   .header-top .btn-theme, .header-top .btn-adv, .header-top .btn-add-hdr { font-size: 18px !important; padding: 10px 22px; }
   .card-title { font-size: 18px; }
   
-  /* 🌟 電腦端 12/8 欄 Grid 配置 */
   .list-wrap { min-width: 100%; }
-  
-  /* 預設 8 欄 */
-  .list-header, .srow { grid-template-columns: 1.4fr 1.3fr 1fr 1fr 1fr 1.3fr 1.4fr 1fr; }
-  
-  /* 展開 12 欄 */
-  body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 1.4fr 1.3fr 1fr 1fr 1fr 1.3fr 1.4fr 1fr 1fr 1fr 1fr 1fr; }
+  .list-header, .srow { grid-template-columns: 1.4fr 1.3fr 1.5fr 1.3fr 1.3fr 1.4fr 1fr; }
+  body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 1.4fr 1.3fr 1.5fr 1.3fr 1.3fr 1.4fr 1fr 1fr 1fr 1fr 1fr; }
   
   .list-header { font-size: 18px; }
   .srow, .srow .sym, .srow .chgp, .qty-main, .total-main { font-size: 18px; }
-  
   .qty-sub, .total-sub { font-size: 15.2px; }
 
   .sum-row .lab { font-size: 19px; }
   .sum-row .val { font-size: 20px; }
-  
   .sum-toggle-btn { font-size: 17px; }
   .hist-item .hdate { font-size: 16px; }
   .hist-item .hval { font-size: 19px; }
@@ -394,7 +388,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
 <div class="table-scroll" id="tableScroll" style="display:none;">
   <div class="list-wrap" id="listContainer">
     <div class="list-header">
-      <div>代號</div><div>庫存/均價</div><div>現價</div><div>幅度</div><div>漲跌</div><div>今日損益</div><div>總損益</div>
+      <div>代號</div><div>庫存/均價</div><div>現價/總計</div><div>漲跌/幅度</div><div>今日損益</div><div>總損益</div>
       <div class="hist-col">5日幅</div><div class="hist-col">20日幅</div><div class="hist-col">60日幅</div><div class="hist-col">120日幅</div>
       <div>動作</div>
     </div>
@@ -504,9 +498,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
         <button type="button" id="tickerToggleBtn" onclick="toggleTicker()" style="width: 100%; height: 40px; padding: 0; font-size: 15px; margin-bottom: 8px;">📰 財經新聞列：</button>
         <button type="button" id="histToggleBtnAdvanced" onclick="toggleHistCols()" style="width: 100%; height: 40px; padding: 0; font-size: 15px; margin-bottom: 8px;">📊 漲跌幅 (歷史)：</button>
         
-        <div class="api-link-box" style="margin-bottom: 8px; padding: 6px;">
-          <a class="btn-link" href="https://developer.fugle.tw/docs/key/" target="_blank" style="font-size: 14px;">🔗 申請 Fugle API Key</a>
-        </div>
+        <a class="btn-link" href="https://developer.fugle.tw/docs/key/" target="_blank" style="display: flex; align-items: center; justify-content: center; width: 100%; height: 40px; margin-bottom: 8px; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; box-shadow: var(--shadow-soft); text-decoration: none; font-size: 15px; font-weight: 800;">🔗 申請 Fugle API Key</a>
         
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
           <label style="margin:0; font-size:13px;">🔑 Fugle Key (主)</label>
@@ -529,7 +521,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
         <div style="margin-top:10px; padding:8px; background:var(--bg-card); border-radius:10px; box-shadow:var(--shadow-inset); border:1px solid var(--border-light);">
           <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--t-muted); margin-bottom:6px; padding:0 4px;">
             <span>📊 今日 API 使用量</span>
-            <button type="button" onclick="openForeignIdxModal()" style="padding:4px 8px; font-size:11px; box-shadow:var(--shadow-soft); border:1px solid var(--border-light); border-radius:6px; color:var(--accent); white-space:nowrap; flex-shrink:0;">⚙️ 國外指數</button>
+            <button type="button" onclick="openForeignIdxModal()" style="height: 30px; padding: 0 10px; font-size: 11px; box-shadow: var(--shadow-soft); border: 1px solid var(--border-light); border-radius: 6px; color: var(--accent); white-space: nowrap; flex-shrink: 0;">⚙️ 國外指數</button>
           </div>
           <div id="apiStatsBox"></div>
         </div>
@@ -545,7 +537,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link
       </div>
       
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.18</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.21</div>
     </div>
   </div>
 </div>
@@ -792,12 +784,6 @@ function getStockHtmlInner(s) {
   const p = s.price; 
   const chg = s.change ?? 0;
   
-  let tpStr = '—', tpClass = '';
-  if (s.change != null) { 
-    tpStr = getSign(info.todayPnl) + info.todayPnl.toLocaleString(); 
-    tpClass = getColorCls(info.todayPnl); 
-  }
-  
   let totalHtml = '—', totalValForClass = 0;
   if (p != null) {
     if (info.hasCost) {
@@ -811,9 +797,27 @@ function getStockHtmlInner(s) {
   }
 
   const pClass = p != null ? getColorCls(chg) : '';
-  const cgp = s.changePercent != null ? `${getSign(s.changePercent)}${s.changePercent.toFixed(2)}%` : '—';
-  const cgpClass = s.changePercent != null ? getColorCls(s.changePercent) : '';
-  const cgStr = s.change != null ? `${getSign(chg)}${chg.toFixed(2)}` : '—';
+  
+  // 🌟 現價/總計 欄位組合
+  let priceHtml = '—';
+  if (p != null) {
+    priceHtml = `<div class="price-container">
+      <div class="price ${pClass}">${formatPrice(p)}</div>
+      <div class="price-sub">${info.mktValue.toLocaleString()}</div>
+    </div>`;
+  }
+
+  // 🌟 漲跌/幅度 欄位組合 (漲跌在上，幅度在下)
+  let changeHtml = '—';
+  if (s.change != null && s.changePercent != null) {
+    const cgStr = `${getSign(chg)}${chg.toFixed(2)}`;
+    const cgpStr = `(${getSign(s.changePercent)}${s.changePercent.toFixed(2)}%)`;
+    changeHtml = `<div class="change-container">
+      <div class="chg ${pClass}">${cgStr}</div>
+      <div class="change-sub ${pClass}">${cgpStr}</div>
+    </div>`;
+  }
+
   const safeName = escapeHTML(s.name || '');
   const nameHtml = safeName ? `<div class="sym-name">${safeName}</div>` : '';
 
@@ -832,10 +836,9 @@ function getStockHtmlInner(s) {
       <div class="qty-main">${s.displayQty} ${escapeHTML(s.displayUnit)}</div>
       <div class="qty-sub" title="${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}">${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}</div>
     </div>
-    <div class="price ${pClass}">${formatPrice(p)}</div>
-    <div class="chgp ${cgpClass}">${cgp}</div>
-    <div class="chg ${pClass}">${cgStr}</div>
-    <div class="today-pnl ${tpClass}">${tpStr}</div>
+    <div style="width:100%; display:flex; flex-direction:column; align-items:flex-end; justify-content:center;">${priceHtml}</div>
+    <div style="width:100%; display:flex; flex-direction:column; align-items:flex-end; justify-content:center;">${changeHtml}</div>
+    <div class="today-pnl ${getColorCls(info.todayPnl)}">${s.change != null ? getSign(info.todayPnl) + info.todayPnl.toLocaleString() : '—'}</div>
     <div class="total ${getColorCls(totalValForClass)}">${totalHtml}</div>
     <div class="hist-col ${pct5Class}" style="font-weight: 800; font-size: 15px;">${pct5Str}</div>
     <div class="hist-col ${pct20Class}" style="font-weight: 800; font-size: 15px;">${pct20Str}</div>
@@ -924,11 +927,10 @@ async function fetchFugle(sym){
         const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
         if (p != null) { trackApiUsage('Fugle'); return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle', name: d.name || ''}; }
       }
-    } catch(e) { /* Silent fail to try next key */ }
+    } catch(e) {}
   } return null; 
 }
 
-// 取得最新報價用
 async function fetchYahoo(sym){
   const tryFetch = async (suffix) => {
     try {

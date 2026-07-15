@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stock-app-V7.18'; // 同步更新 Service Worker 快取版本
+const CACHE_NAME = 'stock-app-V7.21'; // 同步更新 Service Worker 快取版本
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
