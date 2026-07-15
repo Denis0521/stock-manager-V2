@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.15'; 
+const APP_VER = 'V7.16'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -301,88 +301,6 @@ a.btn-link { color: var(--accent); text-decoration: none; font-weight: 800; text
 #modalOverlay .modal button, #modalOverlay .modal a.btn-link, #modalOverlay .modal .btn-manual-row, #modalOverlay .modal .btn-close-icon { color: #000 !important; }
 body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal a.btn-link, body.tech #modalOverlay .modal .btn-manual-row, body.tech #modalOverlay .modal .btn-close-icon { color: #F8FAFC !important; }
 
-/* ========================================================= 🎛️ 側邊區間切換開關 (Neumorphic Switch) ========================================================= */
-.side-toggle-container {
-  position: fixed;
-  right: 12px;
-  top: 55%;
-  transform: translateY(-50%);
-  z-index: 500;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  background: var(--bg-card);
-  padding: 12px 6px;
-  border-radius: 16px;
-  box-shadow: var(--shadow-strong);
-  border: 1px solid var(--border-light);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.switch-label {
-  font-size: 11px;
-  color: var(--t-muted);
-  font-weight: 800;
-  writing-mode: vertical-lr;
-  letter-spacing: 3px;
-  user-select: none;
-  text-align: center;
-  margin-bottom: 2px;
-  text-shadow: 1px 1px 1px var(--engrave-l);
-}
-body.tech .switch-label { text-shadow: none; }
-
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 28px;
-  height: 52px;
-}
-.switch input { 
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: var(--s-dark);
-  transition: .3s;
-  border-radius: 28px;
-  box-shadow: var(--shadow-inset);
-}
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 20px;
-  width: 20px;
-  left: 4px;
-  bottom: 4px;
-  background-color: var(--bg-card);
-  transition: .3s;
-  border-radius: 50%;
-  box-shadow: var(--shadow-soft);
-}
-input:checked + .slider {
-  background-color: var(--accent);
-}
-input:checked + .slider:before {
-  transform: translateY(-24px); /* 向上移動 slider */
-}
-
-/* 螢幕太小時，半透明側邊元件以防阻擋視線，Hover 時恢復不透明 */
-@media (max-width: 500px) {
-  .side-toggle-container {
-    right: 4px;
-    padding: 8px 4px;
-    opacity: 0.85;
-  }
-  .side-toggle-container:hover {
-    opacity: 1;
-  }
-}
-
 @media (max-width: 360px) {
   .header h1 { font-size: 16px; margin-left: 2px; }
   .header-top .btn-theme, .header-top .btn-adv, .header-top .btn-add-hdr { padding: 4px 12px; font-size: 14px !important; }
@@ -467,15 +385,13 @@ input:checked + .slider:before {
   </div>
 </div>
 
-<div class="side-toggle-container" id="sideToggleContainer">
-  <div class="switch-label">統計區間</div>
-  <label class="switch">
-    <input type="checkbox" id="histToggleSwitch" onchange="toggleHistCols()">
-    <span class="slider"></span>
-  </label>
-</div>
-
 <div class="tabs-bar" id="tabsBarContainer"></div>
+
+<div style="display: flex; justify-content: flex-end; margin: 6px 10px 2px;">
+  <div onclick="toggleHistCols()" id="histToggleText" style="cursor: pointer; font-size: 13px; font-weight: 700; color: var(--accent); background: var(--bg-card); padding: 4px 12px; border-radius: 12px; border: 1px solid var(--border-light); box-shadow: var(--shadow-soft); transition: all 0.2s;">
+    📊 開啟統計選單 ▼
+  </div>
+</div>
 
 <div class="table-scroll" id="tableScroll" style="display:none;">
   <div class="list-wrap" id="listContainer">
@@ -618,7 +534,7 @@ input:checked + .slider:before {
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 16px; width: 100%; padding: 10px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V7.15</div>
+      <div class="v-box" style="margin-top: 20px; margin-bottom: 12px;">核心版本：V7.16</div>
     </div>
   </div>
 </div>
@@ -749,7 +665,7 @@ function loadState(){
   $('tickerContainer').style.display = showTicker ? 'flex' : 'none';
   renderTabs(); renderApiStats();
   
-  // 🌟 初始化側邊統計區間開關狀態
+  // 🌟 初始化統計選單開關狀態
   showHistCols = LS.getStr('tw_show_hist', 'false') === 'true';
   applyHistColsState();
   
@@ -820,24 +736,22 @@ function renderTabs() {
   container.querySelectorAll('.tab-btn').forEach(b => b.style.fontSize = fontSize);
 }
 
-/* ========================================================= 🌟 側邊統計開關切換邏輯 ========================================================= */
+/* ========================================================= 🌟 內嵌式統計選單切換邏輯 ========================================================= */
 function applyHistColsState() {
-  const sw = $('histToggleSwitch');
-  if (sw) sw.checked = showHistCols;
+  const btn = $('histToggleText');
   if (showHistCols) {
     document.body.classList.add('show-hist');
+    if (btn) btn.innerHTML = '📊 關閉統計選單 ▲';
   } else {
     document.body.classList.remove('show-hist');
+    if (btn) btn.innerHTML = '📊 開啟統計選單 ▼';
   }
 }
 
 function toggleHistCols() {
-  const sw = $('histToggleSwitch');
-  if (sw) {
-    showHistCols = sw.checked;
-    LS.set('tw_show_hist', String(showHistCols));
-    applyHistColsState();
-  }
+  showHistCols = !showHistCols;
+  LS.set('tw_show_hist', String(showHistCols));
+  applyHistColsState();
 }
 
 /* ========================================================= 🖥 核心業務邏輯與渲染 ========================================================= */
