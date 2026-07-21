@@ -15,7 +15,7 @@ const APP_VER = 'V7.21';
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
-  setTimeout(() => location.reload(true), 200);
+  setTimeout(() => location.reload(), 200);
 }
 </script>
 <style>
@@ -190,23 +190,19 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .idx-scroll-container { margin: 6px 10px; overflow-x: auto; display: flex; gap: 0; padding: 2px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
 
-/* 🌟 指數卡片欄位寬度加寬 (min-width 140px -> 175px)，保障大數字不折行 */
 .idx-card-box { flex: 0 0 auto; min-width: 175px; padding: 4px 12px; scroll-snap-align: start; border-right: 1px solid var(--s-dark); text-align: left; }
 .idx-card-box:last-child { border-right: none; }
 .idx-box-name { font-size: 16px; color: var(--t-muted); font-weight: 600; margin-top: 2px; line-height: 1.3; } 
 .idx-box-price { font-size: 17px; font-weight: 700; margin: 1px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); text-align: right; }
 
-/* 🌟 指數列第二行數字加大至 15.6px (原 14px) */
 .idx-box-change-row { display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 15.6px; font-weight: 700; white-space: nowrap; }
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 1px; opacity: 0.7; }
 
 /* ========================================================= 📈 內容區塊排版與 Grid 調整 ========================================================= */
 .table-scroll { margin: 0 10px 6px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; border-top-left-radius: 0; border-top-right-radius: 0; position: relative; z-index: 2; }
 
-/* 🌟 智慧伸縮寬度設定與欄寬調整 */
 .list-wrap { min-width: 680px; transition: min-width 0.3s ease; }
 
-/* 🌟 控制收放的 11/7 欄 Grid 配置 (因應次級與歷史欄位加大，調整歷史區段欄位比例分配，每個歷史欄位從 80px 加寬至 84px) */
 .list-header, .srow { grid-template-columns: 110px 105px 125px 110px 110px 125px 80px; transition: grid-template-columns 0.3s ease; } 
 
 body.show-hist .list-wrap { min-width: 1100px; }
@@ -228,23 +224,19 @@ body.show-hist .hist-col { display: flex !important; }
 
 .sym-container { align-items: flex-start !important; line-height: 1.1 !important; width: 100%; max-width: 112px; display: flex; flex-direction: column; justify-content: center; }
 
-/* 🌟 明細欄位數字全數粗體 */
 .srow .sym { font-weight: 800; font-size: 17px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; }
 .qty-main { line-height: 1.2; font-size: 17px; font-weight: 800; }
 
-/* 🌟 次級文字加大 2px (13.6px -> 15.6px) */
 .qty-sub { font-size: 15.6px; color: var(--t-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
 
 .price-container { width: 100%; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; line-height: 1.2; }
 .srow .price { font-weight: 800; font-size: 17px; }
 
-/* 🌟 次級文字加大 2px (13.6px -> 15.6px) */
 .price-sub { font-size: 15.6px; color: var(--t-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: right; font-weight: 800; }
 
 .change-container { width: 100%; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; line-height: 1.2; }
 .srow .chg { font-weight: 800; font-size: 17px; }
 
-/* 🌟 次級文字加大 2px (13.6px -> 15.6px) */
 .change-sub { font-size: 15.6px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: right; font-weight: 800; }
 
 .srow .today-pnl { font-weight: 800; font-size: 17px; }
@@ -252,10 +244,8 @@ body.show-hist .hist-col { display: flex !important; }
 
 .total-main { line-height: 1.2; font-size: 17px; width: 100%; overflow: hidden; text-align: right; font-weight: 800; }
 
-/* 🌟 次級文字加大 2px (13.6px -> 15.6px) */
 .total-sub { font-size: 15.6px; opacity: 0.85; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: right; font-weight: 800; }
 
-/* 代號下方的股票簡稱 (維持原 12px 不變) */
 .sym-name { font-size: 12px; color: var(--t-muted); margin-top: 4px; font-weight: normal; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
 .total-sub.neutral { opacity: 0.6; font-weight: 800; }
 
@@ -311,7 +301,6 @@ body.show-hist .hist-col { display: flex !important; }
 .tab-count-wrapper select { width: 100%; box-shadow: none; padding: 2px 0; background: transparent; font-size: 15px; border: none; }
 .api-section { margin-bottom: 16px; } 
 
-/* 🌟 進階視窗極致瘦身與統一 40px 高度 */
 .modal.fullscreen-modal { width: 100vw !important; max-width: 100vw !important; height: 100vh !important; max-height: 100vh !important; border-radius: 0; padding: 12px 16px 16px !important; margin: 0 !important; border: none; box-sizing: border-box; z-index: 999; overflow-y: auto;}
 .btn-close-icon { position: absolute; top: 10px; right: 10px; background: transparent !important; box-shadow: none !important; color: var(--t-muted); font-size: 24px; width: 40px; height: 40px; padding: 0; display: flex; justify-content: center; align-items: center; border-radius: 50%; text-shadow: none !important; cursor: pointer; border: none !important; }
 .btn-close-icon:hover { color: var(--t-main); transform: scale(1.1); }
@@ -336,14 +325,12 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   
   .list-wrap { min-width: 100%; }
   
-  /* 🌟 電腦版也同步等比例加大分配欄寬 */
   .list-header, .srow { grid-template-columns: 1.4fr 1.5fr 1.7fr 1.5fr 1.5fr 1.7fr 1fr; }
   body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 1.4fr 1.5fr 1.7fr 1.5fr 1.5fr 1.7fr 1.15fr 1.15fr 1.15fr 1.15fr 1.1fr; }
   
   .list-header { font-size: 18px; }
   .srow, .srow .sym, .srow .chgp, .qty-main, .total-main { font-size: 18px; }
   
-  /* 🌟 電腦版次級文字與歷史區塊文字 (15.2px -> 17.2px) */
   .qty-sub, .total-sub, .price-sub, .change-sub { font-size: 17.2px; }
 
   .sum-row .lab { font-size: 19px; }
@@ -358,11 +345,9 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   .btn-backup { font-size: 17px; padding: 10px 14px; }
   .v-box { font-size: 15px; }
 
-  /* 🌟 電腦版指數卡片同步寬度擴展 */
   .idx-card-box { min-width: 210px; padding: 6px 16px; }
   .idx-box-name, .idx-box-price { font-size: 18px; } 
   
-  /* 🌟 電腦版指數列第二行加大 */
   .idx-box-change-row { font-size: 17.2px; }
 
   .manual-content { font-size: 17px; }
@@ -458,7 +443,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   <div class="modal">
     <h2>新增持股</h2>
     <label>股票代號</label>
-    <input type="text" id="symInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase; margin-bottom: 10px;">
+    <input type="text" id="symInput" placeholder="代號" maxlength="10" autocomplete="off" autocapitalize="characters" style="text-transform:uppercase; margin-bottom: 10px;">
     <label>數量</label>
     <div style="display:flex; gap:10px; margin-bottom: 10px;">
       <input type="number" id="qtyInput" placeholder="數量" min="1" step="1" inputmode="numeric" autocomplete="off" style="flex:1;">
@@ -478,7 +463,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
     <h2>編輯持股</h2>
     <input type="hidden" id="editId">
     <label>股票代號</label>
-    <input type="text" id="editSymInput" placeholder="代號" maxlength="10" autocomplete="off" style="text-transform:uppercase">
+    <input type="text" id="editSymInput" placeholder="代號" maxlength="10" autocomplete="off" autocapitalize="characters" style="text-transform:uppercase">
     <label>股票簡稱 (選填)</label>
     <input type="text" id="editNameInput" placeholder="自訂簡稱 (如: 台積電)" autocomplete="off">
     <label>數量</label>
@@ -569,7 +554,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
     <div class="card" style="margin: 0 0 16px 0; padding: 10px; box-shadow: var(--shadow-inset); border:1px solid var(--border-light);">
       <div class="card-title" style="font-size:14px; margin-bottom:6px;">新增自選指數</div>
       <div class="form-row">
-        <input type="text" id="newIdxSymbol" placeholder="代號 (如: ^SOX)" style="font-size:12px; padding:8px;">
+        <input type="text" id="newIdxSymbol" placeholder="代號 (如: ^SOX)" style="font-size:12px; padding:8px;" autocapitalize="characters">
         <input type="text" id="newIdxName" placeholder="自訂名稱 (含國旗)" style="font-size:12px; padding:8px;">
         <button type="button" onclick="addForeignIdx()" style="flex:0 0 44px; padding:0; font-size:20px; color:var(--accent); font-weight:bold;">＋</button>
       </div>
@@ -629,7 +614,7 @@ const LS = {
     FK: 'tw_fugle_key', SFK: 'tw_second_fugle_key', THEME: 'tw_theme',
     CUR_TAB: 'tw_current_tab', TAB_NAMES: 'tw_tab_names', TAB_COUNT: 'tw_tab_count',
     TICKER: 'tw_show_ticker', FOREIGN_IDX: 'tw_custom_foreign_indices',
-    CACHE_IDX: 'tw_cached_indices', CACHE_TWII: 'tw_cached_twii',
+    CACHE_IDX: 'tw_cached_indices', CACHE_TWII: 'tw_cached_twii', HIST_CACHE: 'tw_hist_cache_v1',
     STOCK: i => `tw_stock_portfolio_tab_${i}`, RECORD: i => `tw_records_tab_${i}`
   },
   get: (k, def) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch(e){ return def; } },
@@ -641,9 +626,9 @@ const LS = {
 let currentTab = 0, tabCount = 3, showTicker = true, currentInterval = 20000;
 let tabStocks = Array.from({length: 5}, () => []), tabRecords = Array.from({length: 5}, () => []), tabNames = [];
 let fugleKey='', secondFugleKey='', availableIndices = [], cachedGlobalIndices = [];
-let histCache = {}; // 全域歷史價格快取字典
+let histCache = {}; 
 
-let showHistCols = false; // 🌟 歷史區間統計欄位顯示狀態
+let showHistCols = false;
 
 class KeyRotator {
   constructor(keys) { this.keys = keys.filter(k => k && k.trim() !== ''); this.index = 0; }
@@ -689,7 +674,6 @@ function loadState(){
   $('tickerContainer').style.display = showTicker ? 'flex' : 'none';
   renderTabs(); renderApiStats();
   
-  // 🌟 初始化統計選單開關狀態
   showHistCols = LS.getStr('tw_show_hist', 'false') === 'true';
   applyHistColsState();
   
@@ -714,7 +698,6 @@ function applyThemeText(t){
   $('themeBtn').textContent = theme.emoji;
   $('themeColorMeta').content = theme.color;
   
-  // 確保 show-hist 狀態不被主題切換覆蓋
   applyHistColsState();
 }
 
@@ -819,7 +802,6 @@ function getStockHtmlInner(s) {
 
   const pClass = p != null ? getColorCls(chg) : '';
   
-  // 🌟 現價/總計 欄位組合
   let priceHtml = '—';
   if (p != null) {
     priceHtml = `<div class="price-container">
@@ -828,7 +810,6 @@ function getStockHtmlInner(s) {
     </div>`;
   }
 
-  // 🌟 漲跌/幅度 欄位組合 (漲跌在上，幅度在下)
   let changeHtml = '—';
   if (s.change != null && s.changePercent != null) {
     const cgStr = `${getSign(chg)}${chg.toFixed(2)}`;
@@ -842,7 +823,6 @@ function getStockHtmlInner(s) {
   const safeName = escapeHTML(s.name || '');
   const nameHtml = safeName ? `<div class="sym-name">${safeName}</div>` : '';
 
-  // === 🌟 區間漲跌幅渲染 ===
   const genPctStr = val => val != null && !isNaN(val) ? `${getSign(val)}${val.toFixed(2)}%` : '—';
   const genPctCls = val => val != null && !isNaN(val) ? getColorCls(val) : '';
 
@@ -851,7 +831,6 @@ function getStockHtmlInner(s) {
   const pct60Str = genPctStr(s.pct60), pct60Class = genPctCls(s.pct60);
   const pct120Str = genPctStr(s.pct120), pct120Class = genPctCls(s.pct120);
 
-  /* 🌟 將 5日、20日、60日、120日幅的行內字體大小設置為 16px */
   return `
     <div class="sym-container"><div class="sym">${escapeHTML(s.symbol)}</div>${nameHtml}</div>
     <div class="qty-cell">
@@ -914,7 +893,7 @@ function updateSummary(){
   setHtml('totalUnrealized', hasUnPnl ? getSign(totalUnPnl) + totalUnPnl.toLocaleString() : '—', hasUnPnl ? getColorCls(totalUnPnl) : 'neutral');
 }
 
-/* ========================================================= 📡 網路請求與資料流 ========================================================= */
+/* ========================================================= 📡 網路請求與資料流 (優化版) ========================================================= */
 function trackApiUsage(source) {
   const k = `api_usage_${new Date().toISOString().split('T')[0]}_${source}`;
   const c = parseInt(LS.getStr(k, '0')) + 1;
@@ -931,12 +910,20 @@ function renderApiStats() {
     <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${y}</div><div>Yahoo</div></div></div>`;
 }
 
-async function fetchWithProxy(url, index = 0) {
-  if (index >= PROXY_LIST.length) return null;
-  try {
-    const res = await fetch(PROXY_LIST[index] + encodeURIComponent(url), { signal: AbortSignal.timeout(API_TIMEOUT), cache: 'no-store' });
-    if (!res.ok) throw new Error('Proxy failed'); return res;
-  } catch (e) { return fetchWithProxy(url, index + 1); }
+// ✨ 優化 1：將遞迴改寫為標準 for...of 迴圈
+async function fetchWithProxy(url) {
+  for (const proxy of PROXY_LIST) {
+    try {
+      const res = await fetch(proxy + encodeURIComponent(url), { 
+        signal: AbortSignal.timeout(API_TIMEOUT), 
+        cache: 'no-store' 
+      });
+      if (res.ok) return res;
+    } catch (e) {
+      // 繼續嘗試下一個 Proxy
+    }
+  }
+  return null;
 }
 
 async function fetchFugle(sym){
@@ -970,7 +957,14 @@ async function fetchYahoo(sym){
   return await tryFetch('.TW') || await tryFetch('.TWO');
 }
 
+// ✨ 優化 2：加入歷史價格 LocalStorage 當日快取，避免 Yahoo Rate Limit (429)
 async function fetchHistoryData(sym) {
+  const todayStr = new Date().toISOString().split('T')[0];
+  const cacheKey = `${LS.KEYS.HIST_CACHE}_${todayStr}`;
+  let dayCache = LS.get(cacheKey, {});
+  
+  if (dayCache[sym]) return dayCache[sym];
+
   const tryFetch = async (suffix) => {
     try {
       const u = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}${suffix}?interval=1d&range=1y`;
@@ -989,7 +983,13 @@ async function fetchHistoryData(sym) {
       };
     } catch(e) { return null; }
   };
-  return await tryFetch('.TW') || await tryFetch('.TWO');
+
+  const res = await tryFetch('.TW') || await tryFetch('.TWO');
+  if (res) {
+    dayCache[sym] = res;
+    LS.set(cacheKey, dayCache);
+  }
+  return res;
 }
 
 function updateTwiiDOM(res, isOffline = false) {
@@ -1350,7 +1350,7 @@ function importData(e) {
   r.readAsText(file);
 }
 
-/* ========================================================= 🔄 後台輪詢與生命週期 ========================================================= */
+/* ========================================================= 🔄 後台輪詢與生命週期 (優化版) ========================================================= */
 let lastRefreshTime = 0, isRefreshing = false, lastSuccessTime = 0;
 const workerBlob = new Blob([`let t=null;self.onmessage=e=>{if(e.data.action==='start'){clearInterval(t);t=setInterval(()=>self.postMessage('tick'),e.data.interval)}else if(e.data.action==='stop')clearInterval(t)};`], {type:'application/javascript'});
 window.heartbeatWorker = new Worker(URL.createObjectURL(workerBlob));
@@ -1382,13 +1382,23 @@ async function loadFinanceNews() {
   } catch(e) { c.innerHTML = '<span class="ticker-item" style="color:var(--t-muted);">無法載入即時新聞，請稍後再試</span>'; }
 }
 
-/* ========================================================= 🚀 啟動 ========================================================= */
+/* ========================================================= 🚀 啟動與休眠優化 ========================================================= */
 loadState(); renderAll();
 setTimeout(forceRefresh, 500);
 heartbeatWorker.postMessage({action: 'start', interval: currentInterval});
 
 ['focus', 'pageshow'].forEach(e => window.addEventListener(e, forceRefresh));
-document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') forceRefresh(); });
+
+// ✨ 優化 3：視窗切到背景（休眠）時暫停 Worker 輪詢，省電與節省 API 額度
+document.addEventListener('visibilitychange', () => { 
+  if (document.visibilityState === 'visible') {
+    heartbeatWorker.postMessage({ action: 'start', interval: currentInterval });
+    forceRefresh();
+  } else {
+    heartbeatWorker.postMessage({ action: 'stop' });
+  }
+});
+
 document.addEventListener('DOMContentLoaded', loadFinanceNews);
 
 const kd = (id, next, action) => { $(id).addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); if(next) $(next).focus(); else if(action) action(); } }); };
