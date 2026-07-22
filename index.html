@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.24'; 
+const APP_VER = 'V7.25'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -187,30 +187,46 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .tab-btn.active { background: var(--bg-card); color: var(--accent); font-weight: 800; height: 36px; z-index: 3; border-bottom: 2px solid var(--bg-card); box-shadow: none; opacity: 1; }
 
 /* ========================================================= 📈 指數滑動卡片區調整 ========================================================= */
-.idx-scroll-container { margin: 6px 10px; overflow-x: auto; display: flex; gap: 0; padding: 2px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+.idx-scroll-container { margin: 6px 10px; overflow-x: auto; display: flex; gap: 0; padding: 6px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
 
 .idx-card-box { 
   flex: 0 0 auto; 
-  min-width: 175px; 
-  padding: 4px 12px; 
+  min-width: 220px; 
+  padding: 4px 14px; 
   scroll-snap-align: start; 
   border-right: 1px solid var(--s-dark); 
   text-align: left; 
   user-select: none;
   transition: transform 0.2s, opacity 0.2s;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .idx-card-box.draggable-card { cursor: grab; }
 .idx-card-box.draggable-card:active { cursor: grabbing; }
 .idx-card-box.dragging { opacity: 0.4; transform: scale(0.95); }
 .idx-card-box.drag-over { border-left: 3px solid var(--accent); }
 .idx-card-box:last-child { border-right: none; }
-.idx-box-name { font-size: 16px; color: var(--t-muted); font-weight: 600; margin-top: 2px; line-height: 1.3; } 
-.idx-box-price { font-size: 17px; font-weight: 700; margin: 1px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); text-align: right; }
+.idx-box-name { font-size: 15px; color: var(--t-muted); font-weight: 600; margin-bottom: 2px; line-height: 1.2; } 
 
-.idx-box-change-row { display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 15.6px; font-weight: 700; white-space: nowrap; }
-.idx-box-vol { font-size: 12px; color: var(--t-main); font-weight: 600; text-align: right; margin-top: 1px; }
-.idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 1px; opacity: 0.7; }
+/* 橫向排列：價格、漲跌與右側成交量 */
+.idx-data-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 1px;
+}
+.idx-box-price-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.idx-box-price { font-size: 17px; font-weight: 800; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
+.idx-box-change-row { display: flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 700; white-space: nowrap; }
+.idx-box-vol { font-size: 13px; color: var(--t-main); font-weight: 700; white-space: nowrap; }
+.idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 2px; opacity: 0.7; }
 
 /* ========================================================= 📈 內容區塊排版與 Grid 調整 ========================================================= */
 .table-scroll { margin: 0 10px 6px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; border-top-left-radius: 0; border-top-right-radius: 0; position: relative; z-index: 2; }
@@ -359,10 +375,11 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   .btn-backup { font-size: 17px; padding: 10px 14px; }
   .v-box { font-size: 15px; }
 
-  .idx-card-box { min-width: 210px; padding: 6px 16px; }
-  .idx-box-name, .idx-box-price { font-size: 18px; } 
-  
-  .idx-box-change-row { font-size: 17.2px; }
+  .idx-card-box { min-width: 250px; padding: 6px 16px; }
+  .idx-box-name { font-size: 16px; }
+  .idx-box-price { font-size: 18px; } 
+  .idx-box-change-row { font-size: 15px; }
+  .idx-box-vol { font-size: 14px; }
 
   .manual-content { font-size: 17px; }
   .manual-content h3 { font-size: 19px; }
@@ -391,15 +408,20 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   </div>
 </div>
 
+<!-- 📈 上方指數卡片滑動區 (橫向整合成交量) -->
 <div class="idx-scroll-container" id="idxScrollContainer">
   <div class="idx-card-box">
     <div class="idx-box-name">🇹🇼 臺灣加權指數</div>
-    <div class="idx-box-price" id="idxPrice">—</div>
-    <div class="idx-box-change-row">
-      <span id="idxChange"></span>
-      <span id="idxPct"></span>
+    <div class="idx-data-row">
+      <div class="idx-box-price-wrap">
+        <span class="idx-box-price" id="idxPrice">—</span>
+        <div class="idx-box-change-row">
+          <span id="idxChange"></span>
+          <span id="idxPct"></span>
+        </div>
+      </div>
+      <div class="idx-box-vol" id="idxVolume">成交量: —</div>
     </div>
-    <div class="idx-box-vol" id="idxVolume">成交量: —</div>
     <div class="idx-box-src" id="idxSource">Loading...</div>
   </div>
 </div>
@@ -558,7 +580,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       </div>
       
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.24</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.25</div>
     </div>
   </div>
 </div>
@@ -1038,10 +1060,8 @@ function updateTwiiDOM(res, isOffline = false) {
 async function refreshPrices(){
   if (navigator.onLine === false) { showToast('處於離線狀態，顯示快取資料'); return; }
   
-  // 優先使用 Fugle API 抓取大盤 IX0001 資料 (包含成交量)
   let idxR = await fetchFugle('IX0001');
 
-  // 若 Fugle 抓取失敗則自動備援至 Yahoo
   if (!idxR) {
     try {
       const res = await fetchWithProxy(`https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`);
@@ -1147,9 +1167,17 @@ function renderGlobalIndices(indices, isOffline = false) {
     const cls = getColorCls(item.pct);
     return `<div class="idx-card-box draggable-card" draggable="true" data-symbol="${escapeHTML(item.symbol)}">
       <div class="idx-box-name">${escapeHTML(name)}${isOffline ? '<span style="color:var(--t-muted);font-size:12px;margin-left:6px;opacity:0.8;">(離線)</span>' : ''}</div>
-      <div class="idx-box-price">${item.price.toLocaleString('en-US', {maximumFractionDigits:2})}</div>
-      <div class="idx-box-change-row ${cls}"><span>${getSign(item.changeAmt)}${item.changeAmt.toFixed(2)}</span><span>(${getSign(item.pct)}${item.pct.toFixed(2)}%)</span></div>
-      <div class="idx-box-src">via Yahoo ${isOffline ? 'Cache' : ''}</div></div>`;
+      <div class="idx-data-row">
+        <div class="idx-box-price-wrap">
+          <span class="idx-box-price">${item.price.toLocaleString('en-US', {maximumFractionDigits:2})}</span>
+          <div class="idx-box-change-row ${cls}">
+            <span>${getSign(item.changeAmt)}${item.changeAmt.toFixed(2)}</span>
+            <span>(${getSign(item.pct)}${item.pct.toFixed(2)}%)</span>
+          </div>
+        </div>
+      </div>
+      <div class="idx-box-src">via Yahoo ${isOffline ? 'Cache' : ''}</div>
+    </div>`;
   }).join('');
   container.insertAdjacentHTML('beforeend', html);
 
