@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.23'; 
+const APP_VER = 'V7.24'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -558,7 +558,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       </div>
       
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.23</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.24</div>
     </div>
   </div>
 </div>
@@ -947,7 +947,16 @@ async function fetchFugle(sym){
       if (res.ok) {
         const d = await res.json();
         const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
-        if (p != null) { trackApiUsage('Fugle'); return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, source: 'Fugle', name: d.name || ''}; }
+        
+        let vol = 0;
+        if (d.total) {
+          vol = d.total.tradeValue || d.total.tradeVolume || 0;
+        }
+
+        if (p != null) { 
+          trackApiUsage('Fugle'); 
+          return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, volume: vol, source: 'Fugle', name: d.name || ''}; 
+        }
       }
     } catch(e) {}
   } return null; 
@@ -1017,7 +1026,7 @@ function updateTwiiDOM(res, isOffline = false) {
   if(els.v) {
     if (res.volume && res.volume > 0) {
       const volInHundredMillion = Math.round(res.volume / 100000000);
-      els.v.textContent = `成交量: ${volInHundredMillion.toLocaleString()} 億`;
+      els.v.textContent = `成交量: ${volInHundredMillion > 0 ? volInHundredMillion.toLocaleString() + ' 億' : res.volume.toLocaleString()}`;
     } else {
       els.v.textContent = `成交量: —`;
     }
@@ -1029,25 +1038,25 @@ function updateTwiiDOM(res, isOffline = false) {
 async function refreshPrices(){
   if (navigator.onLine === false) { showToast('處於離線狀態，顯示快取資料'); return; }
   
-  let idxR = null;
-  try {
-    const res = await fetchWithProxy(`https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`);
-    if(res) {
-      const text = (await res.text()).trim().split('\n');
-      if(text.length >= 2) {
-        const cols = text.pop().split(',');
-        if(cols[4] !== 'null') {
-          const p = parseFloat(cols[4]), o = parseFloat(cols[1]), v = parseFloat(cols[6] || 0), chg = +(p - o).toFixed(2);
-          idxR = {price: p, change: chg, changePercent: +((chg/o)*100).toFixed(2), volume: v, source: 'Yahoo'};
-          trackApiUsage('Yahoo');
+  // 優先使用 Fugle API 抓取大盤 IX0001 資料 (包含成交量)
+  let idxR = await fetchFugle('IX0001');
+
+  // 若 Fugle 抓取失敗則自動備援至 Yahoo
+  if (!idxR) {
+    try {
+      const res = await fetchWithProxy(`https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`);
+      if(res) {
+        const text = (await res.text()).trim().split('\n');
+        if(text.length >= 2) {
+          const cols = text.pop().split(',');
+          if(cols[4] !== 'null') {
+            const p = parseFloat(cols[4]), o = parseFloat(cols[1]), v = parseFloat(cols[6] || 0), chg = +(p - o).toFixed(2);
+            idxR = {price: p, change: chg, changePercent: +((chg/o)*100).toFixed(2), volume: v, source: 'Yahoo'};
+            trackApiUsage('Yahoo');
+          }
         }
       }
-    }
-  } catch(e) {}
-
-  if (!idxR) {
-    const fR = await fetchFugle('IX0001');
-    if (fR) idxR = fR;
+    } catch(e) {}
   }
 
   if(idxR) { updateTwiiDOM(idxR); LS.set(LS.KEYS.CACHE_TWII, idxR); }
