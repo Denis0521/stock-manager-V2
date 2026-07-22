@@ -180,6 +180,21 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .form-row button { font-size: 16px; letter-spacing: 2px; padding-left: 18px; }
 .btn-save { width: calc(100% - 20px); padding: 14px; font-size: 17px; margin: 6px 10px; }
 
+/* ========================================================= ⚡ 閃爍動畫樣式 ========================================================= */
+.price {
+  border-radius: 4px;
+  padding: 2px 4px;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+.flash-up {
+  background-color: rgba(220, 38, 38, 0.25) !important;
+  color: var(--up) !important;
+}
+.flash-down {
+  background-color: rgba(22, 163, 74, 0.25) !important;
+  color: var(--down) !important;
+}
+
 /* ========================================================= 📂 經典立體漸層頁籤模式 ========================================================= */
 .tabs-bar { display: flex; padding: 0 8px; margin: 6px 10px 0; gap: 4px; align-items: flex-end; }
 .tab-btn { flex: 1; height: 36px; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: linear-gradient(to bottom, var(--s-light) 0%, var(--bg) 100%); color: var(--t-muted); font-weight: 600; cursor: pointer; position: relative; top: 1px; z-index: 1; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-light); border-radius: 8px 8px 0 0; box-shadow: inset 0 2px 2px var(--protrude-l); opacity: 0.5; transition: color 0.2s, filter 0.2s, opacity 0.3s; }
@@ -547,6 +562,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       <div class="api-section" style="margin-bottom: 16px;">
         <button type="button" id="tickerToggleBtn" onclick="toggleTicker()" style="width: 100%; height: 40px; padding: 0; font-size: 15px; margin-bottom: 8px;">📰 財經新聞列：</button>
         <button type="button" id="histToggleBtnAdvanced" onclick="toggleHistCols()" style="width: 100%; height: 40px; padding: 0; font-size: 15px; margin-bottom: 8px;">📊 漲跌幅 (歷史)：</button>
+        <button type="button" id="flashToggleBtn" onclick="toggleFlash()" style="width: 100%; height: 40px; padding: 0; font-size: 15px; margin-bottom: 8px;">💡 報價閃爍提醒：</button>
         
         <a class="btn-link" href="https://developer.fugle.tw/docs/key/" target="_blank" style="display: flex; align-items: center; justify-content: center; width: 100%; height: 40px; margin-bottom: 8px; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; box-shadow: var(--shadow-soft); text-decoration: none; font-size: 15px; font-weight: 800;">🔗 申請 Fugle API Key</a>
         
@@ -658,7 +674,7 @@ const LS = {
   KEYS: {
     FK: 'tw_fugle_key', SFK: 'tw_second_fugle_key', THEME: 'tw_theme',
     CUR_TAB: 'tw_current_tab', TAB_NAMES: 'tw_tab_names', TAB_COUNT: 'tw_tab_count',
-    TICKER: 'tw_show_ticker', FOREIGN_IDX: 'tw_custom_foreign_indices',
+    TICKER: 'tw_show_ticker', FLASH: 'tw_show_flash', FOREIGN_IDX: 'tw_custom_foreign_indices',
     CACHE_IDX: 'tw_cached_indices', CACHE_TWII: 'tw_cached_twii', HIST_CACHE: 'tw_hist_cache_v1',
     STOCK: i => `tw_stock_portfolio_tab_${i}`, RECORD: i => `tw_records_tab_${i}`
   },
@@ -668,7 +684,7 @@ const LS = {
 };
 
 /* ========================================================= 📊 核心狀態 ========================================================= */
-let currentTab = 0, tabCount = 3, showTicker = true, currentInterval = 20000;
+let currentTab = 0, tabCount = 3, showTicker = true, enableFlash = true, currentInterval = 20000;
 let tabStocks = Array.from({length: 5}, () => []), tabRecords = Array.from({length: 5}, () => []), tabNames = [];
 let fugleKey='', secondFugleKey='', availableIndices = [], cachedGlobalIndices = [], histCache = {}; 
 let showHistCols = false;
@@ -693,6 +709,7 @@ function loadState(){
   currentTab = parseInt(LS.getStr(LS.KEYS.CUR_TAB, '0'));
   tabCount = parseInt(LS.getStr(LS.KEYS.TAB_COUNT, '3'));
   showTicker = LS.getStr(LS.KEYS.TICKER, 'true') === 'true';
+  enableFlash = LS.getStr(LS.KEYS.FLASH, 'true') === 'true';
 
   const defaultTabNames = ['分頁 1', '分頁 2', '分頁 3', '分頁 4', '分頁 5'];
   const storedNames = LS.get(LS.KEYS.TAB_NAMES, defaultTabNames);
@@ -754,6 +771,12 @@ function toggleTicker() {
   $('tickerContainer').style.display = showTicker ? 'flex' : 'none';
   $('tickerToggleBtn').textContent = `📰 財經新聞列：${showTicker ? '已開啟' : '已關閉'}`;
   LS.set(LS.KEYS.TICKER, showTicker);
+}
+
+function toggleFlash() {
+  enableFlash = !enableFlash;
+  $('flashToggleBtn').textContent = `💡 報價閃爍提醒：${enableFlash ? '已開啟' : '已關閉'}`;
+  LS.set(LS.KEYS.FLASH, enableFlash);
 }
 
 function applyHistColsState() {
@@ -878,9 +901,19 @@ function renderAll(){
   updateSummary();
 }
 
-function renderRow(s) {
+function renderRow(s, oldPrice = null) {
   const el = document.querySelector(`.srow[data-id="${s.id}"]`);
-  if(el) el.innerHTML = getStockHtmlInner(s);
+  if(el) {
+    el.innerHTML = getStockHtmlInner(s);
+    if (enableFlash && oldPrice != null && s.price != null && oldPrice !== s.price) {
+      const priceEl = el.querySelector('.price');
+      if (priceEl) {
+        const flashClass = s.price > oldPrice ? 'flash-up' : 'flash-down';
+        priceEl.classList.add(flashClass);
+        setTimeout(() => priceEl.classList.remove(flashClass), 500);
+      }
+    }
+  }
 }
 
 function updateSummary(){
@@ -1068,6 +1101,7 @@ async function refreshPrices(){
           hasUpdates = true; 
           for (let idx = 0; idx < 5; idx++) {
             tabStocks[idx].filter(s => s.symbol === sym).forEach(s => {
+              const oldPrice = s.price;
               if (r) {
                 s.price = r.price; s.change = r.change; s.changePercent = r.changePercent;
                 if(r.name && !s.name) s.name = r.name;
@@ -1078,7 +1112,7 @@ async function refreshPrices(){
                 s.pct60 = hist.d60 != null ? ((s.price - hist.d60) / hist.d60) * 100 : null;
                 s.pct120 = hist.d120 != null ? ((s.price - hist.d120) / hist.d120) * 100 : null;
               }
-              if (idx === currentTab) renderRow(s);
+              if (idx === currentTab) renderRow(s, oldPrice);
             });
           }
         }
@@ -1298,6 +1332,7 @@ function openModal(){
   $('fugleKeyInput').value = fugleKey; $('secondFugleKeyInput').value = secondFugleKey;
   $('tabCountSelect').value = tabCount;
   $('tickerToggleBtn').textContent = `📰 財經新聞列：${showTicker ? '已開啟' : '已關閉'}`;
+  $('flashToggleBtn').textContent = `💡 報價閃爍提醒：${enableFlash ? '已開啟' : '已關閉'}`;
   applyHistColsState(); 
   
   ['fugleKey','secondFugleKey'].forEach((id, i) => {
@@ -1360,7 +1395,7 @@ function exportData() {
     tabRecords: Array.from({length: 5}, (_, i) => LS.get(LS.KEYS.RECORD(i), [])),
     tabNames: LS.get(LS.KEYS.TAB_NAMES, ['分頁 1', '分頁 2', '分頁 3', '分頁 4', '分頁 5']),
     fugleKey, secondFugleKey, theme: LS.getStr(LS.KEYS.THEME, 'light'), 
-    tabCount, customForeignIndices: availableIndices 
+    tabCount, customForeignIndices: availableIndices, enableFlash 
   };
   
   const a = document.createElement('a'); 
@@ -1386,6 +1421,7 @@ function importData(e) {
       if (d.theme) LS.set(LS.KEYS.THEME, d.theme);
       if (d.tabCount !== undefined) LS.set(LS.KEYS.TAB_COUNT, d.tabCount);
       if (d.customForeignIndices) LS.set(LS.KEYS.FOREIGN_IDX, typeof d.customForeignIndices === 'string' ? JSON.parse(d.customForeignIndices) : d.customForeignIndices);
+      if (d.enableFlash !== undefined) LS.set(LS.KEYS.FLASH, d.enableFlash);
       
       alert('🎉 還原成功！'); location.reload();
     } catch(err) { alert('❌ 檔案格式錯誤。'); console.error(err); }
