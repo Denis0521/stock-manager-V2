@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.26'; 
+const APP_VER = 'V7.27'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -186,13 +186,13 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .tab-btn:hover { color: var(--t-main); filter: brightness(1.05); opacity: 0.85; }
 .tab-btn.active { background: var(--bg-card); color: var(--accent); font-weight: 800; height: 36px; z-index: 3; border-bottom: 2px solid var(--bg-card); box-shadow: none; opacity: 1; }
 
-/* ========================================================= 📈 指數滑動卡片區調整 ========================================================= */
+/* ========================================================= 📈 指數滑動卡片區調整 (三級結構) ========================================================= */
 .idx-scroll-container { margin: 6px 10px; overflow-x: auto; display: flex; gap: 0; padding: 6px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
 
 .idx-card-box { 
   flex: 0 0 auto; 
-  min-width: 220px; 
+  min-width: 230px; 
   padding: 6px 14px; 
   scroll-snap-align: start; 
   border-right: 1px solid var(--s-dark); 
@@ -208,21 +208,22 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .idx-card-box.dragging { opacity: 0.4; transform: scale(0.95); }
 .idx-card-box.drag-over { border-left: 3px solid var(--accent); }
 .idx-card-box:last-child { border-right: none; }
-.idx-box-name { font-size: 15px; color: var(--t-muted); font-weight: 600; line-height: 1.2; } 
 
+/* 一級標題 */
+.idx-box-name { font-size: 15px; color: var(--t-muted); font-weight: 700; line-height: 1.2; margin-bottom: 2px; } 
+
+/* 二級與三級列容器 */
 .idx-data-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
-  margin-top: 2px;
+  margin-top: 1px;
 }
-.idx-box-price-wrap {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-}
-.idx-box-price { font-size: 17px; font-weight: 800; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
+
+/* 數據與標籤排版 */
+.idx-box-price-wrap { display: flex; align-items: baseline; gap: 6px; }
+.idx-box-price { font-size: 16px; font-weight: 800; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
 .idx-box-change-row { display: flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 700; white-space: nowrap; }
 .idx-box-vol { font-size: 13px; color: var(--t-main); font-weight: 700; white-space: nowrap; }
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 2px; opacity: 0.7; }
@@ -376,7 +377,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
 
   .idx-card-box { min-width: 250px; padding: 8px 16px; }
   .idx-box-name { font-size: 16px; }
-  .idx-box-price { font-size: 18px; } 
+  .idx-box-price { font-size: 17px; } 
   .idx-box-change-row { font-size: 15px; }
   .idx-box-vol { font-size: 14px; }
 
@@ -407,22 +408,25 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   </div>
 </div>
 
-<!-- 📈 上方指數卡片滑動區 -->
+<!-- 📈 上方指數卡片滑動區 (3層獨立層級結構) -->
 <div class="idx-scroll-container" id="idxScrollContainer">
   <div class="idx-card-box">
-    <!-- 一級：大盤指數與今日成交量 -->
-    <div class="idx-data-row">
-      <div class="idx-box-name">🇹🇼 臺灣加權指數</div>
-      <div class="idx-box-vol" id="idxVolume">成交量: —</div>
-    </div>
-    <!-- 二級：今日指數與漲跌幅 -->
+    <!-- 一級：臺灣加權指數標題 -->
+    <div class="idx-box-name" id="idxTitle">🇹🇼 臺灣加權指數</div>
+    
+    <!-- 二級：大盤指數與今日成交量 -->
     <div class="idx-data-row">
       <div class="idx-box-price-wrap">
         <span class="idx-box-price" id="idxPrice">—</span>
-        <div class="idx-box-change-row">
-          <span id="idxChange"></span>
-          <span id="idxPct"></span>
-        </div>
+      </div>
+      <div class="idx-box-vol" id="idxVolume">成交量: —</div>
+    </div>
+    
+    <!-- 三級：今日指數 (最新價) 與漲跌幅 -->
+    <div class="idx-data-row">
+      <div class="idx-box-change-row">
+        <span id="idxChange"></span>
+        <span id="idxPct"></span>
       </div>
     </div>
     <div class="idx-box-src" id="idxSource">Loading...</div>
@@ -540,7 +544,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
         </div>
       </div>
       
-      <div class="api-section" style="margin-bottom: 10px;">
+      <div class="api-section" style="margin-bottom: 16px;">
         <button type="button" id="tickerToggleBtn" onclick="toggleTicker()" style="width: 100%; height: 40px; padding: 0; font-size: 15px; margin-bottom: 8px;">📰 財經新聞列：</button>
         <button type="button" id="histToggleBtnAdvanced" onclick="toggleHistCols()" style="width: 100%; height: 40px; padding: 0; font-size: 15px; margin-bottom: 8px;">📊 漲跌幅 (歷史)：</button>
         
@@ -583,7 +587,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       </div>
       
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.26</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.27</div>
     </div>
   </div>
 </div>
@@ -1040,14 +1044,15 @@ async function fetchHistoryData(sym) {
 
 function updateTwiiDOM(res, isOffline = false) {
   if(!res) return;
-  const nameBox = document.querySelector('#idxScrollContainer .idx-card-box:first-child .idx-box-name');
-  if(nameBox) nameBox.innerHTML = `🇹🇼 臺灣加權指數${isOffline ? '<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>' : ''}`;
+  
+  // 一級：臺灣加權指數標題
+  const titleBox = $('idxTitle');
+  if(titleBox) titleBox.innerHTML = `🇹🇼 臺灣加權指數${isOffline ? '<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>' : ''}`;
   
   const els = { p: $('idxPrice'), c: $('idxChange'), pct: $('idxPct'), v: $('idxVolume'), s: $('idxSource') };
-  if(els.p) els.p.textContent = res.price.toLocaleString('en-US',{maximumFractionDigits:0});
-  if(els.c) { els.c.textContent = getSign(res.change) + res.change.toFixed(2); els.c.className = getColorCls(res.change); }
-  if(els.pct) { els.pct.textContent = `(${getSign(res.changePercent)}${res.changePercent.toFixed(2)}%)`; els.pct.className = getColorCls(res.changePercent); }
   
+  // 二級：大盤指數與今日成交量
+  if(els.p) els.p.textContent = res.price.toLocaleString('en-US',{maximumFractionDigits:0});
   if(els.v) {
     if (res.volume && res.volume > 0) {
       const volInHundredMillion = Math.round(res.volume / 100000000);
@@ -1057,6 +1062,10 @@ function updateTwiiDOM(res, isOffline = false) {
     }
   }
 
+  // 三級：今日指數與漲跌幅
+  if(els.c) { els.c.textContent = getSign(res.change) + res.change.toFixed(2); els.c.className = getColorCls(res.change); }
+  if(els.pct) { els.pct.textContent = `(${getSign(res.changePercent)}${res.changePercent.toFixed(2)}%)`; els.pct.className = getColorCls(res.changePercent); }
+  
   if(els.s) els.s.textContent = `via ${res.source} ${isOffline ? '(快取)' : new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'})}`;
 }
 
@@ -1157,7 +1166,7 @@ async function refreshPrices(){
   renderApiStats();
 }
 
-/* ========================================================= 🔀 指數卡片拖拽排序功能 ========================================================= */
+/* ========================================================= 🔀 指數卡片拖拽排序功能 (三級結構) ========================================================= */
 let draggedIdxSymbol = null;
 
 function renderGlobalIndices(indices, isOffline = false) {
@@ -1171,14 +1180,19 @@ function renderGlobalIndices(indices, isOffline = false) {
     return `<div class="idx-card-box draggable-card" draggable="true" data-symbol="${escapeHTML(item.symbol)}">
       <!-- 一級：國外指數名稱 -->
       <div class="idx-box-name">${escapeHTML(name)}${isOffline ? '<span style="color:var(--t-muted);font-size:12px;margin-left:6px;opacity:0.8;">(離線)</span>' : ''}</div>
-      <!-- 二級：今日指數與漲跌幅 -->
+      
+      <!-- 二級：指數 (當前數值) -->
       <div class="idx-data-row">
         <div class="idx-box-price-wrap">
           <span class="idx-box-price">${item.price.toLocaleString('en-US', {maximumFractionDigits:2})}</span>
-          <div class="idx-box-change-row ${cls}">
-            <span>${getSign(item.changeAmt)}${item.changeAmt.toFixed(2)}</span>
-            <span>(${getSign(item.pct)}${item.pct.toFixed(2)}%)</span>
-          </div>
+        </div>
+      </div>
+      
+      <!-- 三級：今日指數 (漲跌/幅度) -->
+      <div class="idx-data-row">
+        <div class="idx-box-change-row ${cls}">
+          <span>${getSign(item.changeAmt)}${item.changeAmt.toFixed(2)}</span>
+          <span>(${getSign(item.pct)}${item.pct.toFixed(2)}%)</span>
         </div>
       </div>
       <div class="idx-box-src">via Yahoo ${isOffline ? 'Cache' : ''}</div>
