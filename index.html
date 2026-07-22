@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.25'; 
+const APP_VER = 'V7.26'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -193,7 +193,7 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .idx-card-box { 
   flex: 0 0 auto; 
   min-width: 220px; 
-  padding: 4px 14px; 
+  padding: 6px 14px; 
   scroll-snap-align: start; 
   border-right: 1px solid var(--s-dark); 
   text-align: left; 
@@ -208,15 +208,14 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .idx-card-box.dragging { opacity: 0.4; transform: scale(0.95); }
 .idx-card-box.drag-over { border-left: 3px solid var(--accent); }
 .idx-card-box:last-child { border-right: none; }
-.idx-box-name { font-size: 15px; color: var(--t-muted); font-weight: 600; margin-bottom: 2px; line-height: 1.2; } 
+.idx-box-name { font-size: 15px; color: var(--t-muted); font-weight: 600; line-height: 1.2; } 
 
-/* 橫向排列：價格、漲跌與右側成交量 */
 .idx-data-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 .idx-box-price-wrap {
   display: flex;
@@ -375,7 +374,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   .btn-backup { font-size: 17px; padding: 10px 14px; }
   .v-box { font-size: 15px; }
 
-  .idx-card-box { min-width: 250px; padding: 6px 16px; }
+  .idx-card-box { min-width: 250px; padding: 8px 16px; }
   .idx-box-name { font-size: 16px; }
   .idx-box-price { font-size: 18px; } 
   .idx-box-change-row { font-size: 15px; }
@@ -408,10 +407,15 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   </div>
 </div>
 
-<!-- 📈 上方指數卡片滑動區 (橫向整合成交量) -->
+<!-- 📈 上方指數卡片滑動區 -->
 <div class="idx-scroll-container" id="idxScrollContainer">
   <div class="idx-card-box">
-    <div class="idx-box-name">🇹🇼 臺灣加權指數</div>
+    <!-- 一級：大盤指數與今日成交量 -->
+    <div class="idx-data-row">
+      <div class="idx-box-name">🇹🇼 臺灣加權指數</div>
+      <div class="idx-box-vol" id="idxVolume">成交量: —</div>
+    </div>
+    <!-- 二級：今日指數與漲跌幅 -->
     <div class="idx-data-row">
       <div class="idx-box-price-wrap">
         <span class="idx-box-price" id="idxPrice">—</span>
@@ -420,7 +424,6 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
           <span id="idxPct"></span>
         </div>
       </div>
-      <div class="idx-box-vol" id="idxVolume">成交量: —</div>
     </div>
     <div class="idx-box-src" id="idxSource">Loading...</div>
   </div>
@@ -580,7 +583,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       </div>
       
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.25</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.26</div>
     </div>
   </div>
 </div>
@@ -1166,7 +1169,9 @@ function renderGlobalIndices(indices, isOffline = false) {
     const name = matched ? matched.name : item.name;
     const cls = getColorCls(item.pct);
     return `<div class="idx-card-box draggable-card" draggable="true" data-symbol="${escapeHTML(item.symbol)}">
+      <!-- 一級：國外指數名稱 -->
       <div class="idx-box-name">${escapeHTML(name)}${isOffline ? '<span style="color:var(--t-muted);font-size:12px;margin-left:6px;opacity:0.8;">(離線)</span>' : ''}</div>
+      <!-- 二級：今日指數與漲跌幅 -->
       <div class="idx-data-row">
         <div class="idx-box-price-wrap">
           <span class="idx-box-price">${item.price.toLocaleString('en-US', {maximumFractionDigits:2})}</span>
