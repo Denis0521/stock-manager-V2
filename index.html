@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.28'; 
+const APP_VER = 'V7.29'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -192,7 +192,7 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 
 .idx-card-box { 
   flex: 0 0 auto; 
-  min-width: 180px; /* 縮短欄位寬度 */
+  min-width: 180px;
   padding: 6px 12px; 
   scroll-snap-align: start; 
   border-right: 1px solid var(--s-dark); 
@@ -216,16 +216,16 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .idx-data-row {
   display: flex;
   align-items: baseline;
-  justify-content: flex-end; /* 數字向右靠齊 */
+  justify-content: flex-end; 
   gap: 8px;
   margin-top: 1px;
 }
 
 /* 數據與標籤排版 */
 .idx-box-price-wrap { display: flex; align-items: baseline; gap: 6px; }
-.idx-box-price { font-size: 17px; font-weight: 800; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); } /* 指數與股票代號大小一致 (17px) */
+.idx-box-price { font-size: 17px; font-weight: 800; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); } 
 .idx-box-change-row { display: flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 700; white-space: nowrap; }
-.idx-box-vol { font-size: 15px; color: var(--t-main); font-weight: 800; white-space: nowrap; } /* 成交量字體加大一階 (15px) */
+.idx-box-vol { font-size: 15px; color: var(--t-main); font-weight: 800; white-space: nowrap; } 
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 2px; opacity: 0.7; }
 
 /* ========================================================= 📈 內容區塊排版與 Grid 調整 ========================================================= */
@@ -408,21 +408,21 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   </div>
 </div>
 
-<!-- 📈 上方指數卡片滑動區 (3層獨立層級結構) -->
+<!-- 📈 上方指數卡片滑動區 -->
 <div class="idx-scroll-container" id="idxScrollContainer">
   <div class="idx-card-box">
     <!-- 一級：臺灣加權指數標題 -->
     <div class="idx-box-name" id="idxTitle">🇹🇼 臺灣加權指數</div>
     
-    <!-- 二級：大盤指數與今日成交量 (靠右) -->
+    <!-- 二級：大盤指數與今日成交量 (已移除標題，改用圓括號) -->
     <div class="idx-data-row">
       <div class="idx-box-price-wrap">
         <span class="idx-box-price" id="idxPrice">—</span>
       </div>
-      <div class="idx-box-vol" id="idxVolume">成交量: —</div>
+      <div class="idx-box-vol" id="idxVolume">(—)</div>
     </div>
     
-    <!-- 三級：今日指數 (最新價) 與漲跌幅 (靠右) -->
+    <!-- 三級：今日指數 (最新價) 與漲跌幅 -->
     <div class="idx-data-row">
       <div class="idx-box-change-row">
         <span id="idxChange"></span>
@@ -587,7 +587,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       </div>
       
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.28</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.29</div>
     </div>
   </div>
 </div>
@@ -1051,14 +1051,14 @@ function updateTwiiDOM(res, isOffline = false) {
   
   const els = { p: $('idxPrice'), c: $('idxChange'), pct: $('idxPct'), v: $('idxVolume'), s: $('idxSource') };
   
-  // 二級：大盤指數與今日成交量
+  // 二級：大盤指數與今日成交量 (已移除標題，直接以括號包裹)
   if(els.p) els.p.textContent = res.price.toLocaleString('en-US',{maximumFractionDigits:0});
   if(els.v) {
     if (res.volume && res.volume > 0) {
       const volInHundredMillion = Math.round(res.volume / 100000000);
-      els.v.textContent = `成交量: ${volInHundredMillion > 0 ? volInHundredMillion.toLocaleString() + ' 億' : res.volume.toLocaleString()}`;
+      els.v.textContent = `(${volInHundredMillion > 0 ? volInHundredMillion.toLocaleString() + ' 億' : res.volume.toLocaleString()})`;
     } else {
-      els.v.textContent = `成交量: —`;
+      els.v.textContent = `(—)`;
     }
   }
 
