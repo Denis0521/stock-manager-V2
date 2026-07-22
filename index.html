@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.22'; 
+const APP_VER = 'V7.23'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -186,7 +186,7 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .tab-btn:hover { color: var(--t-main); filter: brightness(1.05); opacity: 0.85; }
 .tab-btn.active { background: var(--bg-card); color: var(--accent); font-weight: 800; height: 36px; z-index: 3; border-bottom: 2px solid var(--bg-card); box-shadow: none; opacity: 1; }
 
-/* ========================================================= 📈 指數滑動卡片區調整 (可拖動) ========================================================= */
+/* ========================================================= 📈 指數滑動卡片區調整 ========================================================= */
 .idx-scroll-container { margin: 6px 10px; overflow-x: auto; display: flex; gap: 0; padding: 2px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
 
@@ -209,6 +209,7 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .idx-box-price { font-size: 17px; font-weight: 700; margin: 1px 0; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); text-align: right; }
 
 .idx-box-change-row { display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 15.6px; font-weight: 700; white-space: nowrap; }
+.idx-box-vol { font-size: 12px; color: var(--t-main); font-weight: 600; text-align: right; margin-top: 1px; }
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 1px; opacity: 0.7; }
 
 /* ========================================================= 📈 內容區塊排版與 Grid 調整 ========================================================= */
@@ -398,6 +399,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       <span id="idxChange"></span>
       <span id="idxPct"></span>
     </div>
+    <div class="idx-box-vol" id="idxVolume">成交量: —</div>
     <div class="idx-box-src" id="idxSource">Loading...</div>
   </div>
 </div>
@@ -556,7 +558,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       </div>
       
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.22</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.23</div>
     </div>
   </div>
 </div>
@@ -960,9 +962,9 @@ async function fetchYahoo(sym){
       if (text.length < 2) return null;
       const cols = text.pop().split(',');
       if (cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
-      const p = parseFloat(cols[4]); const o = parseFloat(cols[1]);
+      const p = parseFloat(cols[4]); const o = parseFloat(cols[1]); const v = parseFloat(cols[6] || 0);
       const chg = +(p - o).toFixed(2);
-      trackApiUsage('Yahoo'); return {price: p, change: chg, changePercent: +((chg / o) * 100).toFixed(2), source: 'Yahoo', name: ''};
+      trackApiUsage('Yahoo'); return {price: p, change: chg, changePercent: +((chg / o) * 100).toFixed(2), volume: v, source: 'Yahoo', name: ''};
     } catch(e) { return null; }
   };
   return await tryFetch('.TW') || await tryFetch('.TWO');
@@ -1007,33 +1009,47 @@ function updateTwiiDOM(res, isOffline = false) {
   const nameBox = document.querySelector('#idxScrollContainer .idx-card-box:first-child .idx-box-name');
   if(nameBox) nameBox.innerHTML = `🇹🇼 臺灣加權指數${isOffline ? '<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>' : ''}`;
   
-  const els = { p: $('idxPrice'), c: $('idxChange'), pct: $('idxPct'), s: $('idxSource') };
+  const els = { p: $('idxPrice'), c: $('idxChange'), pct: $('idxPct'), v: $('idxVolume'), s: $('idxSource') };
   if(els.p) els.p.textContent = res.price.toLocaleString('en-US',{maximumFractionDigits:0});
   if(els.c) { els.c.textContent = getSign(res.change) + res.change.toFixed(2); els.c.className = getColorCls(res.change); }
   if(els.pct) { els.pct.textContent = `(${getSign(res.changePercent)}${res.changePercent.toFixed(2)}%)`; els.pct.className = getColorCls(res.changePercent); }
+  
+  if(els.v) {
+    if (res.volume && res.volume > 0) {
+      const volInHundredMillion = Math.round(res.volume / 100000000);
+      els.v.textContent = `成交量: ${volInHundredMillion.toLocaleString()} 億`;
+    } else {
+      els.v.textContent = `成交量: —`;
+    }
+  }
+
   if(els.s) els.s.textContent = `via ${res.source} ${isOffline ? '(快取)' : new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'})}`;
 }
 
 async function refreshPrices(){
   if (navigator.onLine === false) { showToast('處於離線狀態，顯示快取資料'); return; }
   
-  let idxR = await fetchFugle('IX0001');
-  if (!idxR) {
-    try {
-      const res = await fetchWithProxy(`https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`);
-      if(res) {
-        const text = (await res.text()).trim().split('\n');
-        if(text.length >= 2) {
-          const cols = text.pop().split(',');
-          if(cols[4] !== 'null') {
-            const p = parseFloat(cols[4]), o = parseFloat(cols[1]), chg = +(p - o).toFixed(2);
-            idxR = {price: p, change: chg, changePercent: +((chg/o)*100).toFixed(2), source: 'Yahoo'};
-            trackApiUsage('Yahoo');
-          }
+  let idxR = null;
+  try {
+    const res = await fetchWithProxy(`https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`);
+    if(res) {
+      const text = (await res.text()).trim().split('\n');
+      if(text.length >= 2) {
+        const cols = text.pop().split(',');
+        if(cols[4] !== 'null') {
+          const p = parseFloat(cols[4]), o = parseFloat(cols[1]), v = parseFloat(cols[6] || 0), chg = +(p - o).toFixed(2);
+          idxR = {price: p, change: chg, changePercent: +((chg/o)*100).toFixed(2), volume: v, source: 'Yahoo'};
+          trackApiUsage('Yahoo');
         }
       }
-    } catch(e) {}
+    }
+  } catch(e) {}
+
+  if (!idxR) {
+    const fR = await fetchFugle('IX0001');
+    if (fR) idxR = fR;
   }
+
   if(idxR) { updateTwiiDOM(idxR); LS.set(LS.KEYS.CACHE_TWII, idxR); }
 
   try {
