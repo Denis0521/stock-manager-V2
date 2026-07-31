@@ -1523,8 +1523,11 @@ kd('symInput', 'qtyInput'); kd('qtyInput', 'buyPriceInput'); kd('buyPriceInput',
   });
 });
 
-if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-console.log(`股票庫存管理 ${APP_VER} 已啟動`);
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed: ', err));
+  });
+}
 </script>
 </body>
 </html>
