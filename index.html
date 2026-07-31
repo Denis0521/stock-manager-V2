@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.34'; 
+const APP_VER = 'V7.36'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -613,7 +613,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       </div>
       
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.34</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.36</div>
     </div>
   </div>
 </div>
@@ -866,11 +866,11 @@ function getStockHtmlInner(s) {
 
   const pClass = p != null ? getColorCls(chg) : '';
   
-  // 判斷漲跌停（僅當 limitUp / limitDown 明確存在且不等於 null 時）
+  // 判斷漲跌停（僅當 limitUp / limitDown 為有效正數時才顯示）
   let limitClass = '';
-  if (p != null && s.limitUp != null && Math.abs(p - s.limitUp) < 0.005) {
+  if (p != null && s.limitUp != null && s.limitUp > 0 && Math.abs(p - s.limitUp) < 0.005) {
     limitClass = 'limit-up';
-  } else if (p != null && s.limitDown != null && Math.abs(p - s.limitDown) < 0.005) {
+  } else if (p != null && s.limitDown != null && s.limitDown > 0 && Math.abs(p - s.limitDown) < 0.005) {
     limitClass = 'limit-down';
   }
   
@@ -987,21 +987,12 @@ async function fetchFugle(sym){
         const vol = d.total ? (d.total.tradeValue || d.total.tradeVolume || 0) : 0;
         if (p != null) { 
           trackApiUsage('Fugle'); 
-          // 嘗試多種可能欄位名稱
+          // 僅接受有效正數（>0）作為漲跌停價，null 或 0 則視為無限制
           let limitUp = d.limitUpPrice ?? d.limitUp ?? d.priceLimitUp ?? d.limit_up ?? null;
           let limitDown = d.limitDownPrice ?? d.limitDown ?? d.priceLimitDown ?? d.limit_down ?? null;
-          
-          // 後備邏輯：若無明確漲跌停價，但漲跌幅絕對值 ≥ 9.9%，則視為漲跌停（適用於 API 未回報但實際漲跌停的股票）
-          const changePct = d.changePercent ?? 0;
-          if (limitUp == null && changePct >= 9.9) {
-            limitUp = p;
-            console.log(`[備用] ${sym} 漲幅 ${changePct}% 視為漲停`);
-          }
-          if (limitDown == null && changePct <= -9.9) {
-            limitDown = p;
-            console.log(`[備用] ${sym} 跌幅 ${changePct}% 視為跌停`);
-          }
-          
+          // 過濾掉 0 或無效值（若為 0 或負數則設為 null）
+          if (typeof limitUp === 'number' && limitUp <= 0) limitUp = null;
+          if (typeof limitDown === 'number' && limitDown <= 0) limitDown = null;
           return {
             price: p,
             change: d.change ?? 0,
