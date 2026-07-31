@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.33'; 
+const APP_VER = 'V7.34'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -613,7 +613,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       </div>
       
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.33</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.34</div>
     </div>
   </div>
 </div>
@@ -988,9 +988,20 @@ async function fetchFugle(sym){
         if (p != null) { 
           trackApiUsage('Fugle'); 
           // 嘗試多種可能欄位名稱
-          const limitUp = d.limitUpPrice ?? d.limitUp ?? d.priceLimitUp ?? d.limit_up ?? null;
-          const limitDown = d.limitDownPrice ?? d.limitDown ?? d.priceLimitDown ?? d.limit_down ?? null;
-          // 不再使用基於漲跌幅的後備邏輯，避免誤判無漲跌停限制的標的
+          let limitUp = d.limitUpPrice ?? d.limitUp ?? d.priceLimitUp ?? d.limit_up ?? null;
+          let limitDown = d.limitDownPrice ?? d.limitDown ?? d.priceLimitDown ?? d.limit_down ?? null;
+          
+          // 後備邏輯：若無明確漲跌停價，但漲跌幅絕對值 ≥ 9.9%，則視為漲跌停（適用於 API 未回報但實際漲跌停的股票）
+          const changePct = d.changePercent ?? 0;
+          if (limitUp == null && changePct >= 9.9) {
+            limitUp = p;
+            console.log(`[備用] ${sym} 漲幅 ${changePct}% 視為漲停`);
+          }
+          if (limitDown == null && changePct <= -9.9) {
+            limitDown = p;
+            console.log(`[備用] ${sym} 跌幅 ${changePct}% 視為跌停`);
+          }
+          
           return {
             price: p,
             change: d.change ?? 0,
