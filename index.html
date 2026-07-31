@@ -180,8 +180,8 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .form-row button { font-size: 16px; letter-spacing: 2px; padding-left: 18px; }
 .btn-save { width: calc(100% - 20px); padding: 14px; font-size: 17px; margin: 6px 10px; }
 
-/* ========================================================= ⚡ 閃爍動畫與漲跌停樣式 ========================================================= */
-.price, .chg {
+/* ========================================================= ⚡ 閃爍動畫樣式 ========================================================= */
+.price {
   border-radius: 4px;
   padding: 2px 4px;
   transition: background-color 0.4s ease, color 0.4s ease;
@@ -194,10 +194,6 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
   background-color: rgba(22, 163, 74, 0.25) !important;
   color: var(--down) !important;
 }
-
-/* 漲跌停標籤樣式 */
-.limit-up-box { background-color: var(--up) !important; color: #FFFFFF !important; text-shadow: none !important; padding: 2px 6px; border-radius: 6px; box-shadow: var(--shadow-soft); }
-.limit-down-box { background-color: var(--down) !important; color: #FFFFFF !important; text-shadow: none !important; padding: 2px 6px; border-radius: 6px; box-shadow: var(--shadow-soft); }
 
 /* ========================================================= 📂 經典立體漸層頁籤模式 ========================================================= */
 .tabs-bar { display: flex; padding: 0 8px; margin: 6px 10px 0; gap: 4px; align-items: flex-end; }
@@ -279,7 +275,7 @@ body.show-hist .hist-col { display: flex !important; }
 .qty-sub { font-size: 15.6px; color: var(--t-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 600; }
 
 .price-container { width: 100%; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; line-height: 1.2; }
-.srow .price { font-weight: 800; font-size: 17px; }
+.srow .price { font-weight: 800; font-size: 17px; display: inline-flex; align-items: center; gap: 4px; }
 
 .price-sub { font-size: 15.6px; color: var(--t-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; text-align: right; font-weight: 800; }
 
@@ -859,17 +855,17 @@ function getStockHtmlInner(s) {
   }
 
   const pClass = p != null ? getColorCls(chg) : '';
-
-  // ======== 新增漲跌停判斷 ========
-  let isLimitUp = (s.limitUpPrice != null && p != null && p >= s.limitUpPrice);
-  let isLimitDown = (s.limitDownPrice != null && p != null && p <= s.limitDownPrice);
-
-  const priceCustomClass = isLimitUp ? 'limit-up-box' : (isLimitDown ? 'limit-down-box' : pClass);
-  const changeCustomClass = isLimitUp ? 'limit-up-box' : (isLimitDown ? 'limit-down-box' : pClass);
-  // ================================
-
-  const priceHtml = p != null ? `<div class="price-container"><div class="price ${priceCustomClass}">${formatPrice(p)}</div><div class="price-sub">${info.mktValue.toLocaleString()}</div></div>` : '—';
-  const changeHtml = (s.change != null && s.changePercent != null) ? `<div class="change-container"><div class="chg ${changeCustomClass}">${getSign(chg)}${chg.toFixed(2)}</div><div class="change-sub ${changeCustomClass}">(${getSign(s.changePercent)}${s.changePercent.toFixed(2)}%)</div></div>` : '—';
+  
+  // 漲跌停標誌
+  let limitTag = '';
+  if (p != null && s.limitUp != null && Math.abs(p - s.limitUp) < 0.001) {
+    limitTag = `<span style="display:inline-block; background:#dc2626; color:white; padding:1px 6px; border-radius:4px; font-size:12px; font-weight:bold; margin-left:4px;">漲停</span>`;
+  } else if (p != null && s.limitDown != null && Math.abs(p - s.limitDown) < 0.001) {
+    limitTag = `<span style="display:inline-block; background:#16a34a; color:white; padding:1px 6px; border-radius:4px; font-size:12px; font-weight:bold; margin-left:4px;">跌停</span>`;
+  }
+  
+  const priceHtml = p != null ? `<div class="price-container"><div class="price ${pClass}">${formatPrice(p)}${limitTag}</div><div class="price-sub">${info.mktValue.toLocaleString()}</div></div>` : '—';
+  const changeHtml = (s.change != null && s.changePercent != null) ? `<div class="change-container"><div class="chg ${pClass}">${getSign(chg)}${chg.toFixed(2)}</div><div class="change-sub ${pClass}">(${getSign(s.changePercent)}${s.changePercent.toFixed(2)}%)</div></div>` : '—';
 
   const safeName = escapeHTML(s.name || '');
   const nameHtml = safeName ? `<div class="sym-name">${safeName}</div>` : '';
@@ -981,10 +977,18 @@ async function fetchFugle(sym){
         const vol = d.total ? (d.total.tradeValue || d.total.tradeVolume || 0) : 0;
         if (p != null) { 
           trackApiUsage('Fugle'); 
+          // 嘗試獲取漲跌停價（Fugle 可能欄位為 limitUp / limitDown 或 limitUpPrice / limitDownPrice）
+          const limitUp = d.limitUp ?? d.limitUpPrice ?? null;
+          const limitDown = d.limitDown ?? d.limitDownPrice ?? null;
           return {
-             price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, 
-             volume: vol, source: 'Fugle', name: d.name || '',
-             limitUpPrice: d.limitUpPrice, limitDownPrice: d.limitDownPrice // 取出漲跌停價
+            price: p,
+            change: d.change ?? 0,
+            changePercent: d.changePercent ?? 0,
+            volume: vol,
+            source: 'Fugle',
+            name: d.name || '',
+            limitUp: limitUp,
+            limitDown: limitDown
           }; 
         }
       }
@@ -1122,8 +1126,11 @@ async function refreshPrices(){
               if (r) {
                 s.price = r.price; s.change = r.change; s.changePercent = r.changePercent;
                 if(r.name && !s.name) s.name = r.name;
-                if (r.limitUpPrice !== undefined) s.limitUpPrice = r.limitUpPrice;
-                if (r.limitDownPrice !== undefined) s.limitDownPrice = r.limitDownPrice;
+                // 僅當來源為 Fugle 時更新漲跌停價（Yahoo 無此資訊）
+                if (r.source === 'Fugle') {
+                  s.limitUp = r.limitUp;
+                  s.limitDown = r.limitDown;
+                }
               }
               if (hist && s.price != null) {
                 s.pct5 = hist.d5 != null ? ((s.price - hist.d5) / hist.d5) * 100 : null;
@@ -1261,7 +1268,7 @@ function addStock(){
     id: 's_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), symbol: sym, name: STOCK_DICT[sym] || '',
     displayQty: qty, displayUnit: unit, buyPrice: isNaN(bp) || bp <= 0 ? null : bp,
     shares: unit === '張' ? qty * 1000 : qty, price: null, change: null, changePercent: null,
-    limitUpPrice: null, limitDownPrice: null
+    limitUp: null, limitDown: null
   });
   LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll();
   ['symInput', 'qtyInput', 'buyPriceInput'].forEach(id => $(id).value = '');
@@ -1285,7 +1292,7 @@ function openEditModal(id) {
 function saveEditStock() {
   const s = tabStocks[currentTab].find(x => x.id === $('editId').value); if (!s) return;
   const sym = $('editSymInput').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-  if (sym && sym !== s.symbol) { s.symbol = sym; s.price = s.change = s.changePercent = s.limitUpPrice = s.limitDownPrice = null; }
+  if (sym && sym !== s.symbol) { s.symbol = sym; s.price = s.change = s.changePercent = null; }
   s.name = $('editNameInput').value.trim();
   const nq = parseInt($('editQtyInput').value);
   if (nq > 0) s.displayQty = nq;
