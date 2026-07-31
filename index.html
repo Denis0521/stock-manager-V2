@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.29'; 
+const APP_VER = 'V7.30'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -180,7 +180,7 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .form-row button { font-size: 16px; letter-spacing: 2px; padding-left: 18px; }
 .btn-save { width: calc(100% - 20px); padding: 14px; font-size: 17px; margin: 6px 10px; }
 
-/* ========================================================= ⚡ 閃爍動畫樣式 ========================================================= */
+/* ========================================================= ⚡ 閃爍與漲跌停板樣式 ========================================================= */
 .price {
   border-radius: 4px;
   padding: 2px 4px;
@@ -193,6 +193,28 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .flash-down {
   background-color: rgba(22, 163, 74, 0.25) !important;
   color: var(--down) !important;
+}
+
+/* 漲停板：紅色方塊 白色字體 */
+.limit-up {
+  background-color: var(--up) !important;
+  color: #FFFFFF !important;
+  padding: 1px 6px !important;
+  border-radius: 4px !important;
+  display: inline-block !important;
+  text-shadow: none !important;
+  font-weight: 800 !important;
+}
+
+/* 跌停板：綠色方塊 白色字體 */
+.limit-down {
+  background-color: var(--down) !important;
+  color: #FFFFFF !important;
+  padding: 1px 6px !important;
+  border-radius: 4px !important;
+  display: inline-block !important;
+  text-shadow: none !important;
+  font-weight: 800 !important;
 }
 
 /* ========================================================= 📂 經典立體漸層頁籤模式 ========================================================= */
@@ -603,7 +625,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       </div>
       
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.29</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.30</div>
     </div>
   </div>
 </div>
@@ -854,7 +876,14 @@ function getStockHtmlInner(s) {
     }
   }
 
-  const pClass = p != null ? getColorCls(chg) : '';
+  // 判斷是否觸及漲停板或跌停板 (透過 API 的 limitUpPrice / limitDownPrice 精確判斷)
+  const isLimitUp = s.limitUpPrice != null && s.limitUpPrice > 0 && p != null && p >= (s.limitUpPrice - 0.001);
+  const isLimitDown = s.limitDownPrice != null && s.limitDownPrice > 0 && p != null && p <= (s.limitDownPrice + 0.001);
+
+  let pClass = p != null ? getColorCls(chg) : '';
+  if (isLimitUp) pClass = 'limit-up';
+  else if (isLimitDown) pClass = 'limit-down';
+
   const priceHtml = p != null ? `<div class="price-container"><div class="price ${pClass}">${formatPrice(p)}</div><div class="price-sub">${info.mktValue.toLocaleString()}</div></div>` : '—';
   const changeHtml = (s.change != null && s.changePercent != null) ? `<div class="change-container"><div class="chg ${pClass}">${getSign(chg)}${chg.toFixed(2)}</div><div class="change-sub ${pClass}">(${getSign(s.changePercent)}${s.changePercent.toFixed(2)}%)</div></div>` : '—';
 
@@ -968,7 +997,16 @@ async function fetchFugle(sym){
         const vol = d.total ? (d.total.tradeValue || d.total.tradeVolume || 0) : 0;
         if (p != null) { 
           trackApiUsage('Fugle'); 
-          return {price: p, change: d.change ?? 0, changePercent: d.changePercent ?? 0, volume: vol, source: 'Fugle', name: d.name || ''}; 
+          return {
+            price: p, 
+            change: d.change ?? 0, 
+            changePercent: d.changePercent ?? 0, 
+            volume: vol, 
+            source: 'Fugle', 
+            name: d.name || '',
+            limitUpPrice: d.limitUpPrice ?? null,
+            limitDownPrice: d.limitDownPrice ?? null
+          }; 
         }
       }
     } catch(e) {}
@@ -1103,7 +1141,11 @@ async function refreshPrices(){
             tabStocks[idx].filter(s => s.symbol === sym).forEach(s => {
               const oldPrice = s.price;
               if (r) {
-                s.price = r.price; s.change = r.change; s.changePercent = r.changePercent;
+                s.price = r.price; 
+                s.change = r.change; 
+                s.changePercent = r.changePercent;
+                s.limitUpPrice = r.limitUpPrice ?? s.limitUpPrice ?? null;
+                s.limitDownPrice = r.limitDownPrice ?? s.limitDownPrice ?? null;
                 if(r.name && !s.name) s.name = r.name;
               }
               if (hist && s.price != null) {
@@ -1241,7 +1283,8 @@ function addStock(){
   tabStocks[currentTab].push({
     id: 's_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), symbol: sym, name: STOCK_DICT[sym] || '',
     displayQty: qty, displayUnit: unit, buyPrice: isNaN(bp) || bp <= 0 ? null : bp,
-    shares: unit === '張' ? qty * 1000 : qty, price: null, change: null, changePercent: null
+    shares: unit === '張' ? qty * 1000 : qty, price: null, change: null, changePercent: null,
+    limitUpPrice: null, limitDownPrice: null
   });
   LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll();
   ['symInput', 'qtyInput', 'buyPriceInput'].forEach(id => $(id).value = '');
@@ -1265,7 +1308,7 @@ function openEditModal(id) {
 function saveEditStock() {
   const s = tabStocks[currentTab].find(x => x.id === $('editId').value); if (!s) return;
   const sym = $('editSymInput').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-  if (sym && sym !== s.symbol) { s.symbol = sym; s.price = s.change = s.changePercent = null; }
+  if (sym && sym !== s.symbol) { s.symbol = sym; s.price = s.change = s.changePercent = null; s.limitUpPrice = s.limitDownPrice = null; }
   s.name = $('editNameInput').value.trim();
   const nq = parseInt($('editQtyInput').value);
   if (nq > 0) s.displayQty = nq;
