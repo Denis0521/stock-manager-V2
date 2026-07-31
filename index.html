@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.31'; 
+const APP_VER = 'V7.29'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -180,7 +180,7 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .form-row button { font-size: 16px; letter-spacing: 2px; padding-left: 18px; }
 .btn-save { width: calc(100% - 20px); padding: 14px; font-size: 17px; margin: 6px 10px; }
 
-/* ========================================================= ⚡ 閃爍動畫與漲停板樣式 ========================================================= */
+/* ========================================================= ⚡ 閃爍動畫樣式 ========================================================= */
 .price {
   border-radius: 4px;
   padding: 2px 4px;
@@ -193,24 +193,6 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .flash-down {
   background-color: rgba(22, 163, 74, 0.25) !important;
   color: var(--down) !important;
-}
-
-/* 漲停板特殊視覺樣式 */
-.limit-up {
-  background-color: #DC2626 !important;
-  color: #FFFFFF !important;
-  border-radius: 4px;
-  padding: 2px 6px;
-  font-weight: 900 !important;
-  box-shadow: 0 0 6px rgba(220, 38, 38, 0.8), inset 0 0 4px #FFE100;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5) !important;
-  display: inline-block;
-  border: 1px solid #FFE100;
-}
-
-.limit-up-card {
-  box-shadow: 0 0 10px rgba(220, 38, 38, 0.5) !important;
-  border: 1px solid #DC2626 !important;
 }
 
 /* ========================================================= 📂 經典立體漸層頁籤模式 ========================================================= */
@@ -443,7 +425,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
 
 <!-- 📈 上方指數卡片滑動區 -->
 <div class="idx-scroll-container" id="idxScrollContainer">
-  <div class="idx-card-box" id="twiiCardBox">
+  <div class="idx-card-box">
     <!-- 一級：臺灣加權指數標題 -->
     <div class="idx-box-name" id="idxTitle">🇹🇼 臺灣加權指數</div>
     
@@ -563,7 +545,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
     <div style="max-width: 90%; margin: 0 auto;">
       
       <div class="settings-row" style="margin-bottom: 8px;">
-        <button type="button" class="btn-manual-row" onclick="$('manualOverlay').classList.add('show')" style="height: 40px; padding: 0; font-size: 15px;">📖 系統說明</button>
+        <button type="button" class="btn-manual-row" onclick="$('manualOverlay').classList.add('show')" style="height: 40px; padding: 0; font-size: 15px;">📖 系統使用說明</button>
         <div class="tab-count-wrapper" style="height: 40px; padding: 0 10px; flex-direction: row; align-items: center; gap: 6px;">
           <div class="tab-count-label" style="margin-bottom: 0; font-size: 13px; white-space: nowrap;">分頁數量</div>
           <select id="tabCountSelect" style="font-size: 14px; padding: 0; flex: 1;">
@@ -621,7 +603,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       </div>
       
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.31</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.29</div>
     </div>
   </div>
 </div>
@@ -645,7 +627,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
 
 <div class="modal-overlay" id="manualOverlay">
   <div class="modal">
-    <h2>📖 系統說明</h2>
+    <h2>📖 系統使用說明</h2>
     <div class="manual-content">
       <h3>一、基本操作與名詞解釋</h3>
       <ul>
@@ -840,13 +822,7 @@ function renderTabs() {
 /* ========================================================= 🖥 核心業務邏輯與渲染 ========================================================= */
 const formatPrice = p => p == null ? '—' : (Math.abs(p) >= 1000 ? p.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : p.toFixed(2));
 const getSign = n => n >= 0 ? '+' : '';
-const getColorCls = (n, pct) => {
-  // 判斷是否達台股漲停 (約 9.8% ~ 10.05% 以上)
-  if (pct != null && pct >= 9.8 && n > 0) {
-    return 'limit-up';
-  }
-  return n > 0 ? 'up' : (n < 0 ? 'down' : '');
-};
+const getColorCls = n => n > 0 ? 'up' : (n < 0 ? 'down' : '');
 
 function calcStockInfo(s) {
   const shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
@@ -866,7 +842,6 @@ function calcStockInfo(s) {
 
 function getStockHtmlInner(s) {
   const info = calcStockInfo(s), p = s.price, chg = s.change ?? 0;
-  const pct = s.changePercent ?? 0;
   
   let totalHtml = '—', totalValForClass = 0;
   if (p != null) {
@@ -879,15 +854,15 @@ function getStockHtmlInner(s) {
     }
   }
 
-  const pClass = p != null ? getColorCls(chg, pct) : '';
+  const pClass = p != null ? getColorCls(chg) : '';
   const priceHtml = p != null ? `<div class="price-container"><div class="price ${pClass}">${formatPrice(p)}</div><div class="price-sub">${info.mktValue.toLocaleString()}</div></div>` : '—';
-  const changeHtml = (s.change != null && s.changePercent != null) ? `<div class="change-container"><div class="chg ${pClass}">${getSign(chg)}${chg.toFixed(2)}</div><div class="change-sub ${pClass}">(${getSign(pct)}${pct.toFixed(2)}%)</div></div>` : '—';
+  const changeHtml = (s.change != null && s.changePercent != null) ? `<div class="change-container"><div class="chg ${pClass}">${getSign(chg)}${chg.toFixed(2)}</div><div class="change-sub ${pClass}">(${getSign(s.changePercent)}${s.changePercent.toFixed(2)}%)</div></div>` : '—';
 
   const safeName = escapeHTML(s.name || '');
   const nameHtml = safeName ? `<div class="sym-name">${safeName}</div>` : '';
 
   const genPctStr = val => val != null && !isNaN(val) ? `${getSign(val)}${val.toFixed(2)}%` : '—';
-  const genPctCls = val => val != null && !isNaN(val) ? getColorCls(val, val) : '';
+  const genPctCls = val => val != null && !isNaN(val) ? getColorCls(val) : '';
 
   return `
     <div class="sym-container"><div class="sym">${escapeHTML(s.symbol)}</div>${nameHtml}</div>
@@ -1049,12 +1024,6 @@ function updateTwiiDOM(res, isOffline = false) {
   const titleBox = $('idxTitle');
   if(titleBox) titleBox.innerHTML = `🇹🇼 臺灣加權指數${isOffline ? '<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>' : ''}`;
   
-  const cardBox = $('twiiCardBox');
-  if (cardBox) {
-    if (res.changePercent >= 9.8) cardBox.classList.add('limit-up-card');
-    else cardBox.classList.remove('limit-up-card');
-  }
-
   const els = { p: $('idxPrice'), c: $('idxChange'), pct: $('idxPct'), v: $('idxVolume'), s: $('idxSource') };
   if(els.p) els.p.textContent = res.price.toLocaleString('en-US',{maximumFractionDigits:0});
   if(els.v) {
@@ -1064,9 +1033,8 @@ function updateTwiiDOM(res, isOffline = false) {
     } else { els.v.textContent = `(—)`; }
   }
 
-  const cls = getColorCls(res.change, res.changePercent);
-  if(els.c) { els.c.textContent = getSign(res.change) + res.change.toFixed(2); els.c.className = cls; }
-  if(els.pct) { els.pct.textContent = `(${getSign(res.changePercent)}${res.changePercent.toFixed(2)}%)`; els.pct.className = cls; }
+  if(els.c) { els.c.textContent = getSign(res.change) + res.change.toFixed(2); els.c.className = getColorCls(res.change); }
+  if(els.pct) { els.pct.textContent = `(${getSign(res.changePercent)}${res.changePercent.toFixed(2)}%)`; els.pct.className = getColorCls(res.changePercent); }
   if(els.s) els.s.textContent = `via ${res.source} ${isOffline ? '(快取)' : new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'})}`;
 }
 
@@ -1173,9 +1141,8 @@ function renderGlobalIndices(indices, isOffline = false) {
   const html = indices.map(item => {
     const matched = availableIndices.find(idx => idx.symbol === item.symbol);
     const name = matched ? matched.name : item.name;
-    const cls = getColorCls(item.changeAmt, item.pct);
-    const isLimitUpCard = item.pct >= 9.8 ? 'limit-up-card' : '';
-    return `<div class="idx-card-box draggable-card ${isLimitUpCard}" draggable="true" data-symbol="${escapeHTML(item.symbol)}">
+    const cls = getColorCls(item.pct);
+    return `<div class="idx-card-box draggable-card" draggable="true" data-symbol="${escapeHTML(item.symbol)}">
       <div class="idx-box-name">${escapeHTML(name)}${isOffline ? '<span style="color:var(--t-muted);font-size:12px;margin-left:6px;opacity:0.8;">(離線)</span>' : ''}</div>
       <div class="idx-data-row">
         <div class="idx-box-price-wrap"><span class="idx-box-price">${item.price.toLocaleString('en-US', {maximumFractionDigits:2})}</span></div>
@@ -1523,11 +1490,8 @@ kd('symInput', 'qtyInput'); kd('qtyInput', 'buyPriceInput'); kd('buyPriceInput',
   });
 });
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed: ', err));
-  });
-}
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+console.log(`股票庫存管理 ${APP_VER} 已啟動`);
 </script>
 </body>
 </html>
