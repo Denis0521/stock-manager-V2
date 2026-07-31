@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.31'; 
+const APP_VER = 'V7.32'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -603,7 +603,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       </div>
       
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.31</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.32</div>
     </div>
   </div>
 </div>
@@ -978,8 +978,18 @@ async function fetchFugle(sym){
         if (p != null) { 
           trackApiUsage('Fugle'); 
           // 嘗試多種可能欄位名稱
-          const limitUp = d.limitUpPrice ?? d.limitUp ?? d.priceLimitUp ?? d.limit_up ?? null;
-          const limitDown = d.limitDownPrice ?? d.limitDown ?? d.priceLimitDown ?? d.limit_down ?? null;
+          let limitUp = d.limitUpPrice ?? d.limitUp ?? d.priceLimitUp ?? d.limit_up ?? null;
+          let limitDown = d.limitDownPrice ?? d.limitDown ?? d.priceLimitDown ?? d.limit_down ?? null;
+          
+          // 後備邏輯：若無明確漲跌停價，但漲跌幅接近 ±9.5% 以上，則視為漲跌停
+          const changePct = d.changePercent ?? 0;
+          if (limitUp == null && changePct >= 9.5) {
+            limitUp = p;
+          }
+          if (limitDown == null && changePct <= -9.5) {
+            limitDown = p;
+          }
+          
           return {
             price: p,
             change: d.change ?? 0,
