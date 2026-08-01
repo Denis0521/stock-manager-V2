@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.37'; 
+const APP_VER = 'V7.38'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -613,7 +613,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       </div>
       
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.37</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.38</div>
     </div>
   </div>
 </div>
@@ -699,6 +699,9 @@ let currentTab = 0, tabCount = 3, showTicker = true, enableFlash = true, current
 let tabStocks = Array.from({length: 5}, () => []), tabRecords = Array.from({length: 5}, () => []), tabNames = [];
 let fugleKey='', secondFugleKey='', availableIndices = [], cachedGlobalIndices = [], histCache = {}; 
 let showHistCols = false;
+
+// 📦 Ticker 快取：儲存漲跌停價，避免頻繁呼叫 ticker API
+const tickerCache = new Map(); // key: symbol, value: { limitUp, limitDown, timestamp }
 
 class KeyRotator {
   constructor(keys) { this.keys = keys.filter(k => k && k.trim() !== ''); this.index = 0; }
@@ -977,6 +980,60 @@ async function fetchWithProxy(url) {
   return null;
 }
 
+/**
+ * 取得股票的漲跌停價（含 5 分鐘快取 + 觸發式更新）
+ * - 若快取存在且未超過 5 分鐘，直接回傳
+ * - 若該股票目前價格等於漲跌停價，且價格有變動，強制重新取得
+ */
+async function getTickerInfo(sym, currentPrice) {
+  const now = Date.now();
+  const cached = tickerCache.get(sym);
+  const cacheExpiry = 5 * 60 * 1000; // 5 分鐘
+  
+  // 檢查是否需要強制更新：若價格等於漲跌停且價格有變動，重抓
+  let forceUpdate = false;
+  if (cached && currentPrice != null) {
+    const isAtLimit = (cached.limitUp != null && Math.abs(currentPrice - cached.limitUp) < 0.005) ||
+                      (cached.limitDown != null && Math.abs(currentPrice - cached.limitDown) < 0.005);
+    // 若目前處於漲跌停狀態，且價格與上次取得時不同，強制更新
+    if (isAtLimit && cached.priceAtFetch != null && Math.abs(currentPrice - cached.priceAtFetch) > 0.001) {
+      forceUpdate = true;
+    }
+  }
+  
+  // 快取有效且不需強制更新
+  if (cached && !forceUpdate && (now - cached.timestamp < cacheExpiry)) {
+    return cached;
+  }
+  
+  // 呼叫 ticker API
+  const kr = getKeyRotator();
+  if (kr.count === 0) return null;
+  
+  for (let i = 0; i < kr.count; i++) {
+    try {
+      const res = await fetch(TICKER_API + encodeURIComponent(sym), {
+        headers: { 'X-API-KEY': kr.next() },
+        signal: AbortSignal.timeout(API_TIMEOUT)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const limitUp = data.limitUpPrice ?? null;
+        const limitDown = data.limitDownPrice ?? null;
+        // 存入快取
+        tickerCache.set(sym, {
+          limitUp: limitUp,
+          limitDown: limitDown,
+          timestamp: now,
+          priceAtFetch: currentPrice ?? null
+        });
+        return tickerCache.get(sym);
+      }
+    } catch (e) {}
+  }
+  return null;
+}
+
 async function fetchFugle(sym){
   const kr = getKeyRotator(); if (kr.count === 0) return null;
   
@@ -996,38 +1053,24 @@ async function fetchFugle(sym){
   }
   if (!quoteData) return null;
 
-  // 2. 再取得基本資料 (使用 ticker 端點)，包含漲跌停價
-  let tickerData = null;
-  for (let i = 0; i < kr.count; i++){
-    try {
-      const res = await fetch(TICKER_API + encodeURIComponent(sym), { 
-        headers: {'X-API-KEY': kr.next()}, 
-        signal: AbortSignal.timeout(API_TIMEOUT) 
-      });
-      if (res.ok) {
-        tickerData = await res.json();
-        break;
-      }
-    } catch(e) {}
-  }
-
-  // 3. 合併資料並回傳
+  // 2. 取得報價中的價格
   const p = quoteData.lastPrice ?? quoteData.closePrice ?? quoteData.previousClose ?? quoteData.referencePrice ?? quoteData.price;
-  if (p != null) { 
-    trackApiUsage('Fugle'); 
-    return {
-      price: p,
-      change: quoteData.change ?? 0,
-      changePercent: quoteData.changePercent ?? 0,
-      volume: quoteData.total ? (quoteData.total.tradeValue || quoteData.total.tradeVolume || 0) : 0,
-      source: 'Fugle',
-      name: quoteData.name || '',
-      // 從 tickerData 中取得漲跌停價，若無則為 null
-      limitUp: tickerData?.limitUpPrice ?? null,
-      limitDown: tickerData?.limitDownPrice ?? null
-    }; 
-  }
-  return null; 
+  if (p == null) return null;
+
+  // 3. 使用快取機制取得漲跌停價（僅在必要時呼叫 ticker API）
+  const tickerInfo = await getTickerInfo(sym, p);
+  
+  trackApiUsage('Fugle'); 
+  return {
+    price: p,
+    change: quoteData.change ?? 0,
+    changePercent: quoteData.changePercent ?? 0,
+    volume: quoteData.total ? (quoteData.total.tradeValue || quoteData.total.tradeVolume || 0) : 0,
+    source: 'Fugle',
+    name: quoteData.name || '',
+    limitUp: tickerInfo?.limitUp ?? null,
+    limitDown: tickerInfo?.limitDown ?? null
+  };
 }
 
 async function fetchYahoo(sym){
