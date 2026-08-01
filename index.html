@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.36'; 
+const APP_VER = 'V7.37'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -613,7 +613,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       </div>
       
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.36</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.37</div>
     </div>
   </div>
 </div>
@@ -678,6 +678,7 @@ const PROXY_LIST = ['https://api.allorigins.win/raw?url=', 'https://corsproxy.io
 const API_TIMEOUT = 5000;
 const CF_WORKER_URL = 'https://yahoo-index-proxy.denis0521.workers.dev';
 const FUGLE_API = 'https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
+const TICKER_API = 'https://api.fugle.tw/marketdata/v1.0/stock/intraday/ticker/';
 
 /* LocalStorage 統一管理 */
 const LS = {
@@ -978,35 +979,54 @@ async function fetchWithProxy(url) {
 
 async function fetchFugle(sym){
   const kr = getKeyRotator(); if (kr.count === 0) return null;
+  
+  // 1. 先取得報價 (使用 quote 端點)
+  let quoteData = null;
   for (let i = 0; i < kr.count; i++){
     try {
-      const res = await fetch(FUGLE_API + encodeURIComponent(sym), { headers: {'X-API-KEY': kr.next()}, signal: AbortSignal.timeout(API_TIMEOUT) });
+      const res = await fetch(FUGLE_API + encodeURIComponent(sym), { 
+        headers: {'X-API-KEY': kr.next()}, 
+        signal: AbortSignal.timeout(API_TIMEOUT) 
+      });
       if (res.ok) {
-        const d = await res.json();
-        const p = d.lastPrice ?? d.closePrice ?? d.previousClose ?? d.referencePrice ?? d.price;
-        const vol = d.total ? (d.total.tradeValue || d.total.tradeVolume || 0) : 0;
-        if (p != null) { 
-          trackApiUsage('Fugle'); 
-          // 僅接受有效正數（>0）作為漲跌停價，null 或 0 則視為無限制
-          let limitUp = d.limitUpPrice ?? d.limitUp ?? d.priceLimitUp ?? d.limit_up ?? null;
-          let limitDown = d.limitDownPrice ?? d.limitDown ?? d.priceLimitDown ?? d.limit_down ?? null;
-          // 過濾掉 0 或無效值（若為 0 或負數則設為 null）
-          if (typeof limitUp === 'number' && limitUp <= 0) limitUp = null;
-          if (typeof limitDown === 'number' && limitDown <= 0) limitDown = null;
-          return {
-            price: p,
-            change: d.change ?? 0,
-            changePercent: d.changePercent ?? 0,
-            volume: vol,
-            source: 'Fugle',
-            name: d.name || '',
-            limitUp: limitUp,
-            limitDown: limitDown
-          }; 
-        }
+        quoteData = await res.json();
+        break;
       }
     } catch(e) {}
-  } 
+  }
+  if (!quoteData) return null;
+
+  // 2. 再取得基本資料 (使用 ticker 端點)，包含漲跌停價
+  let tickerData = null;
+  for (let i = 0; i < kr.count; i++){
+    try {
+      const res = await fetch(TICKER_API + encodeURIComponent(sym), { 
+        headers: {'X-API-KEY': kr.next()}, 
+        signal: AbortSignal.timeout(API_TIMEOUT) 
+      });
+      if (res.ok) {
+        tickerData = await res.json();
+        break;
+      }
+    } catch(e) {}
+  }
+
+  // 3. 合併資料並回傳
+  const p = quoteData.lastPrice ?? quoteData.closePrice ?? quoteData.previousClose ?? quoteData.referencePrice ?? quoteData.price;
+  if (p != null) { 
+    trackApiUsage('Fugle'); 
+    return {
+      price: p,
+      change: quoteData.change ?? 0,
+      changePercent: quoteData.changePercent ?? 0,
+      volume: quoteData.total ? (quoteData.total.tradeValue || quoteData.total.tradeVolume || 0) : 0,
+      source: 'Fugle',
+      name: quoteData.name || '',
+      // 從 tickerData 中取得漲跌停價，若無則為 null
+      limitUp: tickerData?.limitUpPrice ?? null,
+      limitDown: tickerData?.limitDownPrice ?? null
+    }; 
+  }
   return null; 
 }
 
@@ -1139,11 +1159,9 @@ async function refreshPrices(){
               if (r) {
                 s.price = r.price; s.change = r.change; s.changePercent = r.changePercent;
                 if(r.name && !s.name) s.name = r.name;
-                // 僅當來源為 Fugle 時更新漲跌停價（Yahoo 無此資訊）
-                if (r.source === 'Fugle') {
-                  s.limitUp = r.limitUp;
-                  s.limitDown = r.limitDown;
-                }
+                // 更新漲跌停價
+                s.limitUp = r.limitUp;
+                s.limitDown = r.limitDown;
               }
               if (hist && s.price != null) {
                 s.pct5 = hist.d5 != null ? ((s.price - hist.d5) / hist.d5) * 100 : null;
