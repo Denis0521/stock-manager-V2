@@ -1157,25 +1157,49 @@ async function refreshPrices(){
   }
   if(idxR) { updateTwiiDOM(idxR); LS.set(LS.KEYS.CACHE_TWII, idxR); }
 
+  // ----- 抓取國外指數與期貨（已改為直接使用內建代理） -----
   try {
-    const syms = availableIndices.map(i => i.symbol).join(',');
-    if(syms) {
-      const res = await fetch(`${CF_WORKER_URL}/indices?symbols=${encodeURIComponent(syms)}&_=${Date.now()}`, { signal: AbortSignal.timeout(API_TIMEOUT) });
-      if (res.ok) {
-        const data = await res.json();
-        if(data.indices) {
-          cachedGlobalIndices = data.indices.map(item => ({
-            symbol: item.symbol, name: item.name || item.symbol,
-            price: item.price ?? item.regularMarketPrice ?? item.previousClose ?? 0,
-            changeAmt: item.change ?? item.regularMarketChange ?? 0,
-            pct: item.changePercent ?? item.regularMarketChangePercent ?? 0
-          })).sort((a,b) => syms.indexOf(a.symbol) - syms.indexOf(b.symbol));
-          LS.set(LS.KEYS.CACHE_IDX, cachedGlobalIndices); trackApiUsage('Yahoo');
-          renderGlobalIndices(cachedGlobalIndices, false);
+    const symbols = availableIndices.map(i => i.symbol);
+    if (symbols.length === 0) { renderGlobalIndices([]); return; }
+
+    const results = [];
+    for (let i = 0; i < symbols.length; i++) {
+      const sym = symbols[i];
+      try {
+        // 使用軟體內建代理（支援期貨代號 TXc1.TW）
+        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1d&range=1d`;
+        const res = await fetchWithProxy(url);
+        if (res && res.ok) {
+          const data = await res.json();
+          const meta = data?.chart?.result?.[0]?.meta;
+          const quote = data?.chart?.result?.[0]?.indicators?.quote?.[0];
+          if (meta && quote) {
+            const price = meta.regularMarketPrice ?? meta.previousClose ?? 0;
+            const prevClose = meta.previousClose ?? price;
+            const change = price - prevClose;
+            const pct = (change / prevClose) * 100;
+            const name = meta.shortName || meta.symbol || sym;
+            results.push({ symbol: sym, name, price, changeAmt: change, pct });
+            trackApiUsage('Yahoo');
+          }
         }
-      }
-    } else { renderGlobalIndices([]); }
-  } catch(e) {}
+      } catch(e) { /* 單筆失敗不影響其他 */ }
+      // 避免每秒請求過多，間隔 200ms
+      await new Promise(r => setTimeout(r, 200));
+    }
+
+    if (results.length) {
+      cachedGlobalIndices = results.sort((a, b) => symbols.indexOf(a.symbol) - symbols.indexOf(b.symbol));
+      LS.set(LS.KEYS.CACHE_IDX, cachedGlobalIndices);
+      renderGlobalIndices(cachedGlobalIndices, false);
+    } else {
+      renderGlobalIndices([]);
+    }
+  } catch(e) {
+    console.error(e);
+    renderGlobalIndices([]);
+  }
+  // ----- 抓取結束 -----
 
   if (tabStocks[currentTab].length === 0) { renderApiStats(); return; }
   const uniqueSyms = [...new Set(tabStocks[currentTab].map(s => s.symbol))];
