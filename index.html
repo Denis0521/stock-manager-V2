@@ -254,18 +254,22 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .idx-box-vol { font-size: 15px; color: var(--t-main); font-weight: 800; white-space: nowrap; }
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 2px; opacity: 0.7; }
 
-/* 台指期貨卡片內的報價小工具容器 */
+/* 台指期貨卡片內的迷你圖表容器 - 高度 100px 確保價格完整顯示 */
 .futures-widget-container {
   width: 100%;
-  height: 56px;  /* 固定高度，不撐大卡片 */
+  height: 100px;
   margin-top: 2px;
   border-radius: 4px;
   overflow: hidden;
-}
-/* 讓小工具背景透明，與卡片融合 */
-.futures-widget-container iframe,
-.futures-widget-container > div {
   background: transparent !important;
+}
+.futures-widget-container iframe {
+  border-radius: 4px;
+  background: transparent !important;
+}
+
+@media (max-width: 767px) {
+  .futures-widget-container { height: 90px; }
 }
 
 /* ========================================================= 📈 內容區塊排版與 Grid 調整 ========================================================= */
@@ -370,6 +374,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
 }
 @media (max-width: 767px) {
   .srow, .srow .sym, .srow .chgp, .qty-main, .total-main, .list-header { font-size: 17px; }
+  .futures-widget-container { height: 90px; }
 }
 @media (min-width: 768px) {
   body { font-size: 16px; }
@@ -445,7 +450,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
     <div class="idx-box-src" id="idxSource">Loading...</div>
   </div>
 
-  <!-- 台指期貨卡片（TradingView 純報價小工具） -->
+  <!-- 台指期貨卡片（TradingView Mini Chart） -->
   <div class="idx-card-box" id="futuresCard" style="min-width:190px;">
     <div class="idx-box-name" id="futuresTitle">📈 台指期貨 (早盤)</div>
     <div class="futures-widget-container" id="futuresWidget"></div>
@@ -493,7 +498,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
 
 <div class="toast" id="toast"></div>
 
-<!-- ===== 模態框（保留所有原有功能） ===== -->
+<!-- ===== 模態框 ===== -->
 <div class="modal-overlay" id="historyModalOverlay">
   <div class="modal">
     <button type="button" class="btn-close-icon" onclick="closeModalById('historyModalOverlay')">✕</button>
@@ -654,7 +659,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   </div>
 </div>
 
-<!-- TradingView 腳本（載入後初始化 Symbol Overview） -->
+<!-- TradingView 腳本 -->
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 
 <script>
@@ -741,7 +746,7 @@ function loadState(){
   checkAutoSave();
   setInterval(checkAutoSave, 60000);
 
-  // 初始化台指期貨報價小工具
+  // 初始化台指期貨迷你圖表
   setTimeout(initFuturesWidget, 800);
   // 定時更新早／夜盤標題
   updateFuturesSessionLabel();
@@ -827,7 +832,7 @@ function renderTabs() {
   container.querySelectorAll('.tab-btn').forEach(b => b.style.fontSize = fontSize);
 }
 
-/* ========================================================= 📊 台指期貨 TradingView Symbol Overview 小工具 ========================================================= */
+/* ========================================================= 📊 台指期貨 Mini Chart ========================================================= */
 let futuresWidget = null;
 
 function getFuturesSessionLabel() {
@@ -858,35 +863,25 @@ function initFuturesWidget() {
   }
   const isDark = document.body.classList.contains('tech');
   try {
-    // 使用 SymbolOverview 只顯示價格和漲跌幅，無 K 線
-    futuresWidget = new TradingView.SymbolOverview({
-      "symbols": [
-        ["TXF1!", "台指期|1D"]
-      ],
+    // 使用 Mini Chart，專為嵌入式報價設計，只顯示價格與漲跌幅
+    futuresWidget = new TradingView.MiniChart({
+      "container_id": "futuresWidget",
       "width": "100%",
       "height": "100%",
+      "symbol": "TXF1!",
+      "timezone": "Asia/Taipei",
+      "theme": isDark ? "dark" : "light",
       "locale": "zh_TW",
-      "colorTheme": isDark ? "dark" : "light",
-      "isTransparent": true,
-      "autosize": false,
-      "chartOnly": false,
-      "showVolume": false,
-      "showSymbolLogo": false,
-      "showFloatingTooltip": false,
-      "scalePosition": "no",
-      "scaleMode": "Normal",
-      "fontFamily": "Arial",
-      "fontSize": "medium",
-      "noTimeScale": true,
-      "valuesTracking": "1",
-      "changeMode": "price-and-percent"
+      "hide_volume": true,
+      "hide_side_toolbar": true,
+      "studies": []
     });
   } catch (e) {
-    console.error('期貨報價小工具初始化失敗:', e);
+    console.error('期貨報價初始化失敗:', e);
   }
 }
 
-/* ========================================================= 🖥 核心業務邏輯與渲染（同原版） ========================================================= */
+/* ========================================================= 🖥 核心業務邏輯與渲染 ========================================================= */
 const formatPrice = p => p == null ? '—' : (Math.abs(p) >= 1000 ? p.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : p.toFixed(2));
 const getSign = n => n >= 0 ? '+' : '';
 const getColorCls = n => n > 0 ? 'up' : (n < 0 ? 'down' : '');
@@ -994,7 +989,7 @@ function updateSummary(){
   setHtml('totalUnrealized', hasUnPnl ? getSign(totalUnPnl) + totalUnPnl.toLocaleString() : '—', hasUnPnl ? getColorCls(totalUnPnl) : 'neutral');
 }
 
-/* ========================================================= 📡 網路請求與資料流（同原版） ========================================================= */
+/* ========================================================= 📡 網路請求與資料流 ========================================================= */
 function trackApiUsage(source) {
   const k = `api_usage_${new Date().toISOString().split('T')[0]}_${source}`;
   const c = parseInt(LS.getStr(k, '0')) + 1;
@@ -1247,7 +1242,6 @@ let draggedIdxSymbol = null;
 
 function renderGlobalIndices(indices, isOffline = false) {
   const container = $('idxScrollContainer');
-  // 移除所有自選指數卡片（保留前兩張：臺灣加權 + 期貨）
   while (container.children.length > 2) {
     container.removeChild(container.lastChild);
   }
@@ -1329,7 +1323,7 @@ function handleDragEnd() {
   document.querySelectorAll('.idx-card-box').forEach(card => card.classList.remove('dragging', 'drag-over'));
 }
 
-/* ========================================================= 🖱 互動與資料修改（同原版） ========================================================= */
+/* ========================================================= 🖱 互動與資料修改 ========================================================= */
 const closeModalById = id => $(id).classList.remove('show');
 let toastTimer = null;
 const showToast = msg => { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2000); };
