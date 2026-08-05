@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.38'; 
+const APP_VER = 'V7.39'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -254,20 +254,6 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .idx-box-vol { font-size: 15px; color: var(--t-main); font-weight: 800; white-space: nowrap; }
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 2px; opacity: 0.7; }
 
-/* 台指期貨卡片內的報價小工具容器 */
-.futures-widget-container {
-  width: 100%;
-  height: 56px;  /* 固定高度，不撐大卡片 */
-  margin-top: 2px;
-  border-radius: 4px;
-  overflow: hidden;
-}
-/* 讓小工具背景透明，與卡片融合 */
-.futures-widget-container iframe,
-.futures-widget-container > div {
-  background: transparent !important;
-}
-
 /* ========================================================= 📈 內容區塊排版與 Grid 調整 ========================================================= */
 .table-scroll { margin: 0 10px 6px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; border-top-left-radius: 0; border-top-right-radius: 0; position: relative; z-index: 2; }
 .list-wrap { min-width: 680px; transition: min-width 0.3s ease; }
@@ -445,14 +431,24 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
     <div class="idx-box-src" id="idxSource">Loading...</div>
   </div>
 
-  <!-- 台指期貨卡片（TradingView 純報價小工具） -->
-  <div class="idx-card-box" id="futuresCard" style="min-width:190px;">
-    <div class="idx-box-name" id="futuresTitle">📈 台指期貨 (早盤)</div>
-    <div class="futures-widget-container" id="futuresWidget"></div>
-    <div class="idx-box-src" style="margin-top:0;font-size:10px;opacity:0.6;">via TradingView</div>
+  <!-- 📈 臺灣期貨卡片 (純數據，跟隨主題顏色，支援滑動) -->
+  <div class="idx-card-box" id="futuresCard">
+    <div class="idx-box-name" id="futuresTitle">🇹🇼 台指期貨</div>
+    <div class="idx-data-row">
+      <div class="idx-box-price-wrap">
+        <span class="idx-box-price" id="futuresPrice">—</span>
+      </div>
+    </div>
+    <div class="idx-data-row">
+      <div class="idx-box-change-row">
+        <span id="futuresChange"></span>
+        <span id="futuresPct"></span>
+      </div>
+    </div>
+    <div class="idx-box-src" id="futuresSource">Loading...</div>
   </div>
 
-  <!-- 自選指數由 JavaScript 動態生成 -->
+  <!-- 自選國外指數由 JavaScript 動態生成 -->
 </div>
 
 <div class="tabs-bar" id="tabsBarContainer"></div>
@@ -493,7 +489,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
 
 <div class="toast" id="toast"></div>
 
-<!-- ===== 模態框（保留所有原有功能） ===== -->
+<!-- ===== 模態框 ===== -->
 <div class="modal-overlay" id="historyModalOverlay">
   <div class="modal">
     <button type="button" class="btn-close-icon" onclick="closeModalById('historyModalOverlay')">✕</button>
@@ -603,7 +599,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.38</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.39</div>
     </div>
   </div>
 </div>
@@ -654,9 +650,6 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   </div>
 </div>
 
-<!-- TradingView 腳本（載入後初始化 Symbol Overview） -->
-<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-
 <script>
 /* ========================================================= 🔧 工具與字典 ========================================================= */
 const $ = id => document.getElementById(id);
@@ -676,7 +669,7 @@ const LS = {
     FK: 'tw_fugle_key', SFK: 'tw_second_fugle_key', THEME: 'tw_theme',
     CUR_TAB: 'tw_current_tab', TAB_NAMES: 'tw_tab_names', TAB_COUNT: 'tw_tab_count',
     TICKER: 'tw_show_ticker', FLASH: 'tw_show_flash', FOREIGN_IDX: 'tw_custom_foreign_indices',
-    CACHE_IDX: 'tw_cached_indices', CACHE_TWII: 'tw_cached_twii', HIST_CACHE: 'tw_hist_cache_v1',
+    CACHE_IDX: 'tw_cached_indices', CACHE_TWII: 'tw_cached_twii', CACHE_FUTURES: 'tw_cached_futures', HIST_CACHE: 'tw_hist_cache_v1',
     STOCK: i => `tw_stock_portfolio_tab_${i}`, RECORD: i => `tw_records_tab_${i}`
   },
   get: (k, def) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch(e){ return def; } },
@@ -732,6 +725,9 @@ function loadState(){
   const cachedTwii = LS.get(LS.KEYS.CACHE_TWII, null);
   if (cachedTwii) updateTwiiDOM(cachedTwii, true);
 
+  const cachedFutures = LS.get(LS.KEYS.CACHE_FUTURES, null);
+  if (cachedFutures) updateFuturesDOM(cachedFutures, true);
+
   $('tickerContainer').style.display = showTicker ? 'flex' : 'none';
   renderTabs(); renderApiStats();
   
@@ -740,12 +736,10 @@ function loadState(){
   
   checkAutoSave();
   setInterval(checkAutoSave, 60000);
-
-  // 初始化台指期貨報價小工具
-  setTimeout(initFuturesWidget, 800);
-  // 定時更新早／夜盤標題
-  updateFuturesSessionLabel();
-  setInterval(updateFuturesSessionLabel, 60000);
+  
+  // 定時更新台指期名稱（早盤/夜盤/盤後）
+  updateFuturesSessionTitle();
+  setInterval(updateFuturesSessionTitle, 60000);
 }
 
 function applyThemeText(t){
@@ -765,8 +759,6 @@ function applyThemeText(t){
   $('themeBtn').textContent = theme.emoji;
   $('themeColorMeta').content = theme.color;
   applyHistColsState();
-  // 重新初始化期貨小工具以切換主題
-  setTimeout(initFuturesWidget, 300);
 }
 
 function toggleTheme(){
@@ -827,66 +819,7 @@ function renderTabs() {
   container.querySelectorAll('.tab-btn').forEach(b => b.style.fontSize = fontSize);
 }
 
-/* ========================================================= 📊 台指期貨 TradingView Symbol Overview 小工具 ========================================================= */
-let futuresWidget = null;
-
-function getFuturesSessionLabel() {
-  const now = new Date();
-  const h = now.getHours(), m = now.getMinutes();
-  const minutes = h * 60 + m;
-  if (minutes >= 8*60+45 && minutes < 13*60+45) return '早盤';
-  if (minutes >= 15*60 || minutes < 5*60) return '夜盤';
-  return '盤後';
-}
-
-function updateFuturesSessionLabel() {
-  const label = getFuturesSessionLabel();
-  const el = $('futuresTitle');
-  if (el) el.textContent = `📈 台指期貨 (${label})`;
-}
-
-function initFuturesWidget() {
-  const container = $('futuresWidget');
-  if (!container) return;
-  if (futuresWidget) {
-    try { futuresWidget.remove(); } catch(e) {}
-    futuresWidget = null;
-  }
-  if (typeof TradingView === 'undefined') {
-    setTimeout(initFuturesWidget, 500);
-    return;
-  }
-  const isDark = document.body.classList.contains('tech');
-  try {
-    // 使用 SymbolOverview 只顯示價格和漲跌幅，無 K 線
-    futuresWidget = new TradingView.SymbolOverview({
-      "symbols": [
-        ["TXF1!", "台指期|1D"]
-      ],
-      "width": "100%",
-      "height": "100%",
-      "locale": "zh_TW",
-      "colorTheme": isDark ? "dark" : "light",
-      "isTransparent": true,
-      "autosize": false,
-      "chartOnly": false,
-      "showVolume": false,
-      "showSymbolLogo": false,
-      "showFloatingTooltip": false,
-      "scalePosition": "no",
-      "scaleMode": "Normal",
-      "fontFamily": "Arial",
-      "fontSize": "medium",
-      "noTimeScale": true,
-      "valuesTracking": "1",
-      "changeMode": "price-and-percent"
-    });
-  } catch (e) {
-    console.error('期貨報價小工具初始化失敗:', e);
-  }
-}
-
-/* ========================================================= 🖥 核心業務邏輯與渲染（同原版） ========================================================= */
+/* ========================================================= 🖥 核心業務邏輯與渲染 ========================================================= */
 const formatPrice = p => p == null ? '—' : (Math.abs(p) >= 1000 ? p.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : p.toFixed(2));
 const getSign = n => n >= 0 ? '+' : '';
 const getColorCls = n => n > 0 ? 'up' : (n < 0 ? 'down' : '');
@@ -994,7 +927,7 @@ function updateSummary(){
   setHtml('totalUnrealized', hasUnPnl ? getSign(totalUnPnl) + totalUnPnl.toLocaleString() : '—', hasUnPnl ? getColorCls(totalUnPnl) : 'neutral');
 }
 
-/* ========================================================= 📡 網路請求與資料流（同原版） ========================================================= */
+/* ========================================================= 📡 網路請求與資料流 ========================================================= */
 function trackApiUsage(source) {
   const k = `api_usage_${new Date().toISOString().split('T')[0]}_${source}`;
   const c = parseInt(LS.getStr(k, '0')) + 1;
@@ -1151,9 +1084,68 @@ function updateTwiiDOM(res, isOffline = false) {
   if(els.s) els.s.textContent = `via ${res.source} ${isOffline ? '(快取)' : new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'})}`;
 }
 
+/* ========================================================= 📈 臺灣期貨數據處理與DOM更新 ========================================================= */
+function getFuturesSessionName() {
+  const now = new Date();
+  const m = now.getHours() * 60 + now.getMinutes();
+  if (m >= 8 * 60 + 45 && m < 13 * 60 + 45) return '早盤';
+  if (m >= 15 * 60 || m < 5 * 60) return '夜盤';
+  return '盤後';
+}
+
+function updateFuturesSessionTitle() {
+  const el = $('futuresTitle');
+  if (el) el.innerHTML = `🇹🇼 台指期貨 (${getFuturesSessionName()})`;
+}
+
+function updateFuturesDOM(res, isOffline = false) {
+  if(!res) return;
+  updateFuturesSessionTitle();
+  const els = { p: $('futuresPrice'), c: $('futuresChange'), pct: $('futuresPct'), s: $('futuresSource') };
+  if(els.p) els.p.textContent = res.price.toLocaleString('en-US',{maximumFractionDigits:0});
+  if(els.c) { els.c.textContent = getSign(res.change) + res.change.toFixed(2); els.c.className = getColorCls(res.change); }
+  if(els.pct) { els.pct.textContent = `(${getSign(res.changePercent)}${res.changePercent.toFixed(2)}%)`; els.pct.className = getColorCls(res.changePercent); }
+  if(els.s) els.s.textContent = `via ${res.source} ${isOffline ? '(快取)' : new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'})}`;
+}
+
+async function fetchTaiwanFutures() {
+  try {
+    const res = await fetch(`${CF_WORKER_URL}/indices?symbols=TXF1!&_=${Date.now()}`, { signal: AbortSignal.timeout(API_TIMEOUT) });
+    if (res.ok) {
+      const data = await res.json();
+      if(data.indices && data.indices.length > 0) {
+        const item = data.indices[0];
+        return {
+          price: item.price ?? item.regularMarketPrice ?? 0,
+          change: item.change ?? item.regularMarketChange ?? 0,
+          changePercent: item.changePercent ?? item.regularMarketChangePercent ?? 0,
+          source: 'Yahoo'
+        };
+      }
+    }
+  } catch(e) {}
+  
+  // 備用方案: 直接向 Yahoo 發送代理請求
+  try {
+    const res = await fetchWithProxy(`https://query1.finance.yahoo.com/v7/finance/download/WTX%3DF?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`);
+    if(res) {
+      const text = (await res.text()).trim().split('\n');
+      if(text.length >= 2) {
+        const cols = text.pop().split(',');
+        if(cols[4] !== 'null') {
+          const p = parseFloat(cols[4]), o = parseFloat(cols[1]), chg = +(p - o).toFixed(2);
+          return {price: p, change: chg, changePercent: +((chg/o)*100).toFixed(2), source: 'Yahoo'};
+        }
+      }
+    }
+  } catch(e) {}
+  return null;
+}
+
 async function refreshPrices(){
   if (!navigator.onLine) { showToast('處於離線狀態，顯示快取資料'); return; }
   
+  // 1. 抓取臺灣加權指數
   let idxR = await fetchFugle('IX0001');
   if (!idxR) {
     try {
@@ -1173,6 +1165,11 @@ async function refreshPrices(){
   }
   if(idxR) { updateTwiiDOM(idxR); LS.set(LS.KEYS.CACHE_TWII, idxR); }
 
+  // 2. 抓取臺灣期貨指數
+  const futR = await fetchTaiwanFutures();
+  if(futR) { updateFuturesDOM(futR); LS.set(LS.KEYS.CACHE_FUTURES, futR); }
+
+  // 3. 抓取國外自選指數（透過 Cloudflare Worker）
   try {
     const syms = availableIndices.map(i => i.symbol).join(',');
     if(syms) {
@@ -1193,6 +1190,7 @@ async function refreshPrices(){
     } else { renderGlobalIndices([]); }
   } catch(e) {}
 
+  // 4. 抓取持股報價
   if (tabStocks[currentTab].length === 0) { renderApiStats(); return; }
   const uniqueSyms = [...new Set(tabStocks[currentTab].map(s => s.symbol))];
   let hasUpdates = false;
@@ -1247,11 +1245,11 @@ let draggedIdxSymbol = null;
 
 function renderGlobalIndices(indices, isOffline = false) {
   const container = $('idxScrollContainer');
-  // 移除所有自選指數卡片（保留前兩張：臺灣加權 + 期貨）
+  // 移除所有國外指數卡片 (保留第0張: 加權指數, 第1張: 台灣期貨)
   while (container.children.length > 2) {
     container.removeChild(container.lastChild);
   }
-  const otherIndices = indices.filter(item => item.symbol !== 'IX0001' && item.symbol !== '^TWII');
+  const otherIndices = indices.filter(item => item.symbol !== 'IX0001' && item.symbol !== '^TWII' && item.symbol !== 'TXF1!');
   if (otherIndices.length === 0) return;
   
   const html = otherIndices.map(item => {
@@ -1329,7 +1327,7 @@ function handleDragEnd() {
   document.querySelectorAll('.idx-card-box').forEach(card => card.classList.remove('dragging', 'drag-over'));
 }
 
-/* ========================================================= 🖱 互動與資料修改（同原版） ========================================================= */
+/* ========================================================= 🖱 互動與資料修改 ========================================================= */
 const closeModalById = id => $(id).classList.remove('show');
 let toastTimer = null;
 const showToast = msg => { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2000); };
@@ -1523,82 +1521,76 @@ function importData(e) {
       if(!confirm('⚠️ 將覆蓋所有資料，確定還原？')) return;
       if (d.tabStocks) d.tabStocks.forEach((v, i) => LS.set(LS.KEYS.STOCK(i), typeof v === 'string' ? JSON.parse(v) : v));
       if (d.tabRecords) d.tabRecords.forEach((v, i) => LS.set(LS.KEYS.RECORD(i), typeof v === 'string' ? JSON.parse(v) : v));
-      if (d.tabNames) LS.set(LS.KEYS.TAB_NAMES, typeof d.tabNames === 'string' ? JSON.parse(d.tabNames) : d.tabNames);
+      if (d.tabNames) LS.set(LS.KEYS.TAB_NAMES, d.tabNames);
       if (d.fugleKey !== undefined) LS.set(LS.KEYS.FK, d.fugleKey);
       if (d.secondFugleKey !== undefined) LS.set(LS.KEYS.SFK, d.secondFugleKey);
       if (d.theme) LS.set(LS.KEYS.THEME, d.theme);
       if (d.tabCount !== undefined) LS.set(LS.KEYS.TAB_COUNT, d.tabCount);
-      if (d.customForeignIndices) LS.set(LS.KEYS.FOREIGN_IDX, typeof d.customForeignIndices === 'string' ? JSON.parse(d.customForeignIndices) : d.customForeignIndices);
+      if (d.customForeignIndices) LS.set(LS.KEYS.FOREIGN_IDX, d.customForeignIndices);
       if (d.enableFlash !== undefined) LS.set(LS.KEYS.FLASH, d.enableFlash);
-      alert('🎉 還原成功！'); location.reload();
-    } catch(err) { alert('❌ 檔案格式錯誤。'); console.error(err); }
-    $('importFile').value = '';
+      showToast('✅ 還原成功！即將重新整理');
+      setTimeout(() => location.reload(), 1000);
+    } catch(err) { showToast('❌ 檔案格式錯誤'); }
   };
   r.readAsText(file);
 }
 
-/* ========================================================= 🔄 後台輪詢與生命週期 ========================================================= */
-let lastRefreshTime = 0, isRefreshing = false, lastSuccessTime = 0;
-const workerBlob = new Blob([`let t=null;self.onmessage=e=>{if(e.data.action==='start'){clearInterval(t);t=setInterval(()=>self.postMessage('tick'),e.data.interval)}else if(e.data.action==='stop')clearInterval(t)};`], {type:'application/javascript'});
-window.heartbeatWorker = new Worker(URL.createObjectURL(workerBlob));
-heartbeatWorker.onmessage = () => refresh();
-
-function forceRefresh() { globalKeyRotator = null; lastRefreshTime = 0; isRefreshing = false; refresh(); }
-async function refresh() {
-  const now = Date.now();
-  if (isRefreshing && now - lastRefreshTime > 8000) isRefreshing = false;
-  if (isRefreshing || now - lastRefreshTime < 2000) return;
-  isRefreshing = true; lastRefreshTime = now;
-  try { await refreshPrices(); lastSuccessTime = Date.now(); } catch(e){} finally { isRefreshing = false; }
+function forceRefresh() {
+  refreshPrices();
 }
 
-const handleTouchWakeup = () => { if(Date.now() - lastSuccessTime > 15000 && !isRefreshing) forceRefresh(); };
-document.addEventListener('touchend', handleTouchWakeup, {passive: true});
-document.addEventListener('click', handleTouchWakeup, {passive: true});
-
-async function loadFinanceNews() {
-  const c = $('js-ticker');
+/* ========================================================= 📰 財經新聞跑馬燈 ========================================================= */
+async function fetchNews() {
+  const tickerEl = $('js-ticker');
+  if (!tickerEl) return;
   try {
-    const res = await fetch('https://finance-news-api.denis0521.workers.dev/');
-    if(!res.ok) throw new Error();
-    const data = await res.json();
-    if(!data.length) return c.innerHTML = '<span class="ticker-item">目前暫無新聞</span>';
-    const html = data.map(i => `<a href="${i.link}" target="_blank" class="ticker-item"><span class="ticker-source">${escapeHTML(i.source)}</span>${escapeHTML(i.title)}</a>`).join('');
-    c.innerHTML = html + html;
-    c.style.animationDuration = `${c.textContent.length * 0.18}s`;
-  } catch(e) { c.innerHTML = '<span class="ticker-item" style="color:var(--t-muted);">無法載入即時新聞，請稍後再試</span>'; }
+    const res = await fetch(`${CF_WORKER_URL}/news?_=${Date.now()}`, { signal: AbortSignal.timeout(API_TIMEOUT) });
+    if (res.ok) {
+      const newsList = await res.json();
+      if (Array.isArray(newsList) && newsList.length > 0) {
+        tickerEl.innerHTML = newsList.map(item => `
+          <a class="ticker-item" href="${escapeHTML(item.link || '#')}" target="_blank" rel="noopener noreferrer">
+            <span class="ticker-source">${escapeHTML(item.source || '財經')}</span>${escapeHTML(item.title)}
+          </a>
+        `).join('');
+        const totalWidth = tickerEl.scrollWidth;
+        const duration = Math.max(20, Math.round(totalWidth / 50));
+        tickerEl.style.animationDuration = `${duration}s`;
+        return;
+      }
+    }
+  } catch(e) {}
+  tickerEl.innerHTML = '<span class="ticker-item" style="color:var(--t-muted);">即時財經新聞連線中...</span>';
 }
 
-/* ========================================================= 🚀 啟動與休眠優化 ========================================================= */
-loadState(); renderAll();
-setTimeout(forceRefresh, 500);
-heartbeatWorker.postMessage({action: 'start', interval: currentInterval});
-
-['focus', 'pageshow'].forEach(e => window.addEventListener(e, forceRefresh));
-
-document.addEventListener('visibilitychange', () => { 
-  const isVis = document.visibilityState === 'visible';
-  heartbeatWorker.postMessage({ action: isVis ? 'start' : 'stop', interval: currentInterval });
-  if (isVis) forceRefresh();
+/* ========================================================= 🚀 啟動與 Web Worker 整合 ========================================================= */
+window.addEventListener('DOMContentLoaded', () => {
+  loadState();
+  renderAll();
+  
+  // 建立心跳 Worker 保證背景刷新
+  const workerBlob = new Blob([`
+    let timer = null;
+    self.onmessage = function(e) {
+      if (e.data.action === 'start') {
+        if (timer) clearInterval(timer);
+        timer = setInterval(() => { self.postMessage('tick'); }, e.data.interval);
+      } else if (e.data.action === 'stop') {
+        if (timer) clearInterval(timer);
+      }
+    };
+  `], { type: 'application/javascript' });
+  
+  window.heartbeatWorker = new Worker(URL.createObjectURL(workerBlob));
+  window.heartbeatWorker.onmessage = function(e) {
+    if (e.data === 'tick') refreshPrices();
+  };
+  
+  // 初始即時價格與新聞
+  refreshPrices();
+  fetchNews();
+  setInterval(fetchNews, 600000); // 10分鐘刷新一次新聞
 });
-
-document.addEventListener('DOMContentLoaded', loadFinanceNews);
-
-const kd = (id, next, action) => { $(id).addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); if(next) $(next).focus(); else if(action) action(); } }); };
-kd('symInput', 'qtyInput'); kd('qtyInput', 'buyPriceInput'); kd('buyPriceInput', null, addStock);
-
-['addModalOverlay', 'modalOverlay', 'manualOverlay', 'editModalOverlay', 'foreignIdxOverlay', 'historyModalOverlay'].forEach(id => {
-  const el = $(id);
-  if (el) el.addEventListener('click', function(e) { 
-    if(e.target === this) {
-      if (id === 'foreignIdxOverlay') closeForeignIdxModal();
-      else this.classList.remove('show'); 
-    }
-  });
-});
-
-if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-console.log(`股票庫存管理 ${APP_VER} 已啟動`);
 </script>
 </body>
 </html>
