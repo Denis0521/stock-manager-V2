@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.38'; 
+const APP_VER = 'V7.39'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -435,26 +435,41 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
 
 <!-- 📈 上方指數卡片滑動區 -->
 <div class="idx-scroll-container" id="idxScrollContainer">
+  <!-- 大盤 -->
   <div class="idx-card-box">
-    <!-- 一級：臺灣加權指數標題 -->
     <div class="idx-box-name" id="idxTitle">🇹🇼 臺灣加權指數</div>
-    
-    <!-- 二級：大盤指數與今日成交量 -->
     <div class="idx-data-row">
-      <div class="idx-box-price-wrap">
-        <span class="idx-box-price" id="idxPrice">—</span>
-      </div>
+      <div class="idx-box-price-wrap"><span class="idx-box-price" id="idxPrice">—</span></div>
       <div class="idx-box-vol" id="idxVolume">(—)</div>
     </div>
-    
-    <!-- 三級：今日指數與漲跌幅 -->
     <div class="idx-data-row">
-      <div class="idx-box-change-row">
-        <span id="idxChange"></span>
-        <span id="idxPct"></span>
-      </div>
+      <div class="idx-box-change-row"><span id="idxChange"></span><span id="idxPct"></span></div>
     </div>
     <div class="idx-box-src" id="idxSource">Loading...</div>
+  </div>
+
+  <!-- 台指期（早盤） -->
+  <div class="idx-card-box">
+    <div class="idx-box-name" id="txDayTitle">🇹🇼 台指期（早盤）</div>
+    <div class="idx-data-row">
+      <div class="idx-box-price-wrap"><span class="idx-box-price" id="txDayPrice">—</span></div>
+    </div>
+    <div class="idx-data-row">
+      <div class="idx-box-change-row"><span id="txDayChange"></span><span id="txDayPct"></span></div>
+    </div>
+    <div class="idx-box-src" id="txDaySource">Loading...</div>
+  </div>
+
+  <!-- 台指期（夜盤） -->
+  <div class="idx-card-box">
+    <div class="idx-box-name" id="txNightTitle">🌙 台指期（夜盤）</div>
+    <div class="idx-data-row">
+      <div class="idx-box-price-wrap"><span class="idx-box-price" id="txNightPrice">—</span></div>
+    </div>
+    <div class="idx-data-row">
+      <div class="idx-box-change-row"><span id="txNightChange"></span><span id="txNightPct"></span></div>
+    </div>
+    <div class="idx-box-src" id="txNightSource">Loading...</div>
   </div>
 </div>
 
@@ -613,7 +628,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       </div>
       
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.38</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.39</div>
     </div>
   </div>
 </div>
@@ -677,6 +692,7 @@ const DEFAULT_INDICES = [{symbol:'^DJI',name:'🇺🇸 道瓊工業指數'},{sym
 const PROXY_LIST = ['https://api.allorigins.win/raw?url=', 'https://corsproxy.io/?', 'https://api.codetabs.com/v1/proxy?quest=', 'https://thingproxy.freeboard.io/fetch/'];
 const API_TIMEOUT = 5000;
 const CF_WORKER_URL = 'https://yahoo-index-proxy.denis0521.workers.dev';
+const TAIFEX_WORKER_URL = 'https://taifex.denis0521.workers.dev/taifex';
 const FUGLE_API = 'https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
 const TICKER_API = 'https://api.fugle.tw/marketdata/v1.0/stock/intraday/ticker/';
 
@@ -686,7 +702,7 @@ const LS = {
     FK: 'tw_fugle_key', SFK: 'tw_second_fugle_key', THEME: 'tw_theme',
     CUR_TAB: 'tw_current_tab', TAB_NAMES: 'tw_tab_names', TAB_COUNT: 'tw_tab_count',
     TICKER: 'tw_show_ticker', FLASH: 'tw_show_flash', FOREIGN_IDX: 'tw_custom_foreign_indices',
-    CACHE_IDX: 'tw_cached_indices', CACHE_TWII: 'tw_cached_twii', HIST_CACHE: 'tw_hist_cache_v1',
+    CACHE_IDX: 'tw_cached_indices', CACHE_TWII: 'tw_cached_twii', CACHE_TAIFEX: 'tw_cached_taifex', HIST_CACHE: 'tw_hist_cache_v1',
     STOCK: i => `tw_stock_portfolio_tab_${i}`, RECORD: i => `tw_records_tab_${i}`
   },
   get: (k, def) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch(e){ return def; } },
@@ -701,7 +717,7 @@ let fugleKey='', secondFugleKey='', availableIndices = [], cachedGlobalIndices =
 let showHistCols = false;
 
 // 📦 Ticker 快取：儲存漲跌停價，避免頻繁呼叫 ticker API
-const tickerCache = new Map(); // key: symbol, value: { limitUp, limitDown, timestamp }
+const tickerCache = new Map();
 
 class KeyRotator {
   constructor(keys) { this.keys = keys.filter(k => k && k.trim() !== ''); this.index = 0; }
@@ -744,11 +760,17 @@ function loadState(){
   const cachedTwii = LS.get(LS.KEYS.CACHE_TWII, null);
   if (cachedTwii) updateTwiiDOM(cachedTwii, true);
 
+  const cachedTaifex = LS.get(LS.KEYS.CACHE_TAIFEX, null);
+  if (cachedTaifex) updateTaifexDOM(cachedTaifex, true);
+
   $('tickerContainer').style.display = showTicker ? 'flex' : 'none';
   renderTabs(); renderApiStats();
   
   showHistCols = LS.getStr('tw_show_hist', 'false') === 'true';
   applyHistColsState();
+  
+  renderAll();
+  refreshPrices();
   
   checkAutoSave();
   setInterval(checkAutoSave, 60000);
@@ -835,8 +857,8 @@ function renderTabs() {
 
 /* ========================================================= 🖥 核心業務邏輯與渲染 ========================================================= */
 const formatPrice = p => p == null ? '—' : (Math.abs(p) >= 1000 ? p.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : p.toFixed(2));
-const getSign = n => n >= 0 ? '+' : '';
-const getColorCls = n => n > 0 ? 'up' : (n < 0 ? 'down' : '');
+const getSign = n => n > 0 ? '+' : '';
+const getColorCls = n => n > 0 ? 'up' : (n < 0 ? 'down' : 'neutral');
 
 function calcStockInfo(s) {
   const shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
@@ -870,7 +892,6 @@ function getStockHtmlInner(s) {
 
   const pClass = p != null ? getColorCls(chg) : '';
   
-  // 判斷漲跌停（僅當 limitUp / limitDown 為有效正數時才顯示）
   let limitClass = '';
   if (p != null && s.limitUp != null && s.limitUp > 0 && Math.abs(p - s.limitUp) < 0.005) {
     limitClass = 'limit-up';
@@ -980,33 +1001,24 @@ async function fetchWithProxy(url) {
   return null;
 }
 
-/**
- * 取得股票的漲跌停價（含 5 分鐘快取 + 觸發式更新）
- * - 若快取存在且未超過 5 分鐘，直接回傳
- * - 若該股票目前價格等於漲跌停價，且價格有變動，強制重新取得
- */
 async function getTickerInfo(sym, currentPrice) {
   const now = Date.now();
   const cached = tickerCache.get(sym);
-  const cacheExpiry = 5 * 60 * 1000; // 5 分鐘
+  const cacheExpiry = 5 * 60 * 1000;
   
-  // 檢查是否需要強制更新：若價格等於漲跌停且價格有變動，重抓
   let forceUpdate = false;
   if (cached && currentPrice != null) {
     const isAtLimit = (cached.limitUp != null && Math.abs(currentPrice - cached.limitUp) < 0.005) ||
                       (cached.limitDown != null && Math.abs(currentPrice - cached.limitDown) < 0.005);
-    // 若目前處於漲跌停狀態，且價格與上次取得時不同，強制更新
     if (isAtLimit && cached.priceAtFetch != null && Math.abs(currentPrice - cached.priceAtFetch) > 0.001) {
       forceUpdate = true;
     }
   }
   
-  // 快取有效且不需強制更新
   if (cached && !forceUpdate && (now - cached.timestamp < cacheExpiry)) {
     return cached;
   }
   
-  // 呼叫 ticker API
   const kr = getKeyRotator();
   if (kr.count === 0) return null;
   
@@ -1020,7 +1032,6 @@ async function getTickerInfo(sym, currentPrice) {
         const data = await res.json();
         const limitUp = data.limitUpPrice ?? null;
         const limitDown = data.limitDownPrice ?? null;
-        // 存入快取
         tickerCache.set(sym, {
           limitUp: limitUp,
           limitDown: limitDown,
@@ -1036,8 +1047,6 @@ async function getTickerInfo(sym, currentPrice) {
 
 async function fetchFugle(sym){
   const kr = getKeyRotator(); if (kr.count === 0) return null;
-  
-  // 1. 先取得報價 (使用 quote 端點)
   let quoteData = null;
   for (let i = 0; i < kr.count; i++){
     try {
@@ -1053,13 +1062,10 @@ async function fetchFugle(sym){
   }
   if (!quoteData) return null;
 
-  // 2. 取得報價中的價格
   const p = quoteData.lastPrice ?? quoteData.closePrice ?? quoteData.previousClose ?? quoteData.referencePrice ?? quoteData.price;
   if (p == null) return null;
 
-  // 3. 使用快取機制取得漲跌停價（僅在必要時呼叫 ticker API）
   const tickerInfo = await getTickerInfo(sym, p);
-  
   trackApiUsage('Fugle'); 
   return {
     price: p,
@@ -1135,9 +1141,57 @@ function updateTwiiDOM(res, isOffline = false) {
   if(els.s) els.s.textContent = `via ${res.source} ${isOffline ? '(快取)' : new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'})}`;
 }
 
+function updateTaifexDOM(data, isOffline = false) {
+  if (!data) return;
+  const timeStr = isOffline ? '(快取)' : new Date().toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit' });
+
+  // 早盤
+  if (data.day) {
+    const d = data.day;
+    $('txDayTitle').innerHTML = `🇹🇼 台指期（早盤）${isOffline ? '<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>' : ''}`;
+    $('txDayPrice').textContent = d.price ? Number(d.price).toLocaleString('en-US', { maximumFractionDigits: 0 }) : '—';
+    const chg = d.change ?? 0;
+    const pct = d.changePercent ?? 0;
+    $('txDayChange').textContent = d.price ? (getSign(chg) + Number(chg).toFixed(2)) : '';
+    $('txDayChange').className = d.price ? getColorCls(chg) : 'neutral';
+    $('txDayPct').textContent = d.price ? `(${getSign(pct)}${Number(pct).toFixed(2)}%)` : '';
+    $('txDayPct').className = d.price ? getColorCls(pct) : 'neutral';
+    $('txDaySource').textContent = `via TAIFEX ${timeStr}`;
+  }
+
+  // 夜盤
+  if (data.night) {
+    const n = data.night;
+    $('txNightTitle').innerHTML = `🌙 台指期（夜盤）${isOffline ? '<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>' : ''}`;
+    $('txNightPrice').textContent = n.price ? Number(n.price).toLocaleString('en-US', { maximumFractionDigits: 0 }) : '—';
+    const chg = n.change ?? 0;
+    const pct = n.changePercent ?? 0;
+    $('txNightChange').textContent = n.price ? (getSign(chg) + Number(chg).toFixed(2)) : '';
+    $('txNightChange').className = n.price ? getColorCls(chg) : 'neutral';
+    $('txNightPct').textContent = n.price ? `(${getSign(pct)}${Number(pct).toFixed(2)}%)` : '';
+    $('txNightPct').className = n.price ? getColorCls(pct) : 'neutral';
+    $('txNightSource').textContent = `via TAIFEX ${timeStr}`;
+  }
+}
+
+async function fetchTaifexData() {
+  try {
+    const res = await fetch(`${TAIFEX_WORKER_URL}?_=${Date.now()}`, { signal: AbortSignal.timeout(API_TIMEOUT) });
+    if (res.ok) {
+      const data = await res.json();
+      if (data) {
+        updateTaifexDOM(data, false);
+        LS.set(LS.KEYS.CACHE_TAIFEX, data);
+      }
+    }
+  } catch (e) {}
+}
+
 async function refreshPrices(){
   if (!navigator.onLine) { showToast('處於離線狀態，顯示快取資料'); return; }
   
+  fetchTaifexData();
+
   let idxR = await fetchFugle('IX0001');
   if (!idxR) {
     try {
@@ -1202,7 +1256,6 @@ async function refreshPrices(){
               if (r) {
                 s.price = r.price; s.change = r.change; s.changePercent = r.changePercent;
                 if(r.name && !s.name) s.name = r.name;
-                // 更新漲跌停價
                 s.limitUp = r.limitUp;
                 s.limitDown = r.limitDown;
               }
@@ -1231,12 +1284,14 @@ async function refreshPrices(){
   renderApiStats();
 }
 
+function forceRefresh() { refreshPrices(); }
+
 /* ========================================================= 🔀 指數卡片拖拽排序功能 ========================================================= */
 let draggedIdxSymbol = null;
 
 function renderGlobalIndices(indices, isOffline = false) {
   const container = $('idxScrollContainer');
-  Array.from(container.children).slice(1).forEach(e => e.remove());
+  Array.from(container.children).slice(3).forEach(e => e.remove());
   
   const html = indices.map(item => {
     const matched = availableIndices.find(idx => idx.symbol === item.symbol);
@@ -1512,87 +1567,28 @@ function importData(e) {
   r.onload = ev => {
     try {
       const d = JSON.parse(ev.target.result);
-      if(!confirm('⚠️ 將覆蓋所有資料，確定還原？')) return;
+      if(d.tabStocks && Array.isArray(d.tabStocks)) {
+        d.tabStocks.forEach((sList, i) => LS.set(LS.KEYS.STOCK(i), sList));
+      }
+      if(d.tabRecords && Array.isArray(d.tabRecords)) {
+        d.tabRecords.forEach((rList, i) => LS.set(LS.KEYS.RECORD(i), rList));
+      }
+      if(d.tabNames) LS.set(LS.KEYS.TAB_NAMES, d.tabNames);
+      if(d.fugleKey !== undefined) LS.set(LS.KEYS.FK, d.fugleKey);
+      if(d.secondFugleKey !== undefined) LS.set(LS.KEYS.SFK, d.secondFugleKey);
+      if(d.theme) LS.set(LS.KEYS.THEME, d.theme);
+      if(d.tabCount !== undefined) LS.set(LS.KEYS.TAB_COUNT, d.tabCount);
+      if(d.customForeignIndices) LS.set(LS.KEYS.FOREIGN_IDX, d.customForeignIndices);
+      if(d.enableFlash !== undefined) LS.set(LS.KEYS.FLASH, d.enableFlash);
       
-      if (d.tabStocks) d.tabStocks.forEach((v, i) => LS.set(LS.KEYS.STOCK(i), typeof v === 'string' ? JSON.parse(v) : v));
-      if (d.tabRecords) d.tabRecords.forEach((v, i) => LS.set(LS.KEYS.RECORD(i), typeof v === 'string' ? JSON.parse(v) : v));
-      if (d.tabNames) LS.set(LS.KEYS.TAB_NAMES, typeof d.tabNames === 'string' ? JSON.parse(d.tabNames) : d.tabNames);
-      if (d.fugleKey !== undefined) LS.set(LS.KEYS.FK, d.fugleKey);
-      if (d.secondFugleKey !== undefined) LS.set(LS.KEYS.SFK, d.secondFugleKey);
-      if (d.theme) LS.set(LS.KEYS.THEME, d.theme);
-      if (d.tabCount !== undefined) LS.set(LS.KEYS.TAB_COUNT, d.tabCount);
-      if (d.customForeignIndices) LS.set(LS.KEYS.FOREIGN_IDX, typeof d.customForeignIndices === 'string' ? JSON.parse(d.customForeignIndices) : d.customForeignIndices);
-      if (d.enableFlash !== undefined) LS.set(LS.KEYS.FLASH, d.enableFlash);
-      
-      alert('🎉 還原成功！'); location.reload();
-    } catch(err) { alert('❌ 檔案格式錯誤。'); console.error(err); }
-    $('importFile').value = '';
+      showToast('✅ 資料還原成功');
+      setTimeout(() => location.reload(), 800);
+    } catch(err) { showToast('❌ 檔案格式錯誤'); }
   };
   r.readAsText(file);
 }
 
-/* ========================================================= 🔄 後台輪詢與生命週期 ========================================================= */
-let lastRefreshTime = 0, isRefreshing = false, lastSuccessTime = 0;
-const workerBlob = new Blob([`let t=null;self.onmessage=e=>{if(e.data.action==='start'){clearInterval(t);t=setInterval(()=>self.postMessage('tick'),e.data.interval)}else if(e.data.action==='stop')clearInterval(t)};`], {type:'application/javascript'});
-window.heartbeatWorker = new Worker(URL.createObjectURL(workerBlob));
-heartbeatWorker.onmessage = () => refresh();
-
-function forceRefresh() { globalKeyRotator = null; lastRefreshTime = 0; isRefreshing = false; refresh(); }
-async function refresh() {
-  const now = Date.now();
-  if (isRefreshing && now - lastRefreshTime > 8000) isRefreshing = false;
-  if (isRefreshing || now - lastRefreshTime < 2000) return;
-  isRefreshing = true; lastRefreshTime = now;
-  try { await refreshPrices(); lastSuccessTime = Date.now(); } catch(e){} finally { isRefreshing = false; }
-}
-
-const handleTouchWakeup = () => { if(Date.now() - lastSuccessTime > 15000 && !isRefreshing) forceRefresh(); };
-document.addEventListener('touchend', handleTouchWakeup, {passive: true});
-document.addEventListener('click', handleTouchWakeup, {passive: true});
-
-async function loadFinanceNews() {
-  const c = $('js-ticker');
-  try {
-    const res = await fetch('https://finance-news-api.denis0521.workers.dev/');
-    if(!res.ok) throw new Error();
-    const data = await res.json();
-    if(!data.length) return c.innerHTML = '<span class="ticker-item">目前暫無新聞</span>';
-    const html = data.map(i => `<a href="${i.link}" target="_blank" class="ticker-item"><span class="ticker-source">${escapeHTML(i.source)}</span>${escapeHTML(i.title)}</a>`).join('');
-    c.innerHTML = html + html;
-    c.style.animationDuration = `${c.textContent.length * 0.18}s`;
-  } catch(e) { c.innerHTML = '<span class="ticker-item" style="color:var(--t-muted);">無法載入即時新聞，請稍後再試</span>'; }
-}
-
-/* ========================================================= 🚀 啟動與休眠優化 ========================================================= */
-loadState(); renderAll();
-setTimeout(forceRefresh, 500);
-heartbeatWorker.postMessage({action: 'start', interval: currentInterval});
-
-['focus', 'pageshow'].forEach(e => window.addEventListener(e, forceRefresh));
-
-document.addEventListener('visibilitychange', () => { 
-  const isVis = document.visibilityState === 'visible';
-  heartbeatWorker.postMessage({ action: isVis ? 'start' : 'stop', interval: currentInterval });
-  if (isVis) forceRefresh();
-});
-
-document.addEventListener('DOMContentLoaded', loadFinanceNews);
-
-const kd = (id, next, action) => { $(id).addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); if(next) $(next).focus(); else if(action) action(); } }); };
-kd('symInput', 'qtyInput'); kd('qtyInput', 'buyPriceInput'); kd('buyPriceInput', null, addStock);
-
-['addModalOverlay', 'modalOverlay', 'manualOverlay', 'editModalOverlay', 'foreignIdxOverlay', 'historyModalOverlay'].forEach(id => {
-  const el = $(id);
-  if (el) el.addEventListener('click', function(e) { 
-    if(e.target === this) {
-      if (id === 'foreignIdxOverlay') closeForeignIdxModal();
-      else this.classList.remove('show'); 
-    }
-  });
-});
-
-if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-console.log(`股票庫存管理 ${APP_VER} 已啟動`);
+document.addEventListener('DOMContentLoaded', loadState);
 </script>
 </body>
 </html>
