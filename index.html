@@ -19,7 +19,7 @@ if(localStorage.getItem('tw_app_version') !== APP_VER) {
 }
 </script>
 <style>
-/* ========================================================= 🚀 核心變數引擎 ========================================================= */
+/* ========================================================= 🚀 核心變數引擎（與原版完全相同） ========================================================= */
 :root { 
   --bg: #E8ECF1; --bg-card: #FFFFFF; --s-light: #FFFFFF; --s-dark: #B8C4D0; 
   --t-main: #1A2332; --t-muted: #6B7B8D; --up: #DC2626; --down: #16A34A; 
@@ -254,18 +254,6 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .idx-box-vol { font-size: 15px; color: var(--t-main); font-weight: 800; white-space: nowrap; }
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 2px; opacity: 0.7; }
 
-/* 台指期貨卡片內的小工具容器 */
-.futures-widget-container {
-  width: 100%;
-  height: 52px;
-  margin-top: 2px;
-  border-radius: 4px;
-  overflow: hidden;
-}
-.futures-widget-container iframe {
-  border-radius: 4px;
-}
-
 /* ========================================================= 📈 內容區塊排版與 Grid 調整 ========================================================= */
 .table-scroll { margin: 0 10px 6px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; border-top-left-radius: 0; border-top-right-radius: 0; position: relative; z-index: 2; }
 .list-wrap { min-width: 680px; transition: min-width 0.3s ease; }
@@ -365,11 +353,9 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   .header h1 { font-size: 16px; margin-left: 2px; }
   .header-top .btn-theme, .header-top .btn-adv, .header-top .btn-add-hdr { padding: 4px 12px; font-size: 14px !important; }
   .header-top .hdr-right { gap: 4px; }
-  .futures-widget-container { height: 42px; }
 }
 @media (max-width: 767px) {
   .srow, .srow .sym, .srow .chgp, .qty-main, .total-main, .list-header { font-size: 17px; }
-  .futures-widget-container { height: 46px; }
 }
 @media (min-width: 768px) {
   body { font-size: 16px; }
@@ -401,7 +387,6 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   .manual-content { font-size: 17px; }
   .manual-content h3 { font-size: 19px; }
   .btn-manual-row { font-size: 17px; padding: 10px 10px; } 
-  .futures-widget-container { height: 56px; }
 }
 </style>
 <link rel="manifest" href="manifest.json">
@@ -446,14 +431,25 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
     <div class="idx-box-src" id="idxSource">Loading...</div>
   </div>
 
-  <!-- 台指期貨卡片 -->
-  <div class="idx-card-box" id="futuresCard" style="min-width:190px;">
+  <!-- 台指期貨卡片（純數據，無 iframe） -->
+  <div class="idx-card-box" id="futuresCard">
     <div class="idx-box-name" id="futuresTitle">📈 台指期貨 (早盤)</div>
-    <div class="futures-widget-container" id="futuresWidget"></div>
-    <div class="idx-box-src" style="margin-top:0;font-size:10px;opacity:0.5;">via TradingView</div>
+    <div class="idx-data-row">
+      <div class="idx-box-price-wrap">
+        <span class="idx-box-price" id="futuresPrice">—</span>
+      </div>
+      <div class="idx-box-vol" id="futuresVolume" style="font-size:13px; opacity:0.7;">(—)</div>
+    </div>
+    <div class="idx-data-row">
+      <div class="idx-box-change-row">
+        <span id="futuresChange"></span>
+        <span id="futuresPct"></span>
+      </div>
+    </div>
+    <div class="idx-box-src" id="futuresSource">Loading...</div>
   </div>
 
-  <!-- 自選指數將由 JavaScript 動態生成 -->
+  <!-- 自選指數由 JavaScript 動態生成 -->
 </div>
 
 <div class="tabs-bar" id="tabsBarContainer"></div>
@@ -655,9 +651,6 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   </div>
 </div>
 
-<!-- TradingView 腳本 -->
-<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-
 <script>
 /* ========================================================= 🔧 工具與字典 ========================================================= */
 const $ = id => document.getElementById(id);
@@ -691,6 +684,9 @@ let tabStocks = Array.from({length: 5}, () => []), tabRecords = Array.from({leng
 let fugleKey='', secondFugleKey='', availableIndices = [], cachedGlobalIndices = [], histCache = {}; 
 let showHistCols = false;
 const tickerCache = new Map();
+
+// 期貨數據
+let futuresData = null;
 
 class KeyRotator {
   constructor(keys) { this.keys = keys.filter(k => k && k.trim() !== ''); this.index = 0; }
@@ -733,6 +729,9 @@ function loadState(){
   const cachedTwii = LS.get(LS.KEYS.CACHE_TWII, null);
   if (cachedTwii) updateTwiiDOM(cachedTwii, true);
 
+  // 期貨數據可能無快取，先顯示載入中
+  updateFuturesDOM(null);
+
   $('tickerContainer').style.display = showTicker ? 'flex' : 'none';
   renderTabs(); renderApiStats();
   
@@ -742,8 +741,6 @@ function loadState(){
   checkAutoSave();
   setInterval(checkAutoSave, 60000);
 
-  // 初始化台指期貨 TradingView 小工具
-  setTimeout(initFuturesWidget, 800);
   // 定時更新早／夜盤標題
   updateFuturesSessionLabel();
   setInterval(updateFuturesSessionLabel, 60000);
@@ -766,8 +763,6 @@ function applyThemeText(t){
   $('themeBtn').textContent = theme.emoji;
   $('themeColorMeta').content = theme.color;
   applyHistColsState();
-  // 重新初始化期貨小工具以切換主題
-  setTimeout(initFuturesWidget, 300);
 }
 
 function toggleTheme(){
@@ -828,16 +823,12 @@ function renderTabs() {
   container.querySelectorAll('.tab-btn').forEach(b => b.style.fontSize = fontSize);
 }
 
-/* ========================================================= 📊 台指期貨 TradingView 單報價小工具 ========================================================= */
-let futuresWidget = null;
-
+/* ========================================================= 📊 台指期貨數據抓取與更新 ========================================================= */
 function getFuturesSessionLabel() {
   const now = new Date();
   const h = now.getHours(), m = now.getMinutes();
   const minutes = h * 60 + m;
-  // 早盤：08:45 ~ 13:45
   if (minutes >= 8*60+45 && minutes < 13*60+45) return '早盤';
-  // 夜盤：15:00 ~ 隔日 05:00
   if (minutes >= 15*60 || minutes < 5*60) return '夜盤';
   return '盤後';
 }
@@ -848,43 +839,57 @@ function updateFuturesSessionLabel() {
   if (el) el.textContent = `📈 台指期貨 (${label})`;
 }
 
-function initFuturesWidget() {
-  const container = $('futuresWidget');
-  if (!container) return;
-  if (futuresWidget) {
-    try { futuresWidget.remove(); } catch(e) {}
-    futuresWidget = null;
+async function fetchFutures() {
+  // 使用 Yahoo Finance 抓取 TXF1! 的歷史數據（最近一筆）
+  try {
+    const url = `https://query1.finance.yahoo.com/v7/finance/download/TXF1%21?period1=${Math.floor(Date.now()/1000)-86400}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
+    const res = await fetchWithProxy(url);
+    if (!res) return null;
+    const text = await res.text();
+    const lines = text.trim().split('\n');
+    if (lines.length < 2) return null;
+    const cols = lines[lines.length-1].split(',');
+    if (cols.length < 6 || cols[4] === 'null') return null;
+    const close = parseFloat(cols[4]);
+    const open = parseFloat(cols[1]);
+    const volume = parseInt(cols[6] || 0);
+    const chg = +(close - open).toFixed(2);
+    const pct = +((chg / open) * 100).toFixed(2);
+    trackApiUsage('Yahoo');
+    return { price: close, change: chg, changePercent: pct, volume, source: 'Yahoo' };
+  } catch(e) {
+    return null;
   }
-  if (typeof TradingView === 'undefined') {
-    setTimeout(initFuturesWidget, 500);
+}
+
+function updateFuturesDOM(data) {
+  const priceEl = $('futuresPrice');
+  const changeEl = $('futuresChange');
+  const pctEl = $('futuresPct');
+  const volEl = $('futuresVolume');
+  const srcEl = $('futuresSource');
+
+  if (!data) {
+    priceEl.textContent = '—';
+    changeEl.textContent = '';
+    pctEl.textContent = '';
+    volEl.textContent = '(—)';
+    srcEl.textContent = 'Loading...';
     return;
   }
-  const isDark = document.body.classList.contains('tech');
-  try {
-    futuresWidget = new TradingView.widget({
-      "container_id": "futuresWidget",
-      "width": "100%",
-      "height": "100%",
-      "symbol": "TXF1!",
-      "interval": "1",
-      "timezone": "Asia/Taipei",
-      "theme": isDark ? "dark" : "light",
-      "style": "0",            // 線圖（最簡潔）
-      "locale": "zh_TW",
-      "enable_publishing": false,
-      "hide_top_toolbar": true,
-      "hide_legend": false,
-      "save_image": false,
-      "hide_volume": true,
-      "hide_side_toolbar": true,
-      "show_popup_button": false,
-      "studies": [],
-      "support_host": "https://www.tradingview.com",
-      "autosize": true
-    });
-  } catch (e) {
-    console.error('期貨小工具初始化失敗:', e);
+
+  priceEl.textContent = data.price.toLocaleString('en-US', { maximumFractionDigits: 2 });
+  const cls = data.change > 0 ? 'up' : (data.change < 0 ? 'down' : 'neutral');
+  changeEl.textContent = `${data.change > 0 ? '+' : ''}${data.change.toFixed(2)}`;
+  changeEl.className = cls;
+  pctEl.textContent = `(${data.change > 0 ? '+' : ''}${data.changePercent.toFixed(2)}%)`;
+  pctEl.className = cls;
+  if (data.volume > 0) {
+    volEl.textContent = `(${data.volume.toLocaleString()})`;
+  } else {
+    volEl.textContent = '(—)';
   }
+  srcEl.textContent = `via ${data.source} ${new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'})}`;
 }
 
 /* ========================================================= 🖥 核心業務邏輯與渲染（同原版） ========================================================= */
@@ -1154,6 +1159,8 @@ function updateTwiiDOM(res, isOffline = false) {
 
 async function refreshPrices(){
   if (!navigator.onLine) { showToast('處於離線狀態，顯示快取資料'); return; }
+  
+  // 1. 抓取臺灣加權指數
   let idxR = await fetchFugle('IX0001');
   if (!idxR) {
     try {
@@ -1173,6 +1180,7 @@ async function refreshPrices(){
   }
   if(idxR) { updateTwiiDOM(idxR); LS.set(LS.KEYS.CACHE_TWII, idxR); }
 
+  // 2. 抓取自選指數（透過 Cloudflare Worker）
   try {
     const syms = availableIndices.map(i => i.symbol).join(',');
     if(syms) {
@@ -1193,6 +1201,17 @@ async function refreshPrices(){
     } else { renderGlobalIndices([]); }
   } catch(e) {}
 
+  // 3. 抓取台指期貨（TXF1!）
+  const fut = await fetchFutures();
+  if (fut) {
+    futuresData = fut;
+    updateFuturesDOM(fut);
+  } else {
+    // 若抓取失敗，保留舊數據或顯示錯誤
+    if (!futuresData) updateFuturesDOM(null);
+  }
+
+  // 4. 抓取持股報價
   if (tabStocks[currentTab].length === 0) { renderApiStats(); return; }
   const uniqueSyms = [...new Set(tabStocks[currentTab].map(s => s.symbol))];
   let hasUpdates = false;
