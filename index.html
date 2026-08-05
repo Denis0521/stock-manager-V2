@@ -1327,12 +1327,13 @@ async function refreshPrices(){
   renderApiStats();
 }
 
-/* ========================================================= 🔀 指數卡片拖拽排序功能 ========================================================= */
-let draggedIdxSymbol = null;
-
+// ==================== 🛠 修正後的 renderGlobalIndices（只移除國外指數卡片） ====================
 function renderGlobalIndices(indices, isOffline = false) {
   const container = $('idxScrollContainer');
-  Array.from(container.children).slice(1).forEach(e => e.remove());
+  // 只移除國外指數卡片（有 draggable-card 類別），保留臺灣加權指數與期貨卡片
+  Array.from(container.children).forEach(e => {
+    if (e.classList.contains('draggable-card')) e.remove();
+  });
   
   const html = indices.map(item => {
     const matched = availableIndices.find(idx => idx.symbol === item.symbol);
@@ -1355,6 +1356,9 @@ function renderGlobalIndices(indices, isOffline = false) {
   container.insertAdjacentHTML('beforeend', html);
   bindDragAndDropEvents();
 }
+
+/* ========================================================= 🔀 指數卡片拖拽排序功能 ========================================================= */
+let draggedIdxSymbol = null;
 
 function bindDragAndDropEvents() {
   document.querySelectorAll('.idx-card-box.draggable-card').forEach(card => {
