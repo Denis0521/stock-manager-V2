@@ -195,7 +195,6 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
   color: var(--down) !important;
 }
 
-/* 漲跌停專用樣式（覆蓋原有顏色） */
 .price.limit-up {
   background-color: #dc2626 !important;
   color: white !important;
@@ -211,17 +210,64 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .tab-btn:hover { color: var(--t-main); filter: brightness(1.05); opacity: 0.85; }
 .tab-btn.active { background: var(--bg-card); color: var(--accent); font-weight: 800; height: 36px; z-index: 3; border-bottom: 2px solid var(--bg-card); box-shadow: none; opacity: 1; }
 
-/* ========================================================= 📈 指數滑動卡片區調整 ========================================================= */
-.idx-scroll-container { margin: 6px 10px; overflow-x: auto; display: flex; gap: 0; padding: 6px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+/* ========================================================= 📈 指數主列（臺灣加權 + TradingView） ========================================================= */
+.idx-main-row {
+  display: flex;
+  gap: 10px;
+  margin: 6px 10px 0;
+  align-items: stretch;
+}
+.idx-main-row .idx-card-box {
+  flex: 0 0 auto;
+  min-width: 180px;
+  padding: 6px 12px;
+  background: var(--bg-card);
+  box-shadow: var(--shadow-soft);
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: background-color 0.4s ease, box-shadow 0.4s ease;
+}
+.idx-main-row .idx-tradingview-box {
+  flex: 1;
+  min-width: 200px;
+  background: var(--bg-card);
+  box-shadow: var(--shadow-soft);
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  padding: 4px 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: background-color 0.4s ease, box-shadow 0.4s ease;
+  overflow: hidden;
+}
+.idx-main-row .idx-tradingview-box .tv-widget-container {
+  height: 100%;
+  min-height: 70px;
+}
+
+/* 其餘指數滑動區 */
+.idx-scroll-container {
+  margin: 6px 10px;
+  overflow-x: auto;
+  display: flex;
+  gap: 0;
+  padding: 6px 0;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
 
-.idx-card-box { 
-  flex: 0 0 auto; 
+.idx-card-box {
+  flex: 0 0 auto;
   min-width: 180px;
-  padding: 6px 12px; 
-  scroll-snap-align: start; 
-  border-right: 1px solid var(--s-dark); 
-  text-align: left; 
+  padding: 6px 12px;
+  scroll-snap-align: start;
+  border-right: 1px solid var(--s-dark);
+  text-align: left;
   user-select: none;
   transition: transform 0.2s, opacity 0.2s;
   display: flex;
@@ -234,23 +280,18 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .idx-card-box.drag-over { border-left: 3px solid var(--accent); }
 .idx-card-box:last-child { border-right: none; }
 
-/* 一級標題：增大至 17px */
-.idx-box-name { font-size: 17px; color: var(--t-muted); font-weight: 700; line-height: 1.2; margin-bottom: 2px; } 
-
-/* 二級與三級列容器 (數字向右靠) */
+.idx-box-name { font-size: 17px; color: var(--t-muted); font-weight: 700; line-height: 1.2; margin-bottom: 2px; }
 .idx-data-row {
   display: flex;
   align-items: baseline;
-  justify-content: flex-end; 
+  justify-content: flex-end;
   gap: 8px;
   margin-top: 1px;
 }
-
-/* 數據與標籤排版 */
 .idx-box-price-wrap { display: flex; align-items: baseline; gap: 6px; }
-.idx-box-price { font-size: 17px; font-weight: 800; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); } 
+.idx-box-price { font-size: 17px; font-weight: 800; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); }
 .idx-box-change-row { display: flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 700; white-space: nowrap; }
-.idx-box-vol { font-size: 15px; color: var(--t-main); font-weight: 800; white-space: nowrap; } 
+.idx-box-vol { font-size: 15px; color: var(--t-main); font-weight: 800; white-space: nowrap; }
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 2px; opacity: 0.7; }
 
 /* ========================================================= 📈 內容區塊排版與 Grid 調整 ========================================================= */
@@ -368,9 +409,13 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   .header h1 { font-size: 16px; margin-left: 2px; }
   .header-top .btn-theme, .header-top .btn-adv, .header-top .btn-add-hdr { padding: 4px 12px; font-size: 14px !important; }
   .header-top .hdr-right { gap: 4px; }
+  .idx-main-row { flex-wrap: wrap; }
+  .idx-main-row .idx-card-box { flex: 1 0 100%; }
+  .idx-main-row .idx-tradingview-box { flex: 1 0 100%; }
 }
 @media (max-width: 767px) {
   .srow, .srow .sym, .srow .chgp, .qty-main, .total-main, .list-header { font-size: 17px; }
+  .idx-main-row .idx-tradingview-box .tv-widget-container { min-height: 60px; }
 }
 @media (min-width: 768px) {
   body { font-size: 16px; }
@@ -433,21 +478,17 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   </div>
 </div>
 
-<!-- 📈 上方指數卡片滑動區 -->
-<div class="idx-scroll-container" id="idxScrollContainer">
-  <div class="idx-card-box">
-    <!-- 一級：臺灣加權指數標題 -->
+<!-- 📈 指數主列：臺灣加權指數 + TradingView 台指期報價 -->
+<div class="idx-main-row" id="idxMainRow">
+  <!-- 臺灣加權指數卡片 -->
+  <div class="idx-card-box" id="twiiCard">
     <div class="idx-box-name" id="idxTitle">🇹🇼 臺灣加權指數</div>
-    
-    <!-- 二級：大盤指數與今日成交量 -->
     <div class="idx-data-row">
       <div class="idx-box-price-wrap">
         <span class="idx-box-price" id="idxPrice">—</span>
       </div>
       <div class="idx-box-vol" id="idxVolume">(—)</div>
     </div>
-    
-    <!-- 三級：今日指數與漲跌幅 -->
     <div class="idx-data-row">
       <div class="idx-box-change-row">
         <span id="idxChange"></span>
@@ -456,6 +497,15 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
     </div>
     <div class="idx-box-src" id="idxSource">Loading...</div>
   </div>
+  <!-- TradingView 輕量報價小工具 -->
+  <div class="idx-tradingview-box" id="tradingviewContainer">
+    <div class="tv-widget-container" id="tradingview-widget"></div>
+  </div>
+</div>
+
+<!-- 📈 其餘自選指數滑動區 -->
+<div class="idx-scroll-container" id="idxScrollContainer">
+  <!-- 這裡由 JavaScript 動態渲染其他指數 -->
 </div>
 
 <div class="tabs-bar" id="tabsBarContainer"></div>
@@ -667,6 +717,9 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   </div>
 </div>
 
+<!-- TradingView 腳本（輕量報價） -->
+<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+
 <script>
 /* ========================================================= 🔧 工具與字典 ========================================================= */
 const $ = id => document.getElementById(id);
@@ -700,8 +753,8 @@ let tabStocks = Array.from({length: 5}, () => []), tabRecords = Array.from({leng
 let fugleKey='', secondFugleKey='', availableIndices = [], cachedGlobalIndices = [], histCache = {}; 
 let showHistCols = false;
 
-// 📦 Ticker 快取：儲存漲跌停價，避免頻繁呼叫 ticker API
-const tickerCache = new Map(); // key: symbol, value: { limitUp, limitDown, timestamp }
+// 📦 Ticker 快取
+const tickerCache = new Map();
 
 class KeyRotator {
   constructor(keys) { this.keys = keys.filter(k => k && k.trim() !== ''); this.index = 0; }
@@ -752,6 +805,9 @@ function loadState(){
   
   checkAutoSave();
   setInterval(checkAutoSave, 60000);
+
+  // 延遲初始化 TradingView（確保 DOM 就緒）
+  setTimeout(initTradingView, 800);
 }
 
 function applyThemeText(t){
@@ -771,6 +827,8 @@ function applyThemeText(t){
   $('themeBtn').textContent = theme.emoji;
   $('themeColorMeta').content = theme.color;
   applyHistColsState();
+  // 重新初始化 TradingView 以切換主題
+  setTimeout(initTradingView, 200);
 }
 
 function toggleTheme(){
@@ -833,6 +891,48 @@ function renderTabs() {
   container.querySelectorAll('.tab-btn').forEach(b => b.style.fontSize = fontSize);
 }
 
+/* ========================================================= 📊 TradingView 輕量報價 ========================================================= */
+let tvWidget = null;
+function initTradingView() {
+  const container = document.getElementById('tradingview-widget');
+  if (!container) return;
+  // 清除舊實例
+  if (tvWidget) {
+    try { tvWidget.remove(); } catch(e) {}
+    tvWidget = null;
+  }
+  if (typeof TradingView === 'undefined') {
+    console.warn('TradingView 腳本尚未載入，稍後重試');
+    setTimeout(initTradingView, 500);
+    return;
+  }
+  const isDark = document.body.classList.contains('tech');
+  try {
+    tvWidget = new TradingView.widget({
+      "container_id": "tradingview-widget",
+      "width": "100%",
+      "height": "100%",
+      "symbol": "TAIFEX:TXF",        // 大台指期
+      "interval": "1",
+      "timezone": "Asia/Taipei",
+      "theme": isDark ? "dark" : "light",
+      "style": "1",
+      "locale": "zh_TW",
+      "enable_publishing": false,
+      "hide_top_toolbar": true,
+      "hide_legend": true,
+      "save_image": false,
+      "hide_volume": true,
+      "hide_side_toolbar": true,
+      "show_popup_button": false,
+      "studies": [],
+      "support_host": "https://www.tradingview.com"
+    });
+  } catch (e) {
+    console.error('TradingView 初始化失敗:', e);
+  }
+}
+
 /* ========================================================= 🖥 核心業務邏輯與渲染 ========================================================= */
 const formatPrice = p => p == null ? '—' : (Math.abs(p) >= 1000 ? p.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : p.toFixed(2));
 const getSign = n => n >= 0 ? '+' : '';
@@ -869,8 +969,6 @@ function getStockHtmlInner(s) {
   }
 
   const pClass = p != null ? getColorCls(chg) : '';
-  
-  // 判斷漲跌停（僅當 limitUp / limitDown 為有效正數時才顯示）
   let limitClass = '';
   if (p != null && s.limitUp != null && s.limitUp > 0 && Math.abs(p - s.limitUp) < 0.005) {
     limitClass = 'limit-up';
@@ -980,36 +1078,23 @@ async function fetchWithProxy(url) {
   return null;
 }
 
-/**
- * 取得股票的漲跌停價（含 5 分鐘快取 + 觸發式更新）
- * - 若快取存在且未超過 5 分鐘，直接回傳
- * - 若該股票目前價格等於漲跌停價，且價格有變動，強制重新取得
- */
 async function getTickerInfo(sym, currentPrice) {
   const now = Date.now();
   const cached = tickerCache.get(sym);
-  const cacheExpiry = 5 * 60 * 1000; // 5 分鐘
-  
-  // 檢查是否需要強制更新：若價格等於漲跌停且價格有變動，重抓
+  const cacheExpiry = 5 * 60 * 1000;
   let forceUpdate = false;
   if (cached && currentPrice != null) {
     const isAtLimit = (cached.limitUp != null && Math.abs(currentPrice - cached.limitUp) < 0.005) ||
                       (cached.limitDown != null && Math.abs(currentPrice - cached.limitDown) < 0.005);
-    // 若目前處於漲跌停狀態，且價格與上次取得時不同，強制更新
     if (isAtLimit && cached.priceAtFetch != null && Math.abs(currentPrice - cached.priceAtFetch) > 0.001) {
       forceUpdate = true;
     }
   }
-  
-  // 快取有效且不需強制更新
   if (cached && !forceUpdate && (now - cached.timestamp < cacheExpiry)) {
     return cached;
   }
-  
-  // 呼叫 ticker API
   const kr = getKeyRotator();
   if (kr.count === 0) return null;
-  
   for (let i = 0; i < kr.count; i++) {
     try {
       const res = await fetch(TICKER_API + encodeURIComponent(sym), {
@@ -1020,7 +1105,6 @@ async function getTickerInfo(sym, currentPrice) {
         const data = await res.json();
         const limitUp = data.limitUpPrice ?? null;
         const limitDown = data.limitDownPrice ?? null;
-        // 存入快取
         tickerCache.set(sym, {
           limitUp: limitUp,
           limitDown: limitDown,
@@ -1036,8 +1120,6 @@ async function getTickerInfo(sym, currentPrice) {
 
 async function fetchFugle(sym){
   const kr = getKeyRotator(); if (kr.count === 0) return null;
-  
-  // 1. 先取得報價 (使用 quote 端點)
   let quoteData = null;
   for (let i = 0; i < kr.count; i++){
     try {
@@ -1053,13 +1135,10 @@ async function fetchFugle(sym){
   }
   if (!quoteData) return null;
 
-  // 2. 取得報價中的價格
   const p = quoteData.lastPrice ?? quoteData.closePrice ?? quoteData.previousClose ?? quoteData.referencePrice ?? quoteData.price;
   if (p == null) return null;
 
-  // 3. 使用快取機制取得漲跌停價（僅在必要時呼叫 ticker API）
   const tickerInfo = await getTickerInfo(sym, p);
-  
   trackApiUsage('Fugle'); 
   return {
     price: p,
@@ -1202,7 +1281,6 @@ async function refreshPrices(){
               if (r) {
                 s.price = r.price; s.change = r.change; s.changePercent = r.changePercent;
                 if(r.name && !s.name) s.name = r.name;
-                // 更新漲跌停價
                 s.limitUp = r.limitUp;
                 s.limitDown = r.limitDown;
               }
@@ -1236,9 +1314,16 @@ let draggedIdxSymbol = null;
 
 function renderGlobalIndices(indices, isOffline = false) {
   const container = $('idxScrollContainer');
-  Array.from(container.children).slice(1).forEach(e => e.remove());
+  container.innerHTML = ''; // 清空
+  // 只顯示其他指數（不包含臺灣加權，因為已獨立）
+  const otherIndices = indices.filter(item => item.symbol !== 'IX0001' && item.symbol !== '^TWII');
+  if (otherIndices.length === 0) {
+    container.style.display = 'none';
+    return;
+  }
+  container.style.display = 'flex';
   
-  const html = indices.map(item => {
+  const html = otherIndices.map(item => {
     const matched = availableIndices.find(idx => idx.symbol === item.symbol);
     const name = matched ? matched.name : item.name;
     const cls = getColorCls(item.pct);
