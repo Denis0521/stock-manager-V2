@@ -254,7 +254,7 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .idx-box-vol { font-size: 15px; color: var(--t-main); font-weight: 800; white-space: nowrap; }
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 2px; opacity: 0.7; }
 
-/* 台指期貨卡片內的迷你圖表容器 - 高度 100px 確保價格完整顯示 */
+/* 台指期貨卡片內的迷你圖表容器 */
 .futures-widget-container {
   width: 100%;
   height: 100px;
@@ -863,7 +863,6 @@ function initFuturesWidget() {
   }
   const isDark = document.body.classList.contains('tech');
   try {
-    // 使用 Mini Chart，專為嵌入式報價設計，只顯示價格與漲跌幅
     futuresWidget = new TradingView.MiniChart({
       "container_id": "futuresWidget",
       "width": "100%",
@@ -1533,66 +1532,73 @@ function importData(e) {
 
 /* ========================================================= 🔄 後台輪詢與生命週期 ========================================================= */
 let lastRefreshTime = 0, isRefreshing = false, lastSuccessTime = 0;
-const workerBlob = new Blob([`let t=null;self.onmessage=e=>{if(e.data.action==='start'){clearInterval(t);t=setInterval(()=>self.postMessage('tick'),e.data.interval)}else if(e.data.action==='stop')clearInterval(t)};`], {type:'application/javascript'});
-window.heartbeatWorker = new Worker(URL.createObjectURL(workerBlob));
-heartbeatWorker.onmessage = () => refresh();
+const workerBlob = new Blob([`let t=null;self.onmessage=e=>{if(e.data.action==='start'){clearInterval(t);t=setInterval(()=>self.postMessage('tick'),e.data.interval||20000)}else if(e.data.action==='stop')clearInterval(t)};`], {type:'application/javascript'});
+const heartbeatWorker = new Worker(URL.createObjectURL(workerBlob));
+heartbeatWorker.onmessage = e => { if (e.data === 'tick') triggerRefresh(); };
 
-function forceRefresh() { globalKeyRotator = null; lastRefreshTime = 0; isRefreshing = false; refresh(); }
-async function refresh() {
-  const now = Date.now();
-  if (isRefreshing && now - lastRefreshTime > 8000) isRefreshing = false;
-  if (isRefreshing || now - lastRefreshTime < 2000) return;
-  isRefreshing = true; lastRefreshTime = now;
-  try { await refreshPrices(); lastSuccessTime = Date.now(); } catch(e){} finally { isRefreshing = false; }
-}
-
-const handleTouchWakeup = () => { if(Date.now() - lastSuccessTime > 15000 && !isRefreshing) forceRefresh(); };
-document.addEventListener('touchend', handleTouchWakeup, {passive: true});
-document.addEventListener('click', handleTouchWakeup, {passive: true});
-
-async function loadFinanceNews() {
-  const c = $('js-ticker');
+async function triggerRefresh() {
+  if (isRefreshing) return;
+  isRefreshing = true;
   try {
-    const res = await fetch('https://finance-news-api.denis0521.workers.dev/');
-    if(!res.ok) throw new Error();
-    const data = await res.json();
-    if(!data.length) return c.innerHTML = '<span class="ticker-item">目前暫無新聞</span>';
-    const html = data.map(i => `<a href="${i.link}" target="_blank" class="ticker-item"><span class="ticker-source">${escapeHTML(i.source)}</span>${escapeHTML(i.title)}</a>`).join('');
-    c.innerHTML = html + html;
-    c.style.animationDuration = `${c.textContent.length * 0.18}s`;
-  } catch(e) { c.innerHTML = '<span class="ticker-item" style="color:var(--t-muted);">無法載入即時新聞，請稍後再試</span>'; }
+    await refreshPrices();
+    lastSuccessTime = Date.now();
+  } catch(e) {
+  } finally {
+    isRefreshing = false;
+    lastRefreshTime = Date.now();
+  }
 }
 
-/* ========================================================= 🚀 啟動與休眠優化 ========================================================= */
-loadState(); renderAll();
-setTimeout(forceRefresh, 500);
-heartbeatWorker.postMessage({action: 'start', interval: currentInterval});
+function forceRefresh() {
+  triggerRefresh();
+}
 
-['focus', 'pageshow'].forEach(e => window.addEventListener(e, forceRefresh));
-
-document.addEventListener('visibilitychange', () => { 
-  const isVis = document.visibilityState === 'visible';
-  heartbeatWorker.postMessage({ action: isVis ? 'start' : 'stop', interval: currentInterval });
-  if (isVis) forceRefresh();
-});
-
-document.addEventListener('DOMContentLoaded', loadFinanceNews);
-
-const kd = (id, next, action) => { $(id).addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); if(next) $(next).focus(); else if(action) action(); } }); };
-kd('symInput', 'qtyInput'); kd('qtyInput', 'buyPriceInput'); kd('buyPriceInput', null, addStock);
-
-['addModalOverlay', 'modalOverlay', 'manualOverlay', 'editModalOverlay', 'foreignIdxOverlay', 'historyModalOverlay'].forEach(id => {
-  const el = $(id);
-  if (el) el.addEventListener('click', function(e) { 
-    if(e.target === this) {
-      if (id === 'foreignIdxOverlay') closeForeignIdxModal();
-      else this.classList.remove('show'); 
+async function fetchNewsTicker() {
+  const kr = getKeyRotator();
+  if (kr.count === 0) return;
+  try {
+    const res = await fetch('https://api.fugle.tw/marketdata/v1.0/stock/historical/stat/news', {
+      headers: { 'X-API-KEY': kr.next() },
+      signal: AbortSignal.timeout(API_TIMEOUT)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        renderTickerItems(data);
+      }
     }
-  });
+  } catch(e) {}
+}
+
+function renderTickerItems(newsList) {
+  const wrap = $('js-ticker'); if (!wrap) return;
+  const items = newsList.slice(0, 10).map(item => {
+    const title = escapeHTML(item.title || '');
+    const url = escapeHTML(item.url || item.link || '#');
+    const source = escapeHTML(item.media || item.source || '財經');
+    return `<a class="ticker-item" href="${url}" target="_blank" rel="noopener"><span class="ticker-source">${source}</span>${title}</a>`;
+  }).join('');
+  wrap.innerHTML = items || '<span class="ticker-item" style="color:var(--t-muted);">暫無最新新聞</span>';
+  
+  const containerWidth = wrap.parentElement.offsetWidth || 300;
+  const textWidth = wrap.scrollWidth;
+  const duration = Math.max(15, (textWidth + containerWidth) / 50);
+  wrap.style.animationDuration = `${duration}s`;
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    if (Date.now() - lastSuccessTime > 30000) triggerRefresh();
+    heartbeatWorker.postMessage({ action: 'start', interval: currentInterval });
+  } else {
+    heartbeatWorker.postMessage({ action: 'start', interval: 60000 });
+  }
 });
 
-if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-console.log(`股票庫存管理 ${APP_VER} 已啟動`);
+window.addEventListener('DOMContentLoaded', () => {
+  loadState(); renderAll(); triggerRefresh();
+  fetchNewsTicker(); setInterval(fetchNewsTicker, 300000);
+});
 </script>
 </body>
 </html>
