@@ -1151,7 +1151,6 @@ function updateTwiiDOM(res, isOffline = false) {
 /* ========================================================= 🆕 台指期貨資料擷取（透過 Cloudflare Worker 代理期交所 API） ========================================================= */
 async function fetchTaifex() {
   try {
-    // 透過你自己的 Cloudflare Worker 代理期交所 API
     const workerUrl = 'https://taifexapi.denis0521.workers.dev/taifex';
     const res = await fetch(workerUrl, {
       signal: AbortSignal.timeout(5000)
@@ -1164,13 +1163,15 @@ async function fetchTaifex() {
       throw new Error('數據格式錯誤');
     }
     
-    // 找出台指期 (TXF) 的數據
-    let txData = data.find(item => item.Contract && item.Contract.startsWith('TXF'));
+    // 找出台指期 (TXF) 或小型台指期 (ZFF) 的數據
+    let txData = data.find(item => {
+      const contract = item.Contract || '';
+      return contract === 'TXF' || contract === 'ZFF' || 
+             contract.startsWith('TXF') || contract.startsWith('ZFF');
+    });
+    
     if (!txData) {
-      txData = data.find(item => item.Contract && (item.Contract.includes('台指期') || item.Contract.includes('TX')));
-    }
-    if (!txData) {
-      console.warn('⚠️ 找不到台指期數據，使用第一筆:', data[0]);
+      console.warn('⚠️ 找不到 TXF/ZFF 台指期數據，使用第一筆:', data[0]);
       txData = data[0];
     }
     
@@ -1178,23 +1179,20 @@ async function fetchTaifex() {
     const lastPrice = parseFloat(txData.Last) || 0;
     const change = parseFloat(txData.Change) || 0;
     const settlementPrice = parseFloat(txData.SettlementPrice) || lastPrice;
-    const session = txData.TradingSession || 'DAY';
     const contractName = txData.Contract || '台指期';
     
     console.log('📊 台指期數據:', {
       contract: contractName,
       last: lastPrice,
       change: change,
-      settlement: settlementPrice,
-      session: session
+      settlement: settlementPrice
     });
     
     return {
       price: lastPrice,
       change: change,
       pct: (settlementPrice > 0 && change !== 0) ? (change / settlementPrice) * 100 : 0,
-      name: '台指期',
-      session: session,
+      name: contractName === 'ZFF' ? '小型台指期' : '台指期',
       source: '期交所'
     };
   } catch (e) {
