@@ -435,15 +435,19 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
 
 <!-- 📈 上方指數卡片滑動區 -->
 <div class="idx-scroll-container" id="idxScrollContainer">
-  <!-- 臺灣加權指數 -->
   <div class="idx-card-box">
+    <!-- 一級：臺灣加權指數標題 -->
     <div class="idx-box-name" id="idxTitle">🇹🇼 臺灣加權指數</div>
+    
+    <!-- 二級：大盤指數與今日成交量 -->
     <div class="idx-data-row">
       <div class="idx-box-price-wrap">
         <span class="idx-box-price" id="idxPrice">—</span>
       </div>
       <div class="idx-box-vol" id="idxVolume">(—)</div>
     </div>
+    
+    <!-- 三級：今日指數與漲跌幅 -->
     <div class="idx-data-row">
       <div class="idx-box-change-row">
         <span id="idxChange"></span>
@@ -451,40 +455,6 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       </div>
     </div>
     <div class="idx-box-src" id="idxSource">Loading...</div>
-  </div>
-
-  <!-- 🆕 台指期（日盤） -->
-  <div class="idx-card-box" id="futureDayBox">
-    <div class="idx-box-name" id="futureDayTitle">🇹🇼 台指期</div>
-    <div class="idx-data-row">
-      <div class="idx-box-price-wrap">
-        <span class="idx-box-price" id="futureDayPrice">—</span>
-      </div>
-    </div>
-    <div class="idx-data-row">
-      <div class="idx-box-change-row">
-        <span id="futureDayChange"></span>
-        <span id="futureDayPct"></span>
-      </div>
-    </div>
-    <div class="idx-box-src" id="futureDaySource">Loading...</div>
-  </div>
-
-  <!-- 🆕 台指期盤後（夜盤） -->
-  <div class="idx-card-box" id="futureNightBox">
-    <div class="idx-box-name" id="futureNightTitle">🌙 台指期盤後</div>
-    <div class="idx-data-row">
-      <div class="idx-box-price-wrap">
-        <span class="idx-box-price" id="futureNightPrice">—</span>
-      </div>
-    </div>
-    <div class="idx-data-row">
-      <div class="idx-box-change-row">
-        <span id="futureNightChange"></span>
-        <span id="futureNightPct"></span>
-      </div>
-    </div>
-    <div class="idx-box-src" id="futureNightSource">Loading...</div>
   </div>
 </div>
 
@@ -1165,123 +1135,6 @@ function updateTwiiDOM(res, isOffline = false) {
   if(els.s) els.s.textContent = `via ${res.source} ${isOffline ? '(快取)' : new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'})}`;
 }
 
-/* ========================================================= 🆕 台指期貨資料擷取（透過 Cloudflare Worker 代理期交所 API） ========================================================= */
-async function fetchTaifex() {
-  try {
-    // 透過你自己的 Cloudflare Worker 代理期交所 API
-    const workerUrl = 'https://taifexapi.denis0521.workers.dev/taifex';
-    const res = await fetch(workerUrl, {
-      signal: AbortSignal.timeout(5000)
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    
-    // 檢查是否為期交所數據格式（陣列）
-    if (!Array.isArray(data) || data.length === 0) {
-      throw new Error('數據格式錯誤');
-    }
-    
-    // 找出台指期 (TXF) 的數據
-    let txData = data.find(item => item.Contract && item.Contract.startsWith('TXF'));
-    if (!txData) {
-      txData = data.find(item => item.Contract && (item.Contract.includes('台指期') || item.Contract.includes('TX')));
-    }
-    if (!txData) {
-      console.warn('⚠️ 找不到台指期數據，使用第一筆:', data[0]);
-      txData = data[0];
-    }
-    
-    // 解析數值（API 回傳的是字串）
-    const lastPrice = parseFloat(txData.Last) || 0;
-    const change = parseFloat(txData.Change) || 0;
-    const settlementPrice = parseFloat(txData.SettlementPrice) || lastPrice;
-    const session = txData.TradingSession || 'DAY';
-    const contractName = txData.Contract || '台指期';
-    
-    console.log('📊 台指期數據:', {
-      contract: contractName,
-      last: lastPrice,
-      change: change,
-      settlement: settlementPrice,
-      session: session
-    });
-    
-    // 判斷是否為夜盤
-    const isNight = session && (session.includes('NIGHT') || session.includes('AFTER') || session.includes('夜'));
-    
-    return {
-      day: {
-        price: isNight ? settlementPrice : lastPrice,
-        change: change,
-        pct: (settlementPrice > 0 && change !== 0) ? (change / settlementPrice) * 100 : 0,
-        name: '台指期',
-        session: session
-      },
-      night: {
-        price: lastPrice,
-        change: change,
-        pct: (settlementPrice > 0 && change !== 0) ? (change / settlementPrice) * 100 : 0,
-        name: '台指期盤後',
-        session: session
-      }
-    };
-  } catch (e) {
-    console.warn('⚠️ 台指期資料擷取失敗:', e.message);
-    return null;
-  }
-}
-
-function renderTaifex(data) {
-  if (!data) { 
-    console.warn('⚠️ 無資料可渲染'); 
-    return; 
-  }
-  
-  const day = data.day;
-  const night = data.night;
-
-  // 日盤（台指期）
-  if (day) {
-    const priceEl = document.getElementById('futureDayPrice');
-    const changeEl = document.getElementById('futureDayChange');
-    const pctEl = document.getElementById('futureDayPct');
-    const sourceEl = document.getElementById('futureDaySource');
-
-    if (priceEl) priceEl.textContent = day.price?.toLocaleString() ?? '—';
-    if (changeEl) {
-      changeEl.textContent = (day.change ?? 0) >= 0 ? '+' + (day.change ?? 0).toFixed(2) : (day.change ?? 0).toFixed(2);
-      changeEl.className = (day.change ?? 0) > 0 ? 'up' : (day.change ?? 0) < 0 ? 'down' : '';
-    }
-    if (pctEl) {
-      const pct = day.pct ?? 0;
-      pctEl.textContent = `(${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)`;
-      pctEl.className = pct > 0 ? 'up' : pct < 0 ? 'down' : '';
-    }
-    if (sourceEl) sourceEl.textContent = `via 期交所 ${new Date().toLocaleTimeString('zh-TW', {hour12: false, hour:'2-digit', minute:'2-digit'})}`;
-  }
-
-  // 夜盤（台指期盤後）
-  if (night && night.price > 0) {
-    const priceEl = document.getElementById('futureNightPrice');
-    const changeEl = document.getElementById('futureNightChange');
-    const pctEl = document.getElementById('futureNightPct');
-    const sourceEl = document.getElementById('futureNightSource');
-
-    if (priceEl) priceEl.textContent = night.price?.toLocaleString() ?? '—';
-    if (changeEl) {
-      changeEl.textContent = (night.change ?? 0) >= 0 ? '+' + (night.change ?? 0).toFixed(2) : (night.change ?? 0).toFixed(2);
-      changeEl.className = (night.change ?? 0) > 0 ? 'up' : (night.change ?? 0) < 0 ? 'down' : '';
-    }
-    if (pctEl) {
-      const pct = night.pct ?? 0;
-      pctEl.textContent = `(${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)`;
-      pctEl.className = pct > 0 ? 'up' : pct < 0 ? 'down' : '';
-    }
-    if (sourceEl) sourceEl.textContent = `via 期交所 ${new Date().toLocaleTimeString('zh-TW', {hour12: false, hour:'2-digit', minute:'2-digit'})}`;
-  }
-}
-
-/* ========================================================= 📡 refreshPrices 主要更新函數 ========================================================= */
 async function refreshPrices(){
   if (!navigator.onLine) { showToast('處於離線狀態，顯示快取資料'); return; }
   
@@ -1303,17 +1156,6 @@ async function refreshPrices(){
     } catch(e) {}
   }
   if(idxR) { updateTwiiDOM(idxR); LS.set(LS.KEYS.CACHE_TWII, idxR); }
-
-  // ========== 🆕 更新期貨資料（獨立 try-catch，不影響其他功能） ==========
-  try {
-    const taifexData = await fetchTaifex();
-    if (taifexData) {
-      renderTaifex(taifexData);
-    }
-  } catch (e) {
-    console.warn('⚠️ 期貨資料更新失敗:', e.message);
-  }
-  // ============================================================
 
   try {
     const syms = availableIndices.map(i => i.symbol).join(',');
@@ -1394,10 +1236,7 @@ let draggedIdxSymbol = null;
 
 function renderGlobalIndices(indices, isOffline = false) {
   const container = $('idxScrollContainer');
-  // 只移除國外指數卡片（有 draggable-card 類別），保留臺灣加權指數與期貨卡片
-  Array.from(container.children).forEach(e => {
-    if (e.classList.contains('draggable-card')) e.remove();
-  });
+  Array.from(container.children).slice(1).forEach(e => e.remove());
   
   const html = indices.map(item => {
     const matched = availableIndices.find(idx => idx.symbol === item.symbol);
