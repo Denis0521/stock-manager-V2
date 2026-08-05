@@ -147,7 +147,7 @@ body.tech .title-text {
 
 .news-ticker-container { margin: 6px 0 0 0; width: 100%; box-sizing: border-box; background: transparent; border-radius: 6px; box-shadow: none; border: none; display: flex; align-items: center; height: 42px; overflow: hidden; transition: all 0.4s ease; }
 .ticker-scroll-area { flex: 1; overflow: hidden; position: relative; }
-.ticker-wrap { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker linear infinite; }
+.ticker-wrap { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker 25s linear infinite; }
 .ticker-item { 
   display: inline-block; 
   padding: 0 20px; 
@@ -195,7 +195,7 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
   color: var(--down) !important;
 }
 
-/* 漲跌停專用樣式（覆蓋原有顏色） */
+/* 漲跌停專用樣式 */
 .price.limit-up {
   background-color: #dc2626 !important;
   color: white !important;
@@ -234,10 +234,8 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .idx-card-box.drag-over { border-left: 3px solid var(--accent); }
 .idx-card-box:last-child { border-right: none; }
 
-/* 一級標題：增大至 17px */
 .idx-box-name { font-size: 17px; color: var(--t-muted); font-weight: 700; line-height: 1.2; margin-bottom: 2px; } 
 
-/* 二級與三級列容器 (數字向右靠) */
 .idx-data-row {
   display: flex;
   align-items: baseline;
@@ -246,7 +244,6 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
   margin-top: 1px;
 }
 
-/* 數據與標籤排版 */
 .idx-box-price-wrap { display: flex; align-items: baseline; gap: 6px; }
 .idx-box-price { font-size: 17px; font-weight: 800; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); } 
 .idx-box-change-row { display: flex; align-items: center; gap: 4px; font-size: 14px; font-weight: 700; white-space: nowrap; }
@@ -453,7 +450,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
     <div class="idx-box-src" id="idxSource">Loading...</div>
   </div>
 
-  <!-- 🆕 台指期（日盤） -->
+  <!-- 台指期（日盤） -->
   <div class="idx-card-box" id="futureDayBox">
     <div class="idx-box-name" id="futureDayTitle">🇹🇼 台指期</div>
     <div class="idx-data-row">
@@ -470,7 +467,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
     <div class="idx-box-src" id="futureDaySource">Loading...</div>
   </div>
 
-  <!-- 🆕 台指期盤後（夜盤） -->
+  <!-- 台指期盤後（夜盤） -->
   <div class="idx-card-box" id="futureNightBox">
     <div class="idx-box-name" id="futureNightTitle">🌙 台指期盤後</div>
     <div class="idx-data-row">
@@ -588,7 +585,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
         <button type="button" class="btn-manual-row" onclick="$('manualOverlay').classList.add('show')" style="height: 40px; padding: 0; font-size: 15px;">📖 系統使用說明</button>
         <div class="tab-count-wrapper" style="height: 40px; padding: 0 10px; flex-direction: row; align-items: center; gap: 6px;">
           <div class="tab-count-label" style="margin-bottom: 0; font-size: 13px; white-space: nowrap;">分頁數量</div>
-          <select id="tabCountSelect" style="font-size: 14px; padding: 0; flex: 1;">
+          <select id="tabCountSelect" onchange="changeTabCount(this.value)" style="font-size: 14px; padding: 0; flex: 1;">
             <option value="0">無分頁</option>
             <option value="1">1 個分頁</option>
             <option value="2">2 個分頁</option>
@@ -730,8 +727,8 @@ let tabStocks = Array.from({length: 5}, () => []), tabRecords = Array.from({leng
 let fugleKey='', secondFugleKey='', availableIndices = [], cachedGlobalIndices = [], histCache = {}; 
 let showHistCols = false;
 
-// 📦 Ticker 快取：儲存漲跌停價，避免頻繁呼叫 ticker API
-const tickerCache = new Map(); // key: symbol, value: { limitUp, limitDown, timestamp }
+// 📦 Ticker 快取
+const tickerCache = new Map(); 
 
 class KeyRotator {
   constructor(keys) { this.keys = keys.filter(k => k && k.trim() !== ''); this.index = 0; }
@@ -775,6 +772,7 @@ function loadState(){
   if (cachedTwii) updateTwiiDOM(cachedTwii, true);
 
   $('tickerContainer').style.display = showTicker ? 'flex' : 'none';
+  $('tabCountSelect').value = String(tabCount);
   renderTabs(); renderApiStats();
   
   showHistCols = LS.getStr('tw_show_hist', 'false') === 'true';
@@ -782,6 +780,7 @@ function loadState(){
   
   checkAutoSave();
   setInterval(checkAutoSave, 60000);
+  fetchNewsTicker();
 }
 
 function applyThemeText(t){
@@ -850,6 +849,14 @@ function renameTab(idx) {
   }
 }
 
+function changeTabCount(val) {
+  tabCount = parseInt(val);
+  LS.set(LS.KEYS.TAB_COUNT, tabCount);
+  if (currentTab >= (tabCount === 0 ? 1 : tabCount)) currentTab = 0;
+  LS.set(LS.KEYS.CUR_TAB, currentTab);
+  renderTabs(); renderAll();
+}
+
 function renderTabs() {
   const container = $('tabsBarContainer');
   if (tabCount === 0) { container.style.display = 'none'; return; }
@@ -900,7 +907,6 @@ function getStockHtmlInner(s) {
 
   const pClass = p != null ? getColorCls(chg) : '';
   
-  // 判斷漲跌停（僅當 limitUp / limitDown 為有效正數時才顯示）
   let limitClass = '';
   if (p != null && s.limitUp != null && s.limitUp > 0 && Math.abs(p - s.limitUp) < 0.005) {
     limitClass = 'limit-up';
@@ -1010,33 +1016,24 @@ async function fetchWithProxy(url) {
   return null;
 }
 
-/**
- * 取得股票的漲跌停價（含 5 分鐘快取 + 觸發式更新）
- * - 若快取存在且未超過 5 分鐘，直接回傳
- * - 若該股票目前價格等於漲跌停價，且價格有變動，強制重新取得
- */
 async function getTickerInfo(sym, currentPrice) {
   const now = Date.now();
   const cached = tickerCache.get(sym);
-  const cacheExpiry = 5 * 60 * 1000; // 5 分鐘
+  const cacheExpiry = 5 * 60 * 1000;
   
-  // 檢查是否需要強制更新：若價格等於漲跌停且價格有變動，重抓
   let forceUpdate = false;
   if (cached && currentPrice != null) {
     const isAtLimit = (cached.limitUp != null && Math.abs(currentPrice - cached.limitUp) < 0.005) ||
                       (cached.limitDown != null && Math.abs(currentPrice - cached.limitDown) < 0.005);
-    // 若目前處於漲跌停狀態，且價格與上次取得時不同，強制更新
     if (isAtLimit && cached.priceAtFetch != null && Math.abs(currentPrice - cached.priceAtFetch) > 0.001) {
       forceUpdate = true;
     }
   }
   
-  // 快取有效且不需強制更新
   if (cached && !forceUpdate && (now - cached.timestamp < cacheExpiry)) {
     return cached;
   }
   
-  // 呼叫 ticker API
   const kr = getKeyRotator();
   if (kr.count === 0) return null;
   
@@ -1050,7 +1047,6 @@ async function getTickerInfo(sym, currentPrice) {
         const data = await res.json();
         const limitUp = data.limitUpPrice ?? null;
         const limitDown = data.limitDownPrice ?? null;
-        // 存入快取
         tickerCache.set(sym, {
           limitUp: limitUp,
           limitDown: limitDown,
@@ -1067,7 +1063,6 @@ async function getTickerInfo(sym, currentPrice) {
 async function fetchFugle(sym){
   const kr = getKeyRotator(); if (kr.count === 0) return null;
   
-  // 1. 先取得報價 (使用 quote 端點)
   let quoteData = null;
   for (let i = 0; i < kr.count; i++){
     try {
@@ -1083,11 +1078,9 @@ async function fetchFugle(sym){
   }
   if (!quoteData) return null;
 
-  // 2. 取得報價中的價格
   const p = quoteData.lastPrice ?? quoteData.closePrice ?? quoteData.previousClose ?? quoteData.referencePrice ?? quoteData.price;
   if (p == null) return null;
 
-  // 3. 使用快取機制取得漲跌停價（僅在必要時呼叫 ticker API）
   const tickerInfo = await getTickerInfo(sym, p);
   
   trackApiUsage('Fugle'); 
@@ -1165,17 +1158,14 @@ function updateTwiiDOM(res, isOffline = false) {
   if(els.s) els.s.textContent = `via ${res.source} ${isOffline ? '(快取)' : new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'})}`;
 }
 
-// ==================== 🆕 Taifex 期貨資料擷取與渲染 ====================
 async function fetchTaifex() {
   try {
     const res = await fetch('https://taifex.denis0521.workers.dev/taifex', {
       signal: AbortSignal.timeout(5000)
     });
     if (!res.ok) throw new Error('Taifex API 回應錯誤');
-    const data = await res.json();
-    return data;
+    return await res.json();
   } catch (e) {
-    console.warn('Taifex API 擷取失敗:', e.message);
     return null;
   }
 }
@@ -1184,7 +1174,6 @@ function renderTaifex(data) {
   const day = data?.day;
   const night = data?.night;
 
-  // 日盤（台指期）
   if (day) {
     const priceEl = document.getElementById('futureDayPrice');
     const changeEl = document.getElementById('futureDayChange');
@@ -1204,7 +1193,6 @@ function renderTaifex(data) {
     if (sourceEl) sourceEl.textContent = `via Taifex ${new Date().toLocaleTimeString('zh-TW', {hour12: false, hour:'2-digit', minute:'2-digit'})}`;
   }
 
-  // 夜盤（台指期盤後）
   if (night) {
     const priceEl = document.getElementById('futureNightPrice');
     const changeEl = document.getElementById('futureNightChange');
@@ -1247,11 +1235,8 @@ async function refreshPrices(){
   }
   if(idxR) { updateTwiiDOM(idxR); LS.set(LS.KEYS.CACHE_TWII, idxR); }
 
-  // 🆕 擷取 Taifex 期貨資料
   const taifexData = await fetchTaifex();
-  if (taifexData) {
-    renderTaifex(taifexData);
-  }
+  if (taifexData) { renderTaifex(taifexData); }
 
   try {
     const syms = availableIndices.map(i => i.symbol).join(',');
@@ -1298,7 +1283,6 @@ async function refreshPrices(){
               if (r) {
                 s.price = r.price; s.change = r.change; s.changePercent = r.changePercent;
                 if(r.name && !s.name) s.name = r.name;
-                // 更新漲跌停價
                 s.limitUp = r.limitUp;
                 s.limitDown = r.limitDown;
               }
@@ -1327,10 +1311,29 @@ async function refreshPrices(){
   renderApiStats();
 }
 
-// ==================== 🛠 修正後的 renderGlobalIndices（只移除國外指數卡片） ====================
+async function fetchNewsTicker() {
+  try {
+    const res = await fetchWithProxy('https://news.google.com/rss/headlines/section/topic/BUSINESS?hl=zh-TW&gl=TW&ceid=TW:zh-Hant');
+    if (!res) return;
+    const text = await res.text();
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(text, 'text/xml');
+    const items = Array.from(xml.querySelectorAll('item')).slice(0, 10);
+    
+    if (items.length > 0) {
+      const html = items.map(item => {
+        const title = item.querySelector('title')?.textContent || '';
+        const link = item.querySelector('link')?.textContent || '#';
+        const source = item.querySelector('source')?.textContent || '新聞';
+        return `<a class="ticker-item" href="${link}" target="_blank" rel="noopener noreferrer"><span class="ticker-source">${escapeHTML(source)}</span>${escapeHTML(title)}</a>`;
+      }).join('');
+      $('js-ticker').innerHTML = html;
+    }
+  } catch (e) {}
+}
+
 function renderGlobalIndices(indices, isOffline = false) {
   const container = $('idxScrollContainer');
-  // 只移除國外指數卡片（有 draggable-card 類別），保留臺灣加權指數與期貨卡片
   Array.from(container.children).forEach(e => {
     if (e.classList.contains('draggable-card')) e.remove();
   });
@@ -1471,235 +1474,234 @@ function saveEditStock() {
   const nq = parseInt($('editQtyInput').value);
   if (nq > 0) s.displayQty = nq;
   s.displayUnit = $('editUnitSelect').value;
-  s.shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
   const bp = parseFloat($('editBuyPriceInput').value);
   s.buyPrice = isNaN(bp) || bp <= 0 ? null : bp;
-  LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll(); closeModalById('editModalOverlay'); showToast('已修改'); forceRefresh();
+  
+  LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]);
+  renderAll(); closeModalById('editModalOverlay'); showToast('儲存成功'); forceRefresh();
 }
 
-function checkAutoSave() {
-  const now = new Date(), dayOfWeek = now.getDay(), hours = now.getHours(), minutes = now.getMinutes();
-
-  if (dayOfWeek >= 1 && dayOfWeek <= 5 && (hours > 13 || (hours === 13 && minutes >= 40))) {
-    const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-    let savedAny = false;
-    
-    for(let i=0; i<5; i++) {
-       if(tabStocks[i].length === 0) continue; 
-       if (!tabRecords[i].some(r => r.date === todayStr)) {
-          let pnl = 0, asset = 0;
-          tabStocks[i].forEach(s => {
-            const info = calcStockInfo(s);
-            pnl += info.todayPnl; asset += info.mktValue;
-          });
-          const ts = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-          tabRecords[i].unshift({date: todayStr, time: ts, totalPnl: pnl, totalAsset: asset, timestamp: now.getTime()});
-          if(tabRecords[i].length > 30) tabRecords[i].length = 30;
-          LS.set(LS.KEYS.RECORD(i), tabRecords[i]);
-          savedAny = true;
-       }
-    }
-    if (savedAny && $('historyModalOverlay').classList.contains('show')) renderHistory();
-  }
-}
-
-function openHistoryModal() { renderHistory(); $('historyModalOverlay').classList.add('show'); }
-
-function clearAllHistory() {
-  if(!confirm('確定要清空目前分頁的所有歷史記錄嗎？')) return;
-  tabRecords[currentTab] = [];
-  LS.set(LS.KEYS.RECORD(currentTab), tabRecords[currentTab]);
-  renderHistory(); showToast('已清空全部記錄');
-}
-
-function deleteHistory(ts) {
-  if(!confirm('確定刪除此筆記錄？')) return;
-  tabRecords[currentTab] = tabRecords[currentTab].filter(r => r.timestamp !== ts);
-  LS.set(LS.KEYS.RECORD(currentTab), tabRecords[currentTab]); renderHistory(); showToast('記錄已刪除');
-}
-
-function renderHistory(){
-  const hb = $('historyBody'); if(!hb) return;
-  const recs = tabRecords[currentTab];
-  if(recs.length === 0) return hb.innerHTML = '<div class="hist-empty">尚無記錄</div>';
-  hb.innerHTML = recs.map(r => `
-    <div class="hist-item" style="border: 1px solid var(--protrude-d); border-top: 1px solid var(--protrude-l); border-left: 1px solid var(--protrude-l);">
-      <div class="hist-item-left"><span class="hdate">${r.date} ${r.time}</span><span class="hval ${getColorCls(r.totalPnl)}">${getSign(r.totalPnl)}${r.totalPnl.toLocaleString()}</span></div>
-      <button type="button" class="btn-glass-circle del" onclick="deleteHistory(${r.timestamp})">✕</button>
-    </div>`).join('');
-}
-
-function openModal(){
-  $('fugleKeyInput').value = fugleKey; $('secondFugleKeyInput').value = secondFugleKey;
-  $('tabCountSelect').value = tabCount;
+/* ========================================================= ⚙️ 進階設定與備份管理 ========================================================= */
+function openModal() {
+  $('fugleKeyInput').value = fugleKey;
+  $('secondFugleKeyInput').value = secondFugleKey;
+  updateKeyStatusUI();
   $('tickerToggleBtn').textContent = `📰 財經新聞列：${showTicker ? '已開啟' : '已關閉'}`;
   $('flashToggleBtn').textContent = `💡 報價閃爍提醒：${enableFlash ? '已開啟' : '已關閉'}`;
-  applyHistColsState(); 
-  
-  ['fugleKey','secondFugleKey'].forEach((id, i) => {
-    const el = $(`${id}Status`), val = i===0 ? fugleKey : secondFugleKey;
-    el.textContent = val ? '✓ 已設定' : '未設定'; 
-    el.className = `key-status ${val ? 'ok' : 'none'}`;
-  });
-  renderApiStats(); $('modalOverlay').classList.add('show');
+  $('tabCountSelect').value = String(tabCount);
+  applyHistColsState();
+  renderApiStats();
+  $('modalOverlay').classList.add('show');
 }
 
-function saveAndCloseModal(){
-  fugleKey = $('fugleKeyInput').value.trim(); LS.set(LS.KEYS.FK, fugleKey);
-  secondFugleKey = $('secondFugleKeyInput').value.trim(); LS.set(LS.KEYS.SFK, secondFugleKey);
+function saveAndCloseModal() {
+  fugleKey = $('fugleKeyInput').value.trim();
+  secondFugleKey = $('secondFugleKeyInput').value.trim();
+  LS.set(LS.KEYS.FK, fugleKey);
+  LS.set(LS.KEYS.SFK, secondFugleKey);
   globalKeyRotator = null;
-  const newCount = parseInt($('tabCountSelect').value);
-  if(newCount !== tabCount) {
-    tabCount = newCount; LS.set(LS.KEYS.TAB_COUNT, tabCount);
-    if(currentTab >= (tabCount || 1)) { currentTab = 0; LS.set(LS.KEYS.CUR_TAB, 0); }
-    renderTabs(); renderAll(); 
+  closeModalById('modalOverlay');
+  showToast('設定已儲存');
+  forceRefresh();
+}
+
+function updateKeyStatusUI() {
+  const k1 = $('fugleKeyInput').value.trim(), k2 = $('secondFugleKeyInput').value.trim();
+  $('fugleKeyStatus').className = `key-status ${k1 ? 'ok' : 'none'}`;
+  $('fugleKeyStatus').textContent = k1 ? '已設定' : '未設定';
+  $('secondFugleKeyStatus').className = `key-status ${k2 ? 'ok' : 'none'}`;
+  $('secondFugleKeyStatus').textContent = k2 ? '已設定' : '未設定';
+}
+
+function toggleKeyVisibility(inpId, btnId) {
+  const inp = $(inpId), btn = $(btnId);
+  if (inp.classList.contains('pwd-mask')) {
+    inp.classList.remove('pwd-mask'); btn.textContent = '🔒';
+  } else {
+    inp.classList.add('pwd-mask'); btn.textContent = '👁';
   }
-  closeModalById('modalOverlay'); showToast('設定已儲存'); forceRefresh();
 }
 
-function toggleKeyVisibility(inId, btnId) {
-  const i = $(inId), b = $(btnId);
-  i.classList.toggle('pwd-mask'); b.textContent = i.classList.contains('pwd-mask') ? '👁' : '🙈';
+function openForeignIdxModal() {
+  renderForeignIdxList();
+  $('foreignIdxOverlay').classList.add('show');
 }
 
-function openForeignIdxModal() { renderForeignIdxConfigList(); $('foreignIdxOverlay').classList.add('show'); }
-function closeForeignIdxModal() { closeModalById('foreignIdxOverlay'); availableIndices = LS.get(LS.KEYS.FOREIGN_IDX, DEFAULT_INDICES); forceRefresh(); }
+function closeForeignIdxModal() {
+  closeModalById('foreignIdxOverlay');
+  refreshPrices();
+}
 
-function renderForeignIdxConfigList() {
-  const c = $('foreignIdxListContainer');
-  if(!availableIndices.length) return c.innerHTML = '<div style="text-align:center; color:var(--t-muted); font-weight:600; padding:20px; font-size:14px;">無自選指數</div>';
-  c.innerHTML = availableIndices.map((idx, i) => `
-    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; margin-bottom:8px; background:var(--bg-card); box-shadow:var(--shadow-soft); border-radius:8px; border:1px solid var(--border-light);">
-      <div style="text-align:left; flex:1; min-width:0; padding-right:8px;"><div style="font-weight:700; color:var(--t-main); font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(idx.name)}</div><div style="font-size:12px; color:var(--t-muted); font-weight:600;">${escapeHTML(idx.symbol)}</div></div>
-      <button type="button" class="btn-glass-circle del" style="width:28px!important; height:28px!important; font-size:14px!important;" onclick="deleteForeignIdx(${i})">✕</button>
-    </div>`).join('');
+function renderForeignIdxList() {
+  const container = $('foreignIdxListContainer');
+  if (availableIndices.length === 0) {
+    container.innerHTML = '<div style="text-align:center; color:var(--t-muted); padding:10px;">目前無國外指數</div>';
+    return;
+  }
+  container.innerHTML = availableIndices.map((idx, index) => `
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:var(--bg); margin-bottom:6px; border-radius:8px; border:1px solid var(--border-light);">
+      <div style="text-align:left;">
+        <div style="font-weight:bold; font-size:14px; color:var(--t-main);">${escapeHTML(idx.name)}</div>
+        <div style="font-size:12px; color:var(--t-muted);">${escapeHTML(idx.symbol)}</div>
+      </div>
+      <button type="button" class="btn-glass-circle del" onclick="deleteForeignIdx(${index})">✕</button>
+    </div>
+  `).join('');
 }
 
 function addForeignIdx() {
-  let sym = $('newIdxSymbol').value.trim().toUpperCase(), name = $('newIdxName').value.trim();
-  if(!sym || !name) return showToast('請輸入代號與名稱');
-  if(['DJI','IXIC','GSPC','SOX','N225','KS11'].includes(sym)) sym = '^' + sym;
-  if(availableIndices.some(i => i.symbol === sym)) return showToast('已存在清單中');
-  availableIndices.push({symbol: sym, name}); LS.set(LS.KEYS.FOREIGN_IDX, availableIndices);
-  $('newIdxSymbol').value = ''; $('newIdxName').value = '';
-  renderForeignIdxConfigList(); showToast(`已新增 ${name}`);
-}
-
-function deleteForeignIdx(i) {
-  if(!confirm(`確定要刪除「${availableIndices[i].name}」嗎？`)) return;
-  availableIndices.splice(i, 1); LS.set(LS.KEYS.FOREIGN_IDX, availableIndices); renderForeignIdxConfigList(); showToast('已刪除');
-}
-
-function exportData() {
-  const d = { 
-    tabStocks: Array.from({length: 5}, (_, i) => LS.get(LS.KEYS.STOCK(i), [])),
-    tabRecords: Array.from({length: 5}, (_, i) => LS.get(LS.KEYS.RECORD(i), [])),
-    tabNames: LS.get(LS.KEYS.TAB_NAMES, ['分頁 1', '分頁 2', '分頁 3', '分頁 4', '分頁 5']),
-    fugleKey, secondFugleKey, theme: LS.getStr(LS.KEYS.THEME, 'light'), 
-    tabCount, customForeignIndices: availableIndices, enableFlash 
-  };
+  const sym = $('newIdxSymbol').value.trim().toUpperCase();
+  const name = $('newIdxName').value.trim();
+  if (!sym || !name) return showToast('請填寫完整代號與名稱');
+  if (availableIndices.some(i => i.symbol === sym)) return showToast('該指數代號已存在');
   
-  const a = document.createElement('a'); 
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(d, null, 2)], {type:"application/json"}));
-  const date = new Date(); 
-  a.download = `stock_backup_${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}.json`;
-  a.click(); URL.revokeObjectURL(a.href); showToast('✅ 備份已下載');
+  availableIndices.push({ symbol: sym, name: name });
+  LS.set(LS.KEYS.FOREIGN_IDX, availableIndices);
+  $('newIdxSymbol').value = ''; $('newIdxName').value = '';
+  renderForeignIdxList();
+  showToast(`已新增 ${name}`);
+}
+
+function deleteForeignIdx(index) {
+  availableIndices.splice(index, 1);
+  LS.set(LS.KEYS.FOREIGN_IDX, availableIndices);
+  renderForeignIdxList();
+  showToast('已刪除指數');
+}
+
+/* ========================================================= 📅 每日損益紀錄與自動存檔 ========================================================= */
+function checkAutoSave() {
+  const now = new Date();
+  const day = now.getDay();
+  if (day === 0 || day === 6) return; // 週末不記錄
+  
+  const hour = now.getHours(), min = now.getMinutes();
+  if (hour === 13 && min >= 40 && min <= 45) {
+    const dateStr = now.toISOString().split('T')[0];
+    const savedKey = `tw_auto_saved_${dateStr}_tab_${currentTab}`;
+    if (!LS.getStr(savedKey)) {
+      saveDailyRecord(dateStr);
+      LS.set(savedKey, 'true');
+    }
+  }
+}
+
+function saveDailyRecord(dateStr) {
+  let pnl = 0;
+  tabStocks[currentTab].forEach(s => { pnl += calcStockInfo(s).todayPnl; });
+  const recs = tabRecords[currentTab];
+  const idx = recs.findIndex(r => r.date === dateStr);
+  if (idx !== -1) { recs[idx].pnl = pnl; } 
+  else { recs.unshift({ date: dateStr, pnl }); }
+  if (recs.length > 30) recs.pop();
+  LS.set(LS.KEYS.RECORD(currentTab), recs);
+}
+
+function openHistoryModal() {
+  renderHistoryList();
+  $('historyModalOverlay').classList.add('show');
+}
+
+function renderHistoryList() {
+  const container = $('historyBody');
+  const recs = tabRecords[currentTab];
+  if (!recs || recs.length === 0) {
+    container.innerHTML = '<div class="hist-empty">尚無歷史損益記錄</div>';
+    return;
+  }
+  container.innerHTML = recs.map(r => `
+    <div class="hist-item">
+      <div class="hist-item-left"><span class="hdate">${r.date}</span></div>
+      <div class="hval ${getColorCls(r.pnl)}">${getSign(r.pnl)}${r.pnl.toLocaleString()}</div>
+    </div>
+  `).join('');
+}
+
+function clearAllHistory() {
+  if (!confirm('確定要清空當前分頁的所有歷史損益記錄？')) return;
+  tabRecords[currentTab] = [];
+  LS.set(LS.KEYS.RECORD(currentTab), []);
+  renderHistoryList();
+  showToast('記錄已清空');
+}
+
+/* ========================================================= 📦 匯出與還原 ========================================================= */
+function exportData() {
+  const data = {
+    version: APP_VER,
+    timestamp: new Date().toISOString(),
+    fugleKey, secondFugleKey, tabCount, tabNames, availableIndices,
+    tabStocks, tabRecords
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `stock_portfolio_backup_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  showToast('資料備份匯出成功');
 }
 
 function importData(e) {
-  const file = e.target.files[0]; if (!file) return;
-  const r = new FileReader();
-  r.onload = ev => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt) {
     try {
-      const d = JSON.parse(ev.target.result);
-      if(!confirm('⚠️ 將覆蓋所有資料，確定還原？')) return;
-      
-      if (d.tabStocks) d.tabStocks.forEach((v, i) => LS.set(LS.KEYS.STOCK(i), typeof v === 'string' ? JSON.parse(v) : v));
-      if (d.tabRecords) d.tabRecords.forEach((v, i) => LS.set(LS.KEYS.RECORD(i), typeof v === 'string' ? JSON.parse(v) : v));
-      if (d.tabNames) LS.set(LS.KEYS.TAB_NAMES, typeof d.tabNames === 'string' ? JSON.parse(d.tabNames) : d.tabNames);
-      if (d.fugleKey !== undefined) LS.set(LS.KEYS.FK, d.fugleKey);
-      if (d.secondFugleKey !== undefined) LS.set(LS.KEYS.SFK, d.secondFugleKey);
-      if (d.theme) LS.set(LS.KEYS.THEME, d.theme);
-      if (d.tabCount !== undefined) LS.set(LS.KEYS.TAB_COUNT, d.tabCount);
-      if (d.customForeignIndices) LS.set(LS.KEYS.FOREIGN_IDX, typeof d.customForeignIndices === 'string' ? JSON.parse(d.customForeignIndices) : d.customForeignIndices);
-      if (d.enableFlash !== undefined) LS.set(LS.KEYS.FLASH, d.enableFlash);
-      
-      alert('🎉 還原成功！'); location.reload();
-    } catch(err) { alert('❌ 檔案格式錯誤。'); console.error(err); }
-    $('importFile').value = '';
-  };
-  r.readAsText(file);
-}
-
-/* ========================================================= 🔄 後台輪詢與生命週期 ========================================================= */
-let lastRefreshTime = 0, isRefreshing = false, lastSuccessTime = 0;
-const workerBlob = new Blob([`let t=null;self.onmessage=e=>{if(e.data.action==='start'){clearInterval(t);t=setInterval(()=>self.postMessage('tick'),e.data.interval)}else if(e.data.action==='stop')clearInterval(t)};`], {type:'application/javascript'});
-window.heartbeatWorker = new Worker(URL.createObjectURL(workerBlob));
-heartbeatWorker.onmessage = () => refresh();
-
-function forceRefresh() { globalKeyRotator = null; lastRefreshTime = 0; isRefreshing = false; refresh(); }
-async function refresh() {
-  const now = Date.now();
-  if (isRefreshing && now - lastRefreshTime > 8000) isRefreshing = false;
-  if (isRefreshing || now - lastRefreshTime < 2000) return;
-  isRefreshing = true; lastRefreshTime = now;
-  try { await refreshPrices(); lastSuccessTime = Date.now(); } catch(e){} finally { isRefreshing = false; }
-}
-
-const handleTouchWakeup = () => { if(Date.now() - lastSuccessTime > 15000 && !isRefreshing) forceRefresh(); };
-document.addEventListener('touchend', handleTouchWakeup, {passive: true});
-document.addEventListener('click', handleTouchWakeup, {passive: true});
-
-async function loadFinanceNews() {
-  const c = $('js-ticker');
-  try {
-    const res = await fetch('https://finance-news-api.denis0521.workers.dev/');
-    if(!res.ok) throw new Error();
-    const data = await res.json();
-    if(!data.length) return c.innerHTML = '<span class="ticker-item">目前暫無新聞</span>';
-    const html = data.map(i => `<a href="${i.link}" target="_blank" class="ticker-item"><span class="ticker-source">${escapeHTML(i.source)}</span>${escapeHTML(i.title)}</a>`).join('');
-    c.innerHTML = html + html;
-    c.style.animationDuration = `${c.textContent.length * 0.18}s`;
-  } catch(e) { c.innerHTML = '<span class="ticker-item" style="color:var(--t-muted);">無法載入即時新聞，請稍後再試</span>'; }
-}
-
-/* ========================================================= 🚀 啟動與休眠優化 ========================================================= */
-loadState(); renderAll();
-setTimeout(forceRefresh, 500);
-heartbeatWorker.postMessage({action: 'start', interval: currentInterval});
-
-['focus', 'pageshow'].forEach(e => window.addEventListener(e, forceRefresh));
-
-document.addEventListener('visibilitychange', () => { 
-  const isVis = document.visibilityState === 'visible';
-  heartbeatWorker.postMessage({ action: isVis ? 'start' : 'stop', interval: currentInterval });
-  if (isVis) forceRefresh();
-});
-
-document.addEventListener('DOMContentLoaded', loadFinanceNews);
-
-// 於頁面載入後立即嘗試載入期貨資料（非同步）
-setTimeout(() => {
-  fetchTaifex().then(data => {
-    if (data) renderTaifex(data);
-  });
-}, 300);
-
-const kd = (id, next, action) => { $(id).addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); if(next) $(next).focus(); else if(action) action(); } }); };
-kd('symInput', 'qtyInput'); kd('qtyInput', 'buyPriceInput'); kd('buyPriceInput', null, addStock);
-
-['addModalOverlay', 'modalOverlay', 'manualOverlay', 'editModalOverlay', 'foreignIdxOverlay', 'historyModalOverlay'].forEach(id => {
-  const el = $(id);
-  if (el) el.addEventListener('click', function(e) { 
-    if(e.target === this) {
-      if (id === 'foreignIdxOverlay') closeForeignIdxModal();
-      else this.classList.remove('show'); 
+      const data = JSON.parse(evt.target.result);
+      if (data.tabStocks) {
+        if (data.fugleKey !== undefined) LS.set(LS.KEYS.FK, data.fugleKey);
+        if (data.secondFugleKey !== undefined) LS.set(LS.KEYS.SFK, data.secondFugleKey);
+        if (data.tabCount !== undefined) LS.set(LS.KEYS.TAB_COUNT, data.tabCount);
+        if (data.tabNames) LS.set(LS.KEYS.TAB_NAMES, data.tabNames);
+        if (data.availableIndices) LS.set(LS.KEYS.FOREIGN_IDX, data.availableIndices);
+        
+        for (let i = 0; i < 5; i++) {
+          if (data.tabStocks[i]) LS.set(LS.KEYS.STOCK(i), data.tabStocks[i]);
+          if (data.tabRecords && data.tabRecords[i]) LS.set(LS.KEYS.RECORD(i), data.tabRecords[i]);
+        }
+        showToast('資料還原成功，即將重新載入...');
+        setTimeout(() => location.reload(), 1200);
+      } else {
+        showToast('匯入格式不正確');
+      }
+    } catch (err) {
+      showToast('解析 JSON 檔案失敗');
     }
-  });
-});
+  };
+  reader.readAsText(file);
+}
 
-if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-console.log(`股票庫存管理 ${APP_VER} 已啟動`);
+function forceRefresh() {
+  refreshPrices();
+}
+
+/* ========================================================= 💓 心跳計時器 Web Worker ========================================================= */
+function initHeartbeatWorker() {
+  const blob = new Blob([`
+    let timer = null;
+    self.onmessage = function(e) {
+      if (e.data.action === 'start') {
+        if (timer) clearInterval(timer);
+        timer = setInterval(() => { self.postMessage('tick'); }, e.data.interval);
+      } else if (e.data.action === 'stop') {
+        if (timer) clearInterval(timer);
+      }
+    };
+  `], { type: 'text/javascript' });
+
+  window.heartbeatWorker = new Worker(URL.createObjectURL(blob));
+  window.heartbeatWorker.onmessage = function() {
+    refreshPrices();
+  };
+}
+
+/* ========================================================= 🚀 啟動進入點 ========================================================= */
+document.addEventListener('DOMContentLoaded', () => {
+  loadState();
+  renderAll();
+  initHeartbeatWorker();
+  refreshPrices();
+});
 </script>
 </body>
 </html>
