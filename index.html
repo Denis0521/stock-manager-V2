@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+[source: 4]<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
@@ -1481,17 +1481,35 @@ function saveEditStock() {
   renderAll(); closeModalById('editModalOverlay'); showToast('儲存成功'); forceRefresh();
 }
 
-/* ========================================================= ⚙️ 進階設定與備份管理 ========================================================= */
+/* ========================================================= ⚙️ 設定選單與 API 管理 ========================================================= */
 function openModal() {
   $('fugleKeyInput').value = fugleKey;
   $('secondFugleKeyInput').value = secondFugleKey;
-  updateKeyStatusUI();
+  updateKeyStatusUI('fugleKeyStatus', fugleKey);
+  updateKeyStatusUI('secondFugleKeyStatus', secondFugleKey);
   $('tickerToggleBtn').textContent = `📰 財經新聞列：${showTicker ? '已開啟' : '已關閉'}`;
   $('flashToggleBtn').textContent = `💡 報價閃爍提醒：${enableFlash ? '已開啟' : '已關閉'}`;
-  $('tabCountSelect').value = String(tabCount);
   applyHistColsState();
   renderApiStats();
   $('modalOverlay').classList.add('show');
+}
+
+function updateKeyStatusUI(elId, val) {
+  const el = $(elId);
+  if (val && val.trim() !== '') {
+    el.textContent = '已設定'; el.className = 'key-status ok';
+  } else {
+    el.textContent = '未設定'; el.className = 'key-status none';
+  }
+}
+
+function toggleKeyVisibility(inpId, btnId) {
+  const inp = $(inpId), btn = $(btnId);
+  if (inp.classList.contains('pwd-mask')) {
+    inp.classList.remove('pwd-mask'); btn.textContent = '🔒';
+  } else {
+    inp.classList.add('pwd-mask'); btn.textContent = '👁';
+  }
 }
 
 function saveAndCloseModal() {
@@ -1505,23 +1523,6 @@ function saveAndCloseModal() {
   forceRefresh();
 }
 
-function updateKeyStatusUI() {
-  const k1 = $('fugleKeyInput').value.trim(), k2 = $('secondFugleKeyInput').value.trim();
-  $('fugleKeyStatus').className = `key-status ${k1 ? 'ok' : 'none'}`;
-  $('fugleKeyStatus').textContent = k1 ? '已設定' : '未設定';
-  $('secondFugleKeyStatus').className = `key-status ${k2 ? 'ok' : 'none'}`;
-  $('secondFugleKeyStatus').textContent = k2 ? '已設定' : '未設定';
-}
-
-function toggleKeyVisibility(inpId, btnId) {
-  const inp = $(inpId), btn = $(btnId);
-  if (inp.classList.contains('pwd-mask')) {
-    inp.classList.remove('pwd-mask'); btn.textContent = '🔒';
-  } else {
-    inp.classList.add('pwd-mask'); btn.textContent = '👁';
-  }
-}
-
 function openForeignIdxModal() {
   renderForeignIdxList();
   $('foreignIdxOverlay').classList.add('show');
@@ -1529,22 +1530,18 @@ function openForeignIdxModal() {
 
 function closeForeignIdxModal() {
   closeModalById('foreignIdxOverlay');
-  refreshPrices();
+  forceRefresh();
 }
 
 function renderForeignIdxList() {
-  const container = $('foreignIdxListContainer');
-  if (availableIndices.length === 0) {
-    container.innerHTML = '<div style="text-align:center; color:var(--t-muted); padding:10px;">目前無國外指數</div>';
-    return;
-  }
-  container.innerHTML = availableIndices.map((idx, index) => `
-    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:var(--bg); margin-bottom:6px; border-radius:8px; border:1px solid var(--border-light);">
+  const c = $('foreignIdxListContainer');
+  c.innerHTML = availableIndices.map((idx, i) => `
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; margin-bottom:6px; background:var(--bg-card); border-radius:8px; border:1px solid var(--border-light); box-shadow:var(--shadow-inset);">
       <div style="text-align:left;">
-        <div style="font-weight:bold; font-size:14px; color:var(--t-main);">${escapeHTML(idx.name)}</div>
+        <div style="font-weight:bold; font-size:14px;">${escapeHTML(idx.name)}</div>
         <div style="font-size:12px; color:var(--t-muted);">${escapeHTML(idx.symbol)}</div>
       </div>
-      <button type="button" class="btn-glass-circle del" onclick="deleteForeignIdx(${index})">✕</button>
+      <button type="button" class="btn-glass-circle del" onclick="removeForeignIdx(${i})">✕</button>
     </div>
   `).join('');
 }
@@ -1553,48 +1550,37 @@ function addForeignIdx() {
   const sym = $('newIdxSymbol').value.trim().toUpperCase();
   const name = $('newIdxName').value.trim();
   if (!sym || !name) return showToast('請填寫完整代號與名稱');
-  if (availableIndices.some(i => i.symbol === sym)) return showToast('該指數代號已存在');
+  if (availableIndices.some(x => x.symbol === sym)) return showToast('該指數已存在');
   
   availableIndices.push({ symbol: sym, name: name });
   LS.set(LS.KEYS.FOREIGN_IDX, availableIndices);
   $('newIdxSymbol').value = ''; $('newIdxName').value = '';
-  renderForeignIdxList();
-  showToast(`已新增 ${name}`);
+  renderForeignIdxList(); showToast('已新增自選指數');
 }
 
-function deleteForeignIdx(index) {
-  availableIndices.splice(index, 1);
+function removeForeignIdx(idx) {
+  availableIndices.splice(idx, 1);
   LS.set(LS.KEYS.FOREIGN_IDX, availableIndices);
-  renderForeignIdxList();
-  showToast('已刪除指數');
+  renderForeignIdxList(); showToast('已移除指數');
 }
 
-/* ========================================================= 📅 每日損益紀錄與自動存檔 ========================================================= */
+/* ========================================================= 📅 歷史紀錄與自動儲存 ========================================================= */
 function checkAutoSave() {
   const now = new Date();
   const day = now.getDay();
-  if (day === 0 || day === 6) return; // 週末不記錄
-  
-  const hour = now.getHours(), min = now.getMinutes();
-  if (hour === 13 && min >= 40 && min <= 45) {
-    const dateStr = now.toISOString().split('T')[0];
-    const savedKey = `tw_auto_saved_${dateStr}_tab_${currentTab}`;
-    if (!LS.getStr(savedKey)) {
-      saveDailyRecord(dateStr);
-      LS.set(savedKey, 'true');
+  if (day === 0 || day === 6) return;
+  const m = now.getHours() * 60 + now.getMinutes();
+  if (m >= 820 && m <= 825) { // 13:40 ~ 13:45
+    const todayStr = now.toISOString().split('T')[0];
+    const recs = tabRecords[currentTab];
+    if (!recs.some(r => r.date === todayStr)) {
+      let pnl = 0;
+      tabStocks[currentTab].forEach(s => pnl += calcStockInfo(s).todayPnl);
+      recs.unshift({ date: todayStr, pnl });
+      if (recs.length > 30) recs.pop();
+      LS.set(LS.KEYS.RECORD(currentTab), recs);
     }
   }
-}
-
-function saveDailyRecord(dateStr) {
-  let pnl = 0;
-  tabStocks[currentTab].forEach(s => { pnl += calcStockInfo(s).todayPnl; });
-  const recs = tabRecords[currentTab];
-  const idx = recs.findIndex(r => r.date === dateStr);
-  if (idx !== -1) { recs[idx].pnl = pnl; } 
-  else { recs.unshift({ date: dateStr, pnl }); }
-  if (recs.length > 30) recs.pop();
-  LS.set(LS.KEYS.RECORD(currentTab), recs);
 }
 
 function openHistoryModal() {
@@ -1603,104 +1589,86 @@ function openHistoryModal() {
 }
 
 function renderHistoryList() {
-  const container = $('historyBody');
+  const body = $('historyBody');
   const recs = tabRecords[currentTab];
   if (!recs || recs.length === 0) {
-    container.innerHTML = '<div class="hist-empty">尚無歷史損益記錄</div>';
+    body.innerHTML = '<div class="hist-empty">尚無記錄</div>';
     return;
   }
-  container.innerHTML = recs.map(r => `
+  body.innerHTML = recs.map(r => `
     <div class="hist-item">
-      <div class="hist-item-left"><span class="hdate">${r.date}</span></div>
+      <div class="hist-item-left"><span class="hdate">${escapeHTML(r.date)}</span></div>
       <div class="hval ${getColorCls(r.pnl)}">${getSign(r.pnl)}${r.pnl.toLocaleString()}</div>
     </div>
   `).join('');
 }
 
 function clearAllHistory() {
-  if (!confirm('確定要清空當前分頁的所有歷史損益記錄？')) return;
+  if (!confirm('確定清空此分頁近 30 交易日紀錄？')) return;
   tabRecords[currentTab] = [];
   LS.set(LS.KEYS.RECORD(currentTab), []);
-  renderHistoryList();
-  showToast('記錄已清空');
+  renderHistoryList(); showToast('已清空損益記錄');
 }
 
-/* ========================================================= 📦 匯出與還原 ========================================================= */
+/* ========================================================= 💾 匯出與還原備份 ========================================================= */
 function exportData() {
-  const data = {
-    version: APP_VER,
-    timestamp: new Date().toISOString(),
-    fugleKey, secondFugleKey, tabCount, tabNames, availableIndices,
-    tabStocks, tabRecords
-  };
+  const data = { version: APP_VER, timestamp: new Date().toISOString(), storage: {} };
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k.startsWith('tw_')) data.storage[k] = localStorage.getItem(k);
+  }
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `stock_portfolio_backup_${new Date().toISOString().split('T')[0]}.json`;
+  a.download = `Stock_Portfolio_Backup_${new Date().toISOString().split('T')[0]}.json`;
   a.click();
-  showToast('資料備份匯出成功');
+  showToast('備份資料已匯出');
 }
 
-function importData(e) {
-  const file = e.target.files[0];
-  if (!file) return;
+function importData(evt) {
+  const file = evt.target.files[0]; if (!file) return;
   const reader = new FileReader();
-  reader.onload = function(evt) {
+  reader.onload = e => {
     try {
-      const data = JSON.parse(evt.target.result);
-      if (data.tabStocks) {
-        if (data.fugleKey !== undefined) LS.set(LS.KEYS.FK, data.fugleKey);
-        if (data.secondFugleKey !== undefined) LS.set(LS.KEYS.SFK, data.secondFugleKey);
-        if (data.tabCount !== undefined) LS.set(LS.KEYS.TAB_COUNT, data.tabCount);
-        if (data.tabNames) LS.set(LS.KEYS.TAB_NAMES, data.tabNames);
-        if (data.availableIndices) LS.set(LS.KEYS.FOREIGN_IDX, data.availableIndices);
-        
-        for (let i = 0; i < 5; i++) {
-          if (data.tabStocks[i]) LS.set(LS.KEYS.STOCK(i), data.tabStocks[i]);
-          if (data.tabRecords && data.tabRecords[i]) LS.set(LS.KEYS.RECORD(i), data.tabRecords[i]);
-        }
-        showToast('資料還原成功，即將重新載入...');
+      const data = JSON.parse(e.target.result);
+      if (data && data.storage) {
+        Object.keys(data.storage).forEach(k => localStorage.setItem(k, data.storage[k]));
+        showToast('還原成功！系統即將載入新資料...');
         setTimeout(() => location.reload(), 1200);
-      } else {
-        showToast('匯入格式不正確');
-      }
-    } catch (err) {
-      showToast('解析 JSON 檔案失敗');
-    }
+      } else { throw new Error('Format invalid'); }
+    } catch (err) { showToast('備份檔案格式錯誤'); }
   };
   reader.readAsText(file);
 }
 
-function forceRefresh() {
-  refreshPrices();
-}
+function forceRefresh() { refreshPrices(); }
 
-/* ========================================================= 💓 心跳計時器 Web Worker ========================================================= */
+/* ========================================================= 🔄 Web Worker 心跳定時機制 ========================================================= */
 function initHeartbeatWorker() {
-  const blob = new Blob([`
+  const workerCode = `
     let timer = null;
     self.onmessage = function(e) {
       if (e.data.action === 'start') {
         if (timer) clearInterval(timer);
-        timer = setInterval(() => { self.postMessage('tick'); }, e.data.interval);
+        timer = setInterval(() => self.postMessage('tick'), e.data.interval || 20000);
       } else if (e.data.action === 'stop') {
         if (timer) clearInterval(timer);
       }
     };
-  `], { type: 'text/javascript' });
-
+  `;
+  const blob = new Blob([workerCode], { type: 'application/javascript' });
   window.heartbeatWorker = new Worker(URL.createObjectURL(blob));
-  window.heartbeatWorker.onmessage = function() {
-    refreshPrices();
+  window.heartbeatWorker.onmessage = function(e) {
+    if (e.data === 'tick') refreshPrices();
   };
 }
 
-/* ========================================================= 🚀 啟動進入點 ========================================================= */
-document.addEventListener('DOMContentLoaded', () => {
+/* ========================================================= 🚀 啟動入口 ========================================================= */
+window.addEventListener('DOMContentLoaded', () => {
   loadState();
   renderAll();
   initHeartbeatWorker();
-  refreshPrices();
+  forceRefresh();
 });
 </script>
 </body>
