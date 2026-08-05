@@ -497,7 +497,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
     </div>
     <div class="idx-box-src" id="idxSource">Loading...</div>
   </div>
-  <!-- TradingView 輕量報價小工具 -->
+  <!-- TradingView 輕量報價小工具（符號改為連續合約） -->
   <div class="idx-tradingview-box" id="tradingviewContainer">
     <div class="tv-widget-container" id="tradingview-widget"></div>
   </div>
@@ -912,7 +912,7 @@ function initTradingView() {
       "container_id": "tradingview-widget",
       "width": "100%",
       "height": "100%",
-      "symbol": "TAIFEX:TXF",        // 大台指期
+      "symbol": "TAIFEX:TXF1!",      // 改為連續合約符號
       "interval": "1",
       "timezone": "Asia/Taipei",
       "theme": isDark ? "dark" : "light",
