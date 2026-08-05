@@ -1165,24 +1165,80 @@ function updateTwiiDOM(res, isOffline = false) {
   if(els.s) els.s.textContent = `via ${res.source} ${isOffline ? '(快取)' : new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'})}`;
 }
 
-/* ========================================================= 🆕 Taifex 期貨資料擷取與渲染 ========================================================= */
+/* ========================================================= 🆕 台指期貨資料擷取（透過 Cloudflare Worker 代理期交所 API） ========================================================= */
 async function fetchTaifex() {
   try {
-    const res = await fetch('https://taifex.denis0521.workers.dev/taifex', {
+    // 透過你自己的 Cloudflare Worker 代理期交所 API
+    const workerUrl = 'https://taifexapi.denis0521.workers.dev/taifex';
+    const res = await fetch(workerUrl, {
       signal: AbortSignal.timeout(5000)
     });
-    if (!res.ok) throw new Error('Taifex API 回應錯誤');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    return data;
+    
+    // 檢查是否為期交所數據格式（陣列）
+    if (!Array.isArray(data) || data.length === 0) {
+      throw new Error('數據格式錯誤');
+    }
+    
+    // 找出台指期 (TXF) 的數據
+    let txData = data.find(item => item.Contract && item.Contract.startsWith('TXF'));
+    if (!txData) {
+      txData = data.find(item => item.Contract && (item.Contract.includes('台指期') || item.Contract.includes('TX')));
+    }
+    if (!txData) {
+      console.warn('⚠️ 找不到台指期數據，使用第一筆:', data[0]);
+      txData = data[0];
+    }
+    
+    // 解析數值（API 回傳的是字串）
+    const lastPrice = parseFloat(txData.Last) || 0;
+    const change = parseFloat(txData.Change) || 0;
+    const settlementPrice = parseFloat(txData.SettlementPrice) || lastPrice;
+    const session = txData.TradingSession || 'DAY';
+    const contractName = txData.Contract || '台指期';
+    
+    console.log('📊 台指期數據:', {
+      contract: contractName,
+      last: lastPrice,
+      change: change,
+      settlement: settlementPrice,
+      session: session
+    });
+    
+    // 判斷是否為夜盤
+    const isNight = session && (session.includes('NIGHT') || session.includes('AFTER') || session.includes('夜'));
+    
+    return {
+      day: {
+        price: isNight ? settlementPrice : lastPrice,
+        change: change,
+        pct: (settlementPrice > 0 && change !== 0) ? (change / settlementPrice) * 100 : 0,
+        name: '台指期',
+        session: session
+      },
+      night: {
+        price: lastPrice,
+        change: change,
+        pct: (settlementPrice > 0 && change !== 0) ? (change / settlementPrice) * 100 : 0,
+        name: '台指期盤後',
+        session: session
+      }
+    };
   } catch (e) {
-    console.warn('Taifex API 擷取失敗:', e.message);
+    console.warn('⚠️ 台指期資料擷取失敗:', e.message);
     return null;
   }
 }
 
 function renderTaifex(data) {
-  const day = data?.day;
-  const night = data?.night;
+  if (!data) { 
+    console.warn('⚠️ 無資料可渲染'); 
+    return; 
+  }
+  
+  const day = data.day;
+  const night = data.night;
 
   // 日盤（台指期）
   if (day) {
@@ -1201,11 +1257,11 @@ function renderTaifex(data) {
       pctEl.textContent = `(${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)`;
       pctEl.className = pct > 0 ? 'up' : pct < 0 ? 'down' : '';
     }
-    if (sourceEl) sourceEl.textContent = `via Taifex ${new Date().toLocaleTimeString('zh-TW', {hour12: false, hour:'2-digit', minute:'2-digit'})}`;
+    if (sourceEl) sourceEl.textContent = `via 期交所 ${new Date().toLocaleTimeString('zh-TW', {hour12: false, hour:'2-digit', minute:'2-digit'})}`;
   }
 
   // 夜盤（台指期盤後）
-  if (night) {
+  if (night && night.price > 0) {
     const priceEl = document.getElementById('futureNightPrice');
     const changeEl = document.getElementById('futureNightChange');
     const pctEl = document.getElementById('futureNightPct');
@@ -1221,7 +1277,7 @@ function renderTaifex(data) {
       pctEl.textContent = `(${pct >= 0 ? '+' : ''}${pct.toFixed(2)}%)`;
       pctEl.className = pct > 0 ? 'up' : pct < 0 ? 'down' : '';
     }
-    if (sourceEl) sourceEl.textContent = `via Taifex ${new Date().toLocaleTimeString('zh-TW', {hour12: false, hour:'2-digit', minute:'2-digit'})}`;
+    if (sourceEl) sourceEl.textContent = `via 期交所 ${new Date().toLocaleTimeString('zh-TW', {hour12: false, hour:'2-digit', minute:'2-digit'})}`;
   }
 }
 
