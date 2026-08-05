@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.39'; 
+const APP_VER = 'V7.38'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -435,15 +435,19 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
 
 <!-- 📈 上方指數卡片滑動區 -->
 <div class="idx-scroll-container" id="idxScrollContainer">
-  <!-- 1. 臺灣加權指數 -->
   <div class="idx-card-box">
+    <!-- 一級：臺灣加權指數標題 -->
     <div class="idx-box-name" id="idxTitle">🇹🇼 臺灣加權指數</div>
+    
+    <!-- 二級：大盤指數與今日成交量 -->
     <div class="idx-data-row">
       <div class="idx-box-price-wrap">
         <span class="idx-box-price" id="idxPrice">—</span>
       </div>
       <div class="idx-box-vol" id="idxVolume">(—)</div>
     </div>
+    
+    <!-- 三級：今日指數與漲跌幅 -->
     <div class="idx-data-row">
       <div class="idx-box-change-row">
         <span id="idxChange"></span>
@@ -451,40 +455,6 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       </div>
     </div>
     <div class="idx-box-src" id="idxSource">Loading...</div>
-  </div>
-
-  <!-- 2. 台指期早盤 -->
-  <div class="idx-card-box">
-    <div class="idx-box-name" id="futDayTitle">🇹🇼 台指期早盤</div>
-    <div class="idx-data-row">
-      <div class="idx-box-price-wrap">
-        <span class="idx-box-price" id="futDayPrice">—</span>
-      </div>
-    </div>
-    <div class="idx-data-row">
-      <div class="idx-box-change-row">
-        <span id="futDayChange"></span>
-        <span id="futDayPct"></span>
-      </div>
-    </div>
-    <div class="idx-box-src" id="futDaySource">Loading...</div>
-  </div>
-
-  <!-- 3. 台指期夜盤 -->
-  <div class="idx-card-box">
-    <div class="idx-box-name" id="futNightTitle">🇹🇼 台指期夜盤</div>
-    <div class="idx-data-row">
-      <div class="idx-box-price-wrap">
-        <span class="idx-box-price" id="futNightPrice">—</span>
-      </div>
-    </div>
-    <div class="idx-data-row">
-      <div class="idx-box-change-row">
-        <span id="futNightChange"></span>
-        <span id="futNightPct"></span>
-      </div>
-    </div>
-    <div class="idx-box-src" id="futNightSource">Loading...</div>
   </div>
 </div>
 
@@ -643,7 +613,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       </div>
       
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.39</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.38</div>
     </div>
   </div>
 </div>
@@ -703,11 +673,20 @@ const $ = id => document.getElementById(id);
 const escapeHTML = str => String(str).replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag] || tag));
 
 const STOCK_DICT = {'0050':'元大台灣50','0056':'元大高股息','00878':'國泰永續高股息','00929':'復華台灣科技優息','00919':'群益台灣精選高息','00713':'元大台灣高息低波','006208':'富邦台50','00940':'元大台灣價值高息','00939':'統一台灣高息動能','00679B':'元大美債20年','00687B':'國泰20年美債','00937B':'群益ESG投等債20+','00720B':'元大投資級公司債','00881':'國泰台灣5G+','00891':'中信關鍵半導體','00830':'國泰費城半導體','00715L':'期街口布蘭特正2','00632R':'元大台灣50反1','00915':'凱基優選高股息30','00900':'富邦特選高股息30','2330':'台積電','2317':'鴻海','2454':'聯發科','2308':'台達電','2382':'廣達','2881':'富邦金','2882':'國泰金'};
-const DEFAULT_INDICES = [{symbol:'^DJI',name:'🇺🇸 道瓊工業指數'},{symbol:'^IXIC',name:'🇺🇸 那斯達克指數'},{symbol:'^GSPC',name:'🇺🇸 標普500指數'},{symbol:'^SOX',name:'🇺🇸 費城半導體指數'},{symbol:'TSM',name:'🇹🇼 台積電 ADR'},{symbol:'^N225',name:'🇯🇵 日經225指數'},{symbol:'^KS11',name:'🇰🇷 韓國綜合指數'}];
+const DEFAULT_INDICES = [
+  {symbol:'WTX&',name:'🇹🇼 台指期'},
+  {symbol:'WTXM&',name:'🇹🇼 台指期盤後'},
+  {symbol:'^DJI',name:'🇺🇸 道瓊工業指數'},
+  {symbol:'^IXIC',name:'🇺🇸 那斯達克指數'},
+  {symbol:'^GSPC',name:'🇺🇸 標普500指數'},
+  {symbol:'^SOX',name:'🇺🇸 費城半導體指數'},
+  {symbol:'TSM',name:'🇹🇼 台積電 ADR'},
+  {symbol:'^N225',name:'🇯🇵 日經225指數'},
+  {symbol:'^KS11',name:'🇰🇷 韓國綜合指數'}
+];
 const PROXY_LIST = ['https://api.allorigins.win/raw?url=', 'https://corsproxy.io/?', 'https://api.codetabs.com/v1/proxy?quest=', 'https://thingproxy.freeboard.io/fetch/'];
 const API_TIMEOUT = 5000;
 const CF_WORKER_URL = 'https://yahoo-index-proxy.denis0521.workers.dev';
-const TAIFEX_API_URL = 'https://taifex.denis0521.workers.dev/taifex';
 const FUGLE_API = 'https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
 const TICKER_API = 'https://api.fugle.tw/marketdata/v1.0/stock/intraday/ticker/';
 
@@ -749,6 +728,22 @@ const getKeyRotator = () => {
 /* ========================================================= 🛠 初始化與生命週期 ========================================================= */
 function loadState(){
   availableIndices = LS.get(LS.KEYS.FOREIGN_IDX, DEFAULT_INDICES);
+  
+  // 自動更新已儲存的預設指數名稱（將早盤/夜盤替換為台指期/台指期盤後）
+  let idxUpdated = false;
+  availableIndices = availableIndices.map(idx => {
+    if (idx.symbol === 'WTX&' && idx.name !== '🇹🇼 台指期') {
+      idxUpdated = true;
+      return { ...idx, name: '🇹🇼 台指期' };
+    }
+    if (idx.symbol === 'WTXM&' && idx.name !== '🇹🇼 台指期盤後') {
+      idxUpdated = true;
+      return { ...idx, name: '🇹🇼 台指期盤後' };
+    }
+    return idx;
+  });
+  if (idxUpdated) LS.set(LS.KEYS.FOREIGN_IDX, availableIndices);
+
   fugleKey = LS.getStr(LS.KEYS.FK);
   secondFugleKey = LS.getStr(LS.KEYS.SFK);
   currentTab = parseInt(LS.getStr(LS.KEYS.CUR_TAB, '0'));
@@ -996,7 +991,7 @@ function renderApiStats() {
   const f = parseInt(LS.getStr(`api_usage_${d}_Fugle`, '0'));
   const y = parseInt(LS.getStr(`api_usage_${d}_Yahoo`, '0'));
   const el = $('apiStatsBox');
-  if (el) el.innerHTML = `<div style="display:flex;justify-content:space-around;text-align:center;font-size:13px;color:var(--t-muted);text-shadow:-1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d);">
+  if (el) el.innerHTML = `<div style="display:flex;justify-around;text-align:center;font-size:13px;color:var(--t-muted);text-shadow:-1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d);">
     <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${f}</div><div>Fugle</div></div>
     <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${y}</div><div>Yahoo</div></div></div>`;
 }
@@ -1013,25 +1008,31 @@ async function fetchWithProxy(url) {
 
 /**
  * 取得股票的漲跌停價（含 5 分鐘快取 + 觸發式更新）
+ * - 若快取存在且未超過 5 分鐘，直接回傳
+ * - 若該股票目前價格等於漲跌停價，且價格有變動，強制重新取得
  */
 async function getTickerInfo(sym, currentPrice) {
   const now = Date.now();
   const cached = tickerCache.get(sym);
-  const cacheExpiry = 5 * 60 * 1000;
+  const cacheExpiry = 5 * 60 * 1000; // 5 分鐘
   
+  // 檢查是否需要強制更新：若價格等於漲跌停且價格有變動，重抓
   let forceUpdate = false;
   if (cached && currentPrice != null) {
     const isAtLimit = (cached.limitUp != null && Math.abs(currentPrice - cached.limitUp) < 0.005) ||
                       (cached.limitDown != null && Math.abs(currentPrice - cached.limitDown) < 0.005);
+    // 若目前處於漲跌停狀態，且價格與上次取得時不同，強制更新
     if (isAtLimit && cached.priceAtFetch != null && Math.abs(currentPrice - cached.priceAtFetch) > 0.001) {
       forceUpdate = true;
     }
   }
   
+  // 快取有效且不需強制更新
   if (cached && !forceUpdate && (now - cached.timestamp < cacheExpiry)) {
     return cached;
   }
   
+  // 呼叫 ticker API
   const kr = getKeyRotator();
   if (kr.count === 0) return null;
   
@@ -1045,6 +1046,7 @@ async function getTickerInfo(sym, currentPrice) {
         const data = await res.json();
         const limitUp = data.limitUpPrice ?? null;
         const limitDown = data.limitDownPrice ?? null;
+        // 存入快取
         tickerCache.set(sym, {
           limitUp: limitUp,
           limitDown: limitDown,
@@ -1061,6 +1063,7 @@ async function getTickerInfo(sym, currentPrice) {
 async function fetchFugle(sym){
   const kr = getKeyRotator(); if (kr.count === 0) return null;
   
+  // 1. 先取得報價 (使用 quote 端點)
   let quoteData = null;
   for (let i = 0; i < kr.count; i++){
     try {
@@ -1076,9 +1079,11 @@ async function fetchFugle(sym){
   }
   if (!quoteData) return null;
 
+  // 2. 取得報價中的價格
   const p = quoteData.lastPrice ?? quoteData.closePrice ?? quoteData.previousClose ?? quoteData.referencePrice ?? quoteData.price;
   if (p == null) return null;
 
+  // 3. 使用快取機制取得漲跌停價（僅在必要時呼叫 ticker API）
   const tickerInfo = await getTickerInfo(sym, p);
   
   trackApiUsage('Fugle'); 
@@ -1156,51 +1161,9 @@ function updateTwiiDOM(res, isOffline = false) {
   if(els.s) els.s.textContent = `via ${res.source} ${isOffline ? '(快取)' : new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'})}`;
 }
 
-// 📈 抓取台指期（早盤/夜盤）API 並更新 DOM
-async function fetchTaifexFut() {
-  try {
-    const res = await fetch(TAIFEX_API_URL, { signal: AbortSignal.timeout(API_TIMEOUT) });
-    if (!res.ok) return;
-    const data = await res.json();
-    
-    const timeStr = new Date().toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit' });
-
-    // 早盤 (day)
-    if (data.day) {
-      const p = parseFloat(data.day.price);
-      const c = parseFloat(data.day.change);
-      const pct = parseFloat(data.day.changePercent);
-      
-      const elP = $('futDayPrice'), elC = $('futDayChange'), elPct = $('futDayPct'), elS = $('futDaySource');
-      if (elP) elP.textContent = isNaN(p) ? '—' : p.toLocaleString('en-US');
-      if (elC) { elC.textContent = isNaN(c) ? '' : getSign(c) + c.toFixed(2); elC.className = getColorCls(c); }
-      if (elPct) { elPct.textContent = isNaN(pct) ? '' : `(${getSign(pct)}${pct.toFixed(2)}%)`; elPct.className = getColorCls(pct); }
-      if (elS) elS.textContent = `via TAIFEX ${timeStr}`;
-    }
-
-    // 夜盤 (night)
-    if (data.night) {
-      const p = parseFloat(data.night.price);
-      const c = parseFloat(data.night.change);
-      const pct = parseFloat(data.night.changePercent);
-      
-      const elP = $('futNightPrice'), elC = $('futNightChange'), elPct = $('futNightPct'), elS = $('futNightSource');
-      if (elP) elP.textContent = isNaN(p) ? '—' : p.toLocaleString('en-US');
-      if (elC) { elC.textContent = isNaN(c) ? '' : getSign(c) + c.toFixed(2); elC.className = getColorCls(c); }
-      if (elPct) { elPct.textContent = isNaN(pct) ? '' : `(${getSign(pct)}${pct.toFixed(2)}%)`; elPct.className = getColorCls(pct); }
-      if (elS) elS.textContent = `via TAIFEX ${timeStr}`;
-    }
-  } catch (e) {
-    console.error('Fetch Taifex Error:', e);
-  }
-}
-
 async function refreshPrices(){
   if (!navigator.onLine) { showToast('處於離線狀態，顯示快取資料'); return; }
   
-  // 同步抓取台指期資料
-  fetchTaifexFut();
-
   let idxR = await fetchFugle('IX0001');
   if (!idxR) {
     try {
@@ -1265,6 +1228,7 @@ async function refreshPrices(){
               if (r) {
                 s.price = r.price; s.change = r.change; s.changePercent = r.changePercent;
                 if(r.name && !s.name) s.name = r.name;
+                // 更新漲跌停價
                 s.limitUp = r.limitUp;
                 s.limitDown = r.limitDown;
               }
@@ -1298,8 +1262,7 @@ let draggedIdxSymbol = null;
 
 function renderGlobalIndices(indices, isOffline = false) {
   const container = $('idxScrollContainer');
-  // 保持前三個固定元素（加權指數、台指期早盤、台指期夜盤）
-  Array.from(container.children).slice(3).forEach(e => e.remove());
+  Array.from(container.children).slice(1).forEach(e => e.remove());
   
   const html = indices.map(item => {
     const matched = availableIndices.find(idx => idx.symbol === item.symbol);
@@ -1465,184 +1428,6 @@ function checkAutoSave() {
     if (savedAny && $('historyModalOverlay').classList.contains('show')) renderHistory();
   }
 }
-
-function openHistoryModal() { renderHistory(); $('historyModalOverlay').classList.add('show'); }
-
-function clearAllHistory() {
-  if(!confirm('確定要清空目前分頁的所有歷史記錄嗎？')) return;
-  tabRecords[currentTab] = [];
-  LS.set(LS.KEYS.RECORD(currentTab), tabRecords[currentTab]);
-  renderHistory(); showToast('已清空全部記錄');
-}
-
-function deleteHistory(ts) {
-  if(!confirm('確定刪除此筆記錄？')) return;
-  tabRecords[currentTab] = tabRecords[currentTab].filter(r => r.timestamp !== ts);
-  LS.set(LS.KEYS.RECORD(currentTab), tabRecords[currentTab]); renderHistory(); showToast('記錄已刪除');
-}
-
-function renderHistory(){
-  const hb = $('historyBody'); if(!hb) return;
-  const recs = tabRecords[currentTab];
-  if(recs.length === 0) return hb.innerHTML = '<div class="hist-empty">尚無記錄</div>';
-  hb.innerHTML = recs.map(r => `
-    <div class="hist-item" style="border: 1px solid var(--protrude-d); border-top: 1px solid var(--protrude-l); border-left: 1px solid var(--protrude-l);">
-      <div class="hist-item-left"><span class="hdate">${r.date} ${r.time}</span><span class="hval ${getColorCls(r.totalPnl)}">${getSign(r.totalPnl)}${r.totalPnl.toLocaleString()}</span></div>
-      <button type="button" class="btn-glass-circle del" onclick="deleteHistory(${r.timestamp})">✕</button>
-    </div>`).join('');
-}
-
-function openModal(){
-  $('fugleKeyInput').value = fugleKey; $('secondFugleKeyInput').value = secondFugleKey;
-  $('tabCountSelect').value = tabCount;
-  $('tickerToggleBtn').textContent = `📰 財經新聞列：${showTicker ? '已開啟' : '已關閉'}`;
-  $('flashToggleBtn').textContent = `💡 報價閃爍提醒：${enableFlash ? '已開啟' : '已關閉'}`;
-  applyHistColsState(); 
-  
-  ['fugleKey','secondFugleKey'].forEach((id, i) => {
-    const el = $(`${id}Status`), val = i===0 ? fugleKey : secondFugleKey;
-    el.textContent = val ? '✓ 已設定' : '未設定'; 
-    el.className = `key-status ${val ? 'ok' : 'none'}`;
-  });
-  renderApiStats(); $('modalOverlay').classList.add('show');
-}
-
-function saveAndCloseModal(){
-  fugleKey = $('fugleKeyInput').value.trim(); LS.set(LS.KEYS.FK, fugleKey);
-  secondFugleKey = $('secondFugleKeyInput').value.trim(); LS.set(LS.KEYS.SFK, secondFugleKey);
-  globalKeyRotator = null;
-  const newCount = parseInt($('tabCountSelect').value);
-  if(newCount !== tabCount) {
-    tabCount = newCount; LS.set(LS.KEYS.TAB_COUNT, tabCount);
-    if(currentTab >= (tabCount || 1)) { currentTab = 0; LS.set(LS.KEYS.CUR_TAB, 0); }
-    renderTabs(); renderAll(); 
-  }
-  closeModalById('modalOverlay'); showToast('設定已儲存'); forceRefresh();
-}
-
-function toggleKeyVisibility(inId, btnId) {
-  const i = $(inId), b = $(btnId);
-  i.classList.toggle('pwd-mask'); b.textContent = i.classList.contains('pwd-mask') ? '👁' : '🙈';
-}
-
-function openForeignIdxModal() { renderForeignIdxConfigList(); $('foreignIdxOverlay').classList.add('show'); }
-function closeForeignIdxModal() { closeModalById('foreignIdxOverlay'); availableIndices = LS.get(LS.KEYS.FOREIGN_IDX, DEFAULT_INDICES); forceRefresh(); }
-
-function renderForeignIdxConfigList() {
-  const c = $('foreignIdxListContainer');
-  if(!availableIndices.length) return c.innerHTML = '<div style="text-align:center; color:var(--t-muted); font-weight:600; padding:20px; font-size:14px;">無自選指數</div>';
-  c.innerHTML = availableIndices.map((idx, i) => `
-    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; margin-bottom:8px; background:var(--bg-card); box-shadow:var(--shadow-soft); border-radius:8px; border:1px solid var(--border-light);">
-      <div style="text-align:left; flex:1; min-width:0; padding-right:8px;"><div style="font-weight:700; color:var(--t-main); font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHTML(idx.name)}</div><div style="font-size:12px; color:var(--t-muted); font-weight:600;">${escapeHTML(idx.symbol)}</div></div>
-      <button type="button" class="btn-glass-circle del" style="width:28px!important; height:28px!important; font-size:14px!important;" onclick="deleteForeignIdx(${i})">✕</button>
-    </div>`).join('');
-}
-
-function addForeignIdx() {
-  let sym = $('newIdxSymbol').value.trim().toUpperCase(), name = $('newIdxName').value.trim();
-  if(!sym || !name) return showToast('請輸入代號與名稱');
-  if(['DJI','IXIC','GSPC','SOX','N225','KS11'].includes(sym)) sym = '^' + sym;
-  if(availableIndices.some(i => i.symbol === sym)) return showToast('已存在清單中');
-  availableIndices.push({symbol: sym, name}); LS.set(LS.KEYS.FOREIGN_IDX, availableIndices);
-  $('newIdxSymbol').value = ''; $('newIdxName').value = '';
-  renderForeignIdxConfigList(); showToast(`已新增 ${name}`);
-}
-
-function deleteForeignIdx(i) {
-  if(!confirm(`確定要刪除「${availableIndices[i].name}」嗎？`)) return;
-  availableIndices.splice(i, 1); LS.set(LS.KEYS.FOREIGN_IDX, availableIndices); renderForeignIdxConfigList(); showToast('已刪除');
-}
-
-function exportData() {
-  const d = { 
-    tabStocks: Array.from({length: 5}, (_, i) => LS.get(LS.KEYS.STOCK(i), [])),
-    tabRecords: Array.from({length: 5}, (_, i) => LS.get(LS.KEYS.RECORD(i), [])),
-    tabNames: LS.get(LS.KEYS.TAB_NAMES, ['分頁 1', '分頁 2', '分頁 3', '分頁 4', '分頁 5']),
-    fugleKey, secondFugleKey, theme: LS.getStr(LS.KEYS.THEME, 'light'), 
-    tabCount, customForeignIndices: availableIndices, enableFlash 
-  };
-  
-  const a = document.createElement('a'); 
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(d, null, 2)], {type:"application/json"}));
-  const date = new Date(); 
-  a.download = `stock_backup_${date.getFullYear()}${String(date.getMonth()+1).padStart(2,'0')}${String(date.getDate()).padStart(2,'0')}.json`;
-  a.click(); URL.revokeObjectURL(a.href); showToast('✅ 備份已下載');
-}
-
-function importData(e) {
-  const file = e.target.files[0]; if (!file) return;
-  const r = new FileReader();
-  r.onload = ev => {
-    try {
-      const d = JSON.parse(ev.target.result);
-      if(!confirm('⚠️ 將覆蓋所有資料，確定還原？')) return;
-      
-      if (d.tabStocks) d.tabStocks.forEach((v, i) => LS.set(LS.KEYS.STOCK(i), typeof v === 'string' ? JSON.parse(v) : v));
-      if (d.tabRecords) d.tabRecords.forEach((v, i) => LS.set(LS.KEYS.RECORD(i), typeof v === 'string' ? JSON.parse(v) : v));
-      if (d.tabNames) LS.set(LS.KEYS.TAB_NAMES, typeof d.tabNames === 'string' ? JSON.parse(d.tabNames) : d.tabNames);
-      if (d.fugleKey !== undefined) LS.set(LS.KEYS.FK, d.fugleKey);
-      if (d.secondFugleKey !== undefined) LS.set(LS.KEYS.SFK, d.secondFugleKey);
-      if (d.theme) LS.set(LS.KEYS.THEME, d.theme);
-      if (d.tabCount !== undefined) LS.set(LS.KEYS.TAB_COUNT, d.tabCount);
-      if (d.customForeignIndices) LS.set(LS.KEYS.FOREIGN_IDX, typeof d.customForeignIndices === 'string' ? JSON.parse(d.customForeignIndices) : d.customForeignIndices);
-      if (d.enableFlash !== undefined) LS.set(LS.KEYS.FLASH, d.enableFlash);
-      
-      alert('🎉 還原成功！'); location.reload();
-    } catch(err) { alert('❌ 檔案格式錯誤。'); console.error(err); }
-    $('importFile').value = '';
-  };
-  r.readAsText(file);
-}
-
-/* ========================================================= 🔄 後台輪詢與生命週期 ========================================================= */
-let lastRefreshTime = 0, isRefreshing = false, lastSuccessTime = 0;
-const workerBlob = new Blob([`let t=null;self.onmessage=e=>{if(e.data.action==='start'){clearInterval(t);t=setInterval(()=>self.postMessage('tick'),e.data.interval)}else if(e.data.action==='stop')clearInterval(t)};`], {type:'application/javascript'});
-window.heartbeatWorker = new Worker(URL.createObjectURL(workerBlob));
-heartbeatWorker.onmessage = () => refresh();
-
-function forceRefresh() { globalKeyRotator = null; lastRefreshTime = 0; isRefreshing = false; refresh(); }
-async function refresh() {
-  const now = Date.now();
-  if (isRefreshing && now - lastRefreshTime > 8000) isRefreshing = false;
-  if (isRefreshing || now - lastRefreshTime < 2000) return;
-  isRefreshing = true; lastRefreshTime = now;
-  try { await refreshPrices(); lastSuccessTime = Date.now(); } catch(e){} finally { isRefreshing = false; }
-}
-
-const handleTouchWakeup = () => { if(Date.now() - lastSuccessTime > 15000 && !isRefreshing) forceRefresh(); };
-document.addEventListener('touchend', handleTouchWakeup, {passive: true});
-document.addEventListener('click', handleTouchWakeup, {passive: true});
-
-async function loadFinanceNews() {
-  const c = $('js-ticker');
-  try {
-    const res = await fetch('https://finance-news-api.denis0521.workers.dev/');
-    if(!res.ok) throw new Error();
-    const data = await res.json();
-    if(!data.length) return c.innerHTML = '<span class="ticker-item">目前暫無新聞</span>';
-    const html = data.map(i => `<a href="${i.link}" target="_blank" class="ticker-item"><span class="ticker-source">${escapeHTML(i.source)}</span>${escapeHTML(i.title)}</a>`).join('');
-    c.innerHTML = html + html;
-    c.style.animationDuration = `${c.textContent.length * 0.18}s`;
-  } catch(e) { c.innerHTML = '<span class="ticker-item" style="color:var(--t-muted);">無法載入即時新聞，請稍後再試</span>'; }
-}
-
-/* ========================================================= 🚀 啟動與休眠優化 ========================================================= */
-loadState(); renderAll();
-setTimeout(forceRefresh, 500);
-heartbeatWorker.postMessage({action: 'start', interval: currentInterval});
-
-['focus', 'pageshow'].forEach(e => window.addEventListener(e, forceRefresh));
-
-document.addEventListener('visibilitychange', () => { 
-  const isVis = document.visibilityState === 'visible';
-  heartbeatWorker.postMessage({ action: isVis ? 'start' : 'stop', interval: currentInterval });
-  if (isVis) forceRefresh();
-});
-
-document.addEventListener('DOMContentLoaded', loadFinanceNews);
-
-const kd = (id, next, action) => { $(id).addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); if(next) $(next).focus(); else if(action) action(); } }); };
-kd('symInput', 'qtyInput'); kd('qtyInput', 'buyPriceInput'); kd('buyPriceInput', null, addStock);
 </script>
 </body>
 </html>
