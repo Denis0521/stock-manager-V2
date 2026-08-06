@@ -1122,7 +1122,7 @@ function getNearMonthFuturesSymbol() {
   const now = new Date();
   const year = String(now.getFullYear()).slice(-2); // 取後兩位
   const month = String(now.getMonth() + 1).padStart(2, '0');
-  return `TXF${year}${month}`; // 例如 2026年8月 → TXF2608
+  return `TXF${year}${month}`; // 例如 2026年8月 → TXF202608
 }
 
 async function fetchFutures(symbol) {
