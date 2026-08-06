@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.38'; 
+const APP_VER = 'V7.39'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -627,7 +627,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       </div>
       
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.38</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.39</div>
     </div>
   </div>
 </div>
@@ -1117,19 +1117,23 @@ async function fetchHistoryData(sym) {
   return res;
 }
 
-/* ========== 🆕 期貨相關函數 ========== */
+/* ========== 🆕 期貨相關函數 (修正版) ========== */
 function getNearMonthFuturesSymbol() {
   const now = new Date();
-  const year = now.getFullYear();
+  const year = String(now.getFullYear()).slice(-2); // 取後兩位
   const month = String(now.getMonth() + 1).padStart(2, '0');
-  return `TXF${year}${month}`; // 例如 2026年8月 → TXF202608
+  return `TXF${year}${month}`; // 例如 2026年8月 → TXF2608
 }
 
 async function fetchFutures(symbol) {
   const kr = getKeyRotator();
-  if (kr.count === 0) return null;
+  if (kr.count === 0) {
+    console.warn('❌ 期貨：未設定 API Key');
+    return null;
+  }
   
   const url = `${FUGLE_FUTOPT_API}${encodeURIComponent(symbol)}?type=futures`;
+  console.log(`🔍 期貨請求: ${url}`);
   
   for (let i = 0; i < kr.count; i++) {
     try {
@@ -1139,27 +1143,46 @@ async function fetchFutures(symbol) {
       });
       if (res.ok) {
         const data = await res.json();
+        console.log('✅ 期貨 API 回應:', data);
         trackApiUsage('Fugle');
-        const price = data.lastPrice ?? data.closePrice ?? data.referencePrice;
+        const price = data.lastPrice ?? data.closePrice ?? data.referencePrice ?? data.price;
+        if (price == null) {
+          console.warn('⚠️ 期貨數據缺少價格欄位');
+          return null;
+        }
         const change = data.change ?? 0;
         const changePercent = data.changePercent ?? 0;
         const volume = data.total?.tradeVolume ?? 0;
         return { price, change, changePercent, volume, source: 'Fugle' };
+      } else {
+        console.warn(`❌ 期貨 API 回應狀態 ${res.status}: ${await res.text()}`);
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error('❌ 期貨請求異常:', e);
+    }
   }
   return null;
 }
 
 function updateFuturesDOM(data, isOffline = false) {
-  if (!data) return;
   const pEl = document.getElementById('futuresPrice');
   const vEl = document.getElementById('futuresVolume');
   const cEl = document.getElementById('futuresChange');
   const pctEl = document.getElementById('futuresPct');
   const srcEl = document.getElementById('futuresSource');
   
-  if (pEl) pEl.textContent = data.price.toLocaleString('en-US', { maximumFractionDigits: 2 });
+  if (!pEl) return;
+  
+  if (!data) {
+    pEl.textContent = '—';
+    vEl.textContent = '(—)';
+    cEl.textContent = '—';
+    pctEl.textContent = '—';
+    srcEl.textContent = '無法取得報價';
+    return;
+  }
+  
+  pEl.textContent = data.price.toLocaleString('en-US', { maximumFractionDigits: 2 });
   if (vEl) {
     const vol = data.volume || 0;
     vEl.textContent = vol > 0 ? `(${vol.toLocaleString()})` : '(—)';
@@ -1241,13 +1264,15 @@ async function refreshPrices(){
     } else { renderGlobalIndices([]); }
   } catch(e) {}
 
-  // 3. 🆕 臺指期貨
+  // 3. 🆕 臺指期貨 (修正)
   const futSymbol = getNearMonthFuturesSymbol();
+  console.log(`📊 嘗試取得期貨: ${futSymbol}`);
   const futData = await fetchFutures(futSymbol);
   if (futData) {
     updateFuturesDOM(futData);
   } else {
-    // 若無法取得，可保留上次快取或顯示「—」
+    updateFuturesDOM(null);
+    console.warn('⚠️ 期貨報價獲取失敗，請檢查 API Key 或合約代號');
   }
 
   // 4. 持股報價
