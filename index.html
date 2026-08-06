@@ -433,21 +433,17 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   </div>
 </div>
 
-<!-- 📈 上方指數卡片滑動區 -->
+<!-- 📈 上方指數滑動區 -->
 <div class="idx-scroll-container" id="idxScrollContainer">
+  <!-- ① 臺灣加權指數 -->
   <div class="idx-card-box">
-    <!-- 一級：臺灣加權指數標題 -->
     <div class="idx-box-name" id="idxTitle">🇹🇼 臺灣加權指數</div>
-    
-    <!-- 二級：大盤指數與今日成交量 -->
     <div class="idx-data-row">
       <div class="idx-box-price-wrap">
         <span class="idx-box-price" id="idxPrice">—</span>
       </div>
       <div class="idx-box-vol" id="idxVolume">(—)</div>
     </div>
-    
-    <!-- 三級：今日指數與漲跌幅 -->
     <div class="idx-data-row">
       <div class="idx-box-change-row">
         <span id="idxChange"></span>
@@ -455,6 +451,24 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       </div>
     </div>
     <div class="idx-box-src" id="idxSource">Loading...</div>
+  </div>
+
+  <!-- ② 新增：臺指期貨卡片 -->
+  <div class="idx-card-box" id="futuresCard">
+    <div class="idx-box-name" id="futuresTitle">🇹🇼 臺指期 (近月)</div>
+    <div class="idx-data-row">
+      <div class="idx-box-price-wrap">
+        <span class="idx-box-price" id="futuresPrice">—</span>
+      </div>
+      <div class="idx-box-vol" id="futuresVolume">(—)</div>
+    </div>
+    <div class="idx-data-row">
+      <div class="idx-box-change-row">
+        <span id="futuresChange"></span>
+        <span id="futuresPct"></span>
+      </div>
+    </div>
+    <div class="idx-box-src" id="futuresSource">Loading...</div>
   </div>
 </div>
 
@@ -678,6 +692,7 @@ const PROXY_LIST = ['https://api.allorigins.win/raw?url=', 'https://corsproxy.io
 const API_TIMEOUT = 5000;
 const CF_WORKER_URL = 'https://yahoo-index-proxy.denis0521.workers.dev';
 const FUGLE_API = 'https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
+const FUGLE_FUTOPT_API = 'https://api.fugle.tw/marketdata/v1.0/futopt/intraday/quote/';
 const TICKER_API = 'https://api.fugle.tw/marketdata/v1.0/stock/intraday/ticker/';
 
 /* LocalStorage 統一管理 */
@@ -700,8 +715,8 @@ let tabStocks = Array.from({length: 5}, () => []), tabRecords = Array.from({leng
 let fugleKey='', secondFugleKey='', availableIndices = [], cachedGlobalIndices = [], histCache = {}; 
 let showHistCols = false;
 
-// 📦 Ticker 快取：儲存漲跌停價，避免頻繁呼叫 ticker API
-const tickerCache = new Map(); // key: symbol, value: { limitUp, limitDown, timestamp }
+// 📦 Ticker 快取
+const tickerCache = new Map();
 
 class KeyRotator {
   constructor(keys) { this.keys = keys.filter(k => k && k.trim() !== ''); this.index = 0; }
@@ -870,7 +885,6 @@ function getStockHtmlInner(s) {
 
   const pClass = p != null ? getColorCls(chg) : '';
   
-  // 判斷漲跌停（僅當 limitUp / limitDown 為有效正數時才顯示）
   let limitClass = '';
   if (p != null && s.limitUp != null && s.limitUp > 0 && Math.abs(p - s.limitUp) < 0.005) {
     limitClass = 'limit-up';
@@ -980,33 +994,24 @@ async function fetchWithProxy(url) {
   return null;
 }
 
-/**
- * 取得股票的漲跌停價（含 5 分鐘快取 + 觸發式更新）
- * - 若快取存在且未超過 5 分鐘，直接回傳
- * - 若該股票目前價格等於漲跌停價，且價格有變動，強制重新取得
- */
 async function getTickerInfo(sym, currentPrice) {
   const now = Date.now();
   const cached = tickerCache.get(sym);
-  const cacheExpiry = 5 * 60 * 1000; // 5 分鐘
+  const cacheExpiry = 5 * 60 * 1000;
   
-  // 檢查是否需要強制更新：若價格等於漲跌停且價格有變動，重抓
   let forceUpdate = false;
   if (cached && currentPrice != null) {
     const isAtLimit = (cached.limitUp != null && Math.abs(currentPrice - cached.limitUp) < 0.005) ||
                       (cached.limitDown != null && Math.abs(currentPrice - cached.limitDown) < 0.005);
-    // 若目前處於漲跌停狀態，且價格與上次取得時不同，強制更新
     if (isAtLimit && cached.priceAtFetch != null && Math.abs(currentPrice - cached.priceAtFetch) > 0.001) {
       forceUpdate = true;
     }
   }
   
-  // 快取有效且不需強制更新
   if (cached && !forceUpdate && (now - cached.timestamp < cacheExpiry)) {
     return cached;
   }
   
-  // 呼叫 ticker API
   const kr = getKeyRotator();
   if (kr.count === 0) return null;
   
@@ -1020,7 +1025,6 @@ async function getTickerInfo(sym, currentPrice) {
         const data = await res.json();
         const limitUp = data.limitUpPrice ?? null;
         const limitDown = data.limitDownPrice ?? null;
-        // 存入快取
         tickerCache.set(sym, {
           limitUp: limitUp,
           limitDown: limitDown,
@@ -1037,7 +1041,6 @@ async function getTickerInfo(sym, currentPrice) {
 async function fetchFugle(sym){
   const kr = getKeyRotator(); if (kr.count === 0) return null;
   
-  // 1. 先取得報價 (使用 quote 端點)
   let quoteData = null;
   for (let i = 0; i < kr.count; i++){
     try {
@@ -1053,11 +1056,9 @@ async function fetchFugle(sym){
   }
   if (!quoteData) return null;
 
-  // 2. 取得報價中的價格
   const p = quoteData.lastPrice ?? quoteData.closePrice ?? quoteData.previousClose ?? quoteData.referencePrice ?? quoteData.price;
   if (p == null) return null;
 
-  // 3. 使用快取機制取得漲跌停價（僅在必要時呼叫 ticker API）
   const tickerInfo = await getTickerInfo(sym, p);
   
   trackApiUsage('Fugle'); 
@@ -1116,6 +1117,66 @@ async function fetchHistoryData(sym) {
   return res;
 }
 
+/* ========== 🆕 期貨相關函數 ========== */
+function getNearMonthFuturesSymbol() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  return `TXF${year}${month}`; // 例如 2026年8月 → TXF202608
+}
+
+async function fetchFutures(symbol) {
+  const kr = getKeyRotator();
+  if (kr.count === 0) return null;
+  
+  const url = `${FUGLE_FUTOPT_API}${encodeURIComponent(symbol)}?type=futures`;
+  
+  for (let i = 0; i < kr.count; i++) {
+    try {
+      const res = await fetch(url, {
+        headers: { 'X-API-KEY': kr.next() },
+        signal: AbortSignal.timeout(API_TIMEOUT)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        trackApiUsage('Fugle');
+        const price = data.lastPrice ?? data.closePrice ?? data.referencePrice;
+        const change = data.change ?? 0;
+        const changePercent = data.changePercent ?? 0;
+        const volume = data.total?.tradeVolume ?? 0;
+        return { price, change, changePercent, volume, source: 'Fugle' };
+      }
+    } catch (e) {}
+  }
+  return null;
+}
+
+function updateFuturesDOM(data, isOffline = false) {
+  if (!data) return;
+  const pEl = document.getElementById('futuresPrice');
+  const vEl = document.getElementById('futuresVolume');
+  const cEl = document.getElementById('futuresChange');
+  const pctEl = document.getElementById('futuresPct');
+  const srcEl = document.getElementById('futuresSource');
+  
+  if (pEl) pEl.textContent = data.price.toLocaleString('en-US', { maximumFractionDigits: 2 });
+  if (vEl) {
+    const vol = data.volume || 0;
+    vEl.textContent = vol > 0 ? `(${vol.toLocaleString()})` : '(—)';
+  }
+  if (cEl) {
+    cEl.textContent = (data.change >= 0 ? '+' : '') + data.change.toFixed(2);
+    cEl.className = data.change > 0 ? 'up' : (data.change < 0 ? 'down' : '');
+  }
+  if (pctEl) {
+    pctEl.textContent = `(${(data.changePercent >= 0 ? '+' : '') + data.changePercent.toFixed(2)}%)`;
+    pctEl.className = data.changePercent > 0 ? 'up' : (data.changePercent < 0 ? 'down' : '');
+  }
+  if (srcEl) {
+    srcEl.textContent = `via ${data.source} ${isOffline ? '(快取)' : new Date().toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit' })}`;
+  }
+}
+
 function updateTwiiDOM(res, isOffline = false) {
   if(!res) return;
   const titleBox = $('idxTitle');
@@ -1135,9 +1196,11 @@ function updateTwiiDOM(res, isOffline = false) {
   if(els.s) els.s.textContent = `via ${res.source} ${isOffline ? '(快取)' : new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'})}`;
 }
 
+/* ========================================================= 🔄 核心更新函數 ========================================================= */
 async function refreshPrices(){
   if (!navigator.onLine) { showToast('處於離線狀態，顯示快取資料'); return; }
   
+  // 1. 加權指數
   let idxR = await fetchFugle('IX0001');
   if (!idxR) {
     try {
@@ -1157,6 +1220,7 @@ async function refreshPrices(){
   }
   if(idxR) { updateTwiiDOM(idxR); LS.set(LS.KEYS.CACHE_TWII, idxR); }
 
+  // 2. 國外指數
   try {
     const syms = availableIndices.map(i => i.symbol).join(',');
     if(syms) {
@@ -1177,6 +1241,16 @@ async function refreshPrices(){
     } else { renderGlobalIndices([]); }
   } catch(e) {}
 
+  // 3. 🆕 臺指期貨
+  const futSymbol = getNearMonthFuturesSymbol();
+  const futData = await fetchFutures(futSymbol);
+  if (futData) {
+    updateFuturesDOM(futData);
+  } else {
+    // 若無法取得，可保留上次快取或顯示「—」
+  }
+
+  // 4. 持股報價
   if (tabStocks[currentTab].length === 0) { renderApiStats(); return; }
   const uniqueSyms = [...new Set(tabStocks[currentTab].map(s => s.symbol))];
   let hasUpdates = false;
@@ -1202,7 +1276,6 @@ async function refreshPrices(){
               if (r) {
                 s.price = r.price; s.change = r.change; s.changePercent = r.changePercent;
                 if(r.name && !s.name) s.name = r.name;
-                // 更新漲跌停價
                 s.limitUp = r.limitUp;
                 s.limitDown = r.limitDown;
               }
@@ -1236,7 +1309,10 @@ let draggedIdxSymbol = null;
 
 function renderGlobalIndices(indices, isOffline = false) {
   const container = $('idxScrollContainer');
-  Array.from(container.children).slice(1).forEach(e => e.remove());
+  // 保留前兩個卡片（加權指數和期貨），移除後面的
+  while (container.children.length > 2) {
+    container.removeChild(container.lastChild);
+  }
   
   const html = indices.map(item => {
     const matched = availableIndices.find(idx => idx.symbol === item.symbol);
