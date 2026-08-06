@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.41'; 
+const APP_VER = 'V7.42'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -596,7 +596,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       </div>
       
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.41</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.42</div>
     </div>
   </div>
 </div>
@@ -1081,16 +1081,12 @@ async function fetchHistoryData(sym) {
   return res;
 }
 
-/* ========== 🆕 核心修正：期貨代號產生（TXF + 月份代碼 + 年份尾數） ========== */
+/* ========== 🆕 期貨代號（方案 A：全數字格式 TXF + 4位年份 + 2位月份） ========== */
 function getNearMonthFuturesSymbol() {
   const now = new Date();
   const year = now.getFullYear();
-  const month = now.getMonth() + 1; // 1-12
-  // 國際期貨月份代碼：1月=C, 2月=D, 3月=E, 4月=F, 5月=G, 6月=H, 7月=I, 8月=J, 9月=K, 10月=L, 11月=A, 12月=B
-  const monthCodes = ['C','D','E','F','G','H','I','J','K','L','A','B'];
-  const monthCode = monthCodes[month - 1];
-  const yearCode = String(year).slice(-1);
-  return `TXF${monthCode}${yearCode}`;
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  return `TXF${year}${month}`;
 }
 
 async function fetchFutures(symbol) {
@@ -1239,7 +1235,7 @@ async function refreshPrices(){
     } else { renderGlobalIndices([]); }
   } catch(e) {}
 
-  // 3. 臺指期貨（使用修正後的代號）
+  // 3. 臺指期貨（方案 A：全數字格式）
   const futSymbol = getNearMonthFuturesSymbol();
   console.log(`📊 嘗試取得期貨: ${futSymbol}`);
   const futData = await fetchFutures(futSymbol);
