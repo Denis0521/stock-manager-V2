@@ -500,7 +500,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   <div class="modal">
     <button type="button" class="btn-close-icon" onclick="closeModalById('historyModalOverlay')">✕</button>
     <h2>近30交易日損益記錄</h2>
-    <div style="text-align:center; color:var(--t-muted); font-size:16px; margin-top:-10px; margin-bottom:16px;">（交易日14:40自動儲存）</div>
+    <div style="text-align:center; color:var(--t-muted); font-size:16px; margin-top:-10px; margin-bottom:16px;">（交易日13:40自動儲存）</div>
     <div id="historyBody" style="max-height: 50vh; overflow-y: auto; margin-bottom: 16px;">
       <div class="hist-empty">尚無記錄</div>
     </div>
@@ -656,7 +656,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       <ul>
         <li><strong>為什麼需要 API Key？</strong>本系統為純前端架構，依賴「富果 (Fugle) 開發者 API」直接向您的設備傳送即時股價。請前往 Fugle 官網免費註冊並取得 API Token。</li>
         <li><strong>雙 Key 輪替優勢：</strong>Fugle 免費版有「每分鐘 60 次」的請求限制。若您的持股較多，強烈建議申請並填寫<strong>兩組不同的 API Key</strong>（主要與備用）。系統會自動交替使用，突破單一 Key 限制，將更新速度提升至 10 秒/次，並大幅降低斷線率。</li>
-        <li><strong>盤後節能：</strong>台股收盤後（14:30 後），系統會自動放慢更新頻率至 60 秒/次，以節省您的 API 額度消耗。</li>
+        <li><strong>盤後節能：</strong>台股收盤後（13:30 後），系統會自動放慢更新頻率至 60 秒/次，以節省您的 API 額度消耗。</li>
       </ul>
 
       <h3>四、⚠️ 資料安全與備份</h3>
@@ -982,25 +982,31 @@ async function fetchWithProxy(url) {
 
 /**
  * 取得股票的漲跌停價（含 5 分鐘快取 + 觸發式更新）
+ * - 若快取存在且未超過 5 分鐘，直接回傳
+ * - 若該股票目前價格等於漲跌停價，且價格有變動，強制重新取得
  */
 async function getTickerInfo(sym, currentPrice) {
   const now = Date.now();
   const cached = tickerCache.get(sym);
   const cacheExpiry = 5 * 60 * 1000; // 5 分鐘
   
+  // 檢查是否需要強制更新：若價格等於漲跌停且價格有變動，重抓
   let forceUpdate = false;
   if (cached && currentPrice != null) {
     const isAtLimit = (cached.limitUp != null && Math.abs(currentPrice - cached.limitUp) < 0.005) ||
                       (cached.limitDown != null && Math.abs(currentPrice - cached.limitDown) < 0.005);
+    // 若目前處於漲跌停狀態，且價格與上次取得時不同，強制更新
     if (isAtLimit && cached.priceAtFetch != null && Math.abs(currentPrice - cached.priceAtFetch) > 0.001) {
       forceUpdate = true;
     }
   }
   
+  // 快取有效且不需強制更新
   if (cached && !forceUpdate && (now - cached.timestamp < cacheExpiry)) {
     return cached;
   }
   
+  // 呼叫 ticker API
   const kr = getKeyRotator();
   if (kr.count === 0) return null;
   
@@ -1014,6 +1020,7 @@ async function getTickerInfo(sym, currentPrice) {
         const data = await res.json();
         const limitUp = data.limitUpPrice ?? null;
         const limitDown = data.limitDownPrice ?? null;
+        // 存入快取
         tickerCache.set(sym, {
           limitUp: limitUp,
           limitDown: limitDown,
@@ -1030,6 +1037,7 @@ async function getTickerInfo(sym, currentPrice) {
 async function fetchFugle(sym){
   const kr = getKeyRotator(); if (kr.count === 0) return null;
   
+  // 1. 先取得報價 (使用 quote 端點)
   let quoteData = null;
   for (let i = 0; i < kr.count; i++){
     try {
@@ -1045,9 +1053,11 @@ async function fetchFugle(sym){
   }
   if (!quoteData) return null;
 
+  // 2. 取得報價中的價格
   const p = quoteData.lastPrice ?? quoteData.closePrice ?? quoteData.previousClose ?? quoteData.referencePrice ?? quoteData.price;
   if (p == null) return null;
 
+  // 3. 使用快取機制取得漲跌停價（僅在必要時呼叫 ticker API）
   const tickerInfo = await getTickerInfo(sym, p);
   
   trackApiUsage('Fugle'); 
@@ -1192,6 +1202,7 @@ async function refreshPrices(){
               if (r) {
                 s.price = r.price; s.change = r.change; s.changePercent = r.changePercent;
                 if(r.name && !s.name) s.name = r.name;
+                // 更新漲跌停價
                 s.limitUp = r.limitUp;
                 s.limitDown = r.limitDown;
               }
@@ -1214,11 +1225,7 @@ async function refreshPrices(){
     updateSummary();
   }
   
-  // 開盤時間判斷：08:00 到 14:30
-  const isOpen = () => { 
-    const t = new Date(), d = t.getDay(), h = t.getHours() + t.getMinutes()/60; 
-    return d !== 0 && d !== 6 && (h >= 8 && h <= 14.5); 
-  };
+  const isOpen = () => { const t = new Date(), d = t.getDay(), h = t.getHours() + t.getMinutes()/60; return d!==0 && d!==6 && ((h>=8 && h<=14) || h>=15 || h<=5); };
   currentInterval = isOpen() ? (getKeyRotator().count === 2 ? 10000 : 20000) : 60000;
   if(window.heartbeatWorker) heartbeatWorker.postMessage({ action: 'start', interval: currentInterval });
   renderApiStats();
@@ -1373,8 +1380,7 @@ function saveEditStock() {
 function checkAutoSave() {
   const now = new Date(), dayOfWeek = now.getDay(), hours = now.getHours(), minutes = now.getMinutes();
 
-  // 每日損益自動記錄時間點改為 14:40
-  if (dayOfWeek >= 1 && dayOfWeek <= 5 && (hours > 14 || (hours === 14 && minutes >= 40))) {
+  if (dayOfWeek >= 1 && dayOfWeek <= 5 && (hours > 13 || (hours === 13 && minutes >= 40))) {
     const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
     let savedAny = false;
     
@@ -1511,54 +1517,82 @@ function importData(e) {
       if (d.tabStocks) d.tabStocks.forEach((v, i) => LS.set(LS.KEYS.STOCK(i), typeof v === 'string' ? JSON.parse(v) : v));
       if (d.tabRecords) d.tabRecords.forEach((v, i) => LS.set(LS.KEYS.RECORD(i), typeof v === 'string' ? JSON.parse(v) : v));
       if (d.tabNames) LS.set(LS.KEYS.TAB_NAMES, typeof d.tabNames === 'string' ? JSON.parse(d.tabNames) : d.tabNames);
-      if (d.fugleKey !== undefined) { fugleKey = d.fugleKey; LS.set(LS.KEYS.FK, fugleKey); }
-      if (d.secondFugleKey !== undefined) { secondFugleKey = d.secondFugleKey; LS.set(LS.KEYS.SFK, secondFugleKey); }
-      if (d.theme !== undefined) { applyThemeText(d.theme); LS.set(LS.KEYS.THEME, d.theme); }
-      if (d.tabCount !== undefined) { tabCount = d.tabCount; LS.set(LS.KEYS.TAB_COUNT, d.tabCount); }
-      if (d.customForeignIndices !== undefined) { availableIndices = d.customForeignIndices; LS.set(LS.KEYS.FOREIGN_IDX, availableIndices); }
-      if (d.enableFlash !== undefined) { enableFlash = d.enableFlash; LS.set(LS.KEYS.FLASH, enableFlash); }
-
-      showToast('✅ 資料還原成功！');
-      setTimeout(() => location.reload(), 800);
-    } catch(err) {
-      showToast('❌ 匯入失敗，檔案格式不正確');
-    }
+      if (d.fugleKey !== undefined) LS.set(LS.KEYS.FK, d.fugleKey);
+      if (d.secondFugleKey !== undefined) LS.set(LS.KEYS.SFK, d.secondFugleKey);
+      if (d.theme) LS.set(LS.KEYS.THEME, d.theme);
+      if (d.tabCount !== undefined) LS.set(LS.KEYS.TAB_COUNT, d.tabCount);
+      if (d.customForeignIndices) LS.set(LS.KEYS.FOREIGN_IDX, typeof d.customForeignIndices === 'string' ? JSON.parse(d.customForeignIndices) : d.customForeignIndices);
+      if (d.enableFlash !== undefined) LS.set(LS.KEYS.FLASH, d.enableFlash);
+      
+      alert('🎉 還原成功！'); location.reload();
+    } catch(err) { alert('❌ 檔案格式錯誤。'); console.error(err); }
+    $('importFile').value = '';
   };
   r.readAsText(file);
 }
 
-function forceRefresh() {
-  refreshPrices();
+/* ========================================================= 🔄 後台輪詢與生命週期 ========================================================= */
+let lastRefreshTime = 0, isRefreshing = false, lastSuccessTime = 0;
+const workerBlob = new Blob([`let t=null;self.onmessage=e=>{if(e.data.action==='start'){clearInterval(t);t=setInterval(()=>self.postMessage('tick'),e.data.interval)}else if(e.data.action==='stop')clearInterval(t)};`], {type:'application/javascript'});
+window.heartbeatWorker = new Worker(URL.createObjectURL(workerBlob));
+heartbeatWorker.onmessage = () => refresh();
+
+function forceRefresh() { globalKeyRotator = null; lastRefreshTime = 0; isRefreshing = false; refresh(); }
+async function refresh() {
+  const now = Date.now();
+  if (isRefreshing && now - lastRefreshTime > 8000) isRefreshing = false;
+  if (isRefreshing || now - lastRefreshTime < 2000) return;
+  isRefreshing = true; lastRefreshTime = now;
+  try { await refreshPrices(); lastSuccessTime = Date.now(); } catch(e){} finally { isRefreshing = false; }
 }
 
-/* ========================================================= ⏰ 背景 Worker 輪詢啟動 ========================================================= */
-let heartbeatWorker = null;
-try {
-  const blob = new Blob([`
-    let timer = null;
-    self.onmessage = function(e) {
-      if (e.data.action === 'start') {
-        if (timer) clearInterval(timer);
-        timer = setInterval(() => self.postMessage('tick'), e.data.interval);
-      } else if (e.data.action === 'stop') {
-        if (timer) clearInterval(timer);
-      }
-    };
-  `], { type: 'application/javascript' });
-  heartbeatWorker = new Worker(URL.createObjectURL(blob));
-  window.heartbeatWorker = heartbeatWorker;
-  heartbeatWorker.onmessage = function() {
-    refreshPrices();
-  };
-} catch(e) {
-  setInterval(refreshPrices, currentInterval);
+const handleTouchWakeup = () => { if(Date.now() - lastSuccessTime > 15000 && !isRefreshing) forceRefresh(); };
+document.addEventListener('touchend', handleTouchWakeup, {passive: true});
+document.addEventListener('click', handleTouchWakeup, {passive: true});
+
+async function loadFinanceNews() {
+  const c = $('js-ticker');
+  try {
+    const res = await fetch('https://finance-news-api.denis0521.workers.dev/');
+    if(!res.ok) throw new Error();
+    const data = await res.json();
+    if(!data.length) return c.innerHTML = '<span class="ticker-item">目前暫無新聞</span>';
+    const html = data.map(i => `<a href="${i.link}" target="_blank" class="ticker-item"><span class="ticker-source">${escapeHTML(i.source)}</span>${escapeHTML(i.title)}</a>`).join('');
+    c.innerHTML = html + html;
+    c.style.animationDuration = `${c.textContent.length * 0.18}s`;
+  } catch(e) { c.innerHTML = '<span class="ticker-item" style="color:var(--t-muted);">無法載入即時新聞，請稍後再試</span>'; }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  loadState();
-  renderAll();
-  refreshPrices();
+/* ========================================================= 🚀 啟動與休眠優化 ========================================================= */
+loadState(); renderAll();
+setTimeout(forceRefresh, 500);
+heartbeatWorker.postMessage({action: 'start', interval: currentInterval});
+
+['focus', 'pageshow'].forEach(e => window.addEventListener(e, forceRefresh));
+
+document.addEventListener('visibilitychange', () => { 
+  const isVis = document.visibilityState === 'visible';
+  heartbeatWorker.postMessage({ action: isVis ? 'start' : 'stop', interval: currentInterval });
+  if (isVis) forceRefresh();
 });
+
+document.addEventListener('DOMContentLoaded', loadFinanceNews);
+
+const kd = (id, next, action) => { $(id).addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); if(next) $(next).focus(); else if(action) action(); } }); };
+kd('symInput', 'qtyInput'); kd('qtyInput', 'buyPriceInput'); kd('buyPriceInput', null, addStock);
+
+['addModalOverlay', 'modalOverlay', 'manualOverlay', 'editModalOverlay', 'foreignIdxOverlay', 'historyModalOverlay'].forEach(id => {
+  const el = $(id);
+  if (el) el.addEventListener('click', function(e) { 
+    if(e.target === this) {
+      if (id === 'foreignIdxOverlay') closeForeignIdxModal();
+      else this.classList.remove('show'); 
+    }
+  });
+});
+
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+console.log(`股票庫存管理 ${APP_VER} 已啟動`);
 </script>
 </body>
 </html>
