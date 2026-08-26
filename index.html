@@ -982,31 +982,25 @@ async function fetchWithProxy(url) {
 
 /**
  * 取得股票的漲跌停價（含 5 分鐘快取 + 觸發式更新）
- * - 若快取存在且未超過 5 分鐘，直接回傳
- * - 若該股票目前價格等於漲跌停價，且價格有變動，強制重新取得
  */
 async function getTickerInfo(sym, currentPrice) {
   const now = Date.now();
   const cached = tickerCache.get(sym);
-  const cacheExpiry = 5 * 60 * 1000; // 5 分鐘
+  const cacheExpiry = 5 * 60 * 1000; 
   
-  // 檢查是否需要強制更新：若價格等於漲跌停且價格有變動，重抓
   let forceUpdate = false;
   if (cached && currentPrice != null) {
     const isAtLimit = (cached.limitUp != null && Math.abs(currentPrice - cached.limitUp) < 0.005) ||
                       (cached.limitDown != null && Math.abs(currentPrice - cached.limitDown) < 0.005);
-    // 若目前處於漲跌停狀態，且價格與上次取得時不同，強制更新
     if (isAtLimit && cached.priceAtFetch != null && Math.abs(currentPrice - cached.priceAtFetch) > 0.001) {
       forceUpdate = true;
     }
   }
   
-  // 快取有效且不需強制更新
   if (cached && !forceUpdate && (now - cached.timestamp < cacheExpiry)) {
     return cached;
   }
   
-  // 呼叫 ticker API
   const kr = getKeyRotator();
   if (kr.count === 0) return null;
   
@@ -1020,13 +1014,7 @@ async function getTickerInfo(sym, currentPrice) {
         const data = await res.json();
         const limitUp = data.limitUpPrice ?? null;
         const limitDown = data.limitDownPrice ?? null;
-        // 存入快取
-        tickerCache.set(sym, {
-          limitUp: limitUp,
-          limitDown: limitDown,
-          timestamp: now,
-          priceAtFetch: currentPrice ?? null
-        });
+        tickerCache.set(sym, { limitUp, limitDown, timestamp: now, priceAtFetch: currentPrice ?? null });
         return tickerCache.get(sym);
       }
     } catch (e) {}
@@ -1037,7 +1025,6 @@ async function getTickerInfo(sym, currentPrice) {
 async function fetchFugle(sym){
   const kr = getKeyRotator(); if (kr.count === 0) return null;
   
-  // 1. 先取得報價 (使用 quote 端點)
   let quoteData = null;
   for (let i = 0; i < kr.count; i++){
     try {
@@ -1045,31 +1032,22 @@ async function fetchFugle(sym){
         headers: {'X-API-KEY': kr.next()}, 
         signal: AbortSignal.timeout(API_TIMEOUT) 
       });
-      if (res.ok) {
-        quoteData = await res.json();
-        break;
-      }
+      if (res.ok) { quoteData = await res.json(); break; }
     } catch(e) {}
   }
   if (!quoteData) return null;
 
-  // 2. 取得報價中的價格
   const p = quoteData.lastPrice ?? quoteData.closePrice ?? quoteData.previousClose ?? quoteData.referencePrice ?? quoteData.price;
   if (p == null) return null;
 
-  // 3. 使用快取機制取得漲跌停價（僅在必要時呼叫 ticker API）
   const tickerInfo = await getTickerInfo(sym, p);
   
   trackApiUsage('Fugle'); 
   return {
-    price: p,
-    change: quoteData.change ?? 0,
-    changePercent: quoteData.changePercent ?? 0,
+    price: p, change: quoteData.change ?? 0, changePercent: quoteData.changePercent ?? 0,
     volume: quoteData.total ? (quoteData.total.tradeValue || quoteData.total.tradeVolume || 0) : 0,
-    source: 'Fugle',
-    name: quoteData.name || '',
-    limitUp: tickerInfo?.limitUp ?? null,
-    limitDown: tickerInfo?.limitDown ?? null
+    source: 'Fugle', name: quoteData.name || '',
+    limitUp: tickerInfo?.limitUp ?? null, limitDown: tickerInfo?.limitDown ?? null
   };
 }
 
@@ -1102,12 +1080,7 @@ async function fetchHistoryData(sym) {
       const d = await res.json(); if (!d.chart.result) return null;
       const closes = d.chart.result[0].indicators.quote[0].close.filter(c => c != null);
       const L = closes.length; if(L === 0) return null;
-      return {
-        d5: L > 5 ? closes[L - 1 - 5] : null,
-        d20: L > 20 ? closes[L - 1 - 20] : null,
-        d60: L > 60 ? closes[L - 1 - 60] : null,
-        d120: L > 120 ? closes[L - 1 - 120] : null
-      };
+      return { d5: L > 5 ? closes[L - 1 - 5] : null, d20: L > 20 ? closes[L - 1 - 20] : null, d60: L > 60 ? closes[L - 1 - 60] : null, d120: L > 120 ? closes[L - 1 - 120] : null };
     } catch(e) { return null; }
   };
 
@@ -1202,9 +1175,7 @@ async function refreshPrices(){
               if (r) {
                 s.price = r.price; s.change = r.change; s.changePercent = r.changePercent;
                 if(r.name && !s.name) s.name = r.name;
-                // 更新漲跌停價
-                s.limitUp = r.limitUp;
-                s.limitDown = r.limitDown;
+                s.limitUp = r.limitUp; s.limitDown = r.limitDown;
               }
               if (hist && s.price != null) {
                 s.pct5 = hist.d5 != null ? ((s.price - hist.d5) / hist.d5) * 100 : null;
@@ -1533,40 +1504,63 @@ function importData(e) {
 
 /* ========================================================= 🔄 後台輪詢與生命週期 ========================================================= */
 let lastRefreshTime = 0, isRefreshing = false, lastSuccessTime = 0;
-const workerBlob = new Blob([`let t=null;self.onmessage=e=>{if(e.data.action==='start'){clearInterval(t);t=setInterval(()=>self.postMessage('tick'),e.data.interval)}else if(e.data.action==='stop')clearInterval(t)};`], {type:'application/javascript'});
+
+// 修復截斷的 Worker 代碼並實作新聞拉取及頁面初始化
+const workerBlob = new Blob([`let t=null;self.onmessage=e=>{if(e.data.action==='start'){clearInterval(t);t=setInterval(()=>self.postMessage('tick'),e.data.interval);}}`], {type: 'application/javascript'});
 window.heartbeatWorker = new Worker(URL.createObjectURL(workerBlob));
-heartbeatWorker.onmessage = () => refresh();
+window.heartbeatWorker.onmessage = () => { forceRefresh(); };
 
-function forceRefresh() { globalKeyRotator = null; lastRefreshTime = 0; isRefreshing = false; refresh(); }
-async function refresh() {
+async function forceRefresh() {
+  if (isRefreshing) return;
   const now = Date.now();
-  if (isRefreshing && now - lastRefreshTime > 8000) isRefreshing = false;
-  if (isRefreshing || now - lastRefreshTime < 2000) return;
-  isRefreshing = true; lastRefreshTime = now;
-  try { await refreshPrices(); lastSuccessTime = Date.now(); } catch(e){} finally { isRefreshing = false; }
-}
-
-const handleTouchWakeup = () => { if(Date.now() - lastSuccessTime > 15000 && !isRefreshing) forceRefresh(); };
-document.addEventListener('touchend', handleTouchWakeup, {passive: true});
-document.addEventListener('click', handleTouchWakeup, {passive: true});
-
-async function loadFinanceNews() {
-  const c = $('js-ticker');
+  if (now - lastRefreshTime < 2000) return;
+  isRefreshing = true;
   try {
-    const res = await fetch('https://finance-news-api.denis0521.workers.dev/');
-    if(!res.ok) throw new Error();
-    const data = await res.json();
-    if(!data.length) return c.innerHTML = '<span class="ticker-item">目前暫無新聞</span>';
-    const html = data.map(i => `<a href="${i.link}" target="_blank" class="ticker-item"><span class="ticker-source">${escapeHTML(i.source)}</span>${escapeHTML(i.title)}</a>`).join('');
-    c.innerHTML = html + html;
-    c.style.animationDuration = `${c.textContent.length * 0.18}s`;
-  } catch(e) { c.innerHTML = '<span class="ticker-item" style="color:var(--t-muted);">無法載入即時新聞，請稍後再試</span>'; }
+    await refreshPrices();
+    lastRefreshTime = Date.now();
+    lastSuccessTime = Date.now();
+  } finally {
+    isRefreshing = false;
+  }
 }
 
-/* ========================================================= 🚀 啟動與休眠優化 ========================================================= */
-loadState(); renderAll();
-setTimeout(forceRefresh, 500);
-heartbeatWorker.postMessage({action: 'start', interval: currentInterval});
+async function fetchNews() {
+  try {
+    const res = await fetchWithProxy('https://news.google.com/rss/search?q=%E5%8F%B0%E8%82%A1&hl=zh-TW&gl=TW&ceid=TW:zh-Hant');
+    if (res) {
+      const text = await res.text();
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(text, 'text/xml');
+      const items = xml.querySelectorAll('item');
+      let html = '';
+      for (let i = 0; i < Math.min(items.length, 10); i++) {
+        const title = items[i].querySelector('title').textContent;
+        const link = items[i].querySelector('link').textContent;
+        html += `<a href="${link}" target="_blank" class="ticker-item"><span class="ticker-source">Google新聞</span>${title}</a>`;
+      }
+      if (html) {
+        const tk = $('js-ticker');
+        tk.innerHTML = html;
+        // 動態計算跑馬燈秒數，依照新聞條數給予適當時間
+        tk.style.animationDuration = (items.length * 6) + 's';
+      }
+    }
+  } catch (e) {
+    console.error('新聞載入失敗:', e);
+  }
+}
+
+// 啟動點：執行初始化、呼叫更新、建立定時器與註冊 Service Worker
+window.onload = () => {
+  loadState();
+  fetchNews();
+  forceRefresh();
+  setInterval(fetchNews, 300000); // 新聞每 5 分鐘拉取更新一次
+};
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(err => console.log('Service Worker 註冊失敗:', err));
+}
 </script>
 </body>
 </html>
