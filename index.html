@@ -433,13 +433,10 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   </div>
 </div>
 
-<!-- 📈 上方指數卡片滑動區 -->
 <div class="idx-scroll-container" id="idxScrollContainer">
   <div class="idx-card-box">
-    <!-- 一級：臺灣加權指數標題 -->
     <div class="idx-box-name" id="idxTitle">🇹🇼 臺灣加權指數</div>
     
-    <!-- 二級：大盤指數與今日成交量 -->
     <div class="idx-data-row">
       <div class="idx-box-price-wrap">
         <span class="idx-box-price" id="idxPrice">—</span>
@@ -447,7 +444,6 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       <div class="idx-box-vol" id="idxVolume">(—)</div>
     </div>
     
-    <!-- 三級：今日指數與漲跌幅 -->
     <div class="idx-data-row">
       <div class="idx-box-change-row">
         <span id="idxChange"></span>
@@ -500,7 +496,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   <div class="modal">
     <button type="button" class="btn-close-icon" onclick="closeModalById('historyModalOverlay')">✕</button>
     <h2>近30交易日損益記錄</h2>
-    <div style="text-align:center; color:var(--t-muted); font-size:16px; margin-top:-10px; margin-bottom:16px;">（交易日13:40自動儲存）</div>
+    <div style="text-align:center; color:var(--t-muted); font-size:16px; margin-top:-10px; margin-bottom:16px;">（交易日14:40自動儲存）</div>
     <div id="historyBody" style="max-height: 50vh; overflow-y: auto; margin-bottom: 16px;">
       <div class="hist-empty">尚無記錄</div>
     </div>
@@ -656,7 +652,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
       <ul>
         <li><strong>為什麼需要 API Key？</strong>本系統為純前端架構，依賴「富果 (Fugle) 開發者 API」直接向您的設備傳送即時股價。請前往 Fugle 官網免費註冊並取得 API Token。</li>
         <li><strong>雙 Key 輪替優勢：</strong>Fugle 免費版有「每分鐘 60 次」的請求限制。若您的持股較多，強烈建議申請並填寫<strong>兩組不同的 API Key</strong>（主要與備用）。系統會自動交替使用，突破單一 Key 限制，將更新速度提升至 10 秒/次，並大幅降低斷線率。</li>
-        <li><strong>盤後節能：</strong>台股收盤後（13:30 後），系統會自動放慢更新頻率至 60 秒/次，以節省您的 API 額度消耗。</li>
+        <li><strong>盤後節能：</strong>收盤後（14:30 後），系統會自動放慢更新頻率至 60 秒/次，以節省您的 API 額度消耗。</li>
       </ul>
 
       <h3>四、⚠️ 資料安全與備份</h3>
@@ -1225,7 +1221,7 @@ async function refreshPrices(){
     updateSummary();
   }
   
-  const isOpen = () => { const t = new Date(), d = t.getDay(), h = t.getHours() + t.getMinutes()/60; return d!==0 && d!==6 && ((h>=8 && h<=14) || h>=15 || h<=5); };
+  const isOpen = () => { const t = new Date(), d = t.getDay(), h = t.getHours() + t.getMinutes()/60; return d!==0 && d!==6 && h >= 8 && h < 14.5; };
   currentInterval = isOpen() ? (getKeyRotator().count === 2 ? 10000 : 20000) : 60000;
   if(window.heartbeatWorker) heartbeatWorker.postMessage({ action: 'start', interval: currentInterval });
   renderApiStats();
@@ -1380,7 +1376,7 @@ function saveEditStock() {
 function checkAutoSave() {
   const now = new Date(), dayOfWeek = now.getDay(), hours = now.getHours(), minutes = now.getMinutes();
 
-  if (dayOfWeek >= 1 && dayOfWeek <= 5 && (hours > 13 || (hours === 13 && minutes >= 40))) {
+  if (dayOfWeek >= 1 && dayOfWeek <= 5 && (hours > 14 || (hours === 14 && minutes >= 40))) {
     const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
     let savedAny = false;
     
