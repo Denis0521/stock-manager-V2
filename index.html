@@ -1087,8 +1087,7 @@ async function fetchYahoo(sym){
     try {
       const u = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(sym)}${suffix}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
       const res = await fetchWithProxy(u); if (!res) return null;
-      const text = (await res.text()).trim().split('
-');
+      const text = (await res.text()).trim().split('\n');
       if (text.length < 2) return null;
       const cols = text.pop().split(',');
       if (cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
@@ -1153,8 +1152,7 @@ async function refreshPrices(){
     try {
       const res = await fetchWithProxy(`https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`);
       if(res) {
-        const text = (await res.text()).trim().split('
-');
+        const text = (await res.text()).trim().split('\n');
         if(text.length >= 2) {
           const cols = text.pop().split(',');
           if(cols[4] !== 'null') {
