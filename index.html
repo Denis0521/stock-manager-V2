@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.41'; 
+const APP_VER = 'V7.42'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -517,7 +517,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.41</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.42</div>
     </div>
   </div>
 </div>
@@ -603,6 +603,7 @@ let currentTab = 0, tabCount = 3, showTicker = true, enableFlash = true, current
 let tabStocks = Array.from({length: 5}, () => []), tabRecords = Array.from({length: 5}, () => []), tabNames = [];
 let fugleKey='', secondFugleKey='', availableIndices = [], cachedGlobalIndices = [], histCache = {}; 
 let showHistCols = false;
+let isQuoteUpdated = false; // 確保在API成功抓取報價後，才允許儲存歷史紀錄
 
 const tickerCache = new Map();
 
@@ -970,7 +971,7 @@ function updateTwiiDOM(res, isOffline = false) {
   const titleBox = $('idxTitle');
   if(titleBox) titleBox.innerHTML = `🇹🇼 臺灣加權指數${isOffline ? '<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>' : ''}`;
   
-  const els = { p: $('idxPrice'), c: $('idxChange'), pct: $('idxPct'), v: $('idxVolume'), s: $('idxSource') };
+  const els = { p: $('idxPrice'), c: $('idxChange'), pct:$('idxPct'), v: $('idxVolume'), s:$('idxSource') };
   if(els.p) els.p.textContent = res.price.toLocaleString('en-US',{maximumFractionDigits:0});
   if(els.v) {
     if (res.volume > 0) {
@@ -1157,12 +1158,12 @@ const showToast = msg => { const t = $('toast'); t.textContent = msg; t.classLis
 
 function toggleSummary(e) {
   if(e) e.stopPropagation();
-  const d = $('summaryDetails'), b = $('sumToggleBtn');
+  const d = $('summaryDetails'), b =$('sumToggleBtn');
   const isHidden = d.style.display === 'none';
   d.style.display = isHidden ? 'block' : 'none'; b.style.display = isHidden ? 'none' : 'block';
 }
 
-function openAddModal() { $('addModalOverlay').classList.add('show'); setTimeout(() => $('symInput').focus(), 100); }
+function openAddModal() { $('addModalOverlay').classList.add('show'); setTimeout(() =>$('symInput').focus(), 100); }
 
 function addStock(){
   const sym = $('symInput').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -1192,9 +1193,8 @@ function deleteStock(id){
 function openEditModal(id) {
   const s = tabStocks[currentTab].find(x => x.id === id); if (!s) return;
   $('editId').value = s.id; $('editSymInput').value = s.symbol;
-  $('editNameInput').value = s.name || ''; $('editQtyInput').value = s.displayQty;
-  $('editUnitSelect').value = s.displayUnit; $('editBuyPriceInput').value = s.buyPrice || '';
-  $('editModalOverlay').classList.add('show');
+  $('editNameInput').value = s.name \vert{}\vert{} '';$('editQtyInput').value = s.displayQty;
+  $('editUnitSelect').value = s.displayUnit; $('editBuyPriceInput').value = s.buyPrice \vert{}\vert{} '';$('editModalOverlay').classList.add('show');
 }
 
 function saveEditStock() {
@@ -1213,6 +1213,8 @@ function saveEditStock() {
 
 // 💾 自動儲存機制：強制台灣時區 14:40
 function checkAutoSave() {
+  if (!isQuoteUpdated) return; // 確保在API成功更新過報價後才允許記錄
+  
   const twTime = getTWTime();
   const dayOfWeek = twTime.getDay(), hours = twTime.getHours(), minutes = twTime.getMinutes();
 
@@ -1292,7 +1294,7 @@ function saveAndCloseModal(){
 }
 
 function toggleKeyVisibility(inId, btnId) {
-  const i = $(inId), b = $(btnId);
+  const i = $(inId), b =$(btnId);
   i.classList.toggle('pwd-mask'); b.textContent = i.classList.contains('pwd-mask') ? '👁' : '🙈';
 }
 
@@ -1310,12 +1312,12 @@ function renderForeignIdxConfigList() {
 }
 
 function addForeignIdx() {
-  let sym = $('newIdxSymbol').value.trim().toUpperCase(), name = $('newIdxName').value.trim();
+  let sym = $('newIdxSymbol').value.trim().toUpperCase(), name =$('newIdxName').value.trim();
   if(!sym || !name) return showToast('請輸入代號與名稱');
   if(['DJI','IXIC','GSPC','SOX','N225','KS11'].includes(sym)) sym = '^' + sym;
   if(availableIndices.some(i => i.symbol === sym)) return showToast('已存在清單中');
   availableIndices.push({symbol: sym, name}); LS.set(LS.KEYS.FOREIGN_IDX, availableIndices);
-  $('newIdxSymbol').value = ''; $('newIdxName').value = '';
+  $('newIdxSymbol').value = '';$('newIdxName').value = '';
   renderForeignIdxConfigList(); showToast(`已新增 ${name}`);
 }
 
@@ -1375,7 +1377,14 @@ async function refresh() {
   if (isRefreshing && now - lastRefreshTime > 8000) isRefreshing = false;
   if (isRefreshing || now - lastRefreshTime < 2000) return;
   isRefreshing = true; lastRefreshTime = now;
-  try { await refreshPrices(); lastSuccessTime = Date.now(); } catch(e){} finally { isRefreshing = false; }
+  try { 
+    await refreshPrices(); 
+    lastSuccessTime = Date.now(); 
+    if (!isQuoteUpdated && navigator.onLine) {
+      isQuoteUpdated = true;
+      checkAutoSave(); // 取得首次報價後，立即檢查是否需要補足當日歷史紀錄
+    }
+  } catch(e){} finally { isRefreshing = false; }
 }
 
 const handleTouchWakeup = () => { if(Date.now() - lastSuccessTime > 15000 && !isRefreshing) forceRefresh(); };
@@ -1410,7 +1419,7 @@ document.addEventListener('visibilitychange', () => {
 
 document.addEventListener('DOMContentLoaded', loadFinanceNews);
 
-const kd = (id, next, action) => { $(id).addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); if(next) $(next).focus(); else if(action) action(); } }); };
+const kd = (id, next, action) => { $(id).addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); if(next)$(next).focus(); else if(action) action(); } }); };
 kd('symInput', 'qtyInput'); kd('qtyInput', 'buyPriceInput'); kd('buyPriceInput', null, addStock);
 
 ['addModalOverlay', 'modalOverlay', 'manualOverlay', 'editModalOverlay', 'foreignIdxOverlay', 'historyModalOverlay'].forEach(id => {
