@@ -19,7 +19,7 @@ if(localStorage.getItem('tw_app_version') !== APP_VER) {
 }
 </script>
 <style>
-/* CSS 樣式完全保留，未做變動以確保介面 100% 一致 */
+/* ========================================================= 🚀 核心變數引擎 ========================================================= */
 :root { 
   --bg: #E8ECF1; --bg-card: #FFFFFF; --s-light: #FFFFFF; --s-dark: #B8C4D0; 
   --t-main: #1A2332; --t-muted: #6B7B8D; --up: #DC2626; --down: #16A34A; 
@@ -40,27 +40,101 @@ body.tech {
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light), 0 0 24px rgba(96, 165, 250, 0.8);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light), inset 0 0 12px rgba(96, 165, 250, 0.4);
 }
-body.blue-light { --bg: #D0DEE8; --bg-card: #E8F0F8; --s-light: #E8F0F8; --s-dark: #8CA0B8; --t-main: #061220; --t-muted: #3A5A7A; --up: #DC2626; --down: #16A34A; --engrave-l: rgba(255,255,255,0.95); --engrave-d: rgba(0,0,0,0.25); --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.15); --accent: #1E40AF; --border-light: #A8B8C8; }
-body.purple-light { --bg: #EAE6EF; --bg-card: #FDFBFF; --s-light: #FDFBFF; --s-dark: #C9B8D5; --t-main: #3D2D4D; --t-muted: #7A6A8C; --up: #D9465B; --down: #2D8A70; --engrave-l: rgba(255,255,255,1); --engrave-d: rgba(0,0,0,0.10); --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.05); --accent: #7A5CAF; --border-light: #D6C8E0; }
-body.pink { --bg: #F4E8EC; --bg-card: #FFFBFB; --s-light: #FFFBFB; --s-dark: #D4B8C1; --t-main: #5C3241; --t-muted: #946574; --up: #D9465B; --down: #2D8A70; --engrave-l: rgba(255,255,255,1); --engrave-d: rgba(0,0,0,0.08); --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.04); --accent: #C24D7B; --border-light: #E6D0D8; }
-body.brown-light { --bg: #F5EFEA; --bg-card: #FDFBFA; --s-light: #FFFFFF; --s-dark: #D4C9C1; --t-main: #4A2A17; --t-muted: #7A4526; --up: #D9465B; --down: #2D8A70; --engrave-l: rgba(255,255,255,1); --engrave-d: rgba(122,69,38,0.15); --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(122,69,38,0.08); --accent: #7A4526; --border-light: #E8DFD8; }
-body.gray-light { --bg: #BFC5CC; --bg-card: #D3D9E0; --s-light: #E5EBF2; --s-dark: #9199A3; --t-main: #1D232A; --t-muted: #535C66; --up: #D9465B; --down: #2D8A70; --engrave-l: rgba(255,255,255,0.6); --engrave-d: rgba(0,0,0,0.15); --protrude-l: rgba(255,255,255,0.7); --protrude-d: rgba(0,0,0,0.12); --accent: #373F47; --border-light: #A4ABB3; }
+body.blue-light { 
+  --bg: #D0DEE8; --bg-card: #E8F0F8; --s-light: #E8F0F8; --s-dark: #8CA0B8; 
+  --t-main: #061220; --t-muted: #3A5A7A; --up: #DC2626; --down: #16A34A; 
+  --engrave-l: rgba(255,255,255,0.95); --engrave-d: rgba(0,0,0,0.25); 
+  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.15); 
+  --accent: #1E40AF; --border-light: #A8B8C8; 
+}
+body.purple-light { 
+  --bg: #EAE6EF; --bg-card: #FDFBFF; --s-light: #FDFBFF; --s-dark: #C9B8D5; 
+  --t-main: #3D2D4D; --t-muted: #7A6A8C; --up: #D9465B; --down: #2D8A70; 
+  --engrave-l: rgba(255,255,255,1); --engrave-d: rgba(0,0,0,0.10); 
+  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.05); 
+  --accent: #7A5CAF; --border-light: #D6C8E0; 
+}
+body.pink { 
+  --bg: #F4E8EC; --bg-card: #FFFBFB; --s-light: #FFFBFB; --s-dark: #D4B8C1; 
+  --t-main: #5C3241; --t-muted: #946574; --up: #D9465B; --down: #2D8A70; 
+  --engrave-l: rgba(255,255,255,1); --engrave-d: rgba(0,0,0,0.08); 
+  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.04); 
+  --accent: #C24D7B; --border-light: #E6D0D8; 
+}
+body.brown-light { 
+  --bg: #F5EFEA; --bg-card: #FDFBFA; --s-light: #FFFFFF; --s-dark: #D4C9C1; 
+  --t-main: #4A2A17; --t-muted: #7A4526; --up: #D9465B; --down: #2D8A70; 
+  --engrave-l: rgba(255,255,255,1); --engrave-d: rgba(122,69,38,0.15); 
+  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(122,69,38,0.08); 
+  --accent: #7A4526; --border-light: #E8DFD8; 
+}
+body.gray-light { 
+  --bg: #BFC5CC; --bg-card: #D3D9E0; --s-light: #E5EBF2; --s-dark: #9199A3; 
+  --t-main: #1D232A; --t-muted: #535C66; --up: #D9465B; --down: #2D8A70; 
+  --engrave-l: rgba(255,255,255,0.6); --engrave-d: rgba(0,0,0,0.15); 
+  --protrude-l: rgba(255,255,255,0.7); --protrude-d: rgba(0,0,0,0.12); 
+  --accent: #373F47; --border-light: #A4ABB3; 
+}
 
+/* ========================================================= 🌐 基礎排版 ========================================================= */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Noto Sans TC,sans-serif; background:var(--bg); color:var(--t-main); padding:0 0 60px; min-height:100vh; font-size:15px; overflow-x:hidden; transition:background-color 0.4s ease, color 0.4s ease}
 input,select,button{font-family:inherit;font-size:inherit;outline:none;text-align:center}
 
-.header, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .backup-box { background: var(--bg-card); box-shadow: var(--shadow-soft); border-radius: 12px; transition: background-color 0.4s ease, box-shadow 0.4s ease; border: 1px solid var(--border-light); }
+.header, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .backup-box { 
+  background: var(--bg-card); box-shadow: var(--shadow-soft); border-radius: 12px; transition: background-color 0.4s ease, box-shadow 0.4s ease; border: 1px solid var(--border-light);
+}
 .header { box-shadow: var(--shadow-strong); border-bottom: 2px solid var(--s-dark); border-radius: 0 0 16px 16px; padding: 12px 10px 4px 10px; display: flex; flex-direction: column; position: sticky; top: 0; z-index: 100; transition: all 0.4s ease; }
 .header-top { display: flex; align-items: center; justify-content: space-between; width: 100%; }
 .header h1 { font-size: 20px; font-weight: 700; color: var(--t-main); user-select: none; margin-left: 6px; display: flex; align-items: center; gap: 10px; }
-.title-text { font-size: 22px; font-weight: normal; color: var(--t-main); text-shadow: 1px 1px 0px var(--border-light), 2px 2px 0px var(--s-dark), 3px 3px 5px rgba(0, 0, 0, 0.15); }
-body.tech .title-text { text-shadow: 1px 1px 0px #151820, 2px 2px 0px #0e1015, 3px 3px 6px rgba(0, 0, 0, 0.6); }
 
-.glass-bead { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 25%, #ffffff 0%, #ffe066 20%, #f5a623 60%, #b36b00 100%); box-shadow: inset -3px -3px 6px rgba(102, 51, 0, 0.5), inset 3px 3px 6px rgba(255, 255, 255, 0.8), 0 4px 6px var(--s-dark); color: #7b2c00; text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5), -1px -1px 0px rgba(0, 0, 0, 0.4); font-size: 19px; font-weight: bold; flex-shrink: 0; line-height: 1; }
+.title-text {
+  font-size: 22px;
+  font-weight: normal;
+  color: var(--t-main);
+  text-shadow: 
+    1px 1px 0px var(--border-light),
+    2px 2px 0px var(--s-dark),
+    3px 3px 5px rgba(0, 0, 0, 0.15);
+}
+body.tech .title-text {
+  text-shadow: 
+    1px 1px 0px #151820,
+    2px 2px 0px #0e1015,
+    3px 3px 6px rgba(0, 0, 0, 0.6);
+}
+
+.glass-bead {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 25%, #ffffff 0%, #ffe066 20%, #f5a623 60%, #b36b00 100%);
+  box-shadow: 
+    inset -3px -3px 6px rgba(102, 51, 0, 0.5),
+    inset 3px 3px 6px rgba(255, 255, 255, 0.8),
+    0 4px 6px var(--s-dark);
+  color: #7b2c00; 
+  text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5), -1px -1px 0px rgba(0, 0, 0, 0.4);
+  font-size: 19px;
+  font-weight: bold;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
 .header-top .hdr-right { display: flex; gap: 6px; align-items: center; }
 
-.header-top .btn-theme, .header-top .btn-adv, .header-top .btn-add-hdr { padding: 6px 16px; font-size: 16px !important; font-weight: 800; white-space: nowrap; border-radius: 30px; background: linear-gradient(135deg, var(--s-light) 0%, transparent 100%); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px solid var(--border-light); box-shadow: inset 0 4px 6px var(--protrude-l), inset 0 -4px 6px var(--protrude-d), 3px 4px 8px var(--s-dark), -2px -2px 6px var(--s-light) !important; color: var(--t-main); text-shadow: none !important; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+/* ========================================================= 💎 頂部與圓形按鈕 ========================================================= */
+.header-top .btn-theme, 
+.header-top .btn-adv, 
+.header-top .btn-add-hdr { 
+  padding: 6px 16px; font-size: 16px !important; font-weight: 800; white-space: nowrap; border-radius: 30px; 
+  background: linear-gradient(135deg, var(--s-light) 0%, transparent 100%); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px solid var(--border-light);
+  box-shadow: inset 0 4px 6px var(--protrude-l), inset 0 -4px 6px var(--protrude-d), 3px 4px 8px var(--s-dark), -2px -2px 6px var(--s-light) !important;
+  color: var(--t-main); text-shadow: none !important; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
 .header-top .btn-add-hdr { color: var(--up); }
 .header-top .btn-theme:hover, .header-top .btn-adv:hover, .header-top .btn-add-hdr:hover { transform: translateY(-2px); filter: brightness(1.08); box-shadow: inset 0 5px 8px var(--protrude-l), inset 0 -3px 5px var(--protrude-d), 5px 6px 12px var(--s-dark), -3px -3px 8px var(--s-light) !important; }
 .header-top .btn-theme:active, .header-top .btn-adv:active, .header-top .btn-add-hdr:active { transform: translateY(1px); filter: brightness(0.95); box-shadow: inset 0 3px 6px var(--protrude-d), inset 0 -2px 4px var(--protrude-l), 1px 2px 3px var(--s-dark) !important; }
@@ -95,17 +169,20 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .form-row button { font-size: 16px; letter-spacing: 2px; padding-left: 18px; }
 .btn-save { width: calc(100% - 20px); padding: 14px; font-size: 17px; margin: 6px 10px; }
 
+/* ========================================================= ⚡ 閃爍動畫樣式 ========================================================= */
 .price { border-radius: 4px; padding: 2px 4px; transition: background-color 0.4s ease, color 0.4s ease; }
 .flash-up { background-color: rgba(220, 38, 38, 0.25) !important; color: var(--up) !important; }
 .flash-down { background-color: rgba(220, 38, 38, 0.25) !important; color: var(--down) !important; }
 .price.limit-up { background-color: #dc2626 !important; color: white !important; }
 .price.limit-down { background-color: #16a34a !important; color: white !important; }
 
+/* ========================================================= 📂 經典立體漸層頁籤模式 ========================================================= */
 .tabs-bar { display: flex; padding: 0 8px; margin: 6px 10px 0; gap: 4px; align-items: flex-end; }
 .tab-btn { flex: 1; height: 36px; padding: 0 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: linear-gradient(to bottom, var(--s-light) 0%, var(--bg) 100%); color: var(--t-muted); font-weight: 600; cursor: pointer; position: relative; top: 1px; z-index: 1; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-light); border-radius: 8px 8px 0 0; box-shadow: inset 0 2px 2px var(--protrude-l); opacity: 0.5; transition: color 0.2s, filter 0.2s, opacity 0.3s; }
 .tab-btn:hover { color: var(--t-main); filter: brightness(1.05); opacity: 0.85; }
 .tab-btn.active { background: var(--bg-card); color: var(--accent); font-weight: 800; height: 36px; z-index: 3; border-bottom: 2px solid var(--bg-card); box-shadow: none; opacity: 1; }
 
+/* ========================================================= 📈 指數滑動卡片區調整 ========================================================= */
 .idx-scroll-container { margin: 6px 10px; overflow-x: auto; display: flex; gap: 0; padding: 6px 0; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
 .idx-scroll-container::-webkit-scrollbar { height: 0; }
 .idx-card-box { flex: 0 0 auto; min-width: 180px; padding: 6px 12px; scroll-snap-align: start; border-right: 1px solid var(--s-dark); text-align: left; user-select: none; transition: transform 0.2s, opacity 0.2s; display: flex; flex-direction: column; justify-content: center; }
@@ -123,6 +200,7 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .idx-box-vol { font-size: 15px; color: var(--t-main); font-weight: 800; white-space: nowrap; } 
 .idx-box-src { font-size: 11px; color: var(--t-muted); text-align: right; margin-top: 2px; opacity: 0.7; }
 
+/* ========================================================= 📈 內容區塊排版與 Grid 調整 ========================================================= */
 .table-scroll { margin: 0 10px 6px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; border-top-left-radius: 0; border-top-right-radius: 0; position: relative; z-index: 2; }
 .list-wrap { min-width: 680px; transition: min-width 0.3s ease; }
 .list-header, .srow { grid-template-columns: 110px 105px 125px 110px 110px 125px 80px; transition: grid-template-columns 0.3s ease; } 
@@ -496,19 +574,6 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
 const $ = id => document.getElementById(id);
 const escapeHTML = str => String(str).replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag] || tag));
 
-// Cache DOM Elements for performance
-const DOMElements = {
-  listBody: $('listBody'),
-  emptyState: $('emptyState'),
-  tableScroll: $('tableScroll'),
-  summaryArea: $('summaryArea'),
-  historyBtn: $('historyBtn'),
-  totalPnl: $('totalPnl'),
-  totalAsset: $('totalAsset'),
-  totalUnrealized: $('totalUnrealized'),
-  toast: $('toast')
-};
-
 const getTWTime = () => new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Taipei"}));
 
 const STOCK_DICT = {'0050':'元大台灣50','0056':'元大高股息','00878':'國泰永續高股息','00929':'復華台灣科技優息','00919':'群益台灣精選高息','00713':'元大台灣高息低波','006208':'富邦台50','00940':'元大台灣價值高息','00939':'統一台灣高息動能','00679B':'元大美債20年','00687B':'國泰20年美債','00937B':'群益ESG投等債20+','00720B':'元大投資級公司債','00881':'國泰台灣5G+','00891':'中信關鍵半導體','00830':'國泰費城半導體','00715L':'期街口布蘭特正2','00632R':'元大台灣50反1','00915':'凱基優選高股息30','00900':'富邦特選高股息30','2330':'台積電','2317':'鴻海','2454':'聯發科','2308':'台達電','2382':'廣達','2881':'富邦金','2882':'國泰金'};
@@ -692,12 +757,15 @@ function calcStockInfo(s) {
 function getStockHtmlInner(s) {
   const info = calcStockInfo(s), p = s.price, chg = s.change ?? 0;
   
-  let totalHtml = `<div class="total-main neutral">—</div><div class="total-sub neutral">點擊 ✎ 設均價</div>`;
-  let totalValForClass = 0;
-  if (p != null && info.hasCost) {
+  let totalHtml = '—', totalValForClass = 0;
+  if (p != null) {
+    if (info.hasCost) {
       totalValForClass = info.unPnl;
       totalHtml = `<div class="total-main">${getSign(info.unPnl)}${info.unPnl.toLocaleString()}</div>
       <div class="total-sub">${getSign(info.roi)}${info.roi.toFixed(2)}%</div>`;
+    } else {
+      totalHtml = `<div class="total-main neutral">—</div><div class="total-sub neutral">點擊 ✎ 設均價</div>`;
+    }
   }
 
   const pClass = p != null ? getColorCls(chg) : '';
@@ -735,24 +803,21 @@ function getStockHtmlInner(s) {
 }
 
 function renderAll(){
+  const body = $('listBody'), empty = $('emptyState');
+  const uiEls = ['tableScroll', 'summaryArea', 'historyBtn'].map($);
   const stocks = tabStocks[currentTab];
   
   if(stocks.length === 0){ 
-    DOMElements.listBody.innerHTML = ''; 
-    DOMElements.emptyState.style.display = 'block'; 
-    DOMElements.tableScroll.style.display = 'none';
-    DOMElements.summaryArea.style.display = 'none';
-    DOMElements.historyBtn.style.display = 'none';
+    body.innerHTML = ''; empty.style.display = 'block'; 
+    uiEls.forEach(e => e.style.display = 'none'); 
     return; 
   }
   
-  DOMElements.emptyState.style.display = 'none'; 
-  DOMElements.tableScroll.style.display = 'block';
-  DOMElements.summaryArea.style.display = 'block';
-  DOMElements.historyBtn.style.display = 'block';
+  empty.style.display = 'none'; 
+  uiEls.forEach(e => e.style.display = 'block');
 
   // 使用批次 HTML 生成減少渲染次數
-  DOMElements.listBody.innerHTML = stocks.map(s => `<div class="srow" data-id="${s.id}">${getStockHtmlInner(s)}</div>`).join('');
+  body.innerHTML = stocks.map(s => `<div class="srow" data-id="${s.id}">${getStockHtmlInner(s)}</div>`).join('');
   updateSummary();
 }
 
@@ -779,11 +844,10 @@ function updateSummary(){
     if (info.hasCost) { totalUnPnl += info.unPnl; hasUnPnl = true; }
   });
   
-  // 優化：直接修改快取好的 DOM
-  const updateNode = (el, val, cls) => { el.textContent = val; el.className = `val ${cls}`; };
-  updateNode(DOMElements.totalPnl, getSign(pnl) + pnl.toLocaleString(), getColorCls(pnl));
-  updateNode(DOMElements.totalAsset, getSign(asset) + asset.toLocaleString(), 'neutral');
-  updateNode(DOMElements.totalUnrealized, hasUnPnl ? getSign(totalUnPnl) + totalUnPnl.toLocaleString() : '—', hasUnPnl ? getColorCls(totalUnPnl) : 'neutral');
+  const setHtml = (id, val, cls) => { const e = $(id); e.textContent = val; e.className = `val ${cls}`; };
+  setHtml('totalPnl', getSign(pnl) + pnl.toLocaleString(), getColorCls(pnl));
+  setHtml('totalAsset', getSign(asset) + asset.toLocaleString(), 'neutral');
+  setHtml('totalUnrealized', hasUnPnl ? getSign(totalUnPnl) + totalUnPnl.toLocaleString() : '—', hasUnPnl ? getColorCls(totalUnPnl) : 'neutral');
 }
 
 /* ========================================================= 📡 網路請求與資料流 ========================================================= */
@@ -967,14 +1031,12 @@ async function refreshPrices(){
 
   if (tabStocks[currentTab].length === 0) { renderApiStats(); return; }
   
-  // 優化：預先構建映射表 O(1) 查找，減少雙層迴圈 O(n) 的效能消耗
+  // 優化：只針對「當前分頁」建立 O(1) 查找映射，避免背景撈取全部分頁導致 Fugle API 被封鎖
   const symToStockMap = {};
-  for(let i=0; i<5; i++) {
-    tabStocks[i].forEach(s => {
-      if(!symToStockMap[s.symbol]) symToStockMap[s.symbol] = [];
-      symToStockMap[s.symbol].push({ s, tabIdx: i });
-    });
-  }
+  tabStocks[currentTab].forEach(s => {
+    if(!symToStockMap[s.symbol]) symToStockMap[s.symbol] = [];
+    symToStockMap[s.symbol].push(s);
+  });
   
   const uniqueSyms = Object.keys(symToStockMap);
   let hasUpdates = false;
@@ -995,7 +1057,7 @@ async function refreshPrices(){
         if (r || hist) {
           hasUpdates = true; 
           
-          symToStockMap[sym].forEach(({s, tabIdx}) => {
+          symToStockMap[sym].forEach(s => {
              const oldPrice = s.price;
              if(r) {
                 s.price = r.price; s.change = r.change; s.changePercent = r.changePercent;
@@ -1008,7 +1070,7 @@ async function refreshPrices(){
                 s.pct60 = hist.d60 != null ? ((s.price - hist.d60) / hist.d60) * 100 : null;
                 s.pct120 = hist.d120 != null ? ((s.price - hist.d120) / hist.d120) * 100 : null;
              }
-             if (tabIdx === currentTab && (oldPrice !== s.price || oldPrice == null)) {
+             if (oldPrice !== s.price || oldPrice == null) {
                 renderRow(s, oldPrice);
              }
           });
@@ -1018,7 +1080,7 @@ async function refreshPrices(){
   }
   
   if (hasUpdates) {
-    for (let i = 0; i < 5; i++) LS.set(LS.KEYS.STOCK(i), tabStocks[i]);
+    LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]);
     updateSummary();
   }
   
@@ -1099,7 +1161,7 @@ function handleDragEnd() { document.querySelectorAll('.idx-card-box').forEach(ca
 const closeModalById = id => $(id).classList.remove('show');
 let toastTimer = null;
 const showToast = msg => { 
-  const t = DOMElements.toast; 
+  const t = $('toast'); 
   t.textContent = msg; t.classList.add('show'); 
   clearTimeout(toastTimer); 
   toastTimer = setTimeout(() => t.classList.remove('show'), 2000); 
