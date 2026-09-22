@@ -11,11 +11,11 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.42'; 
+const APP_VER = 'V7.43'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
-  setTimeout(() => location.reload(), 200);
+  setTimeout(() => location.reload(true), 200);
 }
 </script>
 <style>
@@ -538,7 +538,7 @@ body.finance-blue #modalOverlay .modal button, body.finance-blue #modalOverlay .
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.42</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.43</div>
     </div>
   </div>
 </div>
@@ -757,18 +757,18 @@ function renderTabs() {
 }
 
 /* ========================================================= 🖥 核心業務邏輯與渲染 ========================================================= */
-const formatPrice = p => p == null ? '—' : (Math.abs(p) >= 1000 ? p.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : p.toFixed(2));
+const formatPrice = p => p == null || isNaN(p) ? '—' : (Math.abs(p) >= 1000 ? Number(p).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : Number(p).toFixed(2));
 const getSign = n => n >= 0 ? '+' : '';
 const getColorCls = n => n > 0 ? 'up' : (n < 0 ? 'down' : '');
 
 function calcStockInfo(s) {
   const shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
-  const p = s.price, chg = s.change ?? 0;
-  const mktValue = p != null ? Math.round(shares * p) : 0;
-  const todayPnl = (p != null || s.change != null) ? Math.round(shares * chg) : 0;
+  const p = Number(s.price), chg = Number(s.change ?? 0);
+  const mktValue = s.price != null ? Math.round(shares * p) : 0;
+  const todayPnl = (s.price != null || s.change != null) ? Math.round(shares * chg) : 0;
   
   let cost = 0, unPnl = 0, roi = 0, hasCost = false;
-  if (s.buyPrice > 0 && p != null) {
+  if (s.buyPrice > 0 && s.price != null) {
     hasCost = true;
     cost = s.buyPrice * shares;
     unPnl = Math.round(mktValue - cost);
@@ -778,14 +778,14 @@ function calcStockInfo(s) {
 }
 
 function getStockHtmlInner(s) {
-  const info = calcStockInfo(s), p = s.price, chg = s.change ?? 0;
+  const info = calcStockInfo(s), p = s.price != null ? Number(s.price) : null, chg = Number(s.change ?? 0);
   
   let totalHtml = '—', totalValForClass = 0;
   if (p != null) {
     if (info.hasCost) {
       totalValForClass = info.unPnl;
       totalHtml = `<div class="total-main">${getSign(info.unPnl)}${info.unPnl.toLocaleString()}</div>
-      <div class="total-sub">${getSign(info.roi)}${info.roi.toFixed(2)}%</div>`;
+      <div class="total-sub">${getSign(info.roi)}${(info.roi || 0).toFixed(2)}%</div>`;
     } else {
       totalHtml = `<div class="total-main neutral">—</div><div class="total-sub neutral">點擊 ✎ 設均價</div>`;
     }
@@ -797,10 +797,10 @@ function getStockHtmlInner(s) {
   else if (p != null && s.limitDown != null && s.limitDown > 0 && Math.abs(p - s.limitDown) < 0.005) limitClass = 'limit-down';
   
   const priceHtml = p != null ? `<div class="price-container"><div class="price ${pClass} ${limitClass}">${formatPrice(p)}</div><div class="price-sub">${info.mktValue.toLocaleString()}</div></div>` : '—';
-  const changeHtml = (s.change != null && s.changePercent != null) ? `<div class="change-container"><div class="chg ${pClass}">${getSign(chg)}${chg.toFixed(2)}</div><div class="change-sub ${pClass}">(${getSign(s.changePercent)}${s.changePercent.toFixed(2)}%)</div></div>` : '—';
+  const changeHtml = (s.change != null && s.changePercent != null) ? `<div class="change-container"><div class="chg ${pClass}">${getSign(chg)}${chg.toFixed(2)}</div><div class="change-sub ${pClass}">(${getSign(s.changePercent)}${Number(s.changePercent || 0).toFixed(2)}%)</div></div>` : '—';
   const safeName = escapeHTML(s.name || '');
   const nameHtml = safeName ? `<div class="sym-name">${safeName}</div>` : '';
-  const genPctStr = val => val != null && !isNaN(val) ? `${getSign(val)}${val.toFixed(2)}%` : '—';
+  const genPctStr = val => val != null && !isNaN(val) ? `${getSign(val)}${Number(val || 0).toFixed(2)}%` : '—';
   const genPctCls = val => val != null && !isNaN(val) ? getColorCls(val) : '';
 
   return `
@@ -992,8 +992,8 @@ function updateTwiiDOM(res, isOffline = false) {
   const titleBox = $('idxTitle');
   if(titleBox) titleBox.innerHTML = `🇹🇼 臺灣加權指數${isOffline ? '<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>' : ''}`;
   
-  const els = { p: $('idxPrice'), c: $('idxChange'), pct:$('idxPct'), v: $('idxVolume'), s:$('idxSource') };
-  if(els.p) els.p.textContent = res.price.toLocaleString('en-US',{maximumFractionDigits:0});
+  const els = { p: $('idxPrice'), c: $('idxChange'), pct: $('idxPct'), v: $('idxVolume'), s: $('idxSource') };
+  if(els.p) els.p.textContent = Number(res.price || 0).toLocaleString('en-US',{maximumFractionDigits:0});
   if(els.v) {
     if (res.volume > 0) {
       const vol100m = Math.round(res.volume / 100000000);
@@ -1001,8 +1001,8 @@ function updateTwiiDOM(res, isOffline = false) {
     } else { els.v.textContent = `(—)`; }
   }
 
-  if(els.c) { els.c.textContent = getSign(res.change) + res.change.toFixed(2); els.c.className = getColorCls(res.change); }
-  if(els.pct) { els.pct.textContent = `(${getSign(res.changePercent)}${res.changePercent.toFixed(2)}%)`; els.pct.className = getColorCls(res.changePercent); }
+  if(els.c) { els.c.textContent = getSign(res.change || 0) + Number(res.change || 0).toFixed(2); els.c.className = getColorCls(res.change); }
+  if(els.pct) { els.pct.textContent = `(${getSign(res.changePercent || 0)}${Number(res.changePercent || 0).toFixed(2)}%)`; els.pct.className = getColorCls(res.changePercent); }
   if(els.s) els.s.textContent = `via ${res.source} ${isOffline ? '(快取)' : new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'})}`;
 }
 
@@ -1111,16 +1111,19 @@ function renderGlobalIndices(indices, isOffline = false) {
   const html = indices.map(item => {
     const matched = availableIndices.find(idx => idx.symbol === item.symbol);
     const name = matched ? matched.name : item.name;
-    const cls = getColorCls(item.pct);
+    const p = Number(item.price || 0);
+    const c = Number(item.changeAmt || 0);
+    const pct = Number(item.pct || 0);
+    const cls = getColorCls(pct);
     return `<div class="idx-card-box draggable-card" draggable="true" data-symbol="${escapeHTML(item.symbol)}">
       <div class="idx-box-name">${escapeHTML(name)}${isOffline ? '<span style="color:var(--t-muted);font-size:12px;margin-left:6px;opacity:0.8;">(離線)</span>' : ''}</div>
       <div class="idx-data-row">
-        <div class="idx-box-price-wrap"><span class="idx-box-price">${item.price.toLocaleString('en-US', {maximumFractionDigits:2})}</span></div>
+        <div class="idx-box-price-wrap"><span class="idx-box-price">${p.toLocaleString('en-US', {maximumFractionDigits:2})}</span></div>
       </div>
       <div class="idx-data-row">
         <div class="idx-box-change-row ${cls}">
-          <span>${getSign(item.changeAmt)}${item.changeAmt.toFixed(2)}</span>
-          <span>(${getSign(item.pct)}${item.pct.toFixed(2)}%)</span>
+          <span>${getSign(c)}${c.toFixed(2)}</span>
+          <span>(${getSign(pct)}${pct.toFixed(2)}%)</span>
         </div>
       </div>
       <div class="idx-box-src">via Yahoo ${isOffline ? 'Cache' : ''}</div>
