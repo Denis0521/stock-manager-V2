@@ -1521,16 +1521,3 @@ self.addEventListener('fetch', event => {
       })
   );
 });
-```eof
-
-### 更新摘要：
-1. **新增 `finance-blue`（金融藍）佈景主題**：
-   - **配色哲學**：採用投行交易終端機代表性的深海深藍底色（`#0F172A`）配沉穩板岩卡片藍（`#1E293B`），搭配冷天藍重點色（`#38BDF8`）、醒目但柔和的珊瑚紅（`#F87171`）與翡翠綠（`#34D399`）。
-   - **立體光影細節**：專門調配適合深藍背景的發光擬物化陰影（Neumorphism with Subtle Cyan Glow）及琉璃珠頂部裝飾。
-2. **主題按鈕循環與狀態維護**：
-   - 主題圖示設定為金融銀行圖標（`🏦`）。
-   - 納入主題切換列表：`light` → `tech` → `finance-blue` → `blue-light` → ...，並能自動儲存偏好至本機。
-3. **版本號升級至 `V7.42`**：
-   - 更新 Service Worker 與版本檢查機制，確保重新載入即可清除快取並體驗新主題。
-
-http://googleusercontent.com/generated_image_content/0
