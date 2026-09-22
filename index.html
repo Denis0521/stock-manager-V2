@@ -992,7 +992,7 @@ function updateTwiiDOM(res, isOffline = false) {
   const titleBox = $('idxTitle');
   if(titleBox) titleBox.innerHTML = `🇹🇼 臺灣加權指數${isOffline ? '<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>' : ''}`;
   
-  const els = { p: $('idxPrice'), c: $('idxChange'), pct: $('idxPct'), v: $('idxVolume'), s: $('idxSource') };
+  const els = { p: $('idxPrice'), c: $('idxChange'), pct:$('idxPct'), v: $('idxVolume'), s:$('idxSource') };
   if(els.p) els.p.textContent = res.price.toLocaleString('en-US',{maximumFractionDigits:0});
   if(els.v) {
     if (res.volume > 0) {
@@ -1459,65 +1459,3 @@ console.log(`股票庫存管理 ${APP_VER} 已啟動`);
 </script>
 </body>
 </html>
-```eof
-
-```javascript:sw.js
-const CACHE_NAME = 'stock-app-V7.42'; // 同步升級快取版本，確保即刻生效
-const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
-];
-
-// 安裝階段：將核心資源存入快取
-self.addEventListener('install', event => {
-  self.skipWaiting();
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('[Service Worker] Caching App Shell');
-        return cache.addAll(ASSETS_TO_CACHE);
-      })
-      .catch(err => console.log('[Service Worker] Cache fail:', err))
-  );
-});
-
-// 啟動階段：清除舊版本的快取
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('[Service Worker] Removing old cache', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  );
-  self.clients.claim();
-});
-
-// 攔截請求：採用 Network-First 策略
-self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
-  
-  event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        if (response && response.status === 200 && response.type === 'basic') {
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseToCache);
-          });
-        }
-        return response;
-      })
-      .catch(() => {
-        return caches.match(event.request);
-      })
-  );
-});
