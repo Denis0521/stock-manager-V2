@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.41'; 
+const APP_VER = 'V7.42'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -39,6 +39,16 @@ body.tech {
   --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light), 0 0 12px rgba(96, 165, 250, 0.4);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light), 0 0 24px rgba(96, 165, 250, 0.8);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light), inset 0 0 12px rgba(96, 165, 250, 0.4);
+}
+body.finance-blue {
+  --bg: #0F172A; --bg-card: #1E293B; --s-light: #26354D; --s-dark: #080D18;
+  --t-main: #F1F5F9; --t-muted: #94A3B8; --up: #F87171; --down: #34D399;
+  --engrave-l: rgba(255,255,255,0.15); --engrave-d: rgba(0,0,0,0.6);
+  --protrude-l: rgba(255,255,255,0.22); --protrude-d: rgba(0,0,0,0.45);
+  --accent: #38BDF8; --border-light: #334155;
+  --shadow-soft: 4px 4px 9px var(--s-dark), -4px -4px 9px var(--s-light), 0 0 10px rgba(56, 189, 248, 0.25);
+  --shadow-strong: 6px 6px 16px var(--s-dark), -6px -6px 16px var(--s-light), 0 0 20px rgba(56, 189, 248, 0.45);
+  --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light), inset 0 0 8px rgba(56, 189, 248, 0.25);
 }
 body.blue-light { 
   --bg: #D0DEE8; --bg-card: #E8F0F8; --s-light: #E8F0F8; --s-dark: #8CA0B8; 
@@ -97,11 +107,11 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
     2px 2px 0px var(--s-dark),
     3px 3px 5px rgba(0, 0, 0, 0.15);
 }
-body.tech .title-text {
+body.tech .title-text, body.finance-blue .title-text {
   text-shadow: 
-    1px 1px 0px #151820,
-    2px 2px 0px #0e1015,
-    3px 3px 6px rgba(0, 0, 0, 0.6);
+    1px 1px 0px #080D18,
+    2px 2px 0px #05080F,
+    3px 3px 6px rgba(0, 0, 0, 0.65);
 }
 
 .glass-bead {
@@ -122,6 +132,16 @@ body.tech .title-text {
   font-weight: bold;
   flex-shrink: 0;
   line-height: 1;
+}
+
+body.finance-blue .glass-bead {
+  background: radial-gradient(circle at 35% 25%, #E0F2FE 0%, #38BDF8 35%, #0284C7 70%, #0369A1 100%);
+  box-shadow: 
+    inset -3px -3px 6px rgba(2, 44, 76, 0.6),
+    inset 3px 3px 6px rgba(255, 255, 255, 0.8),
+    0 4px 6px var(--s-dark);
+  color: #082F49;
+  text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.6), -1px -1px 0px rgba(0, 0, 0, 0.3);
 }
 
 .header-top .hdr-right { display: flex; gap: 6px; align-items: center; }
@@ -282,7 +302,7 @@ body.show-hist .hist-col { display: flex !important; }
 .manual-content strong { color: var(--t-main); font-weight: 800; }
 
 .settings-row { display: flex; gap: 12px; margin-bottom: 16px; align-items: stretch; }
-.btn-manual-row { flex: 1; padding: 8px 10px; font-size: 15px; color: var(--accent); margin: 0; white-space: nowrap; background: var(--bg-card); border-radius: 8px; box-shadow: var(--shadow-soft); border: 1px solid var(--border-light); font-weight: bold; cursor: display: flex; align-items: center; justify-content: center; }
+.btn-manual-row { flex: 1; padding: 8px 10px; font-size: 15px; color: var(--accent); margin: 0; white-space: nowrap; background: var(--bg-card); border-radius: 8px; box-shadow: var(--shadow-soft); border: 1px solid var(--border-light); font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .btn-manual-row:hover { transform: translateY(-1px); box-shadow: var(--shadow-strong); }
 .btn-manual-row:active { transform: translateY(0); box-shadow: var(--shadow-inset); }
 .tab-count-wrapper { flex: 1; display: flex; flex-direction: column; justify-content: center; background: var(--bg-card); border-radius: 8px; box-shadow: var(--shadow-inset); padding: 2px 12px; border: 1px solid var(--border-light); }
@@ -296,7 +316,8 @@ body.show-hist .hist-col { display: flex !important; }
 .pwd-mask { -webkit-text-security: disc; text-security: disc; }
 
 #modalOverlay .modal button, #modalOverlay .modal .btn-link, #modalOverlay .modal .btn-manual-row, #modalOverlay .modal .btn-close-icon { color: #000 !important; }
-body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link, body.tech #modalOverlay .modal .btn-manual-row, body.tech #modalOverlay .modal .btn-close-icon { color: #F8FAFC !important; }
+body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link, body.tech #modalOverlay .modal .btn-manual-row, body.tech #modalOverlay .modal .btn-close-icon,
+body.finance-blue #modalOverlay .modal button, body.finance-blue #modalOverlay .modal .btn-link, body.finance-blue #modalOverlay .modal .btn-manual-row, body.finance-blue #modalOverlay .modal .btn-close-icon { color: #F1F5F9 !important; }
 
 @media (max-width: 360px) {
   .header h1 { font-size: 16px; margin-left: 2px; }
@@ -517,7 +538,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.41</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.42</div>
     </div>
   </div>
 </div>
@@ -662,6 +683,7 @@ function applyThemeText(t){
   body.className = '';
   const themes = {
     'tech': { emoji: '🚀', color: '#1E2330' },
+    'finance-blue': { emoji: '🏦', color: '#0F172A' },
     'blue-light': { emoji: '💎', color: '#D0DEE8' },
     'purple-light': { emoji: '🍇', color: '#EAE6EF' },
     'pink': { emoji: '🌸', color: '#F4E8EC' },
@@ -677,7 +699,7 @@ function applyThemeText(t){
 }
 
 function toggleTheme(){
-  const modes = ['light', 'tech', 'blue-light', 'purple-light', 'pink', 'brown-light', 'gray-light'];
+  const modes = ['light', 'tech', 'finance-blue', 'blue-light', 'purple-light', 'pink', 'brown-light', 'gray-light'];
   let current = modes.find(m => document.body.classList.contains(m)) || 'light';
   let next = modes[(modes.indexOf(current) + 1) % modes.length];
   applyThemeText(next); LS.set(LS.KEYS.THEME, next);
@@ -1030,7 +1052,6 @@ async function refreshPrices(){
   const uniqueSyms = [...new Set(tabStocks[currentTab].map(s => s.symbol))];
   let hasUpdates = false;
   
-  // 優化：批次從 3 擴充至 5 進行併發抓取
   for (let i = 0; i < uniqueSyms.length; i += 5) {
     const batch = uniqueSyms.slice(i, i + 5);
     const promises = batch.map(async sym => {
@@ -1060,7 +1081,6 @@ async function refreshPrices(){
                 s.pct60 = hist.d60 != null ? ((s.price - hist.d60) / hist.d60) * 100 : null;
                 s.pct120 = hist.d120 != null ? ((s.price - hist.d120) / hist.d120) * 100 : null;
               }
-              // 優化：只在價格真正變動或初次渲染時重繪 DOM
               if (idx === currentTab && (oldPrice !== s.price || oldPrice == null)) {
                 renderRow(s, oldPrice);
               }
@@ -1076,7 +1096,6 @@ async function refreshPrices(){
     updateSummary();
   }
   
-  // 全天不降速更新：雙 Key 維持 8 秒/次，單 Key 維持 15 秒/次
   currentInterval = getKeyRotator().count === 2 ? 8000 : 15000;
   if(window.heartbeatWorker) heartbeatWorker.postMessage({ action: 'start', interval: currentInterval });
   renderApiStats();
@@ -1157,12 +1176,12 @@ const showToast = msg => { const t = $('toast'); t.textContent = msg; t.classLis
 
 function toggleSummary(e) {
   if(e) e.stopPropagation();
-  const d = $('summaryDetails'), b = $('sumToggleBtn');
+  const d = $('summaryDetails'), b =$('sumToggleBtn');
   const isHidden = d.style.display === 'none';
   d.style.display = isHidden ? 'block' : 'none'; b.style.display = isHidden ? 'none' : 'block';
 }
 
-function openAddModal() { $('addModalOverlay').classList.add('show'); setTimeout(() => $('symInput').focus(), 100); }
+function openAddModal() { $('addModalOverlay').classList.add('show'); setTimeout(() =>$('symInput').focus(), 100); }
 
 function addStock(){
   const sym = $('symInput').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -1192,9 +1211,8 @@ function deleteStock(id){
 function openEditModal(id) {
   const s = tabStocks[currentTab].find(x => x.id === id); if (!s) return;
   $('editId').value = s.id; $('editSymInput').value = s.symbol;
-  $('editNameInput').value = s.name || ''; $('editQtyInput').value = s.displayQty;
-  $('editUnitSelect').value = s.displayUnit; $('editBuyPriceInput').value = s.buyPrice || '';
-  $('editModalOverlay').classList.add('show');
+  $('editNameInput').value = s.name \vert{}\vert{} '';$('editQtyInput').value = s.displayQty;
+  $('editUnitSelect').value = s.displayUnit; $('editBuyPriceInput').value = s.buyPrice \vert{}\vert{} '';$('editModalOverlay').classList.add('show');
 }
 
 function saveEditStock() {
@@ -1215,14 +1233,13 @@ function saveEditStock() {
 let autoSaveTimer = null;
 function triggerAutoSave() {
   clearTimeout(autoSaveTimer);
-  autoSaveTimer = setTimeout(checkAutoSave, 20000); // 喚醒後20秒更新
+  autoSaveTimer = setTimeout(checkAutoSave, 20000);
 }
 
 function checkAutoSave() {
   const twTime = getTWTime();
   const dayOfWeek = twTime.getDay(), hours = twTime.getHours(), minutes = twTime.getMinutes();
 
-  // 符合時間：營業日 (週一至週五) 且時間過 14:40
   if (dayOfWeek >= 1 && dayOfWeek <= 5 && (hours > 13 || (hours === 13 && minutes >= 40))) {
     const todayStr = `${twTime.getFullYear()}-${String(twTime.getMonth()+1).padStart(2,'0')}-${String(twTime.getDate()).padStart(2,'0')}`;
     let savedAny = false;
@@ -1306,7 +1323,7 @@ function saveAndCloseModal(){
 }
 
 function toggleKeyVisibility(inId, btnId) {
-  const i = $(inId), b = $(btnId);
+  const i = $(inId), b =$(btnId);
   i.classList.toggle('pwd-mask'); b.textContent = i.classList.contains('pwd-mask') ? '👁' : '🙈';
 }
 
@@ -1324,12 +1341,12 @@ function renderForeignIdxConfigList() {
 }
 
 function addForeignIdx() {
-  let sym = $('newIdxSymbol').value.trim().toUpperCase(), name = $('newIdxName').value.trim();
+  let sym = $('newIdxSymbol').value.trim().toUpperCase(), name =$('newIdxName').value.trim();
   if(!sym || !name) return showToast('請輸入代號與名稱');
   if(['DJI','IXIC','GSPC','SOX','N225','KS11'].includes(sym)) sym = '^' + sym;
   if(availableIndices.some(i => i.symbol === sym)) return showToast('已存在清單中');
   availableIndices.push({symbol: sym, name}); LS.set(LS.KEYS.FOREIGN_IDX, availableIndices);
-  $('newIdxSymbol').value = ''; $('newIdxName').value = '';
+  $('newIdxSymbol').value = '';$('newIdxName').value = '';
   renderForeignIdxConfigList(); showToast(`已新增 ${name}`);
 }
 
@@ -1424,7 +1441,7 @@ document.addEventListener('visibilitychange', () => {
 
 document.addEventListener('DOMContentLoaded', loadFinanceNews);
 
-const kd = (id, next, action) => { $(id).addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); if(next) $(next).focus(); else if(action) action(); } }); };
+const kd = (id, next, action) => { $(id).addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); if(next)$(next).focus(); else if(action) action(); } }); };
 kd('symInput', 'qtyInput'); kd('qtyInput', 'buyPriceInput'); kd('buyPriceInput', null, addStock);
 
 ['addModalOverlay', 'modalOverlay', 'manualOverlay', 'editModalOverlay', 'foreignIdxOverlay', 'historyModalOverlay'].forEach(id => {
@@ -1442,3 +1459,78 @@ console.log(`股票庫存管理 ${APP_VER} 已啟動`);
 </script>
 </body>
 </html>
+```eof
+
+```javascript:sw.js
+const CACHE_NAME = 'stock-app-V7.42'; // 同步升級快取版本，確保即刻生效
+const ASSETS_TO_CACHE = [
+  './',
+  './index.html',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png'
+];
+
+// 安裝階段：將核心資源存入快取
+self.addEventListener('install', event => {
+  self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        console.log('[Service Worker] Caching App Shell');
+        return cache.addAll(ASSETS_TO_CACHE);
+      })
+      .catch(err => console.log('[Service Worker] Cache fail:', err))
+  );
+});
+
+// 啟動階段：清除舊版本的快取
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheName !== CACHE_NAME) {
+            console.log('[Service Worker] Removing old cache', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+  self.clients.claim();
+});
+
+// 攔截請求：採用 Network-First 策略
+self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
+  
+  event.respondWith(
+    fetch(event.request)
+      .then(response => {
+        if (response && response.status === 200 && response.type === 'basic') {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseToCache);
+          });
+        }
+        return response;
+      })
+      .catch(() => {
+        return caches.match(event.request);
+      })
+  );
+});
+```eof
+
+### 更新摘要：
+1. **新增 `finance-blue`（金融藍）佈景主題**：
+   - **配色哲學**：採用投行交易終端機代表性的深海深藍底色（`#0F172A`）配沉穩板岩卡片藍（`#1E293B`），搭配冷天藍重點色（`#38BDF8`）、醒目但柔和的珊瑚紅（`#F87171`）與翡翠綠（`#34D399`）。
+   - **立體光影細節**：專門調配適合深藍背景的發光擬物化陰影（Neumorphism with Subtle Cyan Glow）及琉璃珠頂部裝飾。
+2. **主題按鈕循環與狀態維護**：
+   - 主題圖示設定為金融銀行圖標（`🏦`）。
+   - 納入主題切換列表：`light` → `tech` → `finance-blue` → `blue-light` → ...，並能自動儲存偏好至本機。
+3. **版本號升級至 `V7.42`**：
+   - 更新 Service Worker 與版本檢查機制，確保重新載入即可清除快取並體驗新主題。
+
+http://googleusercontent.com/generated_image_content/0
