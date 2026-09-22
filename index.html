@@ -11,11 +11,11 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.43'; 
+const APP_VER = 'V7.41'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
-  setTimeout(() => location.reload(true), 200);
+  setTimeout(() => location.reload(), 200);
 }
 </script>
 <style>
@@ -39,16 +39,6 @@ body.tech {
   --shadow-soft: 4px 4px 8px var(--s-dark), -4px -4px 8px var(--s-light), 0 0 12px rgba(96, 165, 250, 0.4);
   --shadow-strong: 6px 6px 14px var(--s-dark), -6px -6px 14px var(--s-light), 0 0 24px rgba(96, 165, 250, 0.8);
   --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light), inset 0 0 12px rgba(96, 165, 250, 0.4);
-}
-body.finance-blue {
-  --bg: #0F172A; --bg-card: #1E293B; --s-light: #26354D; --s-dark: #080D18;
-  --t-main: #F1F5F9; --t-muted: #94A3B8; --up: #F87171; --down: #34D399;
-  --engrave-l: rgba(255,255,255,0.15); --engrave-d: rgba(0,0,0,0.6);
-  --protrude-l: rgba(255,255,255,0.22); --protrude-d: rgba(0,0,0,0.45);
-  --accent: #38BDF8; --border-light: #334155;
-  --shadow-soft: 4px 4px 9px var(--s-dark), -4px -4px 9px var(--s-light), 0 0 10px rgba(56, 189, 248, 0.25);
-  --shadow-strong: 6px 6px 16px var(--s-dark), -6px -6px 16px var(--s-light), 0 0 20px rgba(56, 189, 248, 0.45);
-  --shadow-inset: inset 4px 4px 8px var(--s-dark), inset -4px -4px 8px var(--s-light), inset 0 0 8px rgba(56, 189, 248, 0.25);
 }
 body.blue-light { 
   --bg: #D0DEE8; --bg-card: #E8F0F8; --s-light: #E8F0F8; --s-dark: #8CA0B8; 
@@ -107,11 +97,11 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
     2px 2px 0px var(--s-dark),
     3px 3px 5px rgba(0, 0, 0, 0.15);
 }
-body.tech .title-text, body.finance-blue .title-text {
+body.tech .title-text {
   text-shadow: 
-    1px 1px 0px #080D18,
-    2px 2px 0px #05080F,
-    3px 3px 6px rgba(0, 0, 0, 0.65);
+    1px 1px 0px #151820,
+    2px 2px 0px #0e1015,
+    3px 3px 6px rgba(0, 0, 0, 0.6);
 }
 
 .glass-bead {
@@ -132,16 +122,6 @@ body.tech .title-text, body.finance-blue .title-text {
   font-weight: bold;
   flex-shrink: 0;
   line-height: 1;
-}
-
-body.finance-blue .glass-bead {
-  background: radial-gradient(circle at 35% 25%, #E0F2FE 0%, #38BDF8 35%, #0284C7 70%, #0369A1 100%);
-  box-shadow: 
-    inset -3px -3px 6px rgba(2, 44, 76, 0.6),
-    inset 3px 3px 6px rgba(255, 255, 255, 0.8),
-    0 4px 6px var(--s-dark);
-  color: #082F49;
-  text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.6), -1px -1px 0px rgba(0, 0, 0, 0.3);
 }
 
 .header-top .hdr-right { display: flex; gap: 6px; align-items: center; }
@@ -302,7 +282,7 @@ body.show-hist .hist-col { display: flex !important; }
 .manual-content strong { color: var(--t-main); font-weight: 800; }
 
 .settings-row { display: flex; gap: 12px; margin-bottom: 16px; align-items: stretch; }
-.btn-manual-row { flex: 1; padding: 8px 10px; font-size: 15px; color: var(--accent); margin: 0; white-space: nowrap; background: var(--bg-card); border-radius: 8px; box-shadow: var(--shadow-soft); border: 1px solid var(--border-light); font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.btn-manual-row { flex: 1; padding: 8px 10px; font-size: 15px; color: var(--accent); margin: 0; white-space: nowrap; background: var(--bg-card); border-radius: 8px; box-shadow: var(--shadow-soft); border: 1px solid var(--border-light); font-weight: bold; cursor: display: flex; align-items: center; justify-content: center; }
 .btn-manual-row:hover { transform: translateY(-1px); box-shadow: var(--shadow-strong); }
 .btn-manual-row:active { transform: translateY(0); box-shadow: var(--shadow-inset); }
 .tab-count-wrapper { flex: 1; display: flex; flex-direction: column; justify-content: center; background: var(--bg-card); border-radius: 8px; box-shadow: var(--shadow-inset); padding: 2px 12px; border: 1px solid var(--border-light); }
@@ -316,8 +296,7 @@ body.show-hist .hist-col { display: flex !important; }
 .pwd-mask { -webkit-text-security: disc; text-security: disc; }
 
 #modalOverlay .modal button, #modalOverlay .modal .btn-link, #modalOverlay .modal .btn-manual-row, #modalOverlay .modal .btn-close-icon { color: #000 !important; }
-body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link, body.tech #modalOverlay .modal .btn-manual-row, body.tech #modalOverlay .modal .btn-close-icon,
-body.finance-blue #modalOverlay .modal button, body.finance-blue #modalOverlay .modal .btn-link, body.finance-blue #modalOverlay .modal .btn-manual-row, body.finance-blue #modalOverlay .modal .btn-close-icon { color: #F1F5F9 !important; }
+body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link, body.tech #modalOverlay .modal .btn-manual-row, body.tech #modalOverlay .modal .btn-close-icon { color: #F8FAFC !important; }
 
 @media (max-width: 360px) {
   .header h1 { font-size: 16px; margin-left: 2px; }
@@ -538,7 +517,7 @@ body.finance-blue #modalOverlay .modal button, body.finance-blue #modalOverlay .
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.43</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.41</div>
     </div>
   </div>
 </div>
@@ -683,7 +662,6 @@ function applyThemeText(t){
   body.className = '';
   const themes = {
     'tech': { emoji: '🚀', color: '#1E2330' },
-    'finance-blue': { emoji: '🏦', color: '#0F172A' },
     'blue-light': { emoji: '💎', color: '#D0DEE8' },
     'purple-light': { emoji: '🍇', color: '#EAE6EF' },
     'pink': { emoji: '🌸', color: '#F4E8EC' },
@@ -699,7 +677,7 @@ function applyThemeText(t){
 }
 
 function toggleTheme(){
-  const modes = ['light', 'tech', 'finance-blue', 'blue-light', 'purple-light', 'pink', 'brown-light', 'gray-light'];
+  const modes = ['light', 'tech', 'blue-light', 'purple-light', 'pink', 'brown-light', 'gray-light'];
   let current = modes.find(m => document.body.classList.contains(m)) || 'light';
   let next = modes[(modes.indexOf(current) + 1) % modes.length];
   applyThemeText(next); LS.set(LS.KEYS.THEME, next);
@@ -757,18 +735,18 @@ function renderTabs() {
 }
 
 /* ========================================================= 🖥 核心業務邏輯與渲染 ========================================================= */
-const formatPrice = p => p == null || isNaN(p) ? '—' : (Math.abs(p) >= 1000 ? Number(p).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : Number(p).toFixed(2));
+const formatPrice = p => p == null ? '—' : (Math.abs(p) >= 1000 ? p.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : p.toFixed(2));
 const getSign = n => n >= 0 ? '+' : '';
 const getColorCls = n => n > 0 ? 'up' : (n < 0 ? 'down' : '');
 
 function calcStockInfo(s) {
   const shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
-  const p = Number(s.price), chg = Number(s.change ?? 0);
-  const mktValue = s.price != null ? Math.round(shares * p) : 0;
-  const todayPnl = (s.price != null || s.change != null) ? Math.round(shares * chg) : 0;
+  const p = s.price, chg = s.change ?? 0;
+  const mktValue = p != null ? Math.round(shares * p) : 0;
+  const todayPnl = (p != null || s.change != null) ? Math.round(shares * chg) : 0;
   
   let cost = 0, unPnl = 0, roi = 0, hasCost = false;
-  if (s.buyPrice > 0 && s.price != null) {
+  if (s.buyPrice > 0 && p != null) {
     hasCost = true;
     cost = s.buyPrice * shares;
     unPnl = Math.round(mktValue - cost);
@@ -778,14 +756,14 @@ function calcStockInfo(s) {
 }
 
 function getStockHtmlInner(s) {
-  const info = calcStockInfo(s), p = s.price != null ? Number(s.price) : null, chg = Number(s.change ?? 0);
+  const info = calcStockInfo(s), p = s.price, chg = s.change ?? 0;
   
   let totalHtml = '—', totalValForClass = 0;
   if (p != null) {
     if (info.hasCost) {
       totalValForClass = info.unPnl;
       totalHtml = `<div class="total-main">${getSign(info.unPnl)}${info.unPnl.toLocaleString()}</div>
-      <div class="total-sub">${getSign(info.roi)}${(info.roi || 0).toFixed(2)}%</div>`;
+      <div class="total-sub">${getSign(info.roi)}${info.roi.toFixed(2)}%</div>`;
     } else {
       totalHtml = `<div class="total-main neutral">—</div><div class="total-sub neutral">點擊 ✎ 設均價</div>`;
     }
@@ -797,10 +775,10 @@ function getStockHtmlInner(s) {
   else if (p != null && s.limitDown != null && s.limitDown > 0 && Math.abs(p - s.limitDown) < 0.005) limitClass = 'limit-down';
   
   const priceHtml = p != null ? `<div class="price-container"><div class="price ${pClass} ${limitClass}">${formatPrice(p)}</div><div class="price-sub">${info.mktValue.toLocaleString()}</div></div>` : '—';
-  const changeHtml = (s.change != null && s.changePercent != null) ? `<div class="change-container"><div class="chg ${pClass}">${getSign(chg)}${chg.toFixed(2)}</div><div class="change-sub ${pClass}">(${getSign(s.changePercent)}${Number(s.changePercent || 0).toFixed(2)}%)</div></div>` : '—';
+  const changeHtml = (s.change != null && s.changePercent != null) ? `<div class="change-container"><div class="chg ${pClass}">${getSign(chg)}${chg.toFixed(2)}</div><div class="change-sub ${pClass}">(${getSign(s.changePercent)}${s.changePercent.toFixed(2)}%)</div></div>` : '—';
   const safeName = escapeHTML(s.name || '');
   const nameHtml = safeName ? `<div class="sym-name">${safeName}</div>` : '';
-  const genPctStr = val => val != null && !isNaN(val) ? `${getSign(val)}${Number(val || 0).toFixed(2)}%` : '—';
+  const genPctStr = val => val != null && !isNaN(val) ? `${getSign(val)}${val.toFixed(2)}%` : '—';
   const genPctCls = val => val != null && !isNaN(val) ? getColorCls(val) : '';
 
   return `
@@ -993,7 +971,7 @@ function updateTwiiDOM(res, isOffline = false) {
   if(titleBox) titleBox.innerHTML = `🇹🇼 臺灣加權指數${isOffline ? '<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">(離線)</span>' : ''}`;
   
   const els = { p: $('idxPrice'), c: $('idxChange'), pct: $('idxPct'), v: $('idxVolume'), s: $('idxSource') };
-  if(els.p) els.p.textContent = Number(res.price || 0).toLocaleString('en-US',{maximumFractionDigits:0});
+  if(els.p) els.p.textContent = res.price.toLocaleString('en-US',{maximumFractionDigits:0});
   if(els.v) {
     if (res.volume > 0) {
       const vol100m = Math.round(res.volume / 100000000);
@@ -1001,8 +979,8 @@ function updateTwiiDOM(res, isOffline = false) {
     } else { els.v.textContent = `(—)`; }
   }
 
-  if(els.c) { els.c.textContent = getSign(res.change || 0) + Number(res.change || 0).toFixed(2); els.c.className = getColorCls(res.change); }
-  if(els.pct) { els.pct.textContent = `(${getSign(res.changePercent || 0)}${Number(res.changePercent || 0).toFixed(2)}%)`; els.pct.className = getColorCls(res.changePercent); }
+  if(els.c) { els.c.textContent = getSign(res.change) + res.change.toFixed(2); els.c.className = getColorCls(res.change); }
+  if(els.pct) { els.pct.textContent = `(${getSign(res.changePercent)}${res.changePercent.toFixed(2)}%)`; els.pct.className = getColorCls(res.changePercent); }
   if(els.s) els.s.textContent = `via ${res.source} ${isOffline ? '(快取)' : new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'})}`;
 }
 
@@ -1052,6 +1030,7 @@ async function refreshPrices(){
   const uniqueSyms = [...new Set(tabStocks[currentTab].map(s => s.symbol))];
   let hasUpdates = false;
   
+  // 優化：批次從 3 擴充至 5 進行併發抓取
   for (let i = 0; i < uniqueSyms.length; i += 5) {
     const batch = uniqueSyms.slice(i, i + 5);
     const promises = batch.map(async sym => {
@@ -1081,6 +1060,7 @@ async function refreshPrices(){
                 s.pct60 = hist.d60 != null ? ((s.price - hist.d60) / hist.d60) * 100 : null;
                 s.pct120 = hist.d120 != null ? ((s.price - hist.d120) / hist.d120) * 100 : null;
               }
+              // 優化：只在價格真正變動或初次渲染時重繪 DOM
               if (idx === currentTab && (oldPrice !== s.price || oldPrice == null)) {
                 renderRow(s, oldPrice);
               }
@@ -1096,6 +1076,7 @@ async function refreshPrices(){
     updateSummary();
   }
   
+  // 全天不降速更新：雙 Key 維持 8 秒/次，單 Key 維持 15 秒/次
   currentInterval = getKeyRotator().count === 2 ? 8000 : 15000;
   if(window.heartbeatWorker) heartbeatWorker.postMessage({ action: 'start', interval: currentInterval });
   renderApiStats();
@@ -1111,19 +1092,16 @@ function renderGlobalIndices(indices, isOffline = false) {
   const html = indices.map(item => {
     const matched = availableIndices.find(idx => idx.symbol === item.symbol);
     const name = matched ? matched.name : item.name;
-    const p = Number(item.price || 0);
-    const c = Number(item.changeAmt || 0);
-    const pct = Number(item.pct || 0);
-    const cls = getColorCls(pct);
+    const cls = getColorCls(item.pct);
     return `<div class="idx-card-box draggable-card" draggable="true" data-symbol="${escapeHTML(item.symbol)}">
       <div class="idx-box-name">${escapeHTML(name)}${isOffline ? '<span style="color:var(--t-muted);font-size:12px;margin-left:6px;opacity:0.8;">(離線)</span>' : ''}</div>
       <div class="idx-data-row">
-        <div class="idx-box-price-wrap"><span class="idx-box-price">${p.toLocaleString('en-US', {maximumFractionDigits:2})}</span></div>
+        <div class="idx-box-price-wrap"><span class="idx-box-price">${item.price.toLocaleString('en-US', {maximumFractionDigits:2})}</span></div>
       </div>
       <div class="idx-data-row">
         <div class="idx-box-change-row ${cls}">
-          <span>${getSign(c)}${c.toFixed(2)}</span>
-          <span>(${getSign(pct)}${pct.toFixed(2)}%)</span>
+          <span>${getSign(item.changeAmt)}${item.changeAmt.toFixed(2)}</span>
+          <span>(${getSign(item.pct)}${item.pct.toFixed(2)}%)</span>
         </div>
       </div>
       <div class="idx-box-src">via Yahoo ${isOffline ? 'Cache' : ''}</div>
@@ -1179,12 +1157,12 @@ const showToast = msg => { const t = $('toast'); t.textContent = msg; t.classLis
 
 function toggleSummary(e) {
   if(e) e.stopPropagation();
-  const d = $('summaryDetails'), b =$('sumToggleBtn');
+  const d = $('summaryDetails'), b = $('sumToggleBtn');
   const isHidden = d.style.display === 'none';
   d.style.display = isHidden ? 'block' : 'none'; b.style.display = isHidden ? 'none' : 'block';
 }
 
-function openAddModal() { $('addModalOverlay').classList.add('show'); setTimeout(() =>$('symInput').focus(), 100); }
+function openAddModal() { $('addModalOverlay').classList.add('show'); setTimeout(() => $('symInput').focus(), 100); }
 
 function addStock(){
   const sym = $('symInput').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
@@ -1214,8 +1192,9 @@ function deleteStock(id){
 function openEditModal(id) {
   const s = tabStocks[currentTab].find(x => x.id === id); if (!s) return;
   $('editId').value = s.id; $('editSymInput').value = s.symbol;
-  $('editNameInput').value = s.name \vert{}\vert{} '';$('editQtyInput').value = s.displayQty;
-  $('editUnitSelect').value = s.displayUnit; $('editBuyPriceInput').value = s.buyPrice \vert{}\vert{} '';$('editModalOverlay').classList.add('show');
+  $('editNameInput').value = s.name || ''; $('editQtyInput').value = s.displayQty;
+  $('editUnitSelect').value = s.displayUnit; $('editBuyPriceInput').value = s.buyPrice || '';
+  $('editModalOverlay').classList.add('show');
 }
 
 function saveEditStock() {
@@ -1236,13 +1215,14 @@ function saveEditStock() {
 let autoSaveTimer = null;
 function triggerAutoSave() {
   clearTimeout(autoSaveTimer);
-  autoSaveTimer = setTimeout(checkAutoSave, 20000);
+  autoSaveTimer = setTimeout(checkAutoSave, 20000); // 喚醒後20秒更新
 }
 
 function checkAutoSave() {
   const twTime = getTWTime();
   const dayOfWeek = twTime.getDay(), hours = twTime.getHours(), minutes = twTime.getMinutes();
 
+  // 符合時間：營業日 (週一至週五) 且時間過 14:40
   if (dayOfWeek >= 1 && dayOfWeek <= 5 && (hours > 13 || (hours === 13 && minutes >= 40))) {
     const todayStr = `${twTime.getFullYear()}-${String(twTime.getMonth()+1).padStart(2,'0')}-${String(twTime.getDate()).padStart(2,'0')}`;
     let savedAny = false;
@@ -1326,7 +1306,7 @@ function saveAndCloseModal(){
 }
 
 function toggleKeyVisibility(inId, btnId) {
-  const i = $(inId), b =$(btnId);
+  const i = $(inId), b = $(btnId);
   i.classList.toggle('pwd-mask'); b.textContent = i.classList.contains('pwd-mask') ? '👁' : '🙈';
 }
 
@@ -1344,12 +1324,12 @@ function renderForeignIdxConfigList() {
 }
 
 function addForeignIdx() {
-  let sym = $('newIdxSymbol').value.trim().toUpperCase(), name =$('newIdxName').value.trim();
+  let sym = $('newIdxSymbol').value.trim().toUpperCase(), name = $('newIdxName').value.trim();
   if(!sym || !name) return showToast('請輸入代號與名稱');
   if(['DJI','IXIC','GSPC','SOX','N225','KS11'].includes(sym)) sym = '^' + sym;
   if(availableIndices.some(i => i.symbol === sym)) return showToast('已存在清單中');
   availableIndices.push({symbol: sym, name}); LS.set(LS.KEYS.FOREIGN_IDX, availableIndices);
-  $('newIdxSymbol').value = '';$('newIdxName').value = '';
+  $('newIdxSymbol').value = ''; $('newIdxName').value = '';
   renderForeignIdxConfigList(); showToast(`已新增 ${name}`);
 }
 
@@ -1444,7 +1424,7 @@ document.addEventListener('visibilitychange', () => {
 
 document.addEventListener('DOMContentLoaded', loadFinanceNews);
 
-const kd = (id, next, action) => { $(id).addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); if(next)$(next).focus(); else if(action) action(); } }); };
+const kd = (id, next, action) => { $(id).addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); if(next) $(next).focus(); else if(action) action(); } }); };
 kd('symInput', 'qtyInput'); kd('qtyInput', 'buyPriceInput'); kd('buyPriceInput', null, addStock);
 
 ['addModalOverlay', 'modalOverlay', 'manualOverlay', 'editModalOverlay', 'foreignIdxOverlay', 'historyModalOverlay'].forEach(id => {
