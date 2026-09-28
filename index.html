@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.41'; 
+const APP_VER = 'V7.42'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -282,7 +282,7 @@ body.show-hist .hist-col { display: flex !important; }
 .manual-content strong { color: var(--t-main); font-weight: 800; }
 
 .settings-row { display: flex; gap: 12px; margin-bottom: 16px; align-items: stretch; }
-.btn-manual-row { flex: 1; padding: 8px 10px; font-size: 15px; color: var(--accent); margin: 0; white-space: nowrap; background: var(--bg-card); border-radius: 8px; box-shadow: var(--shadow-soft); border: 1px solid var(--border-light); font-weight: bold; cursor: display: flex; align-items: center; justify-content: center; }
+.btn-manual-row { flex: 1; padding: 8px 10px; font-size: 15px; color: var(--accent); margin: 0; white-space: nowrap; background: var(--bg-card); border-radius: 8px; box-shadow: var(--shadow-soft); border: 1px solid var(--border-light); font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .btn-manual-row:hover { transform: translateY(-1px); box-shadow: var(--shadow-strong); }
 .btn-manual-row:active { transform: translateY(0); box-shadow: var(--shadow-inset); }
 .tab-count-wrapper { flex: 1; display: flex; flex-direction: column; justify-content: center; background: var(--bg-card); border-radius: 8px; box-shadow: var(--shadow-inset); padding: 2px 12px; border: 1px solid var(--border-light); }
@@ -517,7 +517,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.41</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.42</div>
     </div>
   </div>
 </div>
@@ -571,10 +571,26 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
 <script>
 /* ========================================================= 🔧 工具與字典 ========================================================= */
 const $ = id => document.getElementById(id);
-const escapeHTML = str => String(str).replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag] || tag));
+const ESC_MAP = {'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'};
+const escapeHTML = str => String(str).replace(/[&<>'"]/g, c => ESC_MAP[c]);
 
 // 🕒 嚴格獲取台灣時區時間 (UTC+8)
 const getTWTime = () => new Date(new Date().toLocaleString("en-US", {timeZone: "Asia/Taipei"}));
+const twDateStr = (d = getTWTime()) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+// 清除超過 2 天的每日快取與 API 用量紀錄（避免 localStorage 越積越多）
+function cleanupOldKeys() {
+  try {
+    const cutoff = new Date(Date.now() - 2 * 86400000).toISOString().slice(0, 10);
+    const re = /^(?:tw_hist_cache_v1_|api_usage_)(\d{4}-\d{2}-\d{2})/;
+    const dead = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i), m = k && re.exec(k);
+      if (m && m[1] < cutoff) dead.push(k);
+    }
+    dead.forEach(k => localStorage.removeItem(k));
+  } catch (e) {}
+}
 
 const STOCK_DICT = {'0050':'元大台灣50','0056':'元大高股息','00878':'國泰永續高股息','00929':'復華台灣科技優息','00919':'群益台灣精選高息','00713':'元大台灣高息低波','006208':'富邦台50','00940':'元大台灣價值高息','00939':'統一台灣高息動能','00679B':'元大美債20年','00687B':'國泰20年美債','00937B':'群益ESG投等債20+','00720B':'元大投資級公司債','00881':'國泰台灣5G+','00891':'中信關鍵半導體','00830':'國泰費城半導體','00715L':'期街口布蘭特正2','00632R':'元大台灣50反1','00915':'凱基優選高股息30','00900':'富邦特選高股息30','2330':'台積電','2317':'鴻海','2454':'聯發科','2308':'台達電','2382':'廣達','2881':'富邦金','2882':'國泰金'};
 const DEFAULT_INDICES = [{symbol:'^DJI',name:'🇺🇸 道瓊工業指數'},{symbol:'^IXIC',name:'🇺🇸 那斯達克指數'},{symbol:'^GSPC',name:'🇺🇸 標普500指數'},{symbol:'^SOX',name:'🇺🇸 費城半導體指數'},{symbol:'TSM',name:'🇹🇼 台積電 ADR'},{symbol:'^N225',name:'🇯🇵 日經225指數'},{symbol:'^KS11',name:'🇰🇷 韓國綜合指數'}];
@@ -706,6 +722,7 @@ function toggleHistCols() {
   showHistCols = !showHistCols;
   LS.set('tw_show_hist', String(showHistCols));
   applyHistColsState();
+  if (showHistCols) ensureHistory([...new Set(tabStocks[currentTab].map(s => s.symbol))]);
 }
 
 function switchTab(idx){
@@ -864,11 +881,14 @@ function renderApiStats() {
     <div><div style="font-size:18px;font-weight:800;color:var(--t-main);">${y}</div><div>Yahoo</div></div></div>`;
 }
 
+let proxyStart = 0; // 優先使用上次成功的代理
 async function fetchWithProxy(url) {
-  for (const proxy of PROXY_LIST) {
+  const n = PROXY_LIST.length;
+  for (let k = 0; k < n; k++) {
+    const i = (proxyStart + k) % n;
     try {
-      const res = await fetch(proxy + encodeURIComponent(url), { signal: AbortSignal.timeout(API_TIMEOUT), cache: 'no-store' });
-      if (res.ok) return res;
+      const res = await fetch(PROXY_LIST[i] + encodeURIComponent(url), { signal: AbortSignal.timeout(API_TIMEOUT), cache: 'no-store' });
+      if (res.ok) { proxyStart = i; return res; }
     } catch (e) {}
   }
   return null;
@@ -926,42 +946,49 @@ async function fetchFugle(sym){
   };
 }
 
-async function fetchYahoo(sym){
-  const tryFetch = async (suffix) => {
-    try {
-      const u = `https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(sym)}${suffix}?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`;
-      const res = await fetchWithProxy(u); if (!res) return null;
-      const text = (await res.text()).trim().split('\n');
-      if (text.length < 2) return null;
-      const cols = text.pop().split(',');
-      if (cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
-      const p = parseFloat(cols[4]), o = parseFloat(cols[1]), v = parseFloat(cols[6] || 0), chg = +(p - o).toFixed(2);
-      trackApiUsage('Yahoo'); return {price: p, change: chg, changePercent: +((chg / o) * 100).toFixed(2), volume: v, source: 'Yahoo', name: ''};
-    } catch(e) { return null; }
-  };
-  return await tryFetch('.TW') || await tryFetch('.TWO');
+const suffixCache = new Map(); // 記住每檔股票是上市(.TW)還是上櫃(.TWO)
+async function tryTwSuffixes(sym, fn) {
+  const order = suffixCache.get(sym) === '.TWO' ? ['.TWO', '.TW'] : ['.TW', '.TWO'];
+  for (const sfx of order) {
+    const r = await fn(sfx);
+    if (r) { suffixCache.set(sym, sfx); return r; }
+  }
+  return null;
 }
 
+async function fetchYahooQuote(ySym) {
+  try {
+    const t = Math.floor(Date.now() / 1000);
+    const res = await fetchWithProxy(`https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(ySym)}?period1=${t - 259200}&period2=${t}&interval=1d&events=history`);
+    if (!res) return null;
+    const rows = (await res.text()).trim().split('\n');
+    if (rows.length < 2) return null;
+    const cols = rows.pop().split(',');
+    if (cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
+    const p = parseFloat(cols[4]), o = parseFloat(cols[1]), v = parseFloat(cols[6] || 0), chg = +(p - o).toFixed(2);
+    trackApiUsage('Yahoo');
+    return { price: p, change: chg, changePercent: +((chg / o) * 100).toFixed(2), volume: v, source: 'Yahoo', name: '' };
+  } catch (e) { return null; }
+}
+
+const fetchYahoo = sym => tryTwSuffixes(sym, sfx => fetchYahooQuote(sym + sfx));
+
 async function fetchHistoryData(sym) {
-  const twTime = getTWTime();
-  const todayStr = `${twTime.getFullYear()}-${String(twTime.getMonth()+1).padStart(2,'0')}-${String(twTime.getDate()).padStart(2,'0')}`;
-  const cacheKey = `${LS.KEYS.HIST_CACHE}_${todayStr}`;
-  let dayCache = LS.get(cacheKey, {});
-  if (dayCache[sym]) return dayCache[sym];
+  const cacheKey = `${LS.KEYS.HIST_CACHE}_${twDateStr()}`;
+  const cached = LS.get(cacheKey, {})[sym];
+  if (cached) return cached;
 
-  const tryFetch = async (suffix) => {
+  const res = await tryTwSuffixes(sym, async sfx => {
     try {
-      const u = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}${suffix}?interval=1d&range=1y`;
-      const res = await fetchWithProxy(u); if (!res) return null;
-      const d = await res.json(); if (!d.chart.result) return null;
+      const resp = await fetchWithProxy(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}${sfx}?interval=1d&range=1y`);
+      if (!resp) return null;
+      const d = await resp.json(); if (!d.chart.result) return null;
       const closes = d.chart.result[0].indicators.quote[0].close.filter(c => c != null);
-      const L = closes.length; if(L === 0) return null;
+      const L = closes.length; if (L === 0) return null;
       return { d5: L > 5 ? closes[L - 1 - 5] : null, d20: L > 20 ? closes[L - 1 - 20] : null, d60: L > 60 ? closes[L - 1 - 60] : null, d120: L > 120 ? closes[L - 1 - 120] : null };
-    } catch(e) { return null; }
-  };
-
-  const res = await tryFetch('.TW') || await tryFetch('.TWO');
-  if (res) { dayCache[sym] = res; LS.set(cacheKey, dayCache); }
+    } catch (e) { return null; }
+  });
+  if (res) { const dayCache = LS.get(cacheKey, {}); dayCache[sym] = res; LS.set(cacheKey, dayCache); } // 寫入前重讀，避免併發覆蓋
   return res;
 }
 
@@ -984,111 +1011,127 @@ function updateTwiiDOM(res, isOffline = false) {
   if(els.s) els.s.textContent = `via ${res.source} ${isOffline ? '(快取)' : new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'})}`;
 }
 
+/* 內容沒變就不寫入 localStorage */
+const lsCache = new Map();
+const setIfChanged = (k, v) => { const str = JSON.stringify(v); if (lsCache.get(k) === str) return; lsCache.set(k, str); LS.set(k, str); };
+
+// 設定視窗沒開時，不必每輪重畫 API 用量
+const maybeRenderApiStats = () => { if ($('modalOverlay').classList.contains('show')) renderApiStats(); };
+
+// 輪詢間隔只在改變時才通知 Worker：雙 Key 8 秒/次，其餘 15 秒/次
+function syncInterval() {
+  const ni = getKeyRotator().count === 2 ? 8000 : 15000;
+  if (ni === currentInterval) return;
+  currentInterval = ni;
+  if (window.heartbeatWorker && document.visibilityState === 'visible') heartbeatWorker.postMessage({ action: 'start', interval: ni });
+}
+
+async function refreshTwii() {
+  const r = await fetchFugle('IX0001') || await fetchYahooQuote('^TWII');
+  if (r) { updateTwiiDOM(r); setIfChanged(LS.KEYS.CACHE_TWII, r); }
+}
+
+async function refreshGlobalIndices() {
+  const syms = availableIndices.map(i => i.symbol).join(',');
+  if (!syms) return renderGlobalIndices([]);
+  try {
+    const res = await fetch(`${CF_WORKER_URL}/indices?symbols=${encodeURIComponent(syms)}&_=${Date.now()}`, { signal: AbortSignal.timeout(API_TIMEOUT) });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!data.indices) return;
+    cachedGlobalIndices = data.indices.map(item => ({
+      symbol: item.symbol, name: item.name || item.symbol,
+      price: item.price ?? item.regularMarketPrice ?? item.previousClose ?? 0,
+      changeAmt: item.change ?? item.regularMarketChange ?? 0,
+      pct: item.changePercent ?? item.regularMarketChangePercent ?? 0
+    })).sort((a, b) => syms.indexOf(a.symbol) - syms.indexOf(b.symbol));
+    setIfChanged(LS.KEYS.CACHE_IDX, cachedGlobalIndices); trackApiUsage('Yahoo');
+    renderGlobalIndices(cachedGlobalIndices, false);
+  } catch (e) {}
+}
+
+function applyHist(s, h) {
+  if (!h || s.price == null) return;
+  const f = d => d != null ? ((s.price - d) / d) * 100 : null;
+  s.pct5 = f(h.d5); s.pct20 = f(h.d20); s.pct60 = f(h.d60); s.pct120 = f(h.d120);
+}
+
+// 歷史漲跌幅：只在欄位開啟時抓取、不阻擋報價、失敗後 5 分鐘內不重試
+const histFailUntil = new Map(), histInflight = new Set();
+async function ensureHistory(syms) {
+  if (!showHistCols) return;
+  const day = twDateStr(), now = Date.now();
+  const need = syms.filter(sym => histCache[sym]?.day !== day && !histInflight.has(sym) && (histFailUntil.get(sym) || 0) < now);
+  if (!need.length) return;
+  need.forEach(sym => histInflight.add(sym));
+  const dirty = new Set();
+  for (let i = 0; i < need.length; i += 3) {
+    const batch = need.slice(i, i + 3);
+    await Promise.all(batch.map(async sym => {
+      try {
+        const h = await fetchHistoryData(sym);
+        if (!h) { histFailUntil.set(sym, Date.now() + 300000); return; }
+        histCache[sym] = { day, data: h };
+        tabStocks.forEach((list, idx) => list.forEach(s => { if (s.symbol === sym) { applyHist(s, h); dirty.add(idx); } }));
+      } catch (e) { histFailUntil.set(sym, Date.now() + 300000); }
+      finally { histInflight.delete(sym); }
+    }));
+    tabStocks[currentTab].forEach(s => { if (batch.includes(s.symbol)) renderRow(s); });
+  }
+  dirty.forEach(i => LS.set(LS.KEYS.STOCK(i), tabStocks[i]));
+}
+
+async function refreshStocks() {
+  const tab = currentTab;
+  if (tabStocks[tab].length === 0) return;
+  const uniqueSyms = [...new Set(tabStocks[tab].map(s => s.symbol))];
+  const dirty = new Set();
+  let hasUpdates = false;
+
+  // 批次併發抓取（每批 5 檔）
+  for (let i = 0; i < uniqueSyms.length; i += 5) {
+    if (tab !== currentTab) break; // 中途切換分頁：不必再抓舊分頁，新分頁會另外觸發更新
+    const results = await Promise.allSettled(uniqueSyms.slice(i, i + 5).map(async sym => ({ sym, r: await fetchFugle(sym) || await fetchYahoo(sym) })));
+
+    for (const res of results) {
+      if (res.status !== 'fulfilled' || !res.value.r) continue;
+      const { sym, r } = res.value;
+      const lu = r.limitUp ?? null, ld = r.limitDown ?? null, h = histCache[sym]?.data;
+      hasUpdates = true;
+      for (let idx = 0; idx < 5; idx++) {
+        for (const s of tabStocks[idx]) {
+          if (s.symbol !== sym) continue;
+          const oldPrice = s.price;
+          if (s.price !== r.price || s.change !== r.change || s.changePercent !== r.changePercent || s.limitUp !== lu || s.limitDown !== ld) dirty.add(idx);
+          s.price = r.price; s.change = r.change; s.changePercent = r.changePercent;
+          if (r.name && !s.name) { s.name = r.name; dirty.add(idx); }
+          s.limitUp = lu; s.limitDown = ld;
+          applyHist(s, h);
+          // 只在價格真正變動或初次渲染時重繪 DOM
+          if (idx === currentTab && (oldPrice !== s.price || oldPrice == null)) renderRow(s, oldPrice);
+        }
+      }
+    }
+  }
+
+  dirty.forEach(i => LS.set(LS.KEYS.STOCK(i), tabStocks[i])); // 只寫入有變動的分頁
+  if (hasUpdates) updateSummary();
+  ensureHistory(uniqueSyms).catch(() => {});
+}
+
 async function refreshPrices(){
   if (!navigator.onLine) { showToast('處於離線狀態，顯示快取資料'); return; }
-  
-  let idxR = await fetchFugle('IX0001');
-  if (!idxR) {
-    try {
-      const res = await fetchWithProxy(`https://query1.finance.yahoo.com/v7/finance/download/%5ETWII?period1=${Math.floor(Date.now()/1000)-259200}&period2=${Math.floor(Date.now()/1000)}&interval=1d&events=history`);
-      if(res) {
-        const text = (await res.text()).trim().split('\n');
-        if(text.length >= 2) {
-          const cols = text.pop().split(',');
-          if(cols[4] !== 'null') {
-            const p = parseFloat(cols[4]), o = parseFloat(cols[1]), v = parseFloat(cols[6] || 0), chg = +(p - o).toFixed(2);
-            idxR = {price: p, change: chg, changePercent: +((chg/o)*100).toFixed(2), volume: v, source: 'Yahoo'};
-            trackApiUsage('Yahoo');
-          }
-        }
-      }
-    } catch(e) {}
-  }
-  if(idxR) { updateTwiiDOM(idxR); LS.set(LS.KEYS.CACHE_TWII, idxR); }
-
-  try {
-    const syms = availableIndices.map(i => i.symbol).join(',');
-    if(syms) {
-      const res = await fetch(`${CF_WORKER_URL}/indices?symbols=${encodeURIComponent(syms)}&_=${Date.now()}`, { signal: AbortSignal.timeout(API_TIMEOUT) });
-      if (res.ok) {
-        const data = await res.json();
-        if(data.indices) {
-          cachedGlobalIndices = data.indices.map(item => ({
-            symbol: item.symbol, name: item.name || item.symbol,
-            price: item.price ?? item.regularMarketPrice ?? item.previousClose ?? 0,
-            changeAmt: item.change ?? item.regularMarketChange ?? 0,
-            pct: item.changePercent ?? item.regularMarketChangePercent ?? 0
-          })).sort((a,b) => syms.indexOf(a.symbol) - syms.indexOf(b.symbol));
-          LS.set(LS.KEYS.CACHE_IDX, cachedGlobalIndices); trackApiUsage('Yahoo');
-          renderGlobalIndices(cachedGlobalIndices, false);
-        }
-      }
-    } else { renderGlobalIndices([]); }
-  } catch(e) {}
-
-  if (tabStocks[currentTab].length === 0) { renderApiStats(); return; }
-  const uniqueSyms = [...new Set(tabStocks[currentTab].map(s => s.symbol))];
-  let hasUpdates = false;
-  
-  // 優化：批次從 3 擴充至 5 進行併發抓取
-  for (let i = 0; i < uniqueSyms.length; i += 5) {
-    const batch = uniqueSyms.slice(i, i + 5);
-    const promises = batch.map(async sym => {
-      let r = await fetchFugle(sym) || await fetchYahoo(sym);
-      let hist = histCache[sym] || await fetchHistoryData(sym);
-      if (hist) histCache[sym] = hist;
-      return { sym, r, hist };
-    });
-    const results = await Promise.allSettled(promises);
-    
-    results.forEach(res => {
-      if(res.status === 'fulfilled') {
-        const {sym, r, hist} = res.value;
-        if (r || hist) {
-          hasUpdates = true; 
-          for (let idx = 0; idx < 5; idx++) {
-            tabStocks[idx].filter(s => s.symbol === sym).forEach(s => {
-              const oldPrice = s.price;
-              if (r) {
-                s.price = r.price; s.change = r.change; s.changePercent = r.changePercent;
-                if(r.name && !s.name) s.name = r.name;
-                s.limitUp = r.limitUp; s.limitDown = r.limitDown;
-              }
-              if (hist && s.price != null) {
-                s.pct5 = hist.d5 != null ? ((s.price - hist.d5) / hist.d5) * 100 : null;
-                s.pct20 = hist.d20 != null ? ((s.price - hist.d20) / hist.d20) * 100 : null;
-                s.pct60 = hist.d60 != null ? ((s.price - hist.d60) / hist.d60) * 100 : null;
-                s.pct120 = hist.d120 != null ? ((s.price - hist.d120) / hist.d120) * 100 : null;
-              }
-              // 優化：只在價格真正變動或初次渲染時重繪 DOM
-              if (idx === currentTab && (oldPrice !== s.price || oldPrice == null)) {
-                renderRow(s, oldPrice);
-              }
-            });
-          }
-        }
-      }
-    });
-  }
-  
-  if (hasUpdates) {
-    for (let i = 0; i < 5; i++) LS.set(LS.KEYS.STOCK(i), tabStocks[i]);
-    updateSummary();
-  }
-  
-  // 全天不降速更新：雙 Key 維持 8 秒/次，單 Key 維持 15 秒/次
-  currentInterval = getKeyRotator().count === 2 ? 8000 : 15000;
-  if(window.heartbeatWorker) heartbeatWorker.postMessage({ action: 'start', interval: currentInterval });
-  renderApiStats();
+  // 大盤、國外指數、個股彼此獨立，平行抓取
+  await Promise.allSettled([refreshTwii(), refreshGlobalIndices(), refreshStocks()]);
+  syncInterval();
+  maybeRenderApiStats();
 }
 
 /* ========================================================= 🔀 指數卡片拖拽排序功能 ========================================================= */
-let draggedIdxSymbol = null;
+let draggedIdxSymbol = null, lastIdxHtml = null;
 
 function renderGlobalIndices(indices, isOffline = false) {
-  const container = $('idxScrollContainer');
-  Array.from(container.children).slice(1).forEach(e => e.remove());
-  
+  if (draggedIdxSymbol) return; // 拖曳中不重建，避免打斷操作
   const html = indices.map(item => {
     const matched = availableIndices.find(idx => idx.symbol === item.symbol);
     const name = matched ? matched.name : item.name;
@@ -1107,48 +1150,57 @@ function renderGlobalIndices(indices, isOffline = false) {
       <div class="idx-box-src">via Yahoo ${isOffline ? 'Cache' : ''}</div>
     </div>`;
   }).join('');
+  if (html === lastIdxHtml) return; // 內容沒變就不動 DOM
+  lastIdxHtml = html;
+  const container = $('idxScrollContainer'), sl = container.scrollLeft;
+  container.querySelectorAll('.idx-card-box.draggable-card').forEach(e => e.remove());
   container.insertAdjacentHTML('beforeend', html);
-  bindDragAndDropEvents();
+  container.scrollLeft = sl; // 保留使用者的橫向捲動位置
 }
 
-function bindDragAndDropEvents() {
-  document.querySelectorAll('.idx-card-box.draggable-card').forEach(card => {
-    card.addEventListener('dragstart', handleDragStart);
-    card.addEventListener('dragover', handleDragOver);
-    card.addEventListener('dragleave', handleDragLeave);
-    card.addEventListener('drop', handleDrop);
-    card.addEventListener('dragend', handleDragEnd);
+// 拖曳事件只在容器綁一次（事件委派），不必每次重繪都重新綁定
+function initIdxDrag() {
+  const c = $('idxScrollContainer');
+  const cardOf = e => (e.target instanceof Element) ? e.target.closest('.idx-card-box.draggable-card') : null;
+
+  c.addEventListener('dragstart', e => {
+    const el = cardOf(e); if (!el) return;
+    draggedIdxSymbol = el.dataset.symbol; el.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', draggedIdxSymbol);
   });
-}
-
-function handleDragStart(e) { draggedIdxSymbol = this.getAttribute('data-symbol'); this.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; }
-function handleDragOver(e) { if (e.preventDefault) e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (this.getAttribute('data-symbol') !== draggedIdxSymbol) this.classList.add('drag-over'); return false; }
-function handleDragLeave() { this.classList.remove('drag-over'); }
-
-function handleDrop(e) {
-  if (e.stopPropagation) e.stopPropagation();
-  const targetSymbol = this.getAttribute('data-symbol');
-  if (draggedIdxSymbol && targetSymbol && draggedIdxSymbol !== targetSymbol) {
-    const fromIndex = availableIndices.findIndex(item => item.symbol === draggedIdxSymbol);
-    const toIndex = availableIndices.findIndex(item => item.symbol === targetSymbol);
+  c.addEventListener('dragover', e => {
+    const el = cardOf(e); if (!el) return;
+    e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+    if (el.dataset.symbol !== draggedIdxSymbol) el.classList.add('drag-over');
+  });
+  c.addEventListener('dragleave', e => { const el = cardOf(e); if (el) el.classList.remove('drag-over'); });
+  c.addEventListener('drop', e => {
+    const el = cardOf(e); if (!el) return;
+    e.preventDefault(); e.stopPropagation();
+    const from = draggedIdxSymbol, to = el.dataset.symbol;
+    draggedIdxSymbol = null;
+    if (!from || !to || from === to) { handleDragEnd(); return; }
+    const fromIndex = availableIndices.findIndex(item => item.symbol === from);
+    const toIndex = availableIndices.findIndex(item => item.symbol === to);
     if (fromIndex !== -1 && toIndex !== -1) {
       const [movedItem] = availableIndices.splice(fromIndex, 1);
       availableIndices.splice(toIndex, 0, movedItem);
       LS.set(LS.KEYS.FOREIGN_IDX, availableIndices);
 
-      const cachedFrom = cachedGlobalIndices.findIndex(item => item.symbol === draggedIdxSymbol);
-      const cachedTo = cachedGlobalIndices.findIndex(item => item.symbol === targetSymbol);
+      const cachedFrom = cachedGlobalIndices.findIndex(item => item.symbol === from);
+      const cachedTo = cachedGlobalIndices.findIndex(item => item.symbol === to);
       if (cachedFrom !== -1 && cachedTo !== -1) {
         const [movedCached] = cachedGlobalIndices.splice(cachedFrom, 1);
         cachedGlobalIndices.splice(cachedTo, 0, movedCached);
-        LS.set(LS.KEYS.CACHE_IDX, cachedGlobalIndices);
+        setIfChanged(LS.KEYS.CACHE_IDX, cachedGlobalIndices);
       }
       renderGlobalIndices(cachedGlobalIndices, false); showToast('已更新指數順序');
     }
-  }
-  return false;
+  });
+  c.addEventListener('dragend', () => { draggedIdxSymbol = null; handleDragEnd(); });
 }
 function handleDragEnd() { document.querySelectorAll('.idx-card-box').forEach(card => card.classList.remove('dragging', 'drag-over')); }
+initIdxDrag();
 
 /* ========================================================= 🖱 互動與資料修改 ========================================================= */
 const closeModalById = id => $(id).classList.remove('show');
@@ -1222,35 +1274,29 @@ function checkAutoSave() {
   const twTime = getTWTime();
   const dayOfWeek = twTime.getDay(), hours = twTime.getHours(), minutes = twTime.getMinutes();
 
-  // 符合時間：營業日 (週一至週五) 且時間過 14:40
-  if (dayOfWeek >= 1 && dayOfWeek <= 5 && (hours > 13 || (hours === 13 && minutes >= 40))) {
-    const todayStr = `${twTime.getFullYear()}-${String(twTime.getMonth()+1).padStart(2,'0')}-${String(twTime.getDate()).padStart(2,'0')}`;
-    let savedAny = false;
-    
-    for(let i=0; i<5; i++) {
-       if(tabStocks[i].length === 0) continue; 
-       
-       let pnl = 0, asset = 0;
-       tabStocks[i].forEach(s => {
-         const info = calcStockInfo(s);
-         pnl += info.todayPnl; asset += info.mktValue;
-       });
-       const ts = `${String(twTime.getHours()).padStart(2,'0')}:${String(twTime.getMinutes()).padStart(2,'0')}`;
-       
-       const existingIdx = tabRecords[i].findIndex(r => r.date === todayStr);
-       if (existingIdx !== -1) {
-          tabRecords[i][existingIdx] = {date: todayStr, time: ts, totalPnl: pnl, totalAsset: asset, timestamp: twTime.getTime()};
-          savedAny = true;
-       } else {
-          tabRecords[i].unshift({date: todayStr, time: ts, totalPnl: pnl, totalAsset: asset, timestamp: twTime.getTime()});
-          savedAny = true;
-       }
-       
-       if(tabRecords[i].length > 10) tabRecords[i].length = 10;
-       LS.set(LS.KEYS.RECORD(i), tabRecords[i]);
-    }
-    if (savedAny && $('historyModalOverlay').classList.contains('show')) renderHistory();
+  // 符合時間：營業日 (週一至週五) 且時間過 13:40
+  if (!(dayOfWeek >= 1 && dayOfWeek <= 5 && (hours > 13 || (hours === 13 && minutes >= 40)))) return;
+
+  const todayStr = twDateStr(twTime);
+  const ts = `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}`;
+  let savedAny = false;
+
+  for (let i = 0; i < 5; i++) {
+    if (tabStocks[i].length === 0) continue;
+    let pnl = 0, asset = 0;
+    tabStocks[i].forEach(s => { const info = calcStockInfo(s); pnl += info.todayPnl; asset += info.mktValue; });
+
+    const recs = tabRecords[i];
+    const existingIdx = recs.findIndex(r => r.date === todayStr);
+    if (existingIdx !== -1 && recs[existingIdx].totalPnl === pnl && recs[existingIdx].totalAsset === asset) continue; // 沒變化：不重寫
+
+    const rec = {date: todayStr, time: ts, totalPnl: pnl, totalAsset: asset, timestamp: twTime.getTime()};
+    if (existingIdx !== -1) recs[existingIdx] = rec; else recs.unshift(rec);
+    if (recs.length > 10) recs.length = 10;
+    LS.set(LS.KEYS.RECORD(i), recs);
+    savedAny = true;
   }
+  if (savedAny && $('historyModalOverlay').classList.contains('show')) renderHistory();
 }
 
 function openHistoryModal() { renderHistory(); $('historyModalOverlay').classList.add('show'); }
@@ -1378,21 +1424,36 @@ function importData(e) {
 }
 
 /* ========================================================= 🔄 後台輪詢與生命週期 ========================================================= */
-let lastRefreshTime = 0, isRefreshing = false, lastSuccessTime = 0;
+let lastRefreshTime = 0, isRefreshing = false, lastSuccessTime = 0, pendingRefresh = false, lastWakeTime = 0;
 const workerBlob = new Blob([`let t=null;self.onmessage=e=>{if(e.data.action==='start'){clearInterval(t);t=setInterval(()=>self.postMessage('tick'),e.data.interval)}else if(e.data.action==='stop')clearInterval(t)};`], {type:'application/javascript'});
 window.heartbeatWorker = new Worker(URL.createObjectURL(workerBlob));
 heartbeatWorker.onmessage = () => refresh();
 
-function forceRefresh() { globalKeyRotator = null; lastRefreshTime = 0; isRefreshing = false; refresh(); }
+// 手動觸發（新增/編輯/切換分頁/儲存設定）：若正在更新，等它結束後立刻再跑一次，而不是同時跑兩輪
+function forceRefresh() {
+  if (isRefreshing && Date.now() - lastRefreshTime < 15000) { pendingRefresh = true; return; }
+  isRefreshing = false; lastRefreshTime = 0; refresh();
+}
 async function refresh() {
   const now = Date.now();
-  if (isRefreshing && now - lastRefreshTime > 8000) isRefreshing = false;
+  if (isRefreshing && now - lastRefreshTime > 15000) isRefreshing = false;
   if (isRefreshing || now - lastRefreshTime < 2000) return;
   isRefreshing = true; lastRefreshTime = now;
-  try { await refreshPrices(); lastSuccessTime = Date.now(); } catch(e){} finally { isRefreshing = false; }
+  try { await refreshPrices(); lastSuccessTime = Date.now(); } catch(e){} finally {
+    isRefreshing = false;
+    if (pendingRefresh) { pendingRefresh = false; lastRefreshTime = 0; refresh(); }
+  }
 }
 
-const handleTouchWakeup = () => { if(Date.now() - lastSuccessTime > 15000 && !isRefreshing) { forceRefresh(); triggerAutoSave(); } };
+// 回到前景時 focus / pageshow / visibilitychange 會連續觸發，1.5 秒內只處理一次
+function wake() {
+  const n = Date.now();
+  if (n - lastWakeTime < 1500) return;
+  lastWakeTime = n;
+  forceRefresh(); triggerAutoSave();
+}
+
+const handleTouchWakeup = () => { if(Date.now() - lastSuccessTime > 15000 && !isRefreshing) wake(); };
 document.addEventListener('touchend', handleTouchWakeup, {passive: true});
 document.addEventListener('click', handleTouchWakeup, {passive: true});
 
@@ -1403,7 +1464,7 @@ async function loadFinanceNews() {
     if(!res.ok) throw new Error();
     const data = await res.json();
     if(!data.length) return c.innerHTML = '<span class="ticker-item">目前暫無新聞</span>';
-    const html = data.map(i => `<a href="${i.link}" target="_blank" class="ticker-item"><span class="ticker-source">${escapeHTML(i.source)}</span>${escapeHTML(i.title)}</a>`).join('');
+    const html = data.map(i => `<a href="${/^https?:\/\//i.test(i.link) ? escapeHTML(i.link) : '#'}" target="_blank" rel="noopener noreferrer" class="ticker-item"><span class="ticker-source">${escapeHTML(i.source)}</span>${escapeHTML(i.title)}</a>`).join('');
     c.innerHTML = html + html;
     c.style.animationDuration = `${c.textContent.length * 0.18}s`;
   } catch(e) { c.innerHTML = '<span class="ticker-item" style="color:var(--t-muted);">無法載入即時新聞，請稍後再試</span>'; }
@@ -1411,15 +1472,16 @@ async function loadFinanceNews() {
 
 /* ========================================================= 🚀 啟動與休眠優化 ========================================================= */
 loadState(); renderAll();
-setTimeout(forceRefresh, 500);
+setTimeout(wake, 500);
+setTimeout(cleanupOldKeys, 3000);
 heartbeatWorker.postMessage({action: 'start', interval: currentInterval});
 
-['focus', 'pageshow'].forEach(e => window.addEventListener(e, () => { forceRefresh(); triggerAutoSave(); }));
+['focus', 'pageshow'].forEach(e => window.addEventListener(e, wake));
 
 document.addEventListener('visibilitychange', () => { 
   const isVis = document.visibilityState === 'visible';
   heartbeatWorker.postMessage({ action: isVis ? 'start' : 'stop', interval: currentInterval });
-  if (isVis) { forceRefresh(); triggerAutoSave(); }
+  if (isVis) wake();
 });
 
 document.addEventListener('DOMContentLoaded', loadFinanceNews);
@@ -1437,7 +1499,7 @@ kd('symInput', 'qtyInput'); kd('qtyInput', 'buyPriceInput'); kd('buyPriceInput',
   });
 });
 
-if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=' + APP_VER).catch(()=>{}));
 console.log(`股票庫存管理 ${APP_VER} 已啟動`);
 </script>
 </body>
