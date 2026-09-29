@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.42'; 
+const APP_VER = 'V7.43'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -517,7 +517,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.42</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.43</div>
     </div>
   </div>
 </div>
@@ -959,15 +959,22 @@ async function tryTwSuffixes(sym, fn) {
 async function fetchYahooQuote(ySym) {
   try {
     const t = Math.floor(Date.now() / 1000);
-    const res = await fetchWithProxy(`https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(ySym)}?period1=${t - 259200}&period2=${t}&interval=1d&events=history`);
+    // 抓近 10 天：遇到連假也一定包含「前一個交易日」的收盤價
+    const res = await fetchWithProxy(`https://query1.finance.yahoo.com/v7/finance/download/${encodeURIComponent(ySym)}?period1=${t - 864000}&period2=${t}&interval=1d&events=history`);
     if (!res) return null;
-    const rows = (await res.text()).trim().split('\n');
-    if (rows.length < 2) return null;
-    const cols = rows.pop().split(',');
-    if (cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
-    const p = parseFloat(cols[4]), o = parseFloat(cols[1]), v = parseFloat(cols[6] || 0), chg = +(p - o).toFixed(2);
+    const rows = (await res.text()).trim().split('\n').slice(1).map(r => r.split(',')); // 去掉標題列
+    const cols = rows[rows.length - 1];
+    if (!cols || cols.length < 6 || cols[4] === 'null' || cols[1] === 'null') return null;
+    const p = parseFloat(cols[4]), o = parseFloat(cols[1]), v = parseFloat(cols[6] || 0);
+    // 漲跌 = 現價 − 前一交易日收盤價（與 Fugle 定義一致）；找不到前一日才退回以開盤價估算
+    let prevClose = null;
+    for (let k = rows.length - 2; k >= 0; k--) {
+      const c = rows[k], pc = parseFloat(c[4]);
+      if (c.length >= 6 && c[4] !== 'null' && !isNaN(pc)) { prevClose = pc; break; }
+    }
+    const base = prevClose ?? o, chg = +(p - base).toFixed(2);
     trackApiUsage('Yahoo');
-    return { price: p, change: chg, changePercent: +((chg / o) * 100).toFixed(2), volume: v, source: 'Yahoo', name: '' };
+    return { price: p, change: chg, changePercent: +((chg / base) * 100).toFixed(2), volume: v, source: 'Yahoo', name: '' };
   } catch (e) { return null; }
 }
 
@@ -1081,23 +1088,27 @@ async function ensureHistory(syms) {
   dirty.forEach(i => LS.set(LS.KEYS.STOCK(i), tabStocks[i]));
 }
 
-async function refreshStocks() {
-  const tab = currentTab;
-  if (tabStocks[tab].length === 0) return;
-  const uniqueSyms = [...new Set(tabStocks[tab].map(s => s.symbol))];
-  const dirty = new Set();
-  let hasUpdates = false;
+const quoteOkAt = new Map(), quoteTryAt = new Map(); // 代號 -> 最近「成功」/「嘗試」取價的時間
+const QUOTE_FRESH_MS = 120000, QUOTE_RETRY_MS = 180000;
+const isQuoteFresh = sym => Date.now() - (quoteOkAt.get(sym) || 0) < QUOTE_FRESH_MS;
+const persistTabs = dirty => dirty.forEach(i => LS.set(LS.KEYS.STOCK(i), tabStocks[i]));
 
+// 取得一批代號的最新報價，套用到所有分頁中同代號的持股；回傳是否有更新
+async function fetchAndApplyQuotes(syms, dirty, shouldAbort = () => false) {
+  let hasUpdates = false;
   // 批次併發抓取（每批 5 檔）
-  for (let i = 0; i < uniqueSyms.length; i += 5) {
-    if (tab !== currentTab) break; // 中途切換分頁：不必再抓舊分頁，新分頁會另外觸發更新
-    const results = await Promise.allSettled(uniqueSyms.slice(i, i + 5).map(async sym => ({ sym, r: await fetchFugle(sym) || await fetchYahoo(sym) })));
+  for (let i = 0; i < syms.length; i += 5) {
+    if (shouldAbort()) break;
+    const batch = syms.slice(i, i + 5);
+    batch.forEach(sym => quoteTryAt.set(sym, Date.now()));
+    const results = await Promise.allSettled(batch.map(async sym => ({ sym, r: await fetchFugle(sym) || await fetchYahoo(sym) })));
 
     for (const res of results) {
       if (res.status !== 'fulfilled' || !res.value.r) continue;
       const { sym, r } = res.value;
       const lu = r.limitUp ?? null, ld = r.limitDown ?? null, h = histCache[sym]?.data;
       hasUpdates = true;
+      quoteOkAt.set(sym, Date.now());
       for (let idx = 0; idx < 5; idx++) {
         for (const s of tabStocks[idx]) {
           if (s.symbol !== sym) continue;
@@ -1113,8 +1124,29 @@ async function refreshStocks() {
       }
     }
   }
+  return hasUpdates;
+}
 
-  dirty.forEach(i => LS.set(LS.KEYS.STOCK(i), tabStocks[i])); // 只寫入有變動的分頁
+// 自動記錄前呼叫：把「久沒開」（報價過舊）的其他分頁也更新一次，避免用舊價格算損益
+async function ensureFreshQuotes() {
+  if (!navigator.onLine) return;
+  const now = Date.now();
+  const stale = [...new Set(tabStocks.flat().map(s => s.symbol))]
+    .filter(sym => !isQuoteFresh(sym) && now - (quoteTryAt.get(sym) || 0) > QUOTE_RETRY_MS); // 剛失敗過的先不重試
+  if (!stale.length) return;
+  const dirty = new Set();
+  if (await fetchAndApplyQuotes(stale, dirty)) updateSummary();
+  persistTabs(dirty);
+}
+
+async function refreshStocks() {
+  const tab = currentTab;
+  if (tabStocks[tab].length === 0) return;
+  const uniqueSyms = [...new Set(tabStocks[tab].map(s => s.symbol))];
+  const dirty = new Set();
+  // 中途切換分頁就不必再抓舊分頁，新分頁會另外觸發更新
+  const hasUpdates = await fetchAndApplyQuotes(uniqueSyms, dirty, () => tab !== currentTab);
+  persistTabs(dirty); // 只寫入有變動的分頁
   if (hasUpdates) updateSummary();
   ensureHistory(uniqueSyms).catch(() => {});
 }
@@ -1270,33 +1302,40 @@ function triggerAutoSave() {
   autoSaveTimer = setTimeout(checkAutoSave, 20000); // 喚醒後20秒更新
 }
 
-function checkAutoSave() {
-  const twTime = getTWTime();
-  const dayOfWeek = twTime.getDay(), hours = twTime.getHours(), minutes = twTime.getMinutes();
-
+let autoSaving = false;
+async function checkAutoSave() {
+  const inWindow = t => { const d = t.getDay(), h = t.getHours(), m = t.getMinutes(); return d >= 1 && d <= 5 && (h > 13 || (h === 13 && m >= 40)); };
   // 符合時間：營業日 (週一至週五) 且時間過 13:40
-  if (!(dayOfWeek >= 1 && dayOfWeek <= 5 && (hours > 13 || (hours === 13 && minutes >= 40)))) return;
+  if (autoSaving || !inWindow(getTWTime())) return;
+  autoSaving = true;
+  try {
+    await ensureFreshQuotes(); // 先確保所有分頁都是最新報價
 
-  const todayStr = twDateStr(twTime);
-  const ts = `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}`;
-  let savedAny = false;
+    const twTime = getTWTime();
+    const todayStr = twDateStr(twTime);
+    const ts = `${String(twTime.getHours()).padStart(2,'0')}:${String(twTime.getMinutes()).padStart(2,'0')}`;
+    let savedAny = false;
 
-  for (let i = 0; i < 5; i++) {
-    if (tabStocks[i].length === 0) continue;
-    let pnl = 0, asset = 0;
-    tabStocks[i].forEach(s => { const info = calcStockInfo(s); pnl += info.todayPnl; asset += info.mktValue; });
+    for (let i = 0; i < 5; i++) {
+      if (tabStocks[i].length === 0) continue;
+      // 有報價的持股若仍是舊價格（取價失敗）：這次不記錄，等下一分鐘重試，避免寫入錯誤損益
+      if (!tabStocks[i].every(s => s.price == null || isQuoteFresh(s.symbol))) continue;
 
-    const recs = tabRecords[i];
-    const existingIdx = recs.findIndex(r => r.date === todayStr);
-    if (existingIdx !== -1 && recs[existingIdx].totalPnl === pnl && recs[existingIdx].totalAsset === asset) continue; // 沒變化：不重寫
+      let pnl = 0, asset = 0;
+      tabStocks[i].forEach(s => { const info = calcStockInfo(s); pnl += info.todayPnl; asset += info.mktValue; });
 
-    const rec = {date: todayStr, time: ts, totalPnl: pnl, totalAsset: asset, timestamp: twTime.getTime()};
-    if (existingIdx !== -1) recs[existingIdx] = rec; else recs.unshift(rec);
-    if (recs.length > 10) recs.length = 10;
-    LS.set(LS.KEYS.RECORD(i), recs);
-    savedAny = true;
-  }
-  if (savedAny && $('historyModalOverlay').classList.contains('show')) renderHistory();
+      const recs = tabRecords[i];
+      const existingIdx = recs.findIndex(r => r.date === todayStr);
+      if (existingIdx !== -1 && recs[existingIdx].totalPnl === pnl && recs[existingIdx].totalAsset === asset) continue; // 沒變化：不重寫
+
+      const rec = {date: todayStr, time: ts, totalPnl: pnl, totalAsset: asset, timestamp: twTime.getTime()};
+      if (existingIdx !== -1) recs[existingIdx] = rec; else recs.unshift(rec);
+      if (recs.length > 10) recs.length = 10;
+      LS.set(LS.KEYS.RECORD(i), recs);
+      savedAny = true;
+    }
+    if (savedAny && $('historyModalOverlay').classList.contains('show')) renderHistory();
+  } catch (e) {} finally { autoSaving = false; }
 }
 
 function openHistoryModal() { renderHistory(); $('historyModalOverlay').classList.add('show'); }
