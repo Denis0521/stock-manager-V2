@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.43'; 
+const APP_VER = 'V7.44'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -517,7 +517,7 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
         </div>
       </div>
       <button type="button" class="modal-close" style="margin-top: 12px; width: 100%; height: 40px; padding: 0; font-size: 16px;" onclick="saveAndCloseModal()">💾 儲存並關閉</button>
-      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.43</div>
+      <div class="v-box" style="margin-top: 12px; margin-bottom: 0; font-size: 12px;">核心版本：V7.44</div>
     </div>
   </div>
 </div>
@@ -1025,12 +1025,12 @@ const setIfChanged = (k, v) => { const str = JSON.stringify(v); if (lsCache.get(
 // 設定視窗沒開時，不必每輪重畫 API 用量
 const maybeRenderApiStats = () => { if ($('modalOverlay').classList.contains('show')) renderApiStats(); };
 
-// 輪詢間隔只在改變時才通知 Worker：雙 Key 8 秒/次，其餘 15 秒/次
-function syncInterval() {
-  const ni = getKeyRotator().count === 2 ? 8000 : 15000;
-  if (ni === currentInterval) return;
-  currentInterval = ni;
-  if (window.heartbeatWorker && document.visibilityState === 'visible') heartbeatWorker.postMessage({ action: 'start', interval: ni });
+// 輪詢間隔：雙 Key 8 秒/次，其餘 15 秒/次（實際套用在每輪結束後重新計時）
+function syncInterval() { currentInterval = getKeyRotator().count === 2 ? 8000 : 15000; }
+
+// 每輪更新「結束後」才重新計時：下一輪 = 結束時間 + 間隔，更新較慢時請求不會堆疊
+function restartHeartbeat() {
+  if (window.heartbeatWorker && document.visibilityState === 'visible') heartbeatWorker.postMessage({ action: 'start', interval: currentInterval });
 }
 
 async function refreshTwii() {
@@ -1480,6 +1480,7 @@ async function refresh() {
   isRefreshing = true; lastRefreshTime = now;
   try { await refreshPrices(); lastSuccessTime = Date.now(); } catch(e){} finally {
     isRefreshing = false;
+    restartHeartbeat();
     if (pendingRefresh) { pendingRefresh = false; lastRefreshTime = 0; refresh(); }
   }
 }
