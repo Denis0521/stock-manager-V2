@@ -66,13 +66,6 @@ body.pink {
   --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.04); 
   --accent: #C24D7B; --border-light: #E6D0D8; 
 }
-body.brown-light { 
-  --bg: #F5EFEA; --bg-card: #FDFBFA; --s-light: #FFFFFF; --s-dark: #D4C9C1; 
-  --t-main: #4A2A17; --t-muted: #7A4526; --up: #D9465B; --down: #2D8A70; 
-  --engrave-l: rgba(255,255,255,1); --engrave-d: rgba(122,69,38,0.15); 
-  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(122,69,38,0.08); 
-  --accent: #7A4526; --border-light: #E8DFD8; 
-}
 body.gray-light { 
   --bg: #BFC5CC; --bg-card: #D3D9E0; --s-light: #E5EBF2; --s-dark: #9199A3; 
   --t-main: #1D232A; --t-muted: #535C66; --up: #D9465B; --down: #2D8A70; 
@@ -372,12 +365,12 @@ body.tech {
   --gold:#E3BE68; --gold-line:rgba(227,190,104,.5);
 }
 body.blue-light {
-  --bg:#CFE7EE; --bg-card:#EBF7FA; --s-light:#F8FEFF; --s-dark:#86B3C2;
-  --t-main:#062B3A; --t-muted:#3B6B7C; --up:#D92D43; --down:#0F9D6B;
-  --accent:#0B7A99; --border-light:#A5CCD8;
-  --a1:#4FC3DD; --a3:#064E66; --glaze-top:#FBFFFF; --glaze-bot:#D3EBF1; --row-alt:#E0F1F5;
-  --rim-shade:rgba(11,122,153,.16); --ring:rgba(11,122,153,.28);
-  --bg-glow:rgba(90,200,225,.42); --bg-glow2:rgba(120,190,230,.34);
+  --bg:#B9D0F0; --bg-card:#E4EEFC; --s-light:#F4F9FF; --s-dark:#6F92C6;
+  --t-main:#071B45; --t-muted:#2F538C; --up:#D92D43; --down:#0F9D6B;
+  --accent:#0F3D9E; --border-light:#8FB0E0;
+  --a1:#2F6FE0; --a3:#08236B; --glaze-top:#F3F8FF; --glaze-bot:#B4CDF0; --row-alt:#D3E2F7;
+  --rim-shade:rgba(15,61,158,.24); --ring:rgba(15,61,158,.36);
+  --bg-glow:rgba(40,100,225,.5); --bg-glow2:rgba(20,70,190,.36);
 }
 body.purple-light {
   --bg:#E5DEF2; --bg-card:#FAF7FF; --s-light:#FFFFFF; --s-dark:#B4A4D4;
@@ -394,14 +387,6 @@ body.pink {
   --a1:#EE7FAE; --a3:#8E1F57; --glaze-top:#FFFFFF; --glaze-bot:#F8DFE8; --row-alt:#FCEEF3;
   --rim-shade:rgba(194,65,122,.14); --ring:rgba(194,65,122,.26);
   --bg-glow:rgba(245,150,190,.42); --bg-glow2:rgba(250,200,150,.32);
-}
-body.brown-light {
-  --bg:#EEE4D3; --bg-card:#FCF8F0; --s-light:#FFFFFF; --s-dark:#CBB593;
-  --t-main:#3F250E; --t-muted:#7B5A32; --up:#D9465B; --down:#2D8A70;
-  --accent:#93591A; --border-light:#E2D3BA;
-  --a1:#D8A05A; --a3:#5E3608; --glaze-top:#FFFFFF; --glaze-bot:#F1E4CC; --row-alt:#F6EEDF;
-  --rim-shade:rgba(147,89,26,.16); --ring:rgba(147,89,26,.28);
-  --bg-glow:rgba(230,190,120,.42); --bg-glow2:rgba(240,210,160,.32);
 }
 body.gray-light {
   --bg:#C5D0DC; --bg-card:#DDE5EE; --s-light:#EEF3F8; --s-dark:#92A1B4;
@@ -583,6 +568,19 @@ body.tech .modal h2 { color: var(--a1); }
   background: linear-gradient(180deg, var(--a1), var(--a3)); color: #fff;
   box-shadow: 0 10px 22px rgba(6,20,52,.35), inset 0 1px 1px rgba(255,255,255,.5), 0 0 0 1px var(--gold-line);
 }
+/* 彈窗版面：欄位一律不超出視窗、尺寸統一 */
+.modal { overflow-x: hidden; padding: 26px 22px 22px; }
+#addModalOverlay .modal > input, #editModalOverlay .modal > input,
+#addModalOverlay .modal > select, #editModalOverlay .modal > select { display: block; width: 100%; max-width: 100%; margin-bottom: 0 !important; }
+#addModalOverlay .modal input, #editModalOverlay .modal input,
+#addModalOverlay .modal select, #editModalOverlay .modal select { height: 48px; padding: 0 16px; border-radius: 16px; }
+#addModalOverlay .modal select, #editModalOverlay .modal select { padding: 0 10px; text-align: center; text-align-last: center; }
+#addModalOverlay .modal > div, #editModalOverlay .modal > div { min-width: 0; margin-bottom: 0 !important; }
+#addModalOverlay .modal label, #editModalOverlay .modal label { margin: 16px 2px 8px; }
+#addModalOverlay .modal h2, #editModalOverlay .modal h2 { margin-bottom: 22px; }
+#addModalOverlay .modal-close, #editModalOverlay .modal-close { height: 50px; padding: 0 12px; border-radius: 18px; white-space: nowrap; }
+#addModalOverlay .modal > div:last-child, #editModalOverlay .modal > div:last-child { gap: 14px !important; margin-top: 26px !important; }
+
 
 </style>
 <link rel="manifest" href="manifest.json">
@@ -923,14 +921,14 @@ function applyThemeText(t){
   body.className = '';
   const themes = {
     'tech': { emoji: '🚀', color: '#0B1730' },
-    'blue-light': { emoji: '💎', color: '#CFE7EE' },
+    'blue-light': { emoji: '💎', color: '#B9D0F0' },
     'purple-light': { emoji: '🍇', color: '#E5DEF2' },
     'pink': { emoji: '🌸', color: '#F6E3EA' },
-    'brown-light': { emoji: '☕', color: '#EEE4D3' },
     'gray-light': { emoji: '📓', color: '#C5D0DC' },
     'light': { emoji: '☀️', color: '#E4EDF7' }
   };
-  const theme = themes[t] || themes['light'];
+  if(!themes[t]) t = 'light';
+  const theme = themes[t];
   if(t !== 'light') body.classList.add(t);
   $('themeBtn').textContent = theme.emoji;
   $('themeColorMeta').content = theme.color;
@@ -938,7 +936,7 @@ function applyThemeText(t){
 }
 
 function toggleTheme(){
-  const modes = ['light', 'tech', 'blue-light', 'purple-light', 'pink', 'brown-light', 'gray-light'];
+  const modes = ['light', 'tech', 'blue-light', 'purple-light', 'pink', 'gray-light'];
   let current = modes.find(m => document.body.classList.contains(m)) || 'light';
   let next = modes[(modes.indexOf(current) + 1) % modes.length];
   applyThemeText(next); LS.set(LS.KEYS.THEME, next);
