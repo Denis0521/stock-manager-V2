@@ -605,6 +605,24 @@ body.tech .modal h2 { color: var(--a1); }
   .idx-scroll-container.idx-marquee { overflow-x: auto; }
 }
 
+/* 關閉 X：原本被之後才出現的標題（我加了 position:relative）蓋住而點不到，且內容捲動時會跟著捲走 */
+.btn-close-icon {
+  z-index: 1001; border-radius: 50% !important; cursor: pointer;
+  background: linear-gradient(180deg, var(--glaze-top), var(--glaze-bot)) !important;
+  border: 1px solid var(--border-light) !important;
+  box-shadow: 2px 3px 7px -1px var(--s-dark), inset 0 1px 1px var(--hl) !important;
+}
+.btn-close-icon:hover { transform: none; }
+.btn-close-icon:active { transform: scale(0.94); }
+.fullscreen-modal .btn-close-icon {
+  position: fixed; top: calc(env(safe-area-inset-top, 0px) + 10px); right: 12px;
+  width: 40px; height: 40px; font-size: 20px; line-height: 1;
+}
+.modal h2 { z-index: 1; }
+.modal h2 { padding-right: 0; }
+#noticeOverlay { align-items: center; }
+#noticeOverlay .modal { margin-top: 0; }
+
 
 </style>
 <link rel="manifest" href="manifest.json">
@@ -679,6 +697,19 @@ body.tech .modal h2 { color: var(--a1); }
 
 <div class="summary-btn-box">
   <button type="button" class="btn-save" id="historyBtn" style="display:none;" onclick="openHistoryModal()">📅 每日損益記錄</button>
+</div>
+
+<div class="modal-overlay" id="noticeOverlay">
+  <div class="modal">
+    <h2>📢 更新通知</h2>
+    <div style="text-align:center; font-size:16px; line-height:1.7; color:var(--t-main);">
+      指數列已更改為<b>跑馬燈</b>模式，會自動循環顯示各項指數，手指按住即可暫停。<br><br>
+      若不喜歡此效果，可到「<b>進階</b>」設定中關閉「<b>📊 指數列跑馬燈</b>」，即可恢復原本的左右滑動樣式。
+    </div>
+    <div style="display: flex; margin-top: 22px;">
+      <button type="button" class="modal-close" onclick="dismissIdxNotice()" style="flex:1; background:var(--accent); color:#fff; text-shadow:none; margin:0;">確定</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -878,7 +909,7 @@ const LS = {
   KEYS: {
     FK: 'tw_fugle_key', SFK: 'tw_second_fugle_key', THEME: 'tw_theme',
     CUR_TAB: 'tw_current_tab', TAB_NAMES: 'tw_tab_names', TAB_COUNT: 'tw_tab_count',
-    TICKER: 'tw_show_ticker', FLASH: 'tw_show_flash', IDX_MARQUEE: 'tw_idx_marquee', FOREIGN_IDX: 'tw_custom_foreign_indices',
+    TICKER: 'tw_show_ticker', FLASH: 'tw_show_flash', IDX_MARQUEE: 'tw_idx_marquee', NOTICE_IDX: 'tw_notice_idx_marquee_v1', FOREIGN_IDX: 'tw_custom_foreign_indices',
     CACHE_IDX: 'tw_cached_indices', CACHE_TWII: 'tw_cached_twii', HIST_CACHE: 'tw_hist_cache_v1',
     STOCK: i => `tw_stock_portfolio_tab_${i}`, RECORD: i => `tw_records_tab_${i}`
   },
@@ -939,6 +970,7 @@ function loadState(){
 
   $('tickerContainer').style.display = showTicker ? 'flex' : 'none';
   applyIdxMarquee();
+  if (LS.getStr(LS.KEYS.NOTICE_IDX, '') !== '1') $('noticeOverlay').classList.add('show');
   renderTabs(); renderApiStats();
   
   showHistCols = LS.getStr('tw_show_hist', 'false') === 'true';
@@ -1007,6 +1039,10 @@ function applyIdxMarquee() {
     $('idxClone').innerHTML = '';
     box.style.removeProperty('--idx-vw'); box.style.removeProperty('--idx-dur');
   }
+}
+function dismissIdxNotice() {
+  LS.set(LS.KEYS.NOTICE_IDX, '1');
+  closeModalById('noticeOverlay');
 }
 function toggleIdxMarquee() {
   idxMarquee = !idxMarquee;
