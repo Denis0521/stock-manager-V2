@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.51'; 
+const APP_VER = 'V7.53'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -60,11 +60,11 @@ body.purple-light {
   --accent: #7A5CAF; --border-light: #D6C8E0; 
 }
 body.pink { 
-  --bg: #F6E4DB; --bg-card: #FFFAF7; --s-light: #FFFAF7; --s-dark: #D8B4A4; 
-  --t-main: #4A2214; --t-muted: #96604A; --up: #D9465B; --down: #2D8A70; 
-  --engrave-l: rgba(255,255,255,1); --engrave-d: rgba(0,0,0,0.08); 
-  --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.04); 
-  --accent: #E4572E; --border-light: #EFCDBE; 
+  --bg: #D9D0C9; --bg-card: #E4DDD7; --s-light: #F1ECE8; --s-dark: #A69A91; 
+  --t-main: #2B2420; --t-muted: #6B5E55; --up: #D9465B; --down: #2D8A70; 
+  --engrave-l: rgba(255,255,255,0.6); --engrave-d: rgba(0,0,0,0.15); 
+  --protrude-l: rgba(255,255,255,0.7); --protrude-d: rgba(0,0,0,0.12); 
+  --accent: #D9692B; --border-light: #B8ACA2; 
 }
 body.gray-light { 
   --bg: #BFC5CC; --bg-card: #D3D9E0; --s-light: #E5EBF2; --s-dark: #9199A3; 
@@ -380,18 +380,18 @@ body.purple-light {
   --bg-glow:rgba(170,140,240,.42); --bg-glow2:rgba(210,170,240,.32);
 }
 body.pink {
-  /* 橘紅：暖橘帶紅，明亮而溫潤 */
-  --bg:#F8E3D9; --bg-card:#FFF8F4; --s-light:#FFFFFF; --s-dark:#DDB3A0;
-  --t-main:#4A2214; --t-muted:#96604A; --up:#D9465B; --down:#2D8A70;
-  --accent:#E4572E; --border-light:#EFCDBE;
-  --a1:#F58A5C; --a3:#A63A14; --glaze-top:#FFFFFF; --glaze-bot:#F9DCCD; --row-alt:#FDEEE6;
-  --rim-shade:rgba(228,87,46,.14); --ring:rgba(228,87,46,.27);
-  --bg-glow:rgba(250,150,100,.45); --bg-glow2:rgba(252,200,130,.34);
+  /* 橘灰：暖灰底色配沉穩的燒橘，低飽和而耐看 */
+  --bg:#D9D0C9; --bg-card:#E9E3DE; --s-light:#F6F2EE; --s-dark:#A69A91;
+  --t-main:#2B2420; --t-muted:#6B5E55; --up:#D9465B; --down:#2D8A70;
+  --accent:#D9692B; --border-light:#B8ACA2;
+  --a1:#E39A6A; --a3:#8A3E12; --glaze-top:#F7F3EF; --glaze-bot:#CFC5BC; --row-alt:#E1D9D2;
+  --rim-shade:rgba(217,105,43,.16); --ring:rgba(217,105,43,.3);
+  --bg-glow:rgba(230,160,110,.4); --bg-glow2:rgba(190,180,170,.45);
 }
-/* 橘紅主題：珠光高光 */
+/* 橘灰主題：珠光高光 */
 body.pink .glass-bead {
-  background: radial-gradient(circle at 32% 24%, #fff 0 7%, #FFD9C4 8%, var(--a1) 36%, var(--accent) 64%, var(--a3) 100%);
-  box-shadow: inset -3px -4px 7px rgba(90,25,5,.45), inset 3px 3px 6px rgba(255,255,255,.65),
+  background: radial-gradient(circle at 32% 24%, #fff 0 7%, #FFE0CC 8%, var(--a1) 36%, var(--accent) 64%, var(--a3) 100%);
+  box-shadow: inset -3px -4px 7px rgba(60,25,5,.45), inset 3px 3px 6px rgba(255,255,255,.65),
               0 0 0 2px var(--gold-2), 0 0 0 3px var(--gold), 0 6px 10px var(--s-dark);
 }
 body.gray-light {
@@ -992,7 +992,7 @@ function applyThemeText(t){
     'tech': { emoji: '🚀', color: '#0B1730' },
     'blue-light': { emoji: '💎', color: '#B9D0F0' },
     'purple-light': { emoji: '🍇', color: '#E5DEF2' },
-    'pink': { emoji: '🍊', color: '#F8E3D9' },
+    'pink': { emoji: '🍂', color: '#D9D0C9' },
     'gray-light': { emoji: '📓', color: '#C5D0DC' },
     'light': { emoji: '☀️', color: '#E4EDF7' }
   };
