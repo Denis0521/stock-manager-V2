@@ -201,10 +201,10 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 /* ========================================================= 📈 內容區塊排版與 Grid 調整 ========================================================= */
 .table-scroll { margin: 0 10px 6px; overflow-x: auto; padding: 0; -webkit-overflow-scrolling: touch; border-top-left-radius: 0; border-top-right-radius: 0; position: relative; z-index: 2; }
 .list-wrap { min-width: 765px; transition: min-width 0.3s ease; }
-.list-header, .srow { grid-template-columns: 110px 105px 205px 110px 110px 125px; transition: grid-template-columns 0.3s ease; } 
+.list-header, .srow { grid-template-columns: 110px 105px 125px 110px 110px 125px 80px; transition: grid-template-columns 0.3s ease; } 
 
 body.show-hist .list-wrap { min-width: 1101px; }
-body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 110px 105px 205px 110px 110px 125px 84px 84px 84px 84px; }
+body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 110px 105px 125px 110px 110px 125px 84px 84px 84px 84px 80px; }
 .hist-col { display: none !important; }
 body.show-hist .hist-col { display: flex !important; }
 
@@ -215,6 +215,8 @@ body.show-hist .hist-col { display: flex !important; }
 .list-header > div:nth-child(1), .srow > div:nth-child(1) { align-items: flex-start; text-align: left; position: sticky; left: 0; z-index: 2; background: var(--bg-card); padding-left: 8px; }
 .list-header > div:nth-child(1)::after, .srow > div:nth-child(1)::after { content: ''; position: absolute; top: 0; bottom: 0; right: -6px; width: 6px; background: linear-gradient(to right, var(--s-dark), transparent); opacity: 0.3; pointer-events: none; }
 .list-header > div:nth-child(6), .srow > div:nth-child(6) { align-items: flex-end; text-align: right; padding-right: 4px; }
+.list-header > div:last-child { align-items: center; justify-content: center; padding-left: 4px; }
+.srow > div:last-child { flex-direction: row; align-items: center; justify-content: center; gap: 8px; padding-left: 4px; }
 
 .sym-container { align-items: flex-start !important; line-height: 1.1 !important; width: 100%; max-width: 112px; display: flex; flex-direction: column; justify-content: center; }
 .srow .sym { font-weight: 800; font-size: 17px; color: var(--t-main); text-shadow: -1px -1px 1px var(--protrude-l), 1px 1px 1px var(--protrude-d); cursor: pointer; }
@@ -309,8 +311,8 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   .card-title { font-size: 18px; }
   
   .list-wrap { min-width: 100%; }
-  .list-header, .srow { grid-template-columns: 1.4fr 1.5fr 2.7fr 1.5fr 1.5fr 1.7fr; }
-  body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 1.4fr 1.5fr 2.7fr 1.5fr 1.5fr 1.7fr 1.15fr 1.15fr 1.15fr 1.15fr; }
+  .list-header, .srow { grid-template-columns: 1.4fr 1.5fr 1.7fr 1.5fr 1.5fr 1.7fr 1fr; }
+  body.show-hist .list-header, body.show-hist .srow { grid-template-columns: 1.4fr 1.5fr 1.7fr 1.5fr 1.5fr 1.7fr 1.15fr 1.15fr 1.15fr 1.15fr 1.1fr; }
   
   .list-header { font-size: 18px; }
   .srow, .srow .sym, .srow .chgp, .qty-main, .total-main { font-size: 18px; }
@@ -579,12 +581,6 @@ body.tech .modal h2 { color: var(--a1); }
 #addModalOverlay .modal-close, #editModalOverlay .modal-close { height: 50px; padding: 0 12px; border-radius: 18px; white-space: nowrap; }
 #addModalOverlay .modal > div:last-child, #editModalOverlay .modal > div:last-child { gap: 14px !important; margin-top: 26px !important; }
 
-/* 動作鈕併入報價欄位：報價欄位向右延伸，不再是獨立欄 */
-.srow > .price-cell { flex-direction: row; align-items: center; justify-content: flex-end; gap: 10px; width: 100%; }
-.price-cell .price-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; }
-.price-cell .act { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; }
-/* 表頭「現價/總計」對齊報價數字（讓出按鈕區寬度） */
-.list-header > div:nth-child(3) { padding-right: 78px; }
 /* 表頭文字大小全部一致 */
 .list-header > div { font-size: 17px; font-weight: 600; }
 @media (min-width: 768px) { .list-header > div { font-size: 18px; } }
@@ -634,6 +630,7 @@ body.tech .modal h2 { color: var(--a1); }
     <div class="list-header">
       <div>代號</div><div>庫存/均價</div><div>現價/總計</div><div>漲跌/幅度</div><div>今日損益</div><div>總損益</div>
       <div class="hist-col">5日幅</div><div class="hist-col">20日幅</div><div class="hist-col">60日幅</div><div class="hist-col">120日幅</div>
+      <div>動作</div>
     </div>
     <div id="listBody"></div>
   </div>
@@ -1054,20 +1051,18 @@ function getStockHtmlInner(s) {
       <div class="qty-main">${s.displayQty} ${escapeHTML(s.displayUnit)}</div>
       <div class="qty-sub" title="${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}">${s.buyPrice ? '均價 '+s.buyPrice : '未設均價'}</div>
     </div>
-    <div class="price-cell">
-      <div class="price-main">${priceHtml}</div>
-      <div class="act">
-        <button type="button" class="btn-glass-circle edit" onclick="openEditModal('${s.id}')">✎</button>
-        <button type="button" class="btn-glass-circle del" onclick="deleteStock('${s.id}')">✕</button>
-      </div>
-    </div>
+    <div style="width:100%; display:flex; flex-direction:column; align-items:flex-end; justify-content:center;">${priceHtml}</div>
     <div style="width:100%; display:flex; flex-direction:column; align-items:flex-end; justify-content:center;">${changeHtml}</div>
     <div class="today-pnl ${getColorCls(info.todayPnl)}">${s.change != null ? getSign(info.todayPnl) + info.todayPnl.toLocaleString() : '—'}</div>
     <div class="total ${getColorCls(totalValForClass)}">${totalHtml}</div>
     <div class="hist-col ${genPctCls(s.pct5)}" style="font-weight:800; font-size:16px;">${genPctStr(s.pct5)}</div>
     <div class="hist-col ${genPctCls(s.pct20)}" style="font-weight:800; font-size:16px;">${genPctStr(s.pct20)}</div>
     <div class="hist-col ${genPctCls(s.pct60)}" style="font-weight:800; font-size:16px;">${genPctStr(s.pct60)}</div>
-    <div class="hist-col ${genPctCls(s.pct120)}" style="font-weight:800; font-size:16px;">${genPctStr(s.pct120)}</div>`;
+    <div class="hist-col ${genPctCls(s.pct120)}" style="font-weight:800; font-size:16px;">${genPctStr(s.pct120)}</div>
+    <div class="act">
+      <button type="button" class="btn-glass-circle edit" onclick="openEditModal('${s.id}')">✎</button>
+      <button type="button" class="btn-glass-circle del" onclick="deleteStock('${s.id}')">✕</button>
+    </div>`;
 }
 
 function renderAll(){
