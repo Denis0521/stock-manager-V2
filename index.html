@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.45'; 
+const APP_VER = 'V7.50'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -60,11 +60,11 @@ body.purple-light {
   --accent: #7A5CAF; --border-light: #D6C8E0; 
 }
 body.pink { 
-  --bg: #F4E8EC; --bg-card: #FFFBFB; --s-light: #FFFBFB; --s-dark: #D4B8C1; 
-  --t-main: #5C3241; --t-muted: #946574; --up: #D9465B; --down: #2D8A70; 
+  --bg: #DCE9E6; --bg-card: #F5FAF9; --s-light: #F5FAF9; --s-dark: #A9C2BD; 
+  --t-main: #1E3B3A; --t-muted: #587C7A; --up: #D9465B; --down: #2A8A5E; 
   --engrave-l: rgba(255,255,255,1); --engrave-d: rgba(0,0,0,0.08); 
   --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.04); 
-  --accent: #C24D7B; --border-light: #E6D0D8; 
+  --accent: #3F8A87; --border-light: #C4DAD6; 
 }
 body.gray-light { 
   --bg: #BFC5CC; --bg-card: #D3D9E0; --s-light: #E5EBF2; --s-dark: #9199A3; 
@@ -353,7 +353,6 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   --f-head:"Noto Serif TC","Songti TC","Source Han Serif TC","STSong","PMingLiU",serif;
   --f-title:"LXGW WenKai TC","Kaiti TC","BiauKai","STKaiti","KaiTi","DFKai-SB","Noto Serif TC",serif;
   --seigaiha:url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%2724%27%20height=%2712%27%20viewBox=%270%200%2024%2012%27%3E%3Cg%20fill=%27none%27%20stroke=%27%23000%27%20stroke-width=%272.4%27%3E%3Ccircle%20cx=%2712%27%20cy=%2712%27%20r=%2711%27/%3E%3Ccircle%20cx=%2712%27%20cy=%2712%27%20r=%277.2%27/%3E%3Ccircle%20cx=%2712%27%20cy=%2712%27%20r=%273.6%27/%3E%3Ccircle%20cx=%270%27%20cy=%276%27%20r=%2711%27/%3E%3Ccircle%20cx=%270%27%20cy=%276%27%20r=%277.2%27/%3E%3Ccircle%20cx=%270%27%20cy=%276%27%20r=%273.6%27/%3E%3Ccircle%20cx=%2724%27%20cy=%276%27%20r=%2711%27/%3E%3Ccircle%20cx=%2724%27%20cy=%276%27%20r=%277.2%27/%3E%3Ccircle%20cx=%2724%27%20cy=%276%27%20r=%273.6%27/%3E%3C/g%3E%3C/svg%3E");
-  --crackle:url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%27200%27%20height=%27200%27%20viewBox=%270%200%20200%20200%27%3E%3Cg%20fill=%27none%27%20stroke=%27%23000%27%20stroke-width=%271.2%27%20stroke-linejoin=%27round%27%3E%3Cpath%20d=%27M0%2046L34%2058L60%2034L104%2048L132%2022L176%2040L200%2046%27/%3E%3Cpath%20d=%27M34%2058L26%20104L70%20122L104%2048%27/%3E%3Cpath%20d=%27M70%20122L60%20168L110%20186L150%20150L132%2022%27/%3E%3Cpath%20d=%27M26%20104L0%20120%27/%3E%3Cpath%20d=%27M110%20186L104%20200%27/%3E%3Cpath%20d=%27M150%20150L200%20138%27/%3E%3Cpath%20d=%27M176%2040L190%2090L200%20138%27/%3E%3Cpath%20d=%27M150%20150L172%20200%27/%3E%3Cpath%20d=%27M60%20168L14%20184L0%20176%27/%3E%3C/g%3E%3C/svg%3E");
 }
 body.tech {
   --bg:#0B1730; --bg-card:#15274A; --s-light:#1E3466; --s-dark:#050C1C;
@@ -381,12 +380,19 @@ body.purple-light {
   --bg-glow:rgba(170,140,240,.42); --bg-glow2:rgba(210,170,240,.32);
 }
 body.pink {
-  --bg:#F6E3EA; --bg-card:#FFF9FB; --s-light:#FFFFFF; --s-dark:#DBB1C1;
-  --t-main:#5A2138; --t-muted:#9A6079; --up:#D9465B; --down:#2D8A70;
-  --accent:#C2417A; --border-light:#EBCBD7;
-  --a1:#EE7FAE; --a3:#8E1F57; --glaze-top:#FFFFFF; --glaze-bot:#F8DFE8; --row-alt:#FCEEF3;
-  --rim-shade:rgba(194,65,122,.14); --ring:rgba(194,65,122,.26);
-  --bg-glow:rgba(245,150,190,.42); --bg-glow2:rgba(250,200,150,.32);
+  /* 汝窯天青：雨過天青雲破處，釉色淡青微帶灰潤，玉質溫潤 */
+  --bg:#D9E8E4; --bg-card:#F4FAF8; --s-light:#FFFFFF; --s-dark:#9FBDB7;
+  --t-main:#1B3A39; --t-muted:#55787A; --up:#D9465B; --down:#2A8A5E;
+  --accent:#3B8784; --border-light:#BFD8D3;
+  --a1:#8CBFB9; --a3:#28615F; --glaze-top:#FBFFFE; --glaze-bot:#CFE4DF; --row-alt:#E6F1EE;
+  --rim-shade:rgba(59,135,132,.15); --ring:rgba(59,135,132,.28);
+  --bg-glow:rgba(150,208,200,.5); --bg-glow2:rgba(205,226,200,.36);
+}
+/* 汝窯天青：玉潤高光 */
+body.pink .glass-bead {
+  background: radial-gradient(circle at 32% 24%, #fff 0 7%, #D4EEE9 8%, var(--a1) 36%, var(--accent) 64%, var(--a3) 100%);
+  box-shadow: inset -3px -4px 7px rgba(10,50,48,.45), inset 3px 3px 6px rgba(255,255,255,.65),
+              0 0 0 2px var(--gold-2), 0 0 0 3px var(--gold), 0 6px 10px var(--s-dark);
 }
 body.gray-light {
   --bg:#C5D0DC; --bg-card:#DDE5EE; --s-light:#EEF3F8; --s-dark:#92A1B4;
@@ -411,15 +417,6 @@ body.tech {
   --shadow-strong: 9px 13px 24px -4px var(--s-dark), -4px -4px 14px rgba(80,130,230,.16), inset 0 2px 1px var(--hl), inset 0 -4px 8px var(--rim-shade), 0 0 26px rgba(110,168,255,.4);
   --shadow-inset: inset 4px 5px 9px var(--s-dark), inset -3px -3px 8px rgba(80,130,230,.12), inset 0 0 12px rgba(110,168,255,.2);
 }
-/* 冰裂紋釉面 */
-body::before {
-  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background: var(--a1); opacity: .065;
-  -webkit-mask-image: var(--crackle); mask-image: var(--crackle);
-  -webkit-mask-size: 200px 200px; mask-size: 200px 200px;
-}
-body.tech::before { opacity: .09; }
-
 /* 釉面卡片 */
 .card, .idx-scroll-container, .summary, .hist-item, .backup-box {
   background: linear-gradient(158deg, var(--glaze-top) 0%, var(--bg-card) 46%, var(--glaze-bot) 100%);
@@ -587,6 +584,12 @@ body.tech .modal h2 { color: var(--a1); }
 
 /* 跑馬燈：不用粗體 */
 .ticker-item, .ticker-source { font-weight: 400; }
+/* 指數列名稱：淺色主題（含汝窯）黑色、暗色主題白色 */
+.idx-box-name { color: #000; }
+body.tech .idx-box-name { color: #fff; }
+/* 新聞跑馬燈字色：所有主題黑色，深色主題白色（含載入中／失敗提示） */
+.ticker-item, .ticker-source { color: #000 !important; }
+body.tech .ticker-item, body.tech .ticker-source { color: #fff !important; }
 
 /* 指數列跑馬燈（實驗性）：關閉時外層包裝不參與版面，與原設計完全相同 */
 .idx-track, .idx-cards { display: contents; }
@@ -989,7 +992,7 @@ function applyThemeText(t){
     'tech': { emoji: '🚀', color: '#0B1730' },
     'blue-light': { emoji: '💎', color: '#B9D0F0' },
     'purple-light': { emoji: '🍇', color: '#E5DEF2' },
-    'pink': { emoji: '🌸', color: '#F6E3EA' },
+    'pink': { emoji: '🏺', color: '#D9E8E4' },
     'gray-light': { emoji: '📓', color: '#C5D0DC' },
     'light': { emoji: '☀️', color: '#E4EDF7' }
   };
