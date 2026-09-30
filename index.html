@@ -588,6 +588,23 @@ body.tech .modal h2 { color: var(--a1); }
 /* 跑馬燈：不用粗體 */
 .ticker-item, .ticker-source { font-weight: 400; }
 
+/* 指數列跑馬燈（實驗性）：關閉時外層包裝不參與版面，與原設計完全相同 */
+.idx-track, .idx-cards { display: contents; }
+.idx-clone { display: none; }
+.idx-scroll-container.idx-marquee { overflow: hidden; scroll-snap-type: none; }
+.idx-marquee .idx-track { display: flex; flex: 0 0 auto; width: max-content; animation: idxMarquee var(--idx-dur, 30s) linear infinite; will-change: transform; }
+.idx-marquee .idx-cards { display: flex; flex: 0 0 auto; min-width: var(--idx-vw, 0px); }
+.idx-marquee .idx-clone { display: flex; }
+.idx-marquee .idx-card-box:last-child { border-right: 1px solid var(--s-dark); }
+.idx-marquee .idx-card-box { scroll-snap-align: none; cursor: default; }
+.idx-marquee:hover .idx-track, .idx-marquee:active .idx-track { animation-play-state: paused; }
+@keyframes idxMarquee { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-50%, 0, 0); } }
+@media (prefers-reduced-motion: reduce) {
+  .idx-marquee .idx-track { animation: none; }
+  .idx-marquee .idx-clone { display: none; }
+  .idx-scroll-container.idx-marquee { overflow-x: auto; }
+}
+
 
 </style>
 <link rel="manifest" href="manifest.json">
@@ -613,6 +630,8 @@ body.tech .modal h2 { color: var(--a1); }
 </div>
 
 <div class="idx-scroll-container" id="idxScrollContainer">
+  <div class="idx-track" id="idxTrack">
+  <div class="idx-cards" id="idxCards">
   <div class="idx-card-box">
     <div class="idx-box-name" id="idxTitle">🇹🇼 臺灣加權指數</div>
     <div class="idx-data-row">
@@ -623,6 +642,9 @@ body.tech .modal h2 { color: var(--a1); }
       <div class="idx-box-change-row"><span id="idxChange"></span><span id="idxPct"></span></div>
     </div>
     <div class="idx-box-src" id="idxSource">Loading...</div>
+  </div>
+  </div>
+  <div class="idx-cards idx-clone" id="idxClone" aria-hidden="true"></div>
   </div>
 </div>
 
@@ -731,6 +753,7 @@ body.tech .modal h2 { color: var(--a1); }
       </div>
       <div class="api-section" style="margin-bottom: 16px;">
         <button type="button" id="tickerToggleBtn" onclick="toggleTicker()" style="width: 100%; height: 40px; padding: 0; font-size: 15px; margin-bottom: 8px;">📰 財經新聞列：</button>
+        <button type="button" id="idxMarqueeToggleBtn" onclick="toggleIdxMarquee()" style="width: 100%; height: 40px; padding: 0; font-size: 15px; margin-bottom: 8px;">📊 指數列跑馬燈：</button>
         <button type="button" id="histToggleBtnAdvanced" onclick="toggleHistCols()" style="width: 100%; height: 40px; padding: 0; font-size: 15px; margin-bottom: 8px;">📊 漲跌幅 (歷史)：</button>
         <button type="button" id="flashToggleBtn" onclick="toggleFlash()" style="width: 100%; height: 40px; padding: 0; font-size: 15px; margin-bottom: 8px;">💡 報價閃爍提醒：</button>
         <a class="btn-link" href="https://developer.fugle.tw/docs/key/" target="_blank" style="display: flex; align-items: center; justify-content: center; width: 100%; height: 40px; margin-bottom: 8px; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; box-shadow: var(--shadow-soft); text-decoration: none; font-size: 15px; font-weight: 800;">🔗 申請 Fugle API Key</a>
@@ -855,7 +878,7 @@ const LS = {
   KEYS: {
     FK: 'tw_fugle_key', SFK: 'tw_second_fugle_key', THEME: 'tw_theme',
     CUR_TAB: 'tw_current_tab', TAB_NAMES: 'tw_tab_names', TAB_COUNT: 'tw_tab_count',
-    TICKER: 'tw_show_ticker', FLASH: 'tw_show_flash', FOREIGN_IDX: 'tw_custom_foreign_indices',
+    TICKER: 'tw_show_ticker', FLASH: 'tw_show_flash', IDX_MARQUEE: 'tw_idx_marquee', FOREIGN_IDX: 'tw_custom_foreign_indices',
     CACHE_IDX: 'tw_cached_indices', CACHE_TWII: 'tw_cached_twii', HIST_CACHE: 'tw_hist_cache_v1',
     STOCK: i => `tw_stock_portfolio_tab_${i}`, RECORD: i => `tw_records_tab_${i}`
   },
@@ -865,7 +888,7 @@ const LS = {
 };
 
 /* ========================================================= 📊 核心狀態 ========================================================= */
-let currentTab = 0, tabCount = 3, showTicker = true, enableFlash = true, currentInterval = 8000;
+let currentTab = 0, tabCount = 3, showTicker = true, enableFlash = true, idxMarquee = true, currentInterval = 8000;
 let tabStocks = Array.from({length: 5}, () => []), tabRecords = Array.from({length: 5}, () => []), tabNames = [];
 let fugleKey='', secondFugleKey='', availableIndices = [], cachedGlobalIndices = [], histCache = {}; 
 let showHistCols = false;
@@ -893,6 +916,7 @@ function loadState(){
   tabCount = parseInt(LS.getStr(LS.KEYS.TAB_COUNT, '3'));
   showTicker = LS.getStr(LS.KEYS.TICKER, 'true') === 'true';
   enableFlash = LS.getStr(LS.KEYS.FLASH, 'true') === 'true';
+  idxMarquee = LS.getStr(LS.KEYS.IDX_MARQUEE, 'true') === 'true';
 
   const defaultTabNames = ['分頁 1', '分頁 2', '分頁 3', '分頁 4', '分頁 5'];
   const storedNames = LS.get(LS.KEYS.TAB_NAMES, defaultTabNames);
@@ -914,6 +938,7 @@ function loadState(){
   if (cachedTwii) updateTwiiDOM(cachedTwii, true);
 
   $('tickerContainer').style.display = showTicker ? 'flex' : 'none';
+  applyIdxMarquee();
   renderTabs(); renderApiStats();
   
   showHistCols = LS.getStr('tw_show_hist', 'false') === 'true';
@@ -954,6 +979,40 @@ function toggleTicker() {
   $('tickerContainer').style.display = showTicker ? 'flex' : 'none';
   $('tickerToggleBtn').textContent = `📰 財經新聞列：${showTicker ? '已開啟' : '已關閉'}`;
   LS.set(LS.KEYS.TICKER, showTicker);
+}
+
+/* ===== 指數列跑馬燈（實驗性）：內容複製一份接在後面，位移 -50% 即無縫循環 ===== */
+let idxCloneRaf = 0, idxObserver = null;
+function syncIdxClone() {
+  if (!idxMarquee) return;
+  const src = $('idxCards'), box = $('idxScrollContainer');
+  $('idxClone').innerHTML = src.innerHTML.replace(/\sid="[^"]*"/g, '').replace(/\sdraggable="[^"]*"/g, '');
+  box.style.setProperty('--idx-vw', box.clientWidth + 'px');
+  box.style.setProperty('--idx-dur', Math.max(14, (src.offsetWidth || 1) / 45) + 's');
+}
+function scheduleIdxClone() { if (!idxMarquee) return; cancelAnimationFrame(idxCloneRaf); idxCloneRaf = requestAnimationFrame(syncIdxClone); }
+function applyIdxMarquee() {
+  const box = $('idxScrollContainer');
+  box.classList.toggle('idx-marquee', idxMarquee);
+  $('idxCards').querySelectorAll('.draggable-card').forEach(c => c.setAttribute('draggable', idxMarquee ? 'false' : 'true'));
+  if (idxMarquee) {
+    box.scrollLeft = 0;
+    if (!idxObserver) {
+      idxObserver = new MutationObserver(scheduleIdxClone);
+      idxObserver.observe($('idxCards'), { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['class'] });
+      window.addEventListener('resize', scheduleIdxClone);
+    }
+    syncIdxClone();
+  } else {
+    $('idxClone').innerHTML = '';
+    box.style.removeProperty('--idx-vw'); box.style.removeProperty('--idx-dur');
+  }
+}
+function toggleIdxMarquee() {
+  idxMarquee = !idxMarquee;
+  $('idxMarqueeToggleBtn').textContent = `📊 指數列跑馬燈：${idxMarquee ? '已開啟' : '已關閉'}`;
+  LS.set(LS.KEYS.IDX_MARQUEE, idxMarquee);
+  applyIdxMarquee();
 }
 
 function toggleFlash() {
@@ -1418,7 +1477,7 @@ function renderGlobalIndices(indices, isOffline = false) {
     const matched = availableIndices.find(idx => idx.symbol === item.symbol);
     const name = matched ? matched.name : item.name;
     const cls = getColorCls(item.pct);
-    return `<div class="idx-card-box draggable-card" draggable="true" data-symbol="${escapeHTML(item.symbol)}">
+    return `<div class="idx-card-box draggable-card" draggable="${idxMarquee ? 'false' : 'true'}" data-symbol="${escapeHTML(item.symbol)}">
       <div class="idx-box-name">${escapeHTML(name)}${isOffline ? '<span style="color:var(--t-muted);font-size:12px;margin-left:6px;opacity:0.8;">(離線)</span>' : ''}</div>
       <div class="idx-data-row">
         <div class="idx-box-price-wrap"><span class="idx-box-price">${item.price.toLocaleString('en-US', {maximumFractionDigits:2})}</span></div>
@@ -1434,9 +1493,9 @@ function renderGlobalIndices(indices, isOffline = false) {
   }).join('');
   if (html === lastIdxHtml) return; // 內容沒變就不動 DOM
   lastIdxHtml = html;
-  const container = $('idxScrollContainer'), sl = container.scrollLeft;
-  container.querySelectorAll('.idx-card-box.draggable-card').forEach(e => e.remove());
-  container.insertAdjacentHTML('beforeend', html);
+  const container = $('idxScrollContainer'), cards = $('idxCards'), sl = container.scrollLeft;
+  cards.querySelectorAll('.idx-card-box.draggable-card').forEach(e => e.remove());
+  cards.insertAdjacentHTML('beforeend', html);
   container.scrollLeft = sl; // 保留使用者的橫向捲動位置
 }
 
@@ -1619,6 +1678,7 @@ function openModal(){
   $('tabCountSelect').value = tabCount;
   $('tickerToggleBtn').textContent = `📰 財經新聞列：${showTicker ? '已開啟' : '已關閉'}`;
   $('flashToggleBtn').textContent = `💡 報價閃爍提醒：${enableFlash ? '已開啟' : '已關閉'}`;
+  $('idxMarqueeToggleBtn').textContent = `📊 指數列跑馬燈：${idxMarquee ? '已開啟' : '已關閉'}`;
   applyHistColsState(); 
   ['fugleKey','secondFugleKey'].forEach((id, i) => {
     const el = $(`${id}Status`), val = i===0 ? fugleKey : secondFugleKey;
@@ -1679,7 +1739,7 @@ function exportData() {
     tabRecords: Array.from({length: 5}, (_, i) => LS.get(LS.KEYS.RECORD(i), [])),
     tabNames: LS.get(LS.KEYS.TAB_NAMES, ['分頁 1', '分頁 2', '分頁 3', '分頁 4', '分頁 5']),
     fugleKey, secondFugleKey, theme: LS.getStr(LS.KEYS.THEME, 'light'), 
-    tabCount, customForeignIndices: availableIndices, enableFlash 
+    tabCount, customForeignIndices: availableIndices, enableFlash, idxMarquee 
   };
   
   const a = document.createElement('a'); 
@@ -1705,6 +1765,7 @@ function importData(e) {
       if (d.tabCount !== undefined) LS.set(LS.KEYS.TAB_COUNT, d.tabCount);
       if (d.customForeignIndices) LS.set(LS.KEYS.FOREIGN_IDX, typeof d.customForeignIndices === 'string' ? JSON.parse(d.customForeignIndices) : d.customForeignIndices);
       if (d.enableFlash !== undefined) LS.set(LS.KEYS.FLASH, d.enableFlash);
+      if (d.idxMarquee !== undefined) LS.set(LS.KEYS.IDX_MARQUEE, d.idxMarquee);
       alert('🎉 還原成功！'); location.reload();
     } catch(err) { alert('❌ 檔案格式錯誤。'); console.error(err); }
     $('importFile').value = '';
