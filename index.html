@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.50'; 
+const APP_VER = 'V7.51'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -60,11 +60,11 @@ body.purple-light {
   --accent: #7A5CAF; --border-light: #D6C8E0; 
 }
 body.pink { 
-  --bg: #DCE9E6; --bg-card: #F5FAF9; --s-light: #F5FAF9; --s-dark: #A9C2BD; 
-  --t-main: #1E3B3A; --t-muted: #587C7A; --up: #D9465B; --down: #2A8A5E; 
+  --bg: #F6E4DB; --bg-card: #FFFAF7; --s-light: #FFFAF7; --s-dark: #D8B4A4; 
+  --t-main: #4A2214; --t-muted: #96604A; --up: #D9465B; --down: #2D8A70; 
   --engrave-l: rgba(255,255,255,1); --engrave-d: rgba(0,0,0,0.08); 
   --protrude-l: rgba(255,255,255,1); --protrude-d: rgba(0,0,0,0.04); 
-  --accent: #3F8A87; --border-light: #C4DAD6; 
+  --accent: #E4572E; --border-light: #EFCDBE; 
 }
 body.gray-light { 
   --bg: #BFC5CC; --bg-card: #D3D9E0; --s-light: #E5EBF2; --s-dark: #9199A3; 
@@ -380,18 +380,18 @@ body.purple-light {
   --bg-glow:rgba(170,140,240,.42); --bg-glow2:rgba(210,170,240,.32);
 }
 body.pink {
-  /* 汝窯天青：雨過天青雲破處，釉色淡青微帶灰潤，玉質溫潤 */
-  --bg:#D9E8E4; --bg-card:#F4FAF8; --s-light:#FFFFFF; --s-dark:#9FBDB7;
-  --t-main:#1B3A39; --t-muted:#55787A; --up:#D9465B; --down:#2A8A5E;
-  --accent:#3B8784; --border-light:#BFD8D3;
-  --a1:#8CBFB9; --a3:#28615F; --glaze-top:#FBFFFE; --glaze-bot:#CFE4DF; --row-alt:#E6F1EE;
-  --rim-shade:rgba(59,135,132,.15); --ring:rgba(59,135,132,.28);
-  --bg-glow:rgba(150,208,200,.5); --bg-glow2:rgba(205,226,200,.36);
+  /* 橘紅：暖橘帶紅，明亮而溫潤 */
+  --bg:#F8E3D9; --bg-card:#FFF8F4; --s-light:#FFFFFF; --s-dark:#DDB3A0;
+  --t-main:#4A2214; --t-muted:#96604A; --up:#D9465B; --down:#2D8A70;
+  --accent:#E4572E; --border-light:#EFCDBE;
+  --a1:#F58A5C; --a3:#A63A14; --glaze-top:#FFFFFF; --glaze-bot:#F9DCCD; --row-alt:#FDEEE6;
+  --rim-shade:rgba(228,87,46,.14); --ring:rgba(228,87,46,.27);
+  --bg-glow:rgba(250,150,100,.45); --bg-glow2:rgba(252,200,130,.34);
 }
-/* 汝窯天青：玉潤高光 */
+/* 橘紅主題：珠光高光 */
 body.pink .glass-bead {
-  background: radial-gradient(circle at 32% 24%, #fff 0 7%, #D4EEE9 8%, var(--a1) 36%, var(--accent) 64%, var(--a3) 100%);
-  box-shadow: inset -3px -4px 7px rgba(10,50,48,.45), inset 3px 3px 6px rgba(255,255,255,.65),
+  background: radial-gradient(circle at 32% 24%, #fff 0 7%, #FFD9C4 8%, var(--a1) 36%, var(--accent) 64%, var(--a3) 100%);
+  box-shadow: inset -3px -4px 7px rgba(90,25,5,.45), inset 3px 3px 6px rgba(255,255,255,.65),
               0 0 0 2px var(--gold-2), 0 0 0 3px var(--gold), 0 6px 10px var(--s-dark);
 }
 body.gray-light {
@@ -584,7 +584,7 @@ body.tech .modal h2 { color: var(--a1); }
 
 /* 跑馬燈：不用粗體 */
 .ticker-item, .ticker-source { font-weight: 400; }
-/* 指數列名稱：淺色主題（含汝窯）黑色、暗色主題白色 */
+/* 指數列名稱：淺色主題黑色、暗色主題白色 */
 .idx-box-name { color: #000; }
 body.tech .idx-box-name { color: #fff; }
 /* 新聞跑馬燈字色：所有主題黑色，深色主題白色（含載入中／失敗提示） */
@@ -992,7 +992,7 @@ function applyThemeText(t){
     'tech': { emoji: '🚀', color: '#0B1730' },
     'blue-light': { emoji: '💎', color: '#B9D0F0' },
     'purple-light': { emoji: '🍇', color: '#E5DEF2' },
-    'pink': { emoji: '🏺', color: '#D9E8E4' },
+    'pink': { emoji: '🍊', color: '#F8E3D9' },
     'gray-light': { emoji: '📓', color: '#C5D0DC' },
     'light': { emoji: '☀️', color: '#E4EDF7' }
   };
