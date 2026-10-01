@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.53-mcd'; 
+const APP_VER = 'V7.53-mcw'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -361,7 +361,7 @@ body.blue-light, body.purple-light, body.pink, body.gray-light { --bead-hi:#A9CC
 body.tech {
   /* 🚀 多彩暗色（橙・粉・紫・藍・青 柔和漸層） */
   --bg:#120E24; --bg-card:#1F1838; --s-light:#2D2450; --s-dark:#07050F;
-  --t-main:#F3EEFF; --t-muted:#A99BD0; --up:#FF6B85; --down:#3DDCA8;
+  --t-main:#FFFFFF; --t-muted:#E6E1F4; --up:#FF6B85; --down:#3DDCA8;
   --accent:#A683FF; --border-light:#3B2F6B;
   --a1:#FF9A55; --a3:#6B5BE6; --glaze-top:#2D2352; --glaze-bot:#171230; --row-alt:#251D45;
   --hl:rgba(255,255,255,.16); --rim-shade:rgba(0,0,0,.4); --ring:rgba(166,131,255,.45);
