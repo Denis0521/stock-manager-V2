@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.53-mc'; 
+const APP_VER = 'V7.53-mcd'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -357,14 +357,17 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
   --f-title:"LXGW WenKai TC","Kaiti TC","BiauKai","STKaiti","KaiTi","DFKai-SB","Noto Serif TC",serif;
   --seigaiha:url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%2724%27%20height=%2712%27%20viewBox=%270%200%2024%2012%27%3E%3Cg%20fill=%27none%27%20stroke=%27%23000%27%20stroke-width=%272.4%27%3E%3Ccircle%20cx=%2712%27%20cy=%2712%27%20r=%2711%27/%3E%3Ccircle%20cx=%2712%27%20cy=%2712%27%20r=%277.2%27/%3E%3Ccircle%20cx=%2712%27%20cy=%2712%27%20r=%273.6%27/%3E%3Ccircle%20cx=%270%27%20cy=%276%27%20r=%2711%27/%3E%3Ccircle%20cx=%270%27%20cy=%276%27%20r=%277.2%27/%3E%3Ccircle%20cx=%270%27%20cy=%276%27%20r=%273.6%27/%3E%3Ccircle%20cx=%2724%27%20cy=%276%27%20r=%2711%27/%3E%3Ccircle%20cx=%2724%27%20cy=%276%27%20r=%277.2%27/%3E%3Ccircle%20cx=%2724%27%20cy=%276%27%20r=%273.6%27/%3E%3C/g%3E%3C/svg%3E");
 }
-body.tech, body.blue-light, body.purple-light, body.pink, body.gray-light { --bead-hi:#A9CCFF; --bg-grad:linear-gradient(transparent,transparent); }
+body.blue-light, body.purple-light, body.pink, body.gray-light { --bead-hi:#A9CCFF; --bg-grad:linear-gradient(transparent,transparent); }
 body.tech {
-  --bg:#0B1730; --bg-card:#15274A; --s-light:#1E3466; --s-dark:#050C1C;
-  --t-main:#EAF2FF; --t-muted:#8EA9D6; --up:#FF5C6C; --down:#3DDC97;
-  --accent:#6EA8FF; --border-light:#2C4680;
-  --a1:#9CC4FF; --a3:#2A5FC4; --glaze-top:#1E3668; --glaze-bot:#0F1E3E; --row-alt:#1A2F58;
-  --hl:rgba(255,255,255,.16); --rim-shade:rgba(0,0,0,.38); --ring:rgba(110,168,255,.42);
-  --bg-glow:rgba(60,110,220,.38); --bg-glow2:rgba(30,70,160,.4);
+  /* 🚀 多彩暗色（橙・粉・紫・藍・青 柔和漸層） */
+  --bg:#120E24; --bg-card:#1F1838; --s-light:#2D2450; --s-dark:#07050F;
+  --t-main:#F3EEFF; --t-muted:#A99BD0; --up:#FF6B85; --down:#3DDCA8;
+  --accent:#A683FF; --border-light:#3B2F6B;
+  --a1:#FF9A55; --a3:#6B5BE6; --glaze-top:#2D2352; --glaze-bot:#171230; --row-alt:#251D45;
+  --hl:rgba(255,255,255,.16); --rim-shade:rgba(0,0,0,.4); --ring:rgba(166,131,255,.45);
+  --bg-glow:rgba(255,120,70,.28); --bg-glow2:rgba(50,180,220,.26);
+  --bead-hi:#FFC9E4;
+  --bg-grad:linear-gradient(160deg, rgba(255,120,60,.30) 0%, rgba(255,80,150,.26) 22%, rgba(150,90,255,.28) 46%, rgba(60,120,255,.26) 70%, rgba(30,190,190,.26) 100%);
   --gold:#E3BE68; --gold-line:rgba(227,190,104,.5);
 }
 body.blue-light {
@@ -417,9 +420,9 @@ body {
   --shadow-inset: inset 4px 5px 9px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
 body.tech {
-  --shadow-soft: 5px 7px 14px -2px var(--s-dark), -3px -3px 10px rgba(80,130,230,.12), inset 0 1.5px 1px var(--hl), inset 0 -3px 5px var(--rim-shade), 0 0 14px rgba(110,168,255,.22);
-  --shadow-strong: 9px 13px 24px -4px var(--s-dark), -4px -4px 14px rgba(80,130,230,.16), inset 0 2px 1px var(--hl), inset 0 -4px 8px var(--rim-shade), 0 0 26px rgba(110,168,255,.4);
-  --shadow-inset: inset 4px 5px 9px var(--s-dark), inset -3px -3px 8px rgba(80,130,230,.12), inset 0 0 12px rgba(110,168,255,.2);
+  --shadow-soft: 5px 7px 14px -2px var(--s-dark), -3px -3px 10px rgba(150,110,255,.12), inset 0 1.5px 1px var(--hl), inset 0 -3px 5px var(--rim-shade), 0 0 14px rgba(166,131,255,.24);
+  --shadow-strong: 9px 13px 24px -4px var(--s-dark), -4px -4px 14px rgba(150,110,255,.16), inset 0 2px 1px var(--hl), inset 0 -4px 8px var(--rim-shade), 0 0 26px rgba(166,131,255,.42);
+  --shadow-inset: inset 4px 5px 9px var(--s-dark), inset -3px -3px 8px rgba(150,110,255,.12), inset 0 0 12px rgba(166,131,255,.22);
 }
 /* 釉面卡片 */
 .card, .idx-scroll-container, .summary, .hist-item, .backup-box {
@@ -448,7 +451,7 @@ body.tech {
   font-family: var(--f-title); letter-spacing: 1px; color: var(--a3);
   text-shadow: 0 1px 0 var(--glaze-top), 0 2px 1px var(--border-light), 0 4px 6px var(--rim-shade);
 }
-body.tech .title-text { color: var(--a1); text-shadow: 0 1px 0 #0a1428, 0 2px 1px #060d1c, 0 0 12px rgba(110,168,255,.55); }
+body.tech .title-text { color: var(--a1); text-shadow: 0 1px 0 #120a24, 0 2px 1px #0a0618, 0 0 12px rgba(166,131,255,.55); }
 .glass-bead {
   background: radial-gradient(circle at 32% 24%, #fff 0 7%, var(--bead-hi,#A9CCFF) 8%, var(--a1) 34%, var(--accent) 62%, var(--a3) 100%);
   box-shadow: inset -3px -4px 7px rgba(4,20,60,.55), inset 3px 3px 6px rgba(255,255,255,.55),
@@ -993,7 +996,7 @@ function applyThemeText(t){
   const body = document.body;
   body.className = '';
   const themes = {
-    'tech': { emoji: '🚀', color: '#0B1730' },
+    'tech': { emoji: '🚀', color: '#120E24' },
     'blue-light': { emoji: '💎', color: '#B9D0F0' },
     'purple-light': { emoji: '🍇', color: '#E5DEF2' },
     'pink': { emoji: '🍂', color: '#D9D0C9' },
