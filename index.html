@@ -7,11 +7,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="股票庫存管理">
-<meta name="theme-color" id="themeColorMeta" content="#EEF4FC">
+<meta name="theme-color" id="themeColorMeta" content="#FFF8F2">
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.53-ob'; 
+const APP_VER = 'V7.53-mc'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -342,21 +342,22 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
    🏺 青花瓷主題層（只改外觀：配色、光澤、圓角、字形；不改字級與版面）
    ========================================================= */
 :root {
-  /* ☀️ 橙 × 藍 混合主題 */
-  --bg:#EEF4FC; --bg-card:#FFFEFC; --s-light:#FFFFFF; --s-dark:#B3C4DF;
-  --t-main:#12274D; --t-muted:#5B6F94; --up:#D92D43; --down:#0F9D6B;
-  --accent:#F27A1A; --border-light:#D3DEEF;
-  --a1:#FF9A45; --a3:#1E4FB5; --glaze-top:#FFFFFF; --glaze-bot:#E4ECF8; --row-alt:#F3F7FD;
-  --hl:rgba(255,255,255,.95); --rim-shade:rgba(30,79,181,.14); --ring:rgba(242,122,26,.32);
-  --bg-glow:rgba(255,154,69,.34); --bg-glow2:rgba(70,120,220,.30);
-  --bead-hi:#FFD9B8;
+  /* ☀️ 多彩繽紛主題（橙・粉・紫・藍・青 柔和漸層） */
+  --bg:#FFF8F2; --bg-card:#FFFDFC; --s-light:#FFFFFF; --s-dark:#D9CBE6;
+  --t-main:#241B45; --t-muted:#6B5F8F; --up:#E0264A; --down:#0E9F78;
+  --accent:#7B4DFF; --border-light:#E6DCF3;
+  --a1:#FF8A3D; --a3:#4B3BD6; --glaze-top:#FFFFFF; --glaze-bot:#F1E9FA; --row-alt:#FAF5FF;
+  --hl:rgba(255,255,255,.95); --rim-shade:rgba(123,77,255,.13); --ring:rgba(123,77,255,.30);
+  --bg-glow:rgba(255,140,70,.34); --bg-glow2:rgba(60,190,230,.30);
+  --bead-hi:#FFD6EC;
+  --bg-grad:linear-gradient(160deg, rgba(255,140,60,.42) 0%, rgba(255,95,150,.34) 22%, rgba(160,100,255,.32) 46%, rgba(70,130,255,.32) 70%, rgba(40,200,200,.34) 100%);
   --gold:#C9A24A; --gold-2:#F3DC94; --gold-line:rgba(201,162,74,.55);
   --f-body:"Chiron GoRound TC","PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   --f-head:"Noto Serif TC","Songti TC","Source Han Serif TC","STSong","PMingLiU",serif;
   --f-title:"LXGW WenKai TC","Kaiti TC","BiauKai","STKaiti","KaiTi","DFKai-SB","Noto Serif TC",serif;
   --seigaiha:url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%2724%27%20height=%2712%27%20viewBox=%270%200%2024%2012%27%3E%3Cg%20fill=%27none%27%20stroke=%27%23000%27%20stroke-width=%272.4%27%3E%3Ccircle%20cx=%2712%27%20cy=%2712%27%20r=%2711%27/%3E%3Ccircle%20cx=%2712%27%20cy=%2712%27%20r=%277.2%27/%3E%3Ccircle%20cx=%2712%27%20cy=%2712%27%20r=%273.6%27/%3E%3Ccircle%20cx=%270%27%20cy=%276%27%20r=%2711%27/%3E%3Ccircle%20cx=%270%27%20cy=%276%27%20r=%277.2%27/%3E%3Ccircle%20cx=%270%27%20cy=%276%27%20r=%273.6%27/%3E%3Ccircle%20cx=%2724%27%20cy=%276%27%20r=%2711%27/%3E%3Ccircle%20cx=%2724%27%20cy=%276%27%20r=%277.2%27/%3E%3Ccircle%20cx=%2724%27%20cy=%276%27%20r=%273.6%27/%3E%3C/g%3E%3C/svg%3E");
 }
-body.tech, body.blue-light, body.purple-light, body.gray-light { --bead-hi:#A9CCFF; }
+body.tech, body.blue-light, body.purple-light, body.pink, body.gray-light { --bead-hi:#A9CCFF; --bg-grad:linear-gradient(transparent,transparent); }
 body.tech {
   --bg:#0B1730; --bg-card:#15274A; --s-light:#1E3466; --s-dark:#050C1C;
   --t-main:#EAF2FF; --t-muted:#8EA9D6; --up:#FF5C6C; --down:#3DDC97;
@@ -409,7 +410,7 @@ body.gray-light {
 /* 陰影放在 body 上，讓每個主題都用自己的色彩計算（原本只有 tech 會跟著換） */
 body {
   font-family: var(--f-body);
-  background: radial-gradient(120% 55% at 8% -8%, var(--bg-glow), transparent 62%),
+  background: var(--bg-grad), radial-gradient(120% 55% at 8% -8%, var(--bg-glow), transparent 62%),
               radial-gradient(90% 45% at 100% 102%, var(--bg-glow2), transparent 62%), var(--bg);
   --shadow-soft: 5px 7px 14px -2px var(--s-dark), -4px -4px 10px var(--s-light), inset 0 1.5px 1px var(--hl), inset 0 -3px 5px var(--rim-shade);
   --shadow-strong: 9px 13px 24px -4px var(--s-dark), -6px -6px 14px var(--s-light), inset 0 2px 1px var(--hl), inset 0 -4px 8px var(--rim-shade);
@@ -997,7 +998,7 @@ function applyThemeText(t){
     'purple-light': { emoji: '🍇', color: '#E5DEF2' },
     'pink': { emoji: '🍂', color: '#D9D0C9' },
     'gray-light': { emoji: '📓', color: '#C5D0DC' },
-    'light': { emoji: '☀️', color: '#EEF4FC' }
+    'light': { emoji: '☀️', color: '#FFF8F2' }
   };
   if(!themes[t]) t = 'light';
   const theme = themes[t];
