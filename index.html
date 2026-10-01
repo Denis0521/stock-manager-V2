@@ -7,11 +7,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="股票庫存管理">
-<meta name="theme-color" id="themeColorMeta" content="#EDEEF0">
+<meta name="theme-color" id="themeColorMeta" content="#EEF4FC">
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.53-ig'; 
+const APP_VER = 'V7.53-ob'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -342,14 +342,14 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
    🏺 青花瓷主題層（只改外觀：配色、光澤、圓角、字形；不改字級與版面）
    ========================================================= */
 :root {
-  /* ☀️ 白 × 鐵灰 混合主題 */
-  --bg:#EDEEF0; --bg-card:#FBFBFC; --s-light:#FFFFFF; --s-dark:#B3B8C0;
-  --t-main:#1F2329; --t-muted:#6A717B; --up:#D92D43; --down:#0F9D6B;
-  --accent:#4A515B; --border-light:#D2D5DA;
-  --a1:#8C94A0; --a3:#2B3037; --glaze-top:#FFFFFF; --glaze-bot:#E3E5E8; --row-alt:#F2F3F5;
-  --hl:rgba(255,255,255,.95); --rim-shade:rgba(74,81,91,.14); --ring:rgba(74,81,91,.28);
-  --bg-glow:rgba(140,148,160,.30); --bg-glow2:rgba(175,181,190,.28);
-  --bead-hi:#D8DCE2;
+  /* ☀️ 橙 × 藍 混合主題 */
+  --bg:#EEF4FC; --bg-card:#FFFEFC; --s-light:#FFFFFF; --s-dark:#B3C4DF;
+  --t-main:#12274D; --t-muted:#5B6F94; --up:#D92D43; --down:#0F9D6B;
+  --accent:#F27A1A; --border-light:#D3DEEF;
+  --a1:#FF9A45; --a3:#1E4FB5; --glaze-top:#FFFFFF; --glaze-bot:#E4ECF8; --row-alt:#F3F7FD;
+  --hl:rgba(255,255,255,.95); --rim-shade:rgba(30,79,181,.14); --ring:rgba(242,122,26,.32);
+  --bg-glow:rgba(255,154,69,.34); --bg-glow2:rgba(70,120,220,.30);
+  --bead-hi:#FFD9B8;
   --gold:#C9A24A; --gold-2:#F3DC94; --gold-line:rgba(201,162,74,.55);
   --f-body:"Chiron GoRound TC","PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   --f-head:"Noto Serif TC","Songti TC","Source Han Serif TC","STSong","PMingLiU",serif;
@@ -997,7 +997,7 @@ function applyThemeText(t){
     'purple-light': { emoji: '🍇', color: '#E5DEF2' },
     'pink': { emoji: '🍂', color: '#D9D0C9' },
     'gray-light': { emoji: '📓', color: '#C5D0DC' },
-    'light': { emoji: '☀️', color: '#EDEEF0' }
+    'light': { emoji: '☀️', color: '#EEF4FC' }
   };
   if(!themes[t]) t = 'light';
   const theme = themes[t];
