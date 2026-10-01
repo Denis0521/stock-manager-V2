@@ -7,11 +7,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="股票庫存管理">
-<meta name="theme-color" id="themeColorMeta" content="#E4EDF7">
+<meta name="theme-color" id="themeColorMeta" content="#EDEEF0">
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.53'; 
+const APP_VER = 'V7.53-ig'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -342,18 +342,21 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
    🏺 青花瓷主題層（只改外觀：配色、光澤、圓角、字形；不改字級與版面）
    ========================================================= */
 :root {
-  --bg:#E4EDF7; --bg-card:#F7FAFE; --s-light:#FFFFFF; --s-dark:#AFC3DA;
-  --t-main:#0F2447; --t-muted:#587294; --up:#D92D43; --down:#0F9D6B;
-  --accent:#1F4FA8; --border-light:#BCD0E8;
-  --a1:#5B92E6; --a3:#0E2F6E; --glaze-top:#FFFFFF; --glaze-bot:#E3ECF8; --row-alt:#EDF3FB;
-  --hl:rgba(255,255,255,.95); --rim-shade:rgba(31,79,168,.14); --ring:rgba(31,79,168,.25);
-  --bg-glow:rgba(120,170,240,.38); --bg-glow2:rgba(150,190,245,.32);
+  /* ☀️ 白 × 鐵灰 混合主題 */
+  --bg:#EDEEF0; --bg-card:#FBFBFC; --s-light:#FFFFFF; --s-dark:#B3B8C0;
+  --t-main:#1F2329; --t-muted:#6A717B; --up:#D92D43; --down:#0F9D6B;
+  --accent:#4A515B; --border-light:#D2D5DA;
+  --a1:#8C94A0; --a3:#2B3037; --glaze-top:#FFFFFF; --glaze-bot:#E3E5E8; --row-alt:#F2F3F5;
+  --hl:rgba(255,255,255,.95); --rim-shade:rgba(74,81,91,.14); --ring:rgba(74,81,91,.28);
+  --bg-glow:rgba(140,148,160,.30); --bg-glow2:rgba(175,181,190,.28);
+  --bead-hi:#D8DCE2;
   --gold:#C9A24A; --gold-2:#F3DC94; --gold-line:rgba(201,162,74,.55);
   --f-body:"Chiron GoRound TC","PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   --f-head:"Noto Serif TC","Songti TC","Source Han Serif TC","STSong","PMingLiU",serif;
   --f-title:"LXGW WenKai TC","Kaiti TC","BiauKai","STKaiti","KaiTi","DFKai-SB","Noto Serif TC",serif;
   --seigaiha:url("data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%2724%27%20height=%2712%27%20viewBox=%270%200%2024%2012%27%3E%3Cg%20fill=%27none%27%20stroke=%27%23000%27%20stroke-width=%272.4%27%3E%3Ccircle%20cx=%2712%27%20cy=%2712%27%20r=%2711%27/%3E%3Ccircle%20cx=%2712%27%20cy=%2712%27%20r=%277.2%27/%3E%3Ccircle%20cx=%2712%27%20cy=%2712%27%20r=%273.6%27/%3E%3Ccircle%20cx=%270%27%20cy=%276%27%20r=%2711%27/%3E%3Ccircle%20cx=%270%27%20cy=%276%27%20r=%277.2%27/%3E%3Ccircle%20cx=%270%27%20cy=%276%27%20r=%273.6%27/%3E%3Ccircle%20cx=%2724%27%20cy=%276%27%20r=%2711%27/%3E%3Ccircle%20cx=%2724%27%20cy=%276%27%20r=%277.2%27/%3E%3Ccircle%20cx=%2724%27%20cy=%276%27%20r=%273.6%27/%3E%3C/g%3E%3C/svg%3E");
 }
+body.tech, body.blue-light, body.purple-light, body.gray-light { --bead-hi:#A9CCFF; }
 body.tech {
   --bg:#0B1730; --bg-card:#15274A; --s-light:#1E3466; --s-dark:#050C1C;
   --t-main:#EAF2FF; --t-muted:#8EA9D6; --up:#FF5C6C; --down:#3DDC97;
@@ -446,7 +449,7 @@ body.tech {
 }
 body.tech .title-text { color: var(--a1); text-shadow: 0 1px 0 #0a1428, 0 2px 1px #060d1c, 0 0 12px rgba(110,168,255,.55); }
 .glass-bead {
-  background: radial-gradient(circle at 32% 24%, #fff 0 7%, #A9CCFF 8%, var(--a1) 34%, var(--accent) 62%, var(--a3) 100%);
+  background: radial-gradient(circle at 32% 24%, #fff 0 7%, var(--bead-hi,#A9CCFF) 8%, var(--a1) 34%, var(--accent) 62%, var(--a3) 100%);
   box-shadow: inset -3px -4px 7px rgba(4,20,60,.55), inset 3px 3px 6px rgba(255,255,255,.55),
               0 0 0 2px var(--gold-2), 0 0 0 3px var(--gold), 0 6px 10px var(--s-dark);
   color: var(--gold-2); text-shadow: 0 1px 1px rgba(0,0,0,.55), 0 0 6px rgba(255,235,160,.6);
@@ -994,7 +997,7 @@ function applyThemeText(t){
     'purple-light': { emoji: '🍇', color: '#E5DEF2' },
     'pink': { emoji: '🍂', color: '#D9D0C9' },
     'gray-light': { emoji: '📓', color: '#C5D0DC' },
-    'light': { emoji: '☀️', color: '#E4EDF7' }
+    'light': { emoji: '☀️', color: '#EDEEF0' }
   };
   if(!themes[t]) t = 'light';
   const theme = themes[t];
