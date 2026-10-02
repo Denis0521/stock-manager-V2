@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.58-pr'; 
+const APP_VER = 'V7.61-pr'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -388,14 +388,16 @@ body.purple-light {
   --bg-glow:rgba(170,140,240,.42); --bg-glow2:rgba(210,170,240,.32);
 }
 body.pink {
-  /* 淺橘紅底層：橘紅配白色卡片 */
-  --bg:#F58468; --bg-card:#FFFFFF; --s-light:#FFAA94; --s-dark:#B8442E;
+  /* 灰橘底層：灰橘配白色卡片 */
+  --bg:#D4A581; --bg-card:#FFFFFF; --s-light:#EDCFB4; --s-dark:#8F6848;
   --t-main:#2B2420; --t-muted:#6B5E55; --up:#D9465B; --down:#2D8A70;
   --accent:#D9692B; --border-light:#E3E3E6;
   --a1:#E39A6A; --a3:#8A3E12; --glaze-top:#FFFFFF; --glaze-bot:#F1F1F2; --row-alt:#F7F7F8;
   --rim-shade:rgba(217,105,43,.16); --ring:rgba(217,105,43,.3);
-  --bg-glow:rgba(255,190,170,.5); --bg-glow2:rgba(210,80,50,.40);
+  --bg-glow:rgba(240,205,175,.55); --bg-glow2:rgba(140,100,70,.38);
 }
+/* 橘灰漸層底色：上方橘、下方灰 */
+body.pink { --bg-grad: linear-gradient(180deg, rgba(240,140,60,.55) 0%, rgba(228,160,100,.28) 35%, rgba(150,140,132,.18) 62%, rgba(105,100,96,.55) 100%); }
 /* 橘灰主題：珠光高光 */
 body.pink .glass-bead {
   background: radial-gradient(circle at 32% 24%, #fff 0 7%, #FFE0CC 8%, var(--a1) 36%, var(--accent) 64%, var(--a3) 100%);
@@ -641,10 +643,14 @@ body.tech .ticker-item, body.tech .ticker-source { color: #fff !important; }
 .tab-btn, .tab-btn:hover, .tab-btn.active { color: #000 !important; }
 body.tech .tab-btn, body.tech .tab-btn:hover, body.tech .tab-btn.active { color: #fff !important; }
 /* 第一塊（標題列）與第三塊（持股表）：四角都做成弧形 */
-.header { border-radius: 26px !important; box-shadow: 9px 13px 24px -4px var(--s-dark), inset 0 2px 1px var(--hl), inset 0 -4px 8px var(--rim-shade) !important; border-top-color: transparent !important; border-left-color: transparent !important; border-right-color: transparent !important; }
-.table-scroll { border-radius: 18px !important; }
+.header { border-radius: 18px !important; box-shadow: 8px 12px 22px -4px var(--s-dark), 2px 3px 0 -1px var(--border-light), inset 0 2px 1px var(--hl), inset 0 -4px 8px var(--rim-shade) !important; border-top-color: transparent !important; border-left-color: transparent !important; border-right-color: transparent !important; }
+.table-scroll { border-radius: 18px !important; background: linear-gradient(158deg, var(--glaze-top) 0%, var(--bg-card) 46%, var(--glaze-bot) 100%) !important; box-shadow: var(--shadow-soft) !important; }
+.card, .idx-scroll-container, .summary { border-radius: 18px !important; }
 /* 標題列上方兩個圓角後面的底色，與狀態列顏色一致 */
 body::before { content:""; position: fixed; top: 0; left: 0; right: 0; height: calc(env(safe-area-inset-top, 0px) + 30px); background: var(--status-bg, var(--bg)); z-index: 99; pointer-events: none; }
+/* 新聞跑馬燈：漂浮文字效果（上方高光＋下方柔和投影） */
+.ticker-item, .ticker-source { color: #1d1f23 !important; font-weight: 500 !important; letter-spacing: .3px; text-shadow: 0 -1px 0 rgba(255,255,255,.85), 0 2px 2px rgba(0,0,0,.28), 0 6px 10px rgba(0,0,0,.20) !important; }
+body.tech .ticker-item, body.tech .ticker-source { color: #fff !important; text-shadow: 0 -1px 0 rgba(255,255,255,.25), 0 2px 2px rgba(0,0,0,.7), 0 6px 12px rgba(0,0,0,.55) !important; }
 </style>
 <link rel="manifest" href="manifest.json">
 </head>
@@ -1009,7 +1015,7 @@ function applyThemeText(t){
     'tech': { emoji: '🚀', color: '#07101F' },
     'blue-light': { emoji: '💎', color: '#B9D0F0' },
     'purple-light': { emoji: '🍇', color: '#E5DEF2' },
-    'pink': { emoji: '🍂', color: '#F58468' },
+    'pink': { emoji: '🍂', color: '#D4A581' },
     'gray-light': { emoji: '📓', color: '#C5D0DC' },
     'light': { emoji: '☀️', color: '#9CC2BE' }
   };
