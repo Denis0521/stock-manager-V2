@@ -4,8 +4,8 @@
   "description": "台股庫存即時記帳與資產管理工具",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0E8A92",
-  "theme_color": "#0E8A92",
+  "background_color": "#9CC2BE",
+  "theme_color": "#9CC2BE",
   "orientation": "portrait",
   "scope": "./",
   "icons": [
