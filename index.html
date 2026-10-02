@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.62-pr'; 
+const APP_VER = 'V7.63-pr'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -1012,12 +1012,12 @@ function applyThemeText(t){
   const body = document.body;
   body.className = '';
   const themes = {
-    'tech': { emoji: '🚀', color: '#07101F' },
-    'blue-light': { emoji: '💎', color: '#B9D0F0' },
-    'purple-light': { emoji: '🍇', color: '#E5DEF2' },
-    'pink': { emoji: '🍂', color: '#F9CFA8' },
-    'gray-light': { emoji: '📓', color: '#C5D0DC' },
-    'light': { emoji: '☀️', color: '#9CC2BE' }
+    'tech': { emoji: '🏦', color: '#07101F' },
+    'blue-light': { emoji: '🌊', color: '#B9D0F0' },
+    'purple-light': { emoji: '🔮', color: '#E5DEF2' },
+    'pink': { emoji: '🍊', color: '#F9CFA8' },
+    'gray-light': { emoji: '🌫️', color: '#C5D0DC' },
+    'light': { emoji: '🏺', color: '#9CC2BE' }
   };
   if(!themes[t]) t = 'light';
   const theme = themes[t];
