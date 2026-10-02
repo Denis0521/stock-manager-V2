@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.55-ru'; 
+const APP_VER = 'V7.55-po'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -387,13 +387,13 @@ body.purple-light {
   --bg-glow:rgba(170,140,240,.42); --bg-glow2:rgba(210,170,240,.32);
 }
 body.pink {
-  /* 橘灰：暖灰底色配沉穩的燒橘，低飽和而耐看 */
-  --bg:#D9D0C9; --bg-card:#FFFFFF; --s-light:#F6F2EE; --s-dark:#A69A91;
+  /* 橘色底層：飽和橘配白色卡片 */
+  --bg:#F29A4A; --bg-card:#FFFFFF; --s-light:#FFBE82; --s-dark:#B8631C;
   --t-main:#2B2420; --t-muted:#6B5E55; --up:#D9465B; --down:#2D8A70;
   --accent:#D9692B; --border-light:#E3E3E6;
   --a1:#E39A6A; --a3:#8A3E12; --glaze-top:#FFFFFF; --glaze-bot:#F1F1F2; --row-alt:#F7F7F8;
   --rim-shade:rgba(217,105,43,.16); --ring:rgba(217,105,43,.3);
-  --bg-glow:rgba(230,160,110,.4); --bg-glow2:rgba(190,180,170,.45);
+  --bg-glow:rgba(255,200,140,.5); --bg-glow2:rgba(214,110,30,.40);
 }
 /* 橘灰主題：珠光高光 */
 body.pink .glass-bead {
@@ -1003,7 +1003,7 @@ function applyThemeText(t){
     'tech': { emoji: '🚀', color: '#07101F' },
     'blue-light': { emoji: '💎', color: '#B9D0F0' },
     'purple-light': { emoji: '🍇', color: '#E5DEF2' },
-    'pink': { emoji: '🍂', color: '#D9D0C9' },
+    'pink': { emoji: '🍂', color: '#F29A4A' },
     'gray-light': { emoji: '📓', color: '#C5D0DC' },
     'light': { emoji: '☀️', color: '#9CC2BE' }
   };
