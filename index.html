@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.54-ru'; 
+const APP_VER = 'V7.55-ru'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -343,10 +343,10 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
    ========================================================= */
 :root {
   /* ☀️ 淺白卡片 × 汝窯天青漸層底層 */
-  --bg:#9CC2BE; --bg-card:#FAFDFC; --s-light:#C4DEDA; --s-dark:#5D8581;
+  --bg:#9CC2BE; --bg-card:#FFFFFF; --s-light:#C4DEDA; --s-dark:#5D8581;
   --t-main:#1B2B2A; --t-muted:#5B7774; --up:#D12A40; --down:#0B8A5C;
-  --accent:#4A817D; --border-light:#D3E5E2;
-  --a1:#7DB0AB; --a3:#3C6C68; --glaze-top:#FFFFFF; --glaze-bot:#E4F0EE; --row-alt:#F2F8F7;
+  --accent:#4A817D; --border-light:#E3E3E6;
+  --a1:#7DB0AB; --a3:#3C6C68; --glaze-top:#FFFFFF; --glaze-bot:#F1F1F2; --row-alt:#F7F7F8;
   --hl:rgba(255,255,255,.9); --rim-shade:rgba(74,129,125,.12); --ring:rgba(255,255,255,.6);
   --bg-glow:rgba(205,232,228,.55); --bg-glow2:rgba(60,105,100,.30);
   --bead-hi:#D6EEEA;
@@ -360,10 +360,10 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
 body.blue-light, body.purple-light, body.pink, body.gray-light { --bead-hi:#A9CCFF; --bg-grad:linear-gradient(transparent,transparent); }
 body.tech {
   /* 🚀 華爾街金融藍（深海軍藍 × 鋼藍 × 終端機綠紅） */
-  --bg:#07101F; --bg-card:#0F1D33; --s-light:#1A2D4A; --s-dark:#030812;
-  --t-main:#FFFFFF; --t-muted:#A9BBD6; --up:#FF4D5E; --down:#19D184;
-  --accent:#3D8BFF; --border-light:#233A5E;
-  --a1:#7DB4FF; --a3:#1F5FD1; --glaze-top:#18294A; --glaze-bot:#0B1730; --row-alt:#122340;
+  --bg:#07101F; --bg-card:#2B2E33; --s-light:#1A2D4A; --s-dark:#030812;
+  --t-main:#FFFFFF; --t-muted:#C9CDD3; --up:#FF4D5E; --down:#19D184;
+  --accent:#3D8BFF; --border-light:#44484F;
+  --a1:#7DB4FF; --a3:#1F5FD1; --glaze-top:#363A40; --glaze-bot:#222529; --row-alt:#303338;
   --hl:rgba(255,255,255,.10); --rim-shade:rgba(0,0,0,.45); --ring:rgba(61,139,255,.45);
   --bg-glow:rgba(40,110,230,.22); --bg-glow2:rgba(25,70,160,.22);
   --bead-hi:#BFD9FF;
@@ -371,27 +371,27 @@ body.tech {
   --gold:#E3BE68; --gold-line:rgba(227,190,104,.5);
 }
 body.blue-light {
-  --bg:#B9D0F0; --bg-card:#E4EEFC; --s-light:#F4F9FF; --s-dark:#6F92C6;
+  --bg:#B9D0F0; --bg-card:#FFFFFF; --s-light:#F4F9FF; --s-dark:#6F92C6;
   --t-main:#071B45; --t-muted:#2F538C; --up:#D92D43; --down:#0F9D6B;
-  --accent:#0F3D9E; --border-light:#8FB0E0;
-  --a1:#2F6FE0; --a3:#08236B; --glaze-top:#F3F8FF; --glaze-bot:#B4CDF0; --row-alt:#D3E2F7;
+  --accent:#0F3D9E; --border-light:#E3E3E6;
+  --a1:#2F6FE0; --a3:#08236B; --glaze-top:#FFFFFF; --glaze-bot:#F1F1F2; --row-alt:#F7F7F8;
   --rim-shade:rgba(15,61,158,.24); --ring:rgba(15,61,158,.36);
   --bg-glow:rgba(40,100,225,.5); --bg-glow2:rgba(20,70,190,.36);
 }
 body.purple-light {
-  --bg:#E5DEF2; --bg-card:#FAF7FF; --s-light:#FFFFFF; --s-dark:#B4A4D4;
+  --bg:#E5DEF2; --bg-card:#FFFFFF; --s-light:#FFFFFF; --s-dark:#B4A4D4;
   --t-main:#2B1B4D; --t-muted:#6C5B92; --up:#D9465B; --down:#2D8A70;
-  --accent:#6B48BA; --border-light:#CFC0E6;
-  --a1:#A388EA; --a3:#3F2385; --glaze-top:#FFFFFF; --glaze-bot:#E7DEF6; --row-alt:#F0EAFA;
+  --accent:#6B48BA; --border-light:#E3E3E6;
+  --a1:#A388EA; --a3:#3F2385; --glaze-top:#FFFFFF; --glaze-bot:#F1F1F2; --row-alt:#F7F7F8;
   --rim-shade:rgba(107,72,186,.15); --ring:rgba(107,72,186,.28);
   --bg-glow:rgba(170,140,240,.42); --bg-glow2:rgba(210,170,240,.32);
 }
 body.pink {
   /* 橘灰：暖灰底色配沉穩的燒橘，低飽和而耐看 */
-  --bg:#D9D0C9; --bg-card:#E9E3DE; --s-light:#F6F2EE; --s-dark:#A69A91;
+  --bg:#D9D0C9; --bg-card:#FFFFFF; --s-light:#F6F2EE; --s-dark:#A69A91;
   --t-main:#2B2420; --t-muted:#6B5E55; --up:#D9465B; --down:#2D8A70;
-  --accent:#D9692B; --border-light:#B8ACA2;
-  --a1:#E39A6A; --a3:#8A3E12; --glaze-top:#F7F3EF; --glaze-bot:#CFC5BC; --row-alt:#E1D9D2;
+  --accent:#D9692B; --border-light:#E3E3E6;
+  --a1:#E39A6A; --a3:#8A3E12; --glaze-top:#FFFFFF; --glaze-bot:#F1F1F2; --row-alt:#F7F7F8;
   --rim-shade:rgba(217,105,43,.16); --ring:rgba(217,105,43,.3);
   --bg-glow:rgba(230,160,110,.4); --bg-glow2:rgba(190,180,170,.45);
 }
@@ -402,10 +402,10 @@ body.pink .glass-bead {
               0 0 0 2px var(--gold-2), 0 0 0 3px var(--gold), 0 6px 10px var(--s-dark);
 }
 body.gray-light {
-  --bg:#C5D0DC; --bg-card:#DDE5EE; --s-light:#EEF3F8; --s-dark:#92A1B4;
+  --bg:#C5D0DC; --bg-card:#FFFFFF; --s-light:#EEF3F8; --s-dark:#92A1B4;
   --t-main:#152233; --t-muted:#4B5F77; --up:#D9465B; --down:#2D8A70;
-  --accent:#32506F; --border-light:#A9B8C9;
-  --a1:#7C9CC0; --a3:#1A2F49; --glaze-top:#F2F6FA; --glaze-bot:#C9D5E2; --row-alt:#D3DDE8;
+  --accent:#32506F; --border-light:#E3E3E6;
+  --a1:#7C9CC0; --a3:#1A2F49; --glaze-top:#FFFFFF; --glaze-bot:#F1F1F2; --row-alt:#F7F7F8;
   --rim-shade:rgba(50,80,111,.18); --ring:rgba(50,80,111,.3);
   --bg-glow:rgba(205,220,238,.7); --bg-glow2:rgba(150,175,205,.4);
 }
@@ -636,8 +636,9 @@ body.tech .ticker-item, body.tech .ticker-source { color: #fff !important; }
 
 
 
-/* ☀️ 淺色主題：汝窯底層上的頁籤文字改黑色，確保對比 */
-body:not(.tech):not(.blue-light):not(.purple-light):not(.pink):not(.gray-light) .tab-btn:not(.active) { color: #000; }
+/* 頁籤文字：淺色主題全部黑色、暗色主題全部白色 */
+.tab-btn, .tab-btn:hover, .tab-btn.active { color: #000 !important; }
+body.tech .tab-btn, body.tech .tab-btn:hover, body.tech .tab-btn.active { color: #fff !important; }
 </style>
 <link rel="manifest" href="manifest.json">
 </head>
