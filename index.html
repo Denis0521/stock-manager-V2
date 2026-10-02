@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.61-pr'; 
+const APP_VER = 'V7.62-pr'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -388,16 +388,16 @@ body.purple-light {
   --bg-glow:rgba(170,140,240,.42); --bg-glow2:rgba(210,170,240,.32);
 }
 body.pink {
-  /* 灰橘底層：灰橘配白色卡片 */
-  --bg:#D4A581; --bg-card:#FFFFFF; --s-light:#EDCFB4; --s-dark:#8F6848;
+  /* 淺橘底層：淺橘配白色卡片 */
+  --bg:#F9CFA8; --bg-card:#FFFFFF; --s-light:#FFE6CF; --s-dark:#C98F5C;
   --t-main:#2B2420; --t-muted:#6B5E55; --up:#D9465B; --down:#2D8A70;
   --accent:#D9692B; --border-light:#E3E3E6;
   --a1:#E39A6A; --a3:#8A3E12; --glaze-top:#FFFFFF; --glaze-bot:#F1F1F2; --row-alt:#F7F7F8;
   --rim-shade:rgba(217,105,43,.16); --ring:rgba(217,105,43,.3);
-  --bg-glow:rgba(240,205,175,.55); --bg-glow2:rgba(140,100,70,.38);
+  --bg-glow:rgba(255,225,195,.6); --bg-glow2:rgba(240,150,70,.32);
 }
-/* 橘灰漸層底色：上方橘、下方灰 */
-body.pink { --bg-grad: linear-gradient(180deg, rgba(240,140,60,.55) 0%, rgba(228,160,100,.28) 35%, rgba(150,140,132,.18) 62%, rgba(105,100,96,.55) 100%); }
+/* 淺橘漸層底色 */
+body.pink { --bg-grad: linear-gradient(180deg, rgba(255,170,90,.40) 0%, rgba(255,200,150,.22) 40%, rgba(255,235,215,.10) 70%, rgba(245,160,90,.30) 100%); }
 /* 橘灰主題：珠光高光 */
 body.pink .glass-bead {
   background: radial-gradient(circle at 32% 24%, #fff 0 7%, #FFE0CC 8%, var(--a1) 36%, var(--accent) 64%, var(--a3) 100%);
@@ -1015,7 +1015,7 @@ function applyThemeText(t){
     'tech': { emoji: '🚀', color: '#07101F' },
     'blue-light': { emoji: '💎', color: '#B9D0F0' },
     'purple-light': { emoji: '🍇', color: '#E5DEF2' },
-    'pink': { emoji: '🍂', color: '#D4A581' },
+    'pink': { emoji: '🍂', color: '#F9CFA8' },
     'gray-light': { emoji: '📓', color: '#C5D0DC' },
     'light': { emoji: '☀️', color: '#9CC2BE' }
   };
