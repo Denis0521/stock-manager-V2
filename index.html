@@ -7,11 +7,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="股票庫存管理">
-<meta name="theme-color" id="themeColorMeta" content="#FFF8F2">
+<meta name="theme-color" id="themeColorMeta" content="#F3EDFC">
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.53-wb'; 
+const APP_VER = 'V7.53-pl'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -342,15 +342,15 @@ body.tech #modalOverlay .modal button, body.tech #modalOverlay .modal .btn-link,
    🏺 青花瓷主題層（只改外觀：配色、光澤、圓角、字形；不改字級與版面）
    ========================================================= */
 :root {
-  /* ☀️ 多彩繽紛主題（橙・粉・紫・藍・青 柔和漸層） */
-  --bg:#FFF8F2; --bg-card:#FFFDFC; --s-light:#FFFFFF; --s-dark:#D9CBE6;
-  --t-main:#241B45; --t-muted:#6B5F8F; --up:#E0264A; --down:#0E9F78;
-  --accent:#7B4DFF; --border-light:#E6DCF3;
-  --a1:#FF8A3D; --a3:#4B3BD6; --glaze-top:#FFFFFF; --glaze-bot:#F1E9FA; --row-alt:#FAF5FF;
-  --hl:rgba(255,255,255,.95); --rim-shade:rgba(123,77,255,.13); --ring:rgba(123,77,255,.30);
-  --bg-glow:rgba(255,140,70,.34); --bg-glow2:rgba(60,190,230,.30);
-  --bead-hi:#FFD6EC;
-  --bg-grad:linear-gradient(160deg, rgba(255,140,60,.42) 0%, rgba(255,95,150,.34) 22%, rgba(160,100,255,.32) 46%, rgba(70,130,255,.32) 70%, rgba(40,200,200,.34) 100%);
+  /* ☀️ 淺紫 × 深橘 × 多彩 組合 */
+  --bg:#F3EDFC; --bg-card:#FCFAFF; --s-light:#FFFFFF; --s-dark:#CFC1E6;
+  --t-main:#2A1B4D; --t-muted:#715F9A; --up:#E0264A; --down:#0E9F78;
+  --accent:#E8590C; --border-light:#DDD0F2;
+  --a1:#F26A1B; --a3:#7B4DD8; --glaze-top:#FFFFFF; --glaze-bot:#E9DEF9; --row-alt:#F8F3FE;
+  --hl:rgba(255,255,255,.95); --rim-shade:rgba(123,77,216,.14); --ring:rgba(232,89,12,.32);
+  --bg-glow:rgba(232,89,12,.34); --bg-glow2:rgba(150,100,235,.34);
+  --bead-hi:#FFC9A3;
+  --bg-grad:linear-gradient(160deg, rgba(232,89,12,.38) 0%, rgba(255,110,150,.28) 20%, rgba(180,130,245,.34) 44%, rgba(110,150,255,.28) 68%, rgba(70,200,190,.28) 100%);
   --gold:#C9A24A; --gold-2:#F3DC94; --gold-line:rgba(201,162,74,.55);
   --f-body:"Chiron GoRound TC","PingFang TC","Noto Sans TC","Microsoft JhengHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   --f-head:"Noto Serif TC","Songti TC","Source Han Serif TC","STSong","PMingLiU",serif;
@@ -1001,7 +1001,7 @@ function applyThemeText(t){
     'purple-light': { emoji: '🍇', color: '#E5DEF2' },
     'pink': { emoji: '🍂', color: '#D9D0C9' },
     'gray-light': { emoji: '📓', color: '#C5D0DC' },
-    'light': { emoji: '☀️', color: '#FFF8F2' }
+    'light': { emoji: '☀️', color: '#F3EDFC' }
   };
   if(!themes[t]) t = 'light';
   const theme = themes[t];
