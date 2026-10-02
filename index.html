@@ -8,10 +8,11 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="股票庫存管理">
 <meta name="theme-color" id="themeColorMeta" content="#9CC2BE">
+<style>:root{--status-bg:#9CC2BE;}</style>
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.55-ru'; 
+const APP_VER = 'V7.58-pr'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -387,13 +388,13 @@ body.purple-light {
   --bg-glow:rgba(170,140,240,.42); --bg-glow2:rgba(210,170,240,.32);
 }
 body.pink {
-  /* 橘灰：暖灰底色配沉穩的燒橘，低飽和而耐看 */
-  --bg:#D9D0C9; --bg-card:#FFFFFF; --s-light:#F6F2EE; --s-dark:#A69A91;
+  /* 淺橘紅底層：橘紅配白色卡片 */
+  --bg:#F58468; --bg-card:#FFFFFF; --s-light:#FFAA94; --s-dark:#B8442E;
   --t-main:#2B2420; --t-muted:#6B5E55; --up:#D9465B; --down:#2D8A70;
   --accent:#D9692B; --border-light:#E3E3E6;
   --a1:#E39A6A; --a3:#8A3E12; --glaze-top:#FFFFFF; --glaze-bot:#F1F1F2; --row-alt:#F7F7F8;
   --rim-shade:rgba(217,105,43,.16); --ring:rgba(217,105,43,.3);
-  --bg-glow:rgba(230,160,110,.4); --bg-glow2:rgba(190,180,170,.45);
+  --bg-glow:rgba(255,190,170,.5); --bg-glow2:rgba(210,80,50,.40);
 }
 /* 橘灰主題：珠光高光 */
 body.pink .glass-bead {
@@ -639,6 +640,11 @@ body.tech .ticker-item, body.tech .ticker-source { color: #fff !important; }
 /* 頁籤文字：淺色主題全部黑色、暗色主題全部白色 */
 .tab-btn, .tab-btn:hover, .tab-btn.active { color: #000 !important; }
 body.tech .tab-btn, body.tech .tab-btn:hover, body.tech .tab-btn.active { color: #fff !important; }
+/* 第一塊（標題列）與第三塊（持股表）：四角都做成弧形 */
+.header { border-radius: 26px !important; box-shadow: 9px 13px 24px -4px var(--s-dark), inset 0 2px 1px var(--hl), inset 0 -4px 8px var(--rim-shade) !important; border-top-color: transparent !important; border-left-color: transparent !important; border-right-color: transparent !important; }
+.table-scroll { border-radius: 18px !important; }
+/* 標題列上方兩個圓角後面的底色，與狀態列顏色一致 */
+body::before { content:""; position: fixed; top: 0; left: 0; right: 0; height: calc(env(safe-area-inset-top, 0px) + 30px); background: var(--status-bg, var(--bg)); z-index: 99; pointer-events: none; }
 </style>
 <link rel="manifest" href="manifest.json">
 </head>
@@ -1003,7 +1009,7 @@ function applyThemeText(t){
     'tech': { emoji: '🚀', color: '#07101F' },
     'blue-light': { emoji: '💎', color: '#B9D0F0' },
     'purple-light': { emoji: '🍇', color: '#E5DEF2' },
-    'pink': { emoji: '🍂', color: '#D9D0C9' },
+    'pink': { emoji: '🍂', color: '#F58468' },
     'gray-light': { emoji: '📓', color: '#C5D0DC' },
     'light': { emoji: '☀️', color: '#9CC2BE' }
   };
@@ -1012,6 +1018,7 @@ function applyThemeText(t){
   if(t !== 'light') body.classList.add(t);
   $('themeBtn').textContent = theme.emoji;
   $('themeColorMeta').content = theme.color;
+  document.documentElement.style.setProperty('--status-bg', theme.color);
   applyHistColsState();
 }
 
