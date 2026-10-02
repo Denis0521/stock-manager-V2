@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.53-pl'; 
+const APP_VER = 'V7.54-pl'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -730,7 +730,7 @@ body.tech .ticker-item, body.tech .ticker-source { color: #fff !important; }
     <button type="button" class="btn-close-icon" onclick="closeModalById('historyModalOverlay')">✕</button>
     <h2>近10交易日損益記錄</h2>
     <div style="text-align:center; color:var(--t-muted); font-size:16px; margin-top:-10px; margin-bottom:16px;">（交易日13:40自動儲存）</div>
-    <div id="historyBody" style="max-height: 50vh; overflow-y: auto; margin-bottom: 16px;">
+    <div id="historyBody" style="position:relative; overflow-y: auto; margin-bottom: 16px;">
       <div class="hist-empty">尚無記錄</div>
     </div>
     <button type="button" class="modal-close danger-btn" onclick="clearAllHistory()" style="width:100%; background:var(--up); color:#fff; text-shadow:none; margin:0;">🗑️ 清空全部記錄</button>
@@ -1701,7 +1701,16 @@ async function checkAutoSave() {
   } catch (e) {} finally { autoSaving = false; }
 }
 
-function openHistoryModal() { renderHistory(); $('historyModalOverlay').classList.add('show'); }
+function fitHistoryBody(){
+  const hb = $('historyBody'); if(!hb) return;
+  const items = hb.querySelectorAll('.hist-item');
+  hb.style.maxHeight = 'none';
+  if(items.length <= 10) return;
+  const it = items[9];
+  const h = it.offsetTop + it.offsetHeight + 4;
+  if(h > 20) hb.style.maxHeight = h + 'px';
+}
+function openHistoryModal() { renderHistory(); $('historyModalOverlay').classList.add('show'); requestAnimationFrame(fitHistoryBody); }
 
 function clearAllHistory() {
   if(!confirm('確定要清空目前分頁的所有歷史記錄嗎？')) return;
@@ -1725,6 +1734,7 @@ function renderHistory(){
       <div class="hist-item-left"><span class="hdate">${r.date} ${r.time}</span><span class="hval ${getColorCls(r.totalPnl)}">${getSign(r.totalPnl)}${r.totalPnl.toLocaleString()}</span></div>
       <button type="button" class="btn-glass-circle del" onclick="deleteHistory(${r.timestamp})">✕</button>
     </div>`).join('');
+  requestAnimationFrame(fitHistoryBody);
 }
 
 function openModal(){
