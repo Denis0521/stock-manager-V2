@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.64-pr'; 
+const APP_VER = 'V7.65-pr'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -651,6 +651,9 @@ body::before { content:""; position: fixed; top: 0; left: 0; right: 0; height: c
 /* 新聞跑馬燈：漂浮文字效果（上方高光＋下方柔和投影） */
 .ticker-item, .ticker-source { color: #1d1f23 !important; font-weight: 500 !important; letter-spacing: .3px; text-shadow: 0 -1px 0 rgba(255,255,255,.85), 0 2px 2px rgba(0,0,0,.28), 0 6px 10px rgba(0,0,0,.20) !important; }
 body.tech .ticker-item, body.tech .ticker-source { color: #fff !important; text-shadow: 0 -1px 0 rgba(255,255,255,.25), 0 2px 2px rgba(0,0,0,.7), 0 6px 12px rgba(0,0,0,.55) !important; }
+/* 進階與所有彈出視窗：使用主題底色的淺色調作為底色 */
+.modal { background: linear-gradient(160deg, color-mix(in srgb, var(--bg) 12%, #fff) 0%, color-mix(in srgb, var(--bg) 24%, #fff) 52%, color-mix(in srgb, var(--bg) 36%, #fff) 100%) !important; }
+body.tech .modal { background: linear-gradient(160deg, color-mix(in srgb, var(--bg) 80%, #fff) 0%, color-mix(in srgb, var(--bg) 86%, #fff) 52%, color-mix(in srgb, var(--bg) 92%, #fff) 100%) !important; }
 </style>
 <link rel="manifest" href="manifest.json">
 </head>
