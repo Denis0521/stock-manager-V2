@@ -7,12 +7,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="股票庫存管理">
-<meta name="theme-color" id="themeColorMeta" content="#9CC2BE">
-<style>:root{--status-bg:#9CC2BE;}</style>
+<meta name="theme-color" id="themeColorMeta" content="#D3D9E0">
+<style>:root{--status-bg:#D3D9E0;}</style>
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.66-pr'; 
+const APP_VER = 'V7.68-pr'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -422,6 +422,17 @@ body {
   --shadow-strong: 9px 13px 24px -4px var(--s-dark), -6px -6px 14px var(--s-light), inset 0 2px 1px var(--hl), inset 0 -4px 8px var(--rim-shade);
   --shadow-inset: inset 4px 5px 9px var(--s-dark), inset -4px -4px 8px var(--s-light);
 }
+body.ember {
+  /* 🔥 暗紅橘多層次底色（其餘板塊設定與淺色主題相同） */
+  --bg:#1A0709; --bg-card:#FFFFFF; --s-light:#4E1A1A; --s-dark:#070203;
+  --t-main:#2B2420; --t-muted:#6B5E55; --up:#D9465B; --down:#2D8A70;
+  --accent:#D9532B; --border-light:#E3E3E6;
+  --a1:#E8845A; --a3:#8A2A12; --glaze-top:#FFFFFF; --glaze-bot:#F1F1F2; --row-alt:#F7F7F8;
+  --rim-shade:rgba(217,83,43,.16); --ring:rgba(217,83,43,.3);
+  --bg-glow:rgba(255,90,40,.30); --bg-glow2:rgba(180,30,40,.34);
+  --bead-hi:#FFD2AE;
+  --bg-grad:radial-gradient(90% 40% at 85% 22%, rgba(255,140,50,.22), transparent 70%), radial-gradient(80% 45% at 10% 60%, rgba(200,40,40,.24), transparent 70%), linear-gradient(180deg, rgba(255,100,40,.26) 0%, rgba(160,25,30,.20) 38%, rgba(70,10,18,.28) 72%, rgba(0,0,0,.42) 100%);
+}
 body.tech {
   --shadow-soft: 5px 7px 14px -2px var(--s-dark), -3px -3px 10px rgba(61,139,255,.10), inset 0 1.5px 1px var(--hl), inset 0 -3px 5px var(--rim-shade), 0 0 14px rgba(61,139,255,.22);
   --shadow-strong: 9px 13px 24px -4px var(--s-dark), -4px -4px 14px rgba(61,139,255,.12), inset 0 2px 1px var(--hl), inset 0 -4px 8px var(--rim-shade), 0 0 26px rgba(61,139,255,.40);
@@ -654,6 +665,7 @@ body.tech .ticker-item, body.tech .ticker-source { color: #fff !important; text-
 /* 進階與所有彈出視窗：使用主題底色的淺色調作為底色 */
 .modal { background: linear-gradient(160deg, color-mix(in srgb, var(--bg) 12%, #fff) 0%, color-mix(in srgb, var(--bg) 24%, #fff) 52%, color-mix(in srgb, var(--bg) 36%, #fff) 100%) !important; }
 body.tech .modal { background: linear-gradient(160deg, color-mix(in srgb, var(--bg) 80%, #fff) 0%, color-mix(in srgb, var(--bg) 86%, #fff) 52%, color-mix(in srgb, var(--bg) 92%, #fff) 100%) !important; }
+
 </style>
 <link rel="manifest" href="manifest.json">
 </head>
@@ -1020,7 +1032,8 @@ function applyThemeText(t){
     'purple-light': { emoji: '🔮', color: '#E5DEF2' },
     'pink': { emoji: '🪵', color: '#E6D2B0' },
     'gray-light': { emoji: '🌫️', color: '#C5D0DC' },
-    'light': { emoji: '🏺', color: '#9CC2BE' }
+    'ember': { emoji: '🔥', color: '#1A0709' },
+    'light': { emoji: '🏺', color: '#D3D9E0' }
   };
   if(!themes[t]) t = 'light';
   const theme = themes[t];
@@ -1032,7 +1045,7 @@ function applyThemeText(t){
 }
 
 function toggleTheme(){
-  const modes = ['light', 'tech', 'blue-light', 'purple-light', 'pink', 'gray-light'];
+  const modes = ['light', 'tech', 'ember', 'blue-light', 'purple-light', 'pink', 'gray-light'];
   let current = modes.find(m => document.body.classList.contains(m)) || 'light';
   let next = modes[(modes.indexOf(current) + 1) % modes.length];
   applyThemeText(next); LS.set(LS.KEYS.THEME, next);
