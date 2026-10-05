@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.71-pr'; 
+const APP_VER = 'V7.72-pr'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -664,6 +664,11 @@ body.tech .modal { background: linear-gradient(160deg, color-mix(in srgb, var(--
 .key-led.bad { background: radial-gradient(circle at 35% 30%, #ffc2c2, #f03a3a 55%, #b01616); box-shadow: 0 0 8px 2px rgba(240,58,58,.75), inset 0 -1px 2px rgba(0,0,0,.3); }
 .key-led.checking { background: radial-gradient(circle at 35% 30%, #fff1b8, #f5b422 55%, #b9810a); animation: ledBlink .8s ease-in-out infinite; }
 @keyframes ledBlink { 0%,100% { opacity: 1; box-shadow: 0 0 8px 2px rgba(245,180,34,.7); } 50% { opacity: .35; box-shadow: none; } }
+/* ===== 長按代號拖曳排序 ===== */
+.sym-container { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+#listBody .srow.dragging { position: relative; z-index: 5; box-shadow: 0 6px 18px rgba(0,0,0,.28); outline: 2px solid var(--accent); outline-offset: -2px; transform: scale(1.01); transition: box-shadow .15s, transform .15s; }
+#listBody .srow.dragging, #listBody .srow.dragging > div:nth-child(1) { background: var(--bg-card) !important; }
+body.row-sorting, body.row-sorting * { -webkit-user-select: none; user-select: none; cursor: grabbing !important; }
 </style>
 <link rel="manifest" href="manifest.json">
 </head>
@@ -1941,6 +1946,101 @@ async function loadFinanceNews() {
     c.style.animationDuration = `${c.textContent.length * 0.18}s`;
   } catch(e) { c.innerHTML = '<span class="ticker-item" style="color:var(--t-muted);">無法載入即時新聞，請稍後再試</span>'; }
 }
+
+/* ========================================================= ↕ 長按代號拖曳排序 ========================================================= */
+(function initRowDrag() {
+  const body = $('listBody');
+  const HOLD_MS = 350, MOVE_TOL = 8, EDGE = 80;
+  let st = null;
+
+  const getScroller = () => {
+    for (let el = body.parentElement; el && el !== document.body; el = el.parentElement) {
+      const oy = getComputedStyle(el).overflowY;
+      if ((oy === 'auto' || oy === 'scroll') && el.scrollHeight > el.clientHeight) return el;
+    }
+    return null;
+  };
+
+  const cleanup = () => {
+    if (!st) return;
+    clearTimeout(st.timer); cancelAnimationFrame(st.raf);
+    st.row.classList.remove('dragging');
+    document.body.classList.remove('row-sorting');
+    st = null;
+  };
+
+  const reorderTo = y => {
+    const row = st.row;
+    for (const r of body.children) {
+      if (r === row) continue;
+      const b = r.getBoundingClientRect();
+      if (y < b.top + b.height / 2) { if (row.nextElementSibling !== r) body.insertBefore(row, r); return; }
+    }
+    if (body.lastElementChild !== row) body.appendChild(row);
+  };
+
+  const tick = () => {
+    if (!st || !st.active) return;
+    const vh = window.innerHeight;
+    let dy = 0;
+    if (st.y < EDGE) dy = -Math.ceil((EDGE - st.y) / 6);
+    else if (st.y > vh - EDGE) dy = Math.ceil((st.y - (vh - EDGE)) / 6);
+    if (dy) { (st.scroller || window).scrollBy(0, dy); reorderTo(st.y); }
+    st.raf = requestAnimationFrame(tick);
+  };
+
+  const commit = () => {
+    if (!st.row.isConnected || currentTab !== st.tab) return;
+    const list = tabStocks[st.tab];
+    const map = new Map(list.map(s => [String(s.id), s]));
+    const next = [...body.children].map(r => map.get(r.dataset.id)).filter(Boolean);
+    if (next.length !== list.length) { renderAll(); return; }
+    if (next.every((s, i) => s === list[i])) return;
+    list.splice(0, list.length, ...next);
+    LS.set(LS.KEYS.STOCK(st.tab), list);
+    showToast('已調整順序');
+  };
+
+  body.addEventListener('pointerdown', e => {
+    if (st || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    const handle = e.target.closest('.sym-container');
+    const row = handle && handle.closest('.srow');
+    if (!row) return;
+    st = { row, id: e.pointerId, x: e.clientX, y: e.clientY, active: false, tab: currentTab, scroller: null, raf: 0 };
+    st.timer = setTimeout(() => {
+      if (!st) return;
+      st.active = true; st.scroller = getScroller();
+      row.classList.add('dragging'); document.body.classList.add('row-sorting');
+      if (navigator.vibrate) { try { navigator.vibrate(15); } catch (_) {} }
+      st.raf = requestAnimationFrame(tick);
+    }, HOLD_MS);
+  });
+
+  document.addEventListener('pointermove', e => {
+    if (!st || e.pointerId !== st.id) return;
+    if (!st.active) {
+      if (Math.hypot(e.clientX - st.x, e.clientY - st.y) > MOVE_TOL) cleanup(); // 想捲動就取消長按
+      return;
+    }
+    st.y = e.clientY; reorderTo(st.y);
+  });
+
+  document.addEventListener('pointerup', e => {
+    if (!st || e.pointerId !== st.id) return;
+    if (st.active) commit();
+    cleanup();
+  });
+
+  document.addEventListener('pointercancel', e => {
+    if (!st || e.pointerId !== st.id) return;
+    const was = st.active; cleanup();
+    if (was) renderAll(); // 被系統中斷：還原顯示
+  });
+
+  // 拖曳中禁止頁面捲動；長按時不要跳出選單
+  document.addEventListener('touchmove', e => { if (st && st.active && e.cancelable) e.preventDefault(); }, { passive: false });
+  body.addEventListener('contextmenu', e => { if (e.target.closest('.sym-container')) e.preventDefault(); });
+})();
 
 /* ========================================================= 🚀 啟動與休眠優化 ========================================================= */
 loadState(); renderAll();
