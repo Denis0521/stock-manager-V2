@@ -2,6 +2,23 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
+<script>
+// LINE 內建瀏覽器 → 改用外部瀏覽器（Android 優先 Chrome）
+(function () {
+  var ua = navigator.userAgent;
+  if (!/Line\//i.test(ua)) return;
+  var u = new URL(location.href);
+  var fb = new URL(u.href);
+  fb.searchParams.set('openExternalBrowser', '1');
+  if (/Android/i.test(ua)) {
+    location.replace('intent://' + u.host + u.pathname + u.search +
+      '#Intent;scheme=https;package=com.android.chrome;' +
+      'S.browser_fallback_url=' + encodeURIComponent(fb.toString()) + ';end');
+  } else if (!u.searchParams.has('openExternalBrowser')) {
+    location.replace(fb.toString());
+  }
+})();
+</script>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>股票庫存管理</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,7 +29,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.72-pr'; 
+const APP_VER = 'V7.73-pr'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -673,6 +690,14 @@ body.row-sorting, body.row-sorting * { -webkit-user-select: none; user-select: n
 <link rel="manifest" href="manifest.json">
 </head>
 <body>
+<div id="installBanner" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:99999;padding:12px 14px;background:#fff;color:#333;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 -2px 10px rgba(0,0,0,.2);font-size:15px">
+  <span id="installText">安裝「股票庫存」到主畫面，使用更方便</span>
+  <span style="display:flex;gap:8px;flex-shrink:0">
+    <button id="installBtn" style="padding:8px 14px;border:0;border-radius:6px;background:#d32f2f;color:#fff;font-weight:bold">安裝</button>
+    <button id="installClose" style="padding:8px 10px;border:0;border-radius:6px;background:transparent;color:#666">✕</button>
+  </span>
+</div>
+
 
 <div class="header">
   <div class="header-top">
@@ -2072,6 +2097,37 @@ kd('symInput', 'qtyInput'); kd('qtyInput', 'buyPriceInput'); kd('buyPriceInput',
 });
 
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=' + APP_VER).catch(()=>{}));
+// ==================== PWA 安裝提示 ====================
+(function () {
+  const banner = document.getElementById('installBanner');
+  if (!banner) return;
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  if (isStandalone) return; // 已安裝/以 App 開啟，不顯示
+  let deferredPrompt = null;
+  const hide = () => { banner.style.display = 'none'; };
+  const show = () => { banner.style.display = 'flex'; };
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    show();
+  });
+  document.getElementById('installBtn').addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    hide();
+  });
+  document.getElementById('installClose').addEventListener('click', hide);
+  window.addEventListener('appinstalled', hide);
+  // iOS Safari 沒有安裝事件，顯示手動說明
+  if (/iPhone|iPad|iPod/i.test(navigator.userAgent) && !/Line\//i.test(navigator.userAgent)) {
+    document.getElementById('installText').textContent = '點下方「分享」→「加入主畫面」即可安裝';
+    document.getElementById('installBtn').style.display = 'none';
+    show();
+  }
+})();
+
 console.log(`股票庫存管理 ${APP_VER} 已啟動`);
 </script>
 </body>
