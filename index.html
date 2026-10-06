@@ -29,7 +29,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.74-chart'; 
+const APP_VER = 'V7.75-chart'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -2107,7 +2107,6 @@ async function openChartModal(s) {
   body.innerHTML = '';
   $('chartModalOverlay').classList.add('show');
   if (!(history.state && history.state.chart)) history.pushState({ chart: 1 }, '');
-  if (!navigator.onLine) { body.innerHTML = '<div class="chart-msg">目前離線，無法載入 K 線圖</div>'; return; }
   body.innerHTML = '<div class="chart-msg">圖表載入中…</div>';
   const tvSym = await resolveTvSymbol(s.symbol);
   if (seq !== chartOpenSeq || !$('chartModalOverlay').classList.contains('show')) return; // 等待期間已關閉
@@ -2134,7 +2133,8 @@ async function openChartModal(s) {
   // 圖表出現後移除載入訊息
   let tries = 0;
   const iv = setInterval(() => {
-    if (seq !== chartOpenSeq || ++tries > 40) return clearInterval(iv);
+    if (seq !== chartOpenSeq) return clearInterval(iv);
+    if (++tries > 48 && !body.querySelector('iframe')) { clearInterval(iv); body.innerHTML = '<div class="chart-msg">圖表載入逾時，請檢查網路後再試</div>'; return; }
     const m = body.querySelector('.chart-msg');
     if (body.querySelector('iframe')) { if (m) m.remove(); clearInterval(iv); }
   }, 250);
