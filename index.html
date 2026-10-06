@@ -29,7 +29,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.77-chartF'; 
+const APP_VER = 'V7.78-chartF'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -314,17 +314,26 @@ body.show-hist .hist-col { display: flex !important; }
 .chart-title { min-width: 0; font-weight: 800; font-size: 18px; color: var(--t-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .chart-title small { font-weight: normal; font-size: 13px; color: var(--t-muted); margin-left: 8px; }
 #chartModalOverlay .btn-close-icon { position: static; flex: 0 0 auto; }
-.chart-tools { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 12px 6px 16px; border-bottom: 1px solid var(--border-light); }
-.chart-tfs { display: flex; gap: 6px; }
-.chart-tfs button, .chart-sw { height: 30px; padding: 0 12px; font-size: 13px; font-weight: 700; border-radius: 15px; border: 1px solid var(--border-light); background: var(--bg-card); color: var(--t-main); cursor: pointer; }
+.chart-tools { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; padding: 0 12px 6px 16px; border-bottom: 1px solid var(--border-light); }
+.chart-tfs { display: flex; gap: 8px; }
+.chart-tfs button { min-width: 52px; height: 32px; padding: 0 14px; font-size: 14px; font-weight: 700; line-height: 1; white-space: nowrap; border-radius: 16px; border: 1px solid var(--border-light); background: var(--bg-card); color: var(--t-main); cursor: pointer; }
 .chart-tfs button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
-.chart-sw { font-size: 12px; font-weight: 600; color: var(--t-muted); }
 .chart-info { flex: 0 0 auto; min-height: 34px; padding: 6px 16px 0; font-size: 12px; line-height: 1.5; color: var(--t-muted); }
 .chart-info b { font-weight: 700; }
-.chart-body { flex: 1 1 auto; position: relative; min-height: 0; }
+.chart-body { flex: 0 0 44%; position: relative; min-height: 0; }
 .chart-body canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
 .chart-body .tradingview-widget-container, .chart-body .tradingview-widget-container__widget { width: 100%; height: 100%; }
 .chart-msg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; color: var(--t-muted); font-size: 15px; pointer-events: none; }
+.chart-panel { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 4px 16px calc(14px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border-light); font-size: 13px; color: var(--t-main); -webkit-overflow-scrolling: touch; }
+.cp-title { font-weight: 800; font-size: 13px; color: var(--accent); margin: 10px 0 4px; }
+.cp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 18px; }
+.cp-grid > div { display: flex; justify-content: space-between; gap: 8px; white-space: nowrap; }
+.cp-grid > div > span:first-child { color: var(--t-muted); }
+.cp-grid b { font-weight: 700; }
+.cp-book { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 18px; }
+.cp-book > div { display: flex; justify-content: space-between; }
+.chart-modal.tv .chart-body { flex: 1 1 auto; }
+.chart-modal.tv .chart-tools, .chart-modal.tv .chart-info, .chart-modal.tv .chart-panel { display: none; }
 .btn-close-icon:hover { color: var(--t-main); transform: scale(1.1); }
 .pwd-mask { -webkit-text-security: disc; text-security: disc; }
 
@@ -807,12 +816,10 @@ body.row-sorting, body.row-sorting * { -webkit-user-select: none; user-select: n
       <div class="chart-title" id="chartTitle"></div>
       <button type="button" class="btn-close-icon" onclick="closeChartModal()">✕</button>
     </div>
-    <div class="chart-tools">
-      <div class="chart-tfs" id="chartTfs"></div>
-      <button type="button" class="chart-sw" id="chartSwitchBtn" onclick="switchChartEngine()"></button>
-    </div>
+    <div class="chart-tools"><div class="chart-tfs" id="chartTfs"></div></div>
     <div class="chart-info" id="chartInfo"></div>
     <div class="chart-body" id="chartBody"></div>
+    <div class="chart-panel" id="chartPanel"></div>
   </div>
 </div>
 
@@ -889,7 +896,6 @@ body.row-sorting, body.row-sorting * { -webkit-user-select: none; user-select: n
         <button type="button" id="idxMarqueeToggleBtn" onclick="toggleIdxMarquee()" style="width: 100%; height: 40px; padding: 0; font-size: 15px; margin-bottom: 8px;">📊 指數列跑馬燈：</button>
         <button type="button" id="histToggleBtnAdvanced" onclick="toggleHistCols()" style="width: 100%; height: 40px; padding: 0; font-size: 15px; margin-bottom: 8px;">📊 漲跌幅 (歷史)：</button>
         <button type="button" id="flashToggleBtn" onclick="toggleFlash()" style="width: 100%; height: 40px; padding: 0; font-size: 15px; margin-bottom: 8px;">💡 報價閃爍提醒：</button>
-        <button type="button" id="chartSrcToggleBtn" onclick="toggleChartSrc()" style="width: 100%; height: 40px; padding: 0; font-size: 15px; margin-bottom: 8px;">📈 K線圖來源：</button>
         <a class="btn-link" href="https://developer.fugle.tw/docs/key/" target="_blank" style="display: flex; align-items: center; justify-content: center; width: 100%; height: 40px; margin-bottom: 8px; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; box-shadow: var(--shadow-soft); text-decoration: none; font-size: 15px; font-weight: 800;">🔗 申請 Fugle API Key</a>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
           <label style="margin:0; font-size:13px;">🔑 Fugle Key (主)</label>
@@ -1861,7 +1867,7 @@ function openModal(){
   $('tabCountSelect').value = tabCount;
   $('tickerToggleBtn').textContent = `📰 財經新聞列：${showTicker ? '已開啟' : '已關閉'}`;
   $('flashToggleBtn').textContent = `💡 報價閃爍提醒：${enableFlash ? '已開啟' : '已關閉'}`;
-  $('chartSrcToggleBtn').textContent = `📈 K線圖來源：${chartSrc === 'fugle' ? 'Fugle（自繪）' : 'TradingView'}`;
+  $('appVerBox').textContent = '版本：' + APP_VER;
   $('idxMarqueeToggleBtn').textContent = `📊 指數列跑馬燈：${idxMarquee ? '已開啟' : '已關閉'}`;
   applyHistColsState(); 
   ['fugleKey','secondFugleKey'].forEach((id, i) => {
@@ -2101,18 +2107,13 @@ async function loadFinanceNews() {
   body.addEventListener('contextmenu', e => { if (e.target.closest('.sym-container')) e.preventDefault(); });
 })();
 
-/* ========================================================= 📈 K 線圖彈窗（Fugle 自繪 / TradingView 嵌入） ========================================================= */
+/* ========================================================= 📈 K 線圖彈窗（Fugle 自繪；非台股代號改用 TradingView） ========================================================= */
 let lastRowDragAt = 0, chartOpenSeq = 0, chartTf = 'D', chartCur = null;
-let chartSrc = LS.getStr('tw_chart_src', 'fugle') === 'tv' ? 'tv' : 'fugle';
 const CHART_TFS = [['5', '5分'], ['D', '日'], ['W', '週'], ['M', '月']];
 const CHART_UP = '#E5484D', CHART_DN = '#1FA971';
 const FUGLE_STOCK = 'https://api.fugle.tw/marketdata/v1.0/stock/';
+$('appVerBox').textContent = '版本：' + APP_VER;
 
-function toggleChartSrc() {
-  chartSrc = chartSrc === 'fugle' ? 'tv' : 'fugle';
-  LS.set('tw_chart_src', chartSrc);
-  $('chartSrcToggleBtn').textContent = `📈 K線圖來源：${chartSrc === 'fugle' ? 'Fugle（自繪）' : 'TradingView'}`;
-}
 const twToday = () => new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
 function isTwTradingNow() {
   const t = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Taipei' }));
@@ -2160,21 +2161,25 @@ async function fugleIntradayRows(sym) {
   return (j.data || []).map(d => ({ t: d.date, o: d.open, h: d.high, l: d.low, c: d.close, v: d.volume || 0 }))
     .filter(validBar).sort((a, b) => a.t < b.t ? -1 : 1);
 }
-async function mergeLiveQuote(sym, rows) {
-  try {
-    const q = await fugleGet(`intraday/quote/${encodeURIComponent(sym)}`);
-    const today = twToday(), last = q.lastPrice ?? q.closePrice;
-    if (last == null || q.openPrice == null || (q.date && q.date !== today)) return;
-    const bar = { t: today, o: q.openPrice, h: q.highPrice ?? last, l: q.lowPrice ?? last, c: last, v: (q.total && q.total.tradeVolume || 0) * 1000 };
-    const prev = rows[rows.length - 1];
-    if (prev && prev.t === today) Object.assign(prev, bar);
-    else if (!prev || prev.t < today) rows.push(bar);
-  } catch (e) {}
+const fugleQuote = sym => fugleGet(`intraday/quote/${encodeURIComponent(sym)}`).catch(() => null);
+function mergeLiveQuote(rows, q) {
+  if (!q) return;
+  const today = twToday(), last = q.lastPrice ?? q.closePrice;
+  if (last == null || q.openPrice == null || (q.date && q.date !== today)) return;
+  const bar = { t: today, o: q.openPrice, h: q.highPrice ?? last, l: q.lowPrice ?? last, c: last, v: (q.total && q.total.tradeVolume || 0) * 1000 };
+  const prev = rows[rows.length - 1];
+  if (prev && prev.t === today) Object.assign(prev, bar);
+  else if (!prev || prev.t < today) rows.push(bar);
 }
 function calcMA(rows, n) {
   const out = []; let sum = 0;
   rows.forEach((r, i) => { sum += r.c; if (i >= n) sum -= rows[i - n].c; out.push(i >= n - 1 ? sum / n : null); });
   return out;
+}
+function calcYear(c) {
+  if (c.tf !== 'D' || !c.data.length) return;
+  const rows = c.data.slice(-245);
+  c.year = { hi: Math.max(...rows.map(r => r.h)), lo: Math.min(...rows.map(r => r.l)) };
 }
 
 async function loadFugleChart(c) {
@@ -2182,30 +2187,34 @@ async function loadFugleChart(c) {
   c.data = []; c.sel = null; c.off = 0; drawChart(); chartInfoUpdate();
   chartMsg('圖表載入中…');
   try {
-    const rows = c.tf === '5' ? await fugleIntradayRows(c.sym) : await fugleHistRows(c.sym, c.tf);
-    if (c.tf === 'D') await mergeLiveQuote(c.sym, rows);
+    const rowsP = c.tf === '5' ? fugleIntradayRows(c.sym) : fugleHistRows(c.sym, c.tf);
+    const [rows, q] = await Promise.all([rowsP, fugleQuote(c.sym)]);
+    if (q) c.quote = q;
+    if (c.tf === 'D') mergeLiveQuote(rows, c.quote);
     if (seq !== chartOpenSeq || chartCur !== c) return;
+    renderChartPanel();
     if (!rows.length) { chartMsg(c.tf === '5' ? '目前沒有當日分K資料（非交易時段或休市）' : '沒有取得K線資料'); return; }
     c.data = rows; c.vis = { '5': 54, D: 60, W: 52, M: 48 }[c.tf];
-    c.ma = [5, 20, 60].map(n => calcMA(rows, n));
-    chartMsg(''); drawChart(); chartInfoUpdate(); scheduleChartRefresh(c, seq);
+    c.ma = [5, 20, 60].map(n => calcMA(rows, n)); calcYear(c);
+    chartMsg(''); drawChart(); chartInfoUpdate(); renderChartPanel(); scheduleChartRefresh(c, seq);
   } catch (e) {
     if (seq !== chartOpenSeq || chartCur !== c) return;
-    chartMsg(e.message === 'nokey' ? '尚未設定 Fugle Key，請到「進階」設定，或改看 TradingView'
-      : '無法取得 Fugle K線資料（可能是方案權限或流量限制），可改看 TradingView');
+    chartMsg(e.message === 'nokey' ? '尚未設定 Fugle Key，請到「進階」輸入 Key'
+      : '無法取得 Fugle K線資料（可能是方案權限或流量限制）');
   }
 }
 function scheduleChartRefresh(c, seq) {
   clearTimeout(c.timer);
-  if (c.tf !== '5' && c.tf !== 'D') return;
   c.timer = setTimeout(async () => {
     if (seq !== chartOpenSeq || chartCur !== c) return;
     if (document.visibilityState === 'visible' && isTwTradingNow()) {
       try {
-        if (c.tf === '5') { const rows = await fugleIntradayRows(c.sym); if (rows.length) { c.data = rows; } }
-        else await mergeLiveQuote(c.sym, c.data);
+        const [q, rows] = await Promise.all([fugleQuote(c.sym), c.tf === '5' ? fugleIntradayRows(c.sym).catch(() => null) : null]);
         if (seq !== chartOpenSeq || chartCur !== c) return;
-        c.ma = [5, 20, 60].map(n => calcMA(c.data, n)); drawChart(); chartInfoUpdate();
+        if (q) c.quote = q;
+        if (rows && rows.length) c.data = rows; else if (c.tf === 'D') mergeLiveQuote(c.data, c.quote);
+        c.ma = [5, 20, 60].map(n => calcMA(c.data, n)); calcYear(c);
+        drawChart(); chartInfoUpdate(); renderChartPanel();
       } catch (e) {}
     }
     scheduleChartRefresh(c, seq);
@@ -2213,7 +2222,7 @@ function scheduleChartRefresh(c, seq) {
 }
 
 /* ---------- 繪圖 ---------- */
-const fmtP = v => (+v.toFixed(2)).toString();
+const fmtP = v => (+Number(v).toFixed(2)).toString();
 const fmtV = (c, v) => c.tf === '5' ? Math.round(v).toLocaleString() : Math.round(v / 1000).toLocaleString() + ' 張';
 function drawChart() {
   const cv = $('chartCanvas'); if (!cv || !chartCur) return;
@@ -2225,10 +2234,11 @@ function drawChart() {
   const cs = getComputedStyle(document.body);
   const cMuted = cs.getPropertyValue('--t-muted').trim() || '#888', cGrid = cs.getPropertyValue('--border-light').trim() || '#ddd', cMain = cs.getPropertyValue('--t-main').trim() || '#222';
   const padR = 52, padT = 8, padB = 20, gap = 8;
-  const volH = Math.round((H - padT - padB) * 0.2), priceH = H - padT - padB - volH - gap;
-  const vis = Math.min(c.vis, data.length), end = data.length - c.off, start = Math.max(0, end - vis);
+  const volH = Math.round((H - padT - padB) * 0.22), priceH = H - padT - padB - volH - gap;
+  const vis = Math.max(Math.min(c.vis, data.length), Math.min(30, c.vis)); // 資料太少時保留空位，K 棒不會變得又寬又大
+  const end = data.length - c.off, start = Math.max(0, end - vis);
   const slice = data.slice(start, end), n = slice.length;
-  const plotW = W - padR, step = plotW / vis, bw = Math.max(1, step * 0.68);
+  const plotW = W - padR, step = plotW / vis, bw = Math.max(1, Math.min(step * 0.68, 18));
   const xAt = i => plotW - (n - i - 0.5) * step;
   let hi = -Infinity, lo = Infinity, vmax = 0;
   slice.forEach(d => { hi = Math.max(hi, d.h); lo = Math.min(lo, d.l); vmax = Math.max(vmax, d.v); });
@@ -2236,18 +2246,15 @@ function drawChart() {
   const pd = (hi - lo) * 0.06 || hi * 0.01; hi += pd; lo -= pd;
   const yP = v => padT + (hi - v) / (hi - lo) * priceH, yV = v => padT + priceH + gap + volH - (vmax ? v / vmax * volH : 0);
   g.font = '11px sans-serif'; g.textBaseline = 'middle'; g.lineWidth = 1;
-  // 格線與價格軸
   for (let k = 0; k <= 4; k++) {
     const v = lo + (hi - lo) * k / 4, y = Math.round(yP(v)) + 0.5;
     g.strokeStyle = cGrid; g.beginPath(); g.moveTo(0, y); g.lineTo(plotW, y); g.stroke();
     g.fillStyle = cMuted; g.textAlign = 'left'; g.fillText(fmtP(v), plotW + 4, y);
   }
-  // 日期軸
   g.textBaseline = 'alphabetic'; g.textAlign = 'center'; g.fillStyle = cMuted;
   const lab = d => c.tf === '5' ? d.t.slice(11, 16) : c.tf === 'M' ? d.t.slice(0, 7) : d.t.slice(5);
   const every = Math.max(1, Math.round(n / 4));
   for (let i = 0; i < n; i += every) { const x = xAt(i); if (x > 18 && x < plotW - 18) g.fillText(lab(slice[i]), x, H - 5); }
-  // 成交量與 K 棒
   slice.forEach((d, i) => {
     const x = xAt(i), col = d.c > d.o ? CHART_UP : d.c < d.o ? CHART_DN : cMuted;
     g.fillStyle = col; g.strokeStyle = col;
@@ -2256,14 +2263,12 @@ function drawChart() {
     const top = yP(Math.max(d.o, d.c)), bh = Math.max(1, Math.abs(yP(d.o) - yP(d.c)));
     g.fillRect(x - bw / 2, top, bw, bh);
   });
-  // 均線
   ['#F59E0B', '#3B82F6', '#A855F7'].forEach((col, mi) => {
     g.strokeStyle = col; g.lineWidth = 1.2; g.beginPath(); let started = false;
     for (let i = start; i < end; i++) { const v = c.ma[mi][i]; if (v == null) continue; const x = xAt(i - start), y = yP(v); if (!started) { g.moveTo(x, y); started = true; } else g.lineTo(x, y); }
     g.stroke();
   });
   g.lineWidth = 1;
-  // 最新價標籤
   const lastBar = data[data.length - 1];
   if (c.off === 0) {
     const y = yP(lastBar.c), col = lastBar.c >= lastBar.o ? CHART_UP : CHART_DN;
@@ -2271,12 +2276,11 @@ function drawChart() {
     g.fillStyle = col; g.fillRect(plotW, y - 8, padR, 16);
     g.fillStyle = '#fff'; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(fmtP(lastBar.c), plotW + 4, y);
   }
-  // 十字線
   if (c.sel != null && c.sel >= start && c.sel < end) {
     const x = xAt(c.sel - start); g.strokeStyle = cMain; g.globalAlpha = 0.5; g.setLineDash([4, 3]);
     g.beginPath(); g.moveTo(Math.round(x) + 0.5, padT); g.lineTo(Math.round(x) + 0.5, padT + priceH + gap + volH); g.stroke(); g.setLineDash([]); g.globalAlpha = 1;
   }
-  c.L = { step, plotW, start, n };
+  c.L = { step, plotW, start, n, vis };
 }
 function chartInfoUpdate() {
   const el = $('chartInfo'), c = chartCur;
@@ -2288,13 +2292,67 @@ function chartInfoUpdate() {
   el.innerHTML = `${escapeHTML(d.t.replace('T', ' ').slice(0, 16))}　開 <b>${fmtP(d.o)}</b> 高 <b style="color:${CHART_UP}">${fmtP(d.h)}</b> 低 <b style="color:${CHART_DN}">${fmtP(d.l)}</b> 收 <b>${fmtP(d.c)}</b>${chgTxt}　量 ${fmtV(c, d.v)}<br>` +
     `<span style="color:#F59E0B">MA5 ${c.ma[0][i] != null ? fmtP(c.ma[0][i]) : '—'}</span>　<span style="color:#3B82F6">MA20 ${c.ma[1][i] != null ? fmtP(c.ma[1][i]) : '—'}</span>　<span style="color:#A855F7">MA60 ${c.ma[2][i] != null ? fmtP(c.ma[2][i]) : '—'}</span>`;
 }
+
+/* ---------- 下方資訊面板 ---------- */
+function renderChartPanel() {
+  const c = chartCur, el = $('chartPanel'); if (!c || c.engine !== 'fugle') { el.innerHTML = ''; return; }
+  const q = c.quote, s = c.stock, num = v => typeof v === 'number' && isFinite(v);
+  const clr = (v, ref) => !num(v) || !num(ref) ? '' : v > ref ? `style="color:${CHART_UP}"` : v < ref ? `style="color:${CHART_DN}"` : '';
+  const row = (k, v, extra = '') => `<div><span>${k}</span><b ${extra}>${v}</b></div>`;
+  const signed = v => (v > 0 ? '+' : '') + v.toLocaleString();
+  let html = '';
+  if (s) {
+    const info = calcStockInfo(s), has = info.hasCost, pc = v => v > 0 ? `style="color:${CHART_UP}"` : v < 0 ? `style="color:${CHART_DN}"` : '';
+    html += `<div class="cp-title">我的持股</div><div class="cp-grid">` +
+      row('持有', `${escapeHTML(String(s.displayQty))} ${escapeHTML(s.displayUnit || '')}`) +
+      row('均價', s.buyPrice > 0 ? fmtP(s.buyPrice) : '未設') +
+      row('市值', info.mktValue.toLocaleString()) +
+      row('成本', has ? Math.round(info.cost).toLocaleString() : '—') +
+      row('今日損益', signed(info.todayPnl), pc(info.todayPnl)) +
+      row('未實現損益', has ? signed(info.unPnl) : '—', has ? pc(info.unPnl) : '') +
+      row('報酬率', has ? `${info.roi > 0 ? '+' : ''}${info.roi.toFixed(2)}%` : '—', has ? pc(info.roi) : '') + `</div>`;
+  }
+  if (q) {
+    const t = q.total || {}, prev = q.previousClose ?? q.referencePrice;
+    const yi = v => num(v) ? (v >= 1e8 ? (v / 1e8).toFixed(2) + ' 億' : Math.round(v / 1e4).toLocaleString() + ' 萬') : '—';
+    const askV = t.tradeVolumeAtAsk, bidV = t.tradeVolumeAtBid;
+    html += `<div class="cp-title">今日行情${q.date ? `（${escapeHTML(String(q.date))}）` : ''}</div><div class="cp-grid">` +
+      row('昨收', num(prev) ? fmtP(prev) : '—') +
+      row('開盤', num(q.openPrice) ? fmtP(q.openPrice) : '—', clr(q.openPrice, prev)) +
+      row('最高', num(q.highPrice) ? fmtP(q.highPrice) : '—', clr(q.highPrice, prev)) +
+      row('最低', num(q.lowPrice) ? fmtP(q.lowPrice) : '—', clr(q.lowPrice, prev)) +
+      row('均價', num(q.avgPrice) ? fmtP(q.avgPrice) : '—', clr(q.avgPrice, prev)) +
+      row('振幅', num(q.amplitude) ? q.amplitude.toFixed(2) + '%' : '—') +
+      row('成交量', num(t.tradeVolume) ? Math.round(t.tradeVolume).toLocaleString() + ' 張' : '—') +
+      row('成交金額', yi(t.tradeValue)) +
+      row('成交筆數', num(t.transaction) ? t.transaction.toLocaleString() : '—') +
+      row('內盤/外盤', num(bidV) && num(askV) && bidV + askV > 0 ? `${(bidV / (bidV + askV) * 100).toFixed(0)}% / ${(askV / (bidV + askV) * 100).toFixed(0)}%` : '—') + `</div>`;
+    const bids = (q.bids || []).slice(0, 5), asks = (q.asks || []).slice(0, 5);
+    if (bids.length || asks.length) {
+      let book = '';
+      for (let i = 0; i < Math.max(bids.length, asks.length); i++) {
+        const b = bids[i], a = asks[i];
+        book += `<div><span ${clr(b && b.price, prev)}>${b ? fmtP(b.price) : '—'}</span><span>${b ? b.size : ''}</span></div>` +
+                `<div><span ${clr(a && a.price, prev)}>${a ? fmtP(a.price) : '—'}</span><span>${a ? a.size : ''}</span></div>`;
+      }
+      html += `<div class="cp-title">五檔報價（買 ／ 賣，單位：張）</div><div class="cp-book">${book}</div>`;
+    }
+  }
+  if (c.year) {
+    const last = c.data.length ? c.data[c.data.length - 1].c : null;
+    html += `<div class="cp-title">近一年區間</div><div class="cp-grid">` +
+      row('最高', fmtP(c.year.hi), `style="color:${CHART_UP}"`) + row('最低', fmtP(c.year.lo), `style="color:${CHART_DN}"`) +
+      (last != null ? row('距高點', ((last / c.year.hi - 1) * 100).toFixed(2) + '%') + row('距低點', '+' + ((last / c.year.lo - 1) * 100).toFixed(2) + '%') : '') + `</div>`;
+  }
+  el.innerHTML = html || '<div style="color:var(--t-muted); padding-top:12px;">暫無資料</div>';
+}
+
 function bindChartCanvas(cv) {
   const ptrs = new Map(); let st = null;
-  const reset = () => { st = null; };
   cv.addEventListener('pointerdown', e => {
     const c = chartCur; if (!c || !c.data.length) return;
     cv.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, e.clientX);
-    if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; st = { pinch: true, d0: Math.abs(a - b) || 1, vis0: c.vis }; }
+    if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; st = { pinch: true, d0: Math.abs(a - b) || 1, vis0: c.L ? c.L.vis : c.vis }; }
     else if (ptrs.size === 1) st = { x0: e.clientX, off0: c.off, moved: false };
   });
   cv.addEventListener('pointermove', e => {
@@ -2302,7 +2360,7 @@ function bindChartCanvas(cv) {
     ptrs.set(e.pointerId, e.clientX);
     if (st.pinch && ptrs.size === 2) {
       const [a, b] = [...ptrs.values()]; const d = Math.abs(a - b) || 1;
-      c.vis = Math.max(15, Math.min(Math.min(240, c.data.length), Math.round(st.vis0 * st.d0 / d))); c.sel = null;
+      c.vis = Math.max(15, Math.min(240, Math.round(st.vis0 * st.d0 / d))); c.sel = null;
       drawChart(); chartInfoUpdate();
     } else if (!st.pinch) {
       const dx = e.clientX - st.x0; if (Math.abs(dx) > 6) st.moved = true;
@@ -2318,14 +2376,14 @@ function bindChartCanvas(cv) {
       k = Math.max(0, Math.min(L.n - 1, k)); const idx = L.start + k;
       c.sel = c.sel === idx ? null : idx; drawChart(); chartInfoUpdate();
     }
-    if (ptrs.size === 0) reset();
+    if (ptrs.size === 0) st = null;
     else if (ptrs.size === 1 && st && st.pinch) st = { x0: [...ptrs.values()][0], off0: chartCur ? chartCur.off : 0, moved: true };
   };
   cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
 }
 window.addEventListener('resize', () => { if (chartCur && chartCur.engine === 'fugle') drawChart(); });
 
-/* ---------- TradingView ---------- */
+/* ---------- TradingView（僅用於非台股代號，例如美股） ---------- */
 async function resolveTvSymbol(sym) {
   if (!/^\d/.test(sym)) return sym;
   let sfx = suffixCache.get(sym);
@@ -2368,36 +2426,29 @@ function renderChartTools() {
   const c = chartCur;
   $('chartTfs').innerHTML = c.engine === 'fugle'
     ? CHART_TFS.map(([k, n]) => `<button type="button" class="${k === c.tf ? 'on' : ''}" data-tf="${k}">${n}</button>`).join('') : '';
-  const canFugle = /^\d/.test(c.sym);
-  const sw = $('chartSwitchBtn');
-  sw.style.display = canFugle ? '' : 'none';
-  sw.textContent = c.engine === 'fugle' ? '改看 TradingView' : '改看 Fugle K線';
 }
 function startChart(c) {
   const body = $('chartBody'); clearTimeout(c.timer); chartCur = c; ++chartOpenSeq;
-  body.innerHTML = ''; $('chartInfo').innerHTML = ''; renderChartTools();
+  body.innerHTML = ''; $('chartInfo').innerHTML = ''; $('chartPanel').innerHTML = '';
+  $('chartModalOverlay').querySelector('.chart-modal').classList.toggle('tv', c.engine === 'tv');
+  renderChartTools();
   if (c.engine === 'fugle') {
     const cv = document.createElement('canvas'); cv.id = 'chartCanvas'; body.appendChild(cv); bindChartCanvas(cv);
-    loadFugleChart(c);
+    renderChartPanel(); loadFugleChart(c);
   } else loadTvChart(c);
-}
-function switchChartEngine() {
-  const c = chartCur; if (!c) return;
-  c.engine = c.engine === 'fugle' ? 'tv' : 'fugle'; startChart(c);
 }
 function openChartModal(s) {
   $('chartTitle').innerHTML = `${escapeHTML(s.symbol)}${s.name ? `<small>${escapeHTML(s.name)}</small>` : ''}`;
   $('chartModalOverlay').classList.add('show');
   if (!(history.state && history.state.chart)) history.pushState({ chart: 1 }, '');
-  const useFugle = chartSrc === 'fugle' && /^\d/.test(s.symbol);
-  startChart({ sym: s.symbol, engine: useFugle ? 'fugle' : 'tv', tf: chartTf, data: [], ma: [[], [], []], vis: 60, off: 0, sel: null, timer: 0 });
+  startChart({ sym: s.symbol, stock: s, engine: /^\d/.test(s.symbol) ? 'fugle' : 'tv', tf: chartTf, data: [], ma: [[], [], []], vis: 60, off: 0, sel: null, timer: 0, quote: null, year: null });
 }
 function teardownChart() {
   chartOpenSeq++;
   if (chartCur) clearTimeout(chartCur.timer);
   chartCur = null;
   $('chartModalOverlay').classList.remove('show');
-  $('chartBody').innerHTML = ''; $('chartInfo').innerHTML = ''; // 移除圖表，不在背景繼續佔資源
+  $('chartBody').innerHTML = ''; $('chartInfo').innerHTML = ''; $('chartPanel').innerHTML = ''; // 移除圖表，不在背景繼續佔資源
 }
 function closeChartModal() {
   if (history.state && history.state.chart) history.back(); else teardownChart();
