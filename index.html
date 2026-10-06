@@ -29,7 +29,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.81-chartF'; 
+const APP_VER = 'V7.82-chartF'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -2181,6 +2181,35 @@ async function fugleHistRows(sym, tf) {
   catch (e) { if (e.message === 'nokey') throw e; j = await fugleGet(q); }
   return (j.data || []).map(d => ({ t: d.date, o: d.open, h: d.high, l: d.low, c: d.close, v: d.volume || 0 })).filter(validBar);
 }
+async function yahooHistRows(sym, tf) {
+  const [range, itv] = tf === 'D' ? ['2y', '1d'] : tf === 'W' ? ['5y', '1wk'] : ['10y', '1mo'];
+  return tryTwSuffixes(sym, async sfx => {
+    try {
+      const r = await fetchWithProxy(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}${sfx}?interval=${itv}&range=${range}`);
+      if (!r) return null;
+      const d = await r.json(), res = d.chart && d.chart.result && d.chart.result[0];
+      if (!res || !res.timestamp) return null;
+      const q = res.indicators.quote[0];
+      const rows = res.timestamp.map((t, i) => ({ t: new Date(t * 1000 + 8 * 3600e3).toISOString().slice(0, 10), o: q.open[i], h: q.high[i], l: q.low[i], c: q.close[i], v: q.volume[i] || 0 })).filter(validBar);
+      return rows.length ? rows : null;
+    } catch (e) { return null; }
+  });
+}
+// Fugle 回傳的 K 棒太少時（例如只有近一個月），改用 Yahoo 補足歷史資料
+async function chartHistRows(sym, tf) {
+  let rows = [], err = null;
+  try { rows = await fugleHistRows(sym, tf); } catch (e) { err = e; if (e.message === 'nokey') throw e; }
+  const need = tf === 'D' ? 120 : tf === 'W' ? 60 : 36;
+  if (rows.length < need) {
+    const y = await yahooHistRows(sym, tf);
+    if (y && y.length > rows.length) {
+      if (tf === 'D') { const m = new Map(y.map(r => [r.t, r])); rows.forEach(r => m.set(r.t, r)); rows = [...m.values()].sort((a, b) => a.t < b.t ? -1 : 1); }
+      else rows = y;
+    }
+  }
+  if (!rows.length && err) throw err;
+  return rows;
+}
 async function fugleIntradayRows(sym) {
   const j = await fugleGet(`intraday/candles/${encodeURIComponent(sym)}?timeframe=5`);
   return (j.data || []).map(d => ({ t: d.date, o: d.open, h: d.high, l: d.low, c: d.close, v: d.volume || 0 }))
@@ -2244,7 +2273,7 @@ async function loadFugleChart(c) {
   c.data = []; c.sel = null; c.off = 0; drawChart(); chartInfoUpdate();
   chartMsg('圖表載入中…');
   try {
-    const rowsP = c.tf === '5' ? fugleIntradayRows(c.sym) : fugleHistRows(c.sym, c.tf);
+    const rowsP = c.tf === '5' ? fugleIntradayRows(c.sym) : chartHistRows(c.sym, c.tf);
     const [rows, q] = await Promise.all([rowsP, fugleQuote(c.sym)]);
     if (q) c.quote = q;
     if (c.tf === 'D') mergeLiveQuote(rows, c.quote);
@@ -2281,7 +2310,7 @@ function scheduleChartRefresh(c, seq) {
 
 /* ---------- 繪圖 ---------- */
 const fmtP = v => (+Number(v).toFixed(2)).toString();
-const fmtV = (c, v) => c.tf === '5' ? Math.round(v).toLocaleString() : Math.round(v / 1000).toLocaleString() + ' 張';
+const fmtV = (c, v) => c.tf === '5' ? Math.round(v).toLocaleString() + ' 張' : Math.round(v / 1000).toLocaleString() + ' 張';
 function drawChart() {
   const cv = $('chartCanvas'); if (!cv || !chartCur) return;
   const c = chartCur, W = cv.parentElement.clientWidth, H = cv.parentElement.clientHeight, dpr = window.devicePixelRatio || 1;
