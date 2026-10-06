@@ -29,7 +29,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.73-pr'; 
+const APP_VER = 'V7.74-chart'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -308,6 +308,15 @@ body.show-hist .hist-col { display: flex !important; }
 
 .modal.fullscreen-modal { width: 100vw !important; max-width: 100vw !important; height: 100vh !important; max-height: 100vh !important; border-radius: 0; padding: 12px 16px 16px !important; margin: 0 !important; border: none; box-sizing: border-box; z-index: 999; overflow-y: auto;}
 .btn-close-icon { position: absolute; top: 10px; right: 10px; background: transparent !important; box-shadow: none !important; color: var(--t-muted); font-size: 24px; width: 40px; height: 40px; padding: 0; display: flex; justify-content: center; align-items: center; border-radius: 50%; text-shadow: none !important; cursor: pointer; border: none !important; }
+/* ===== K 線圖彈窗 ===== */
+#chartModalOverlay .modal.chart-modal { padding: 0 !important; display: flex; flex-direction: column; overflow: hidden; }
+.chart-head { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: calc(8px + env(safe-area-inset-top, 0px)) 8px 8px 16px; border-bottom: 1px solid var(--border-light); }
+.chart-title { min-width: 0; font-weight: 800; font-size: 18px; color: var(--t-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chart-title small { font-weight: normal; font-size: 13px; color: var(--t-muted); margin-left: 8px; }
+#chartModalOverlay .btn-close-icon { position: static; flex: 0 0 auto; }
+.chart-body { flex: 1 1 auto; position: relative; min-height: 0; }
+.chart-body .tradingview-widget-container, .chart-body .tradingview-widget-container__widget { width: 100%; height: 100%; }
+.chart-msg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 24px; color: var(--t-muted); font-size: 15px; pointer-events: none; }
 .btn-close-icon:hover { color: var(--t-main); transform: scale(1.1); }
 .pwd-mask { -webkit-text-security: disc; text-security: disc; }
 
@@ -783,6 +792,16 @@ body.row-sorting, body.row-sorting * { -webkit-user-select: none; user-select: n
 </div>
 
 <div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="chartModalOverlay">
+  <div class="modal fullscreen-modal chart-modal">
+    <div class="chart-head">
+      <div class="chart-title" id="chartTitle"></div>
+      <button type="button" class="btn-close-icon" onclick="closeChartModal()">✕</button>
+    </div>
+    <div class="chart-body" id="chartBody"></div>
+  </div>
+</div>
 
 <div class="modal-overlay" id="historyModalOverlay">
   <div class="modal">
@@ -2052,7 +2071,7 @@ async function loadFinanceNews() {
 
   document.addEventListener('pointerup', e => {
     if (!st || e.pointerId !== st.id) return;
-    if (st.active) commit();
+    if (st.active) { commit(); lastRowDragAt = Date.now(); }
     cleanup();
   });
 
@@ -2066,6 +2085,78 @@ async function loadFinanceNews() {
   document.addEventListener('touchmove', e => { if (st && st.active && e.cancelable) e.preventDefault(); }, { passive: false });
   body.addEventListener('contextmenu', e => { if (e.target.closest('.sym-container')) e.preventDefault(); });
 })();
+
+/* ========================================================= 📈 K 線圖彈窗（TradingView 嵌入，不使用 Fugle 額度） ========================================================= */
+let lastRowDragAt = 0;
+let chartOpenSeq = 0;
+function isDarkUi() {
+  const m = (getComputedStyle(document.body).backgroundColor || '').match(/\d+(\.\d+)?/g);
+  if (!m || m.length < 3) return false;
+  return (0.299 * m[0] + 0.587 * m[1] + 0.114 * m[2]) < 110;
+}
+async function resolveTvSymbol(sym) {
+  if (!/^\d/.test(sym)) return sym; // 美股等非數字開頭：直接帶入
+  let sfx = suffixCache.get(sym);
+  if (!sfx) { try { await fetchYahoo(sym); } catch (_) {} sfx = suffixCache.get(sym); }
+  return (sfx === '.TWO' ? 'TPEX:' : 'TWSE:') + sym;
+}
+async function openChartModal(s) {
+  const seq = ++chartOpenSeq;
+  const body = $('chartBody');
+  $('chartTitle').innerHTML = `${escapeHTML(s.symbol)}${s.name ? `<small>${escapeHTML(s.name)}</small>` : ''}`;
+  body.innerHTML = '';
+  $('chartModalOverlay').classList.add('show');
+  if (!(history.state && history.state.chart)) history.pushState({ chart: 1 }, '');
+  if (!navigator.onLine) { body.innerHTML = '<div class="chart-msg">目前離線，無法載入 K 線圖</div>'; return; }
+  body.innerHTML = '<div class="chart-msg">圖表載入中…</div>';
+  const tvSym = await resolveTvSymbol(s.symbol);
+  if (seq !== chartOpenSeq || !$('chartModalOverlay').classList.contains('show')) return; // 等待期間已關閉
+  const dark = isDarkUi();
+  const box = document.createElement('div');
+  box.className = 'tradingview-widget-container';
+  box.innerHTML = '<div class="tradingview-widget-container__widget"></div>';
+  const sc = document.createElement('script');
+  sc.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+  sc.async = true;
+  sc.onerror = () => { if (seq === chartOpenSeq) body.innerHTML = '<div class="chart-msg">圖表載入失敗，請檢查網路後再試</div>'; };
+  sc.text = JSON.stringify({
+    autosize: true, symbol: tvSym, interval: 'D', timezone: 'Asia/Taipei', locale: 'zh_TW',
+    theme: dark ? 'dark' : 'light', style: '1', allow_symbol_change: false, hide_side_toolbar: true,
+    withdateranges: true, save_image: false, calendar: false, support_host: 'https://www.tradingview.com',
+    backgroundColor: dark ? '#1E2330' : '#FFFFFF',
+    overrides: { 'mainSeriesProperties.candleStyle.upColor': '#E5484D', 'mainSeriesProperties.candleStyle.downColor': '#1FA971',
+      'mainSeriesProperties.candleStyle.borderUpColor': '#E5484D', 'mainSeriesProperties.candleStyle.borderDownColor': '#1FA971',
+      'mainSeriesProperties.candleStyle.wickUpColor': '#E5484D', 'mainSeriesProperties.candleStyle.wickDownColor': '#1FA971' }
+  });
+  box.appendChild(sc);
+  body.innerHTML = '<div class="chart-msg">圖表載入中…</div>';
+  body.appendChild(box);
+  // 圖表出現後移除載入訊息
+  let tries = 0;
+  const iv = setInterval(() => {
+    if (seq !== chartOpenSeq || ++tries > 40) return clearInterval(iv);
+    const m = body.querySelector('.chart-msg');
+    if (body.querySelector('iframe')) { if (m) m.remove(); clearInterval(iv); }
+  }, 250);
+}
+function teardownChart() {
+  chartOpenSeq++;
+  $('chartModalOverlay').classList.remove('show');
+  $('chartBody').innerHTML = ''; // 移除 iframe，不在背景繼續佔資源
+}
+function closeChartModal() {
+  if (history.state && history.state.chart) history.back(); else teardownChart();
+}
+window.addEventListener('popstate', () => { if ($('chartModalOverlay').classList.contains('show')) teardownChart(); });
+$('chartModalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeChartModal(); });
+document.addEventListener('click', e => {
+  const h = e.target.closest('.srow .sym-container');
+  if (!h) return;
+  if (Date.now() - lastRowDragAt < 500) return; // 長按拖曳排序後放開，不要誤開圖表
+  const row = h.closest('.srow');
+  const st = (tabStocks[currentTab] || []).find(x => String(x.id) === row.dataset.id);
+  if (st) openChartModal(st);
+});
 
 /* ========================================================= 🚀 啟動與休眠優化 ========================================================= */
 loadState(); renderAll();
