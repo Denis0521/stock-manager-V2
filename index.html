@@ -29,7 +29,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.86-chartF'; 
+const APP_VER = 'V7.87-chartF'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -861,7 +861,7 @@ body.row-sorting, body.row-sorting * { -webkit-user-select: none; user-select: n
   <div class="modal">
     <button type="button" class="btn-close-icon" onclick="closeModalById('historyModalOverlay')">✕</button>
     <h2>近10交易日損益記錄</h2>
-    <div style="text-align:center; color:var(--t-muted); font-size:16px; margin-top:-10px; margin-bottom:16px;">（交易日13:40自動儲存）</div>
+    <div style="text-align:center; color:var(--t-muted); font-size:16px; margin-top:-10px; margin-bottom:16px;">（交易日13:40自動儲存；久沒開啟會用官方收盤價補記）</div>
     <div id="historyBody" style="position:relative; overflow-y: auto; margin-bottom: 16px;">
       <div class="hist-empty">尚無記錄</div>
     </div>
@@ -1791,6 +1791,65 @@ function saveEditStock() {
   LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll(); closeModalById('editModalOverlay'); showToast('已修改'); forceRefresh();
 }
 
+// 📅 補記漏掉的交易日：久沒開啟時，用官方收盤價（Worker /hist → Yahoo）換算每日損益
+// 規則：只補「最新一筆記錄之後、今天之前」的交易日；持股數量以目前持股計算；任何一檔取價失敗就整個分頁跳過，避免寫入錯誤數字
+let backfilling = false, lastBackfillAt = 0;
+async function dailyCloseMap(sym) {
+  let rows = null;
+  try {
+    const j = await workerGet(`/hist?symbol=${encodeURIComponent(sym)}&tf=D`);
+    if (Array.isArray(j.rows) && j.rows.length) rows = j.rows.map(a => ({ t: a[0], c: a[4] })).filter(r => typeof r.c === 'number' && isFinite(r.c));
+  } catch (e) {}
+  if (!rows) { const y = await yahooHistRows(sym, 'D'); if (y.rows) rows = y.rows.map(r => ({ t: r.t, c: r.c })); }
+  if (!rows || !rows.length) return null;
+  return rows.sort((a, b) => a.t < b.t ? -1 : 1);
+}
+async function backfillRecords(force = false) {
+  if (backfilling || !navigator.onLine) return;
+  if (!force && Date.now() - lastBackfillAt < 30 * 60e3) return;
+  backfilling = true; lastBackfillAt = Date.now();
+  try {
+    const today = twDateStr();
+    const barsCache = new Map(); // sym -> bars | null
+    let changed = false;
+    for (let i = 0; i < 5; i++) {
+      const stocks = tabStocks[i], recs0 = tabRecords[i];
+      if (!stocks.length || !recs0.length) continue; // 沒有記錄就沒有起點，不補
+      const lastDate = recs0.reduce((m, r) => r.date > m ? r.date : m, '');
+      if (lastDate >= today) continue;
+      const syms = [...new Set(stocks.map(s => s.symbol))];
+      for (const sym of syms) if (!barsCache.has(sym)) barsCache.set(sym, await dailyCloseMap(sym));
+      if (syms.some(sym => !barsCache.get(sym))) continue;
+      // 這段期間內的交易日 = 各檔有收盤資料的日期聯集
+      const days = [...new Set(syms.flatMap(sym => barsCache.get(sym).map(r => r.t)))]
+        .filter(d => d > lastDate && d < today).sort();
+      if (!days.length) continue;
+      const recs = tabRecords[i]; // await 之後重新取用，避免覆蓋同時間寫入的記錄
+      const have = new Set(recs.map(r => r.date));
+      for (const d of days) {
+        if (have.has(d)) continue;
+        let pnl = 0, asset = 0;
+        for (const s of stocks) {
+          const bars = barsCache.get(s.symbol);
+          let k = -1; for (let n = bars.length - 1; n >= 0; n--) if (bars[n].t <= d) { k = n; break; }
+          if (k < 0) continue; // 該日以前還沒上市
+          const shares = calcStockInfo(s).shares, c = bars[k].c;
+          asset += Math.round(shares * c);
+          if (bars[k].t === d && k > 0) pnl += Math.round(shares * (c - bars[k - 1].c)); // 該日沒成交（停牌）則損益為 0
+        }
+        recs.push({ date: d, time: '收盤價', totalPnl: pnl, totalAsset: asset, timestamp: Date.parse(d + 'T13:30:00+08:00'), backfill: true });
+        changed = true;
+      }
+      if (changed) {
+        recs.sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
+        if (recs.length > 10) recs.length = 10;
+        LS.set(LS.KEYS.RECORD(i), recs);
+      }
+    }
+    if (changed && $('historyModalOverlay').classList.contains('show')) renderHistory();
+  } catch (e) {} finally { backfilling = false; }
+}
+
 // 💾 自動儲存機制：台灣時區 13:40 (支援當日重複更新)
 let autoSaveTimer = null;
 function triggerAutoSave() {
@@ -1800,6 +1859,7 @@ function triggerAutoSave() {
 
 let autoSaving = false;
 async function checkAutoSave() {
+  backfillRecords().catch(() => {}); // 不受 13:40 限制，開啟 App 就會檢查有沒有漏掉的交易日
   const inWindow = t => { const d = t.getDay(), h = t.getHours(), m = t.getMinutes(); return d >= 1 && d <= 5 && (h > 13 || (h === 13 && m >= 40)); };
   // 符合時間：營業日 (週一至週五) 且時間過 13:40
   if (autoSaving || !inWindow(getTWTime())) return;
@@ -1843,7 +1903,7 @@ function fitHistoryBody(){
   const h = it.offsetTop + it.offsetHeight + 4;
   if(h > 20) hb.style.maxHeight = h + 'px';
 }
-function openHistoryModal() { renderHistory(); $('historyModalOverlay').classList.add('show'); requestAnimationFrame(fitHistoryBody); }
+function openHistoryModal() { backfillRecords(true).catch(() => {}); renderHistory(); $('historyModalOverlay').classList.add('show'); requestAnimationFrame(fitHistoryBody); }
 
 function clearAllHistory() {
   if(!confirm('確定要清空目前分頁的所有歷史記錄嗎？')) return;
