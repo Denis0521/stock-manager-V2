@@ -29,7 +29,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.84-chartF'; 
+const APP_VER = 'V7.85-chartF'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -351,6 +351,10 @@ body.show-hist .hist-col { display: flex !important; }
 .cp-tr.hd { color: var(--t-muted); font-size: 12px; }
 .cp-list > div { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border-light); }
 .cp-list > div > span:first-child { color: var(--t-muted); }
+.cp-up { background: var(--bg-card); border-radius: 10px; padding: 8px 10px; margin: 6px 0; line-height: 1.6; }
+.cp-up > div:first-child { display: flex; justify-content: space-between; gap: 8px; }
+.cp-up > div:first-child span { color: var(--accent); font-weight: 700; }
+.cp-up > div:last-child { color: var(--t-muted); font-size: 12px; }
 .cp-hold { display: grid; grid-template-columns: 18px minmax(0, 1fr) 56px 54px; align-items: center; gap: 6px; padding: 5px 0; border-bottom: 1px solid var(--border-light); }
 .cp-hold .rk { color: var(--t-muted); font-size: 12px; text-align: center; }
 .cp-hold .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -2581,10 +2585,15 @@ const isEtfSym = sym => /^00\d/.test(sym);
 async function loadDivTab(c) {
   if (c.div) return;
   c.div = { state: 'loading' }; renderChartPanel();
-  try {
-    const j = await workerGet(`/div?symbol=${encodeURIComponent(c.sym)}`);
-    c.div = Array.isArray(j.dividends) ? (j.dividends.length ? { state: 'ok', list: j.dividends } : { state: 'empty' }) : { state: 'noworker' };
-  } catch (e) { c.div = { state: e.message === 'http404' ? 'empty' : 'err' }; }
+  const [y, m] = await Promise.allSettled([
+    workerGet(`/div?symbol=${encodeURIComponent(c.sym)}`),
+    isEtfSym(c.sym) ? workerGet(`/divinfo?symbol=${encodeURIComponent(c.sym)}`) : Promise.reject(new Error('skip'))
+  ]);
+  const list = y.status === 'fulfilled' && Array.isArray(y.value.dividends) ? y.value.dividends : null;
+  const info = m.status === 'fulfilled' && Array.isArray(m.value.dividends) ? m.value.dividends : null;
+  const noworker = y.status === 'fulfilled' && !Array.isArray(y.value.dividends);
+  const hasAny = (list && list.length) || (info && info.length);
+  c.div = { state: hasAny ? 'ok' : noworker ? 'noworker' : (y.status === 'rejected' && y.reason.message !== 'http404') ? 'err' : 'empty', list: list || [], info };
   if (chartCur === c) renderChartPanel();
 }
 async function loadHoldTab(c) {
@@ -2597,19 +2606,37 @@ async function loadHoldTab(c) {
   if (chartCur === c) renderChartPanel();
 }
 const workerNote = st => ({ noworker: '需要先更新 Cloudflare Worker 才能取得這項資料。', empty: '查無資料（可能尚未配息，或來源網站沒有這檔）。' }[st] || failNote(st));
+const fmtD = v => (+Number(v).toFixed(4)).toString(); // 配息金額保留到小數 4 位（例如 0.866）
 function panelDivHTML(c) {
   const v = c.div; if (!v || v.state !== 'ok') return `<div class="cp-note">${workerNote(v ? v.state : 'loading')}</div>`;
-  const yearAgo = new Date(Date.now() + 8 * 3600e3 - 365 * 864e5).toISOString().slice(0, 10);
-  const yr = v.list.filter(x => x.date >= yearAgo), sum = yr.reduce((a, x) => a + x.amount, 0);
-  const price = c.quote && numOk(c.quote.lastPrice) ? c.quote.lastPrice : (c.stock && numOk(c.stock.price) ? c.stock.price : null);
+  const today = twToday(), dayN = d => Math.round((Date.parse(d + 'T00:00:00+08:00') - Date.parse(today + 'T00:00:00+08:00')) / 864e5);
   const shares = c.stock ? calcStockInfo(c.stock).shares : 0;
-  let html = `<div class="cp-title">近一年配息</div><div class="cp-grid">` +
-    cpRow('合計', fmtP(sum) + ' 元') + cpRow('次數', yr.length + ' 次') +
-    cpRow('現價殖利率', price && sum ? (sum / price * 100).toFixed(2) + '%' : '—') + cpRow('最近一次', escapeHTML(v.list[0].date)) + `</div>`;
-  if (shares > 0 && sum > 0) html += `<div class="cp-small">以目前持有 ${shares.toLocaleString()} 股估算，近一年配息約 ${Math.round(shares * sum).toLocaleString()} 元（過去配息不代表未來）。</div>`;
-  html += `<div class="cp-title">歷史配息（每股，依除息日）</div><div class="cp-list">` +
-    v.list.slice(0, 16).map(x => `<div><span>${escapeHTML(x.date)}</span><b>${fmtP(x.amount)} 元</b></div>`).join('') + `</div>`;
-  return html;
+  const info = (v.info || []).filter(x => x.ex);
+  let html = '';
+  const upcoming = info.filter(x => x.ex >= today || (x.pay && x.pay >= today)).sort((a, b) => a.ex < b.ex ? -1 : 1);
+  if (upcoming.length) {
+    html += `<div class="cp-title">即將除息／發放（投信已公告）</div>` + upcoming.map(x => {
+      const dEx = dayN(x.ex), tag = dEx > 0 ? `還有 ${dEx} 天除息` : dEx === 0 ? '今天除息' : '已除息，待發放';
+      const est = numOk(x.amount) && shares > 0 ? `　預計入帳約 ${Math.round(shares * x.amount).toLocaleString()} 元` : '';
+      return `<div class="cp-up"><div><b>除息日 ${escapeHTML(x.ex)}</b><span>${tag}</span></div>` +
+        `<div>發放日 ${x.pay ? escapeHTML(x.pay) : '尚未公布'}　每單位 ${numOk(x.amount) ? fmtD(x.amount) + ' 元' : '—'}${est}</div></div>`;
+    }).join('') + `<div class="cp-small">第一階段公告的金額可能是預估值，以投信第二階段公告為準。</div>`;
+  } else if (isEtfSym(c.sym)) {
+    html += `<div class="cp-small" style="margin-top:10px">${v.info ? '目前沒有已公告、尚未發放的配息。' : '未取得投信公告的除息／發放日（來源網站沒有這檔，或 Worker 尚未更新）。'}</div>`;
+  }
+  const past = info.length ? info.filter(x => x.ex <= today && numOk(x.amount)).map(x => ({ date: x.ex, amount: x.amount, pay: x.pay })) : v.list;
+  if (past.length) {
+    const yearAgo = new Date(Date.now() + 8 * 3600e3 - 365 * 864e5).toISOString().slice(0, 10);
+    const yr = past.filter(x => x.date >= yearAgo), sum = yr.reduce((a, x) => a + x.amount, 0);
+    const price = c.quote && numOk(c.quote.lastPrice) ? c.quote.lastPrice : (c.stock && numOk(c.stock.price) ? c.stock.price : null);
+    html += `<div class="cp-title">近一年配息</div><div class="cp-grid">` +
+      cpRow('合計', fmtD(sum) + ' 元') + cpRow('次數', yr.length + ' 次') +
+      cpRow('現價殖利率', price && sum ? (sum / price * 100).toFixed(2) + '%' : '—') + cpRow('最近除息', escapeHTML(past[0].date)) + `</div>`;
+    if (shares > 0 && sum > 0) html += `<div class="cp-small">以目前持有 ${shares.toLocaleString()} 股估算，近一年配息約 ${Math.round(shares * sum).toLocaleString()} 元（過去配息不代表未來）。</div>`;
+    html += `<div class="cp-title">歷史配息（每單位）</div><div class="cp-list">` +
+      past.slice(0, 16).map(x => `<div><span>${escapeHTML(x.date)}${x.pay ? `　發放 ${escapeHTML(x.pay.slice(5))}` : ''}</span><b>${fmtD(x.amount)} 元</b></div>`).join('') + `</div>`;
+  }
+  return html || '<div class="cp-note">查無資料。</div>';
 }
 function panelHoldHTML(c) {
   const v = c.hold; if (!v || v.state !== 'ok') return `<div class="cp-note">${workerNote(v ? v.state : 'loading')}</div>`;
