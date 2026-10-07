@@ -29,7 +29,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.82-chartF'; 
+const APP_VER = 'V7.84-chartF'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -335,8 +335,9 @@ body.show-hist .hist-col { display: flex !important; }
 .cp-note { color: var(--t-muted); padding: 14px 0; line-height: 1.6; }
 .cp-small { font-size: 11px; color: var(--t-muted); margin-top: 6px; line-height: 1.5; }
 .chart-sw { height: 32px; padding: 0 12px; font-size: 13px; font-weight: 700; line-height: 1; white-space: nowrap; border-radius: 16px; border: 1px solid var(--border-light); background: var(--bg-card); color: var(--accent); cursor: pointer; }
-.chart-ptabs { flex: 0 0 auto; display: flex; gap: 6px; padding: 8px 16px 4px; border-top: 1px solid var(--border-light); }
-.chart-ptabs button { height: 28px; padding: 0 14px; font-size: 13px; font-weight: 700; line-height: 1; white-space: nowrap; border-radius: 14px; border: 1px solid var(--border-light); background: var(--bg-card); color: var(--t-muted); cursor: pointer; }
+.chart-ptabs { flex: 0 0 auto; display: flex; gap: 6px; padding: 8px 16px 4px; border-top: 1px solid var(--border-light); overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.chart-ptabs::-webkit-scrollbar { display: none; }
+.chart-ptabs button { flex: 0 0 auto; height: 28px; padding: 0 12px; font-size: 13px; font-weight: 700; line-height: 1; white-space: nowrap; border-radius: 14px; border: 1px solid var(--border-light); background: var(--bg-card); color: var(--t-muted); cursor: pointer; }
 .chart-ptabs button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
 .chart-modal.ind .chart-body { flex-basis: 52%; }
 .cp-vol { display: grid; grid-template-columns: 56px minmax(0, 1fr) 62px; align-items: center; gap: 8px; padding: 3px 0; }
@@ -348,6 +349,15 @@ body.show-hist .hist-col { display: flex !important; }
 .cp-tr > span:nth-child(2), .cp-tr > span:nth-child(3) { text-align: right; }
 .cp-tr > span:last-child { text-align: center; font-size: 12px; }
 .cp-tr.hd { color: var(--t-muted); font-size: 12px; }
+.cp-list > div { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--border-light); }
+.cp-list > div > span:first-child { color: var(--t-muted); }
+.cp-hold { display: grid; grid-template-columns: 18px minmax(0, 1fr) 56px 54px; align-items: center; gap: 6px; padding: 5px 0; border-bottom: 1px solid var(--border-light); }
+.cp-hold .rk { color: var(--t-muted); font-size: 12px; text-align: center; }
+.cp-hold .nm { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cp-hold .nm small { color: var(--t-muted); margin-left: 4px; font-size: 11px; }
+.cp-hold .bar { height: 6px; border-radius: 3px; background: var(--border-light); overflow: hidden; }
+.cp-hold .bar i { display: block; height: 100%; background: var(--accent); }
+.cp-hold b { text-align: right; }
 .chart-modal.tv .chart-body { flex: 1 1 auto; }
 .chart-modal.tv .chart-tools, .chart-modal.tv .chart-info, .chart-modal.tv .chart-panel, .chart-modal.tv .chart-ptabs { display: none; }
 .btn-close-icon:hover { color: var(--t-main); transform: scale(1.1); }
@@ -2181,32 +2191,78 @@ async function fugleHistRows(sym, tf) {
   catch (e) { if (e.message === 'nokey') throw e; j = await fugleGet(q); }
   return (j.data || []).map(d => ({ t: d.date, o: d.open, h: d.high, l: d.low, c: d.close, v: d.volume || 0 })).filter(validBar);
 }
-async function yahooHistRows(sym, tf) {
-  const [range, itv] = tf === 'D' ? ['2y', '1d'] : tf === 'W' ? ['5y', '1wk'] : ['10y', '1mo'];
-  return tryTwSuffixes(sym, async sfx => {
-    try {
-      const r = await fetchWithProxy(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}${sfx}?interval=${itv}&range=${range}`);
-      if (!r) return null;
-      const d = await r.json(), res = d.chart && d.chart.result && d.chart.result[0];
-      if (!res || !res.timestamp) return null;
-      const q = res.indicators.quote[0];
-      const rows = res.timestamp.map((t, i) => ({ t: new Date(t * 1000 + 8 * 3600e3).toISOString().slice(0, 10), o: q.open[i], h: q.high[i], l: q.low[i], c: q.close[i], v: q.volume[i] || 0 })).filter(validBar);
-      return rows.length ? rows : null;
-    } catch (e) { return null; }
-  });
+// 同時向所有代理發出請求，最快成功的優先；全部失敗才算失敗
+function proxyJson(url) {
+  const tasks = PROXY_LIST.map(px => (async () => {
+    const res = await fetch(px + encodeURIComponent(url), { signal: AbortSignal.timeout(10000), cache: 'no-store' });
+    if (!res.ok) throw new Error('http' + res.status);
+    const j = await res.json();
+    if (!j || !j.chart) throw new Error('bad');
+    return j;
+  })());
+  return Promise.any(tasks).catch(() => null);
 }
-// Fugle 回傳的 K 棒太少時（例如只有近一個月），改用 Yahoo 補足歷史資料
-async function chartHistRows(sym, tf) {
-  let rows = [], err = null;
-  try { rows = await fugleHistRows(sym, tf); } catch (e) { err = e; if (e.message === 'nokey') throw e; }
-  const need = tf === 'D' ? 120 : tf === 'W' ? 60 : 36;
-  if (rows.length < need) {
-    const y = await yahooHistRows(sym, tf);
-    if (y && y.length > rows.length) {
-      if (tf === 'D') { const m = new Map(y.map(r => [r.t, r])); rows.forEach(r => m.set(r.t, r)); rows = [...m.values()].sort((a, b) => a.t < b.t ? -1 : 1); }
-      else rows = y;
+async function yahooHistRows(sym, tf) {
+  const [range, itv] = tf === 'D' ? ['1y', '1d'] : tf === 'W' ? ['5y', '1wk'] : ['10y', '1mo'];
+  const order = suffixCache.get(sym) === '.TWO' ? ['.TWO', '.TW'] : ['.TW', '.TWO'];
+  let log = '代理伺服器無回應';
+  for (const sfx of order) {
+    let j = null;
+    for (const host of ['query1', 'query2']) {
+      j = await proxyJson(`https://${host}.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}${sfx}?interval=${itv}&range=${range}`);
+      if (j) break;
+    }
+    if (!j) return { rows: null, log };
+    const res = j.chart.result && j.chart.result[0];
+    if (!res || !res.timestamp) { log = '查無此代號資料'; continue; }
+    const q = res.indicators.quote[0];
+    const rows = res.timestamp.map((t, i) => ({ t: new Date(t * 1000 + 8 * 3600e3).toISOString().slice(0, 10), o: q.open[i], h: q.high[i], l: q.low[i], c: q.close[i], v: q.volume[i] || 0 })).filter(validBar);
+    if (rows.length) { suffixCache.set(sym, sfx); return { rows, log: '' }; }
+  }
+  return { rows: null, log };
+}
+// 本機累積：Fugle 每次只給近期資料，每次開圖就把新資料合併存起來，歷史會越存越長
+const histKey = (sym, tf) => `tw_chart_hist_v1_${tf}_${sym}`;
+function histCacheGet(sym, tf) {
+  try { const j = JSON.parse(localStorage.getItem(histKey(sym, tf)) || 'null'); return j && Array.isArray(j.rows) ? j.rows.map(a => ({ t: a[0], o: a[1], h: a[2], l: a[3], c: a[4], v: a[5] })) : []; } catch (e) { return []; }
+}
+function histCacheSet(sym, tf, rows) {
+  try { localStorage.setItem(histKey(sym, tf), JSON.stringify({ rows: rows.slice(-520).map(r => [r.t, r.o, r.h, r.l, r.c, r.v]) })); } catch (e) {}
+}
+async function workerGet(path) {
+  const r = await fetch(CF_WORKER_URL + path, { signal: AbortSignal.timeout(12000) });
+  if (!r.ok) throw new Error('http' + r.status);
+  return r.json();
+}
+async function chartHistRows(c) {
+  const { sym, tf } = c, diag = [], need = tf === 'D' ? 120 : tf === 'W' ? 60 : 36;
+  let fRows = [], err = null;
+  try { fRows = await fugleHistRows(sym, tf); diag.push(`Fugle ${fRows.length} 根${fRows.length ? '（最早 ' + fRows[0].t + '）' : ''}`); }
+  catch (e) { err = e; if (e.message === 'nokey') throw e; diag.push('Fugle 取得失敗'); }
+  const cRows = histCacheGet(sym, tf);
+  let yRows = null;
+  if (fRows.length < need && cRows.length < need) {
+    let wlog = '';
+    try {
+      const j = await workerGet(`/hist?symbol=${encodeURIComponent(sym)}&tf=${tf}`);
+      if (Array.isArray(j.rows)) yRows = j.rows.map(a => ({ t: a[0], o: a[1], h: a[2], l: a[3], c: a[4], v: a[5] })).filter(validBar);
+      else wlog = 'Worker 尚未更新';
+    } catch (e) { wlog = e.message === 'http404' ? '查無此代號' : '連線失敗'; }
+    if (yRows && yRows.length) diag.push(`Worker ${yRows.length} 根`);
+    else {
+      yRows = null; diag.push(`Worker 失敗（${wlog || '無資料'}）`);
+      const y = await yahooHistRows(sym, tf);
+      yRows = y.rows; diag.push(yRows ? `Yahoo ${yRows.length} 根` : `Yahoo 失敗（${y.log}）`);
     }
   }
+  let rows;
+  if (tf === 'D') {
+    const m = new Map(); cRows.forEach(r => m.set(r.t, r)); (yRows || []).forEach(r => m.set(r.t, r)); fRows.forEach(r => m.set(r.t, r));
+    rows = [...m.values()].sort((a, b) => a.t < b.t ? -1 : 1);
+    if (cRows.length) diag.push(`本機累積 ${cRows.length} 根`);
+  } else rows = yRows && yRows.length > fRows.length ? yRows : cRows.length > fRows.length ? cRows : fRows;
+  if (rows.length) histCacheSet(sym, tf, rows);
+  c.diag = diag.join('；');
   if (!rows.length && err) throw err;
   return rows;
 }
@@ -2273,7 +2329,7 @@ async function loadFugleChart(c) {
   c.data = []; c.sel = null; c.off = 0; drawChart(); chartInfoUpdate();
   chartMsg('圖表載入中…');
   try {
-    const rowsP = c.tf === '5' ? fugleIntradayRows(c.sym) : chartHistRows(c.sym, c.tf);
+    const rowsP = c.tf === '5' ? fugleIntradayRows(c.sym) : chartHistRows(c);
     const [rows, q] = await Promise.all([rowsP, fugleQuote(c.sym)]);
     if (q) c.quote = q;
     if (c.tf === 'D') mergeLiveQuote(rows, c.quote);
@@ -2459,6 +2515,7 @@ function panelQuoteHTML(c) {
       cpRow('最高', fmtP(c.year.hi), `style="color:${CHART_UP}"`) + cpRow('最低', fmtP(c.year.lo), `style="color:${CHART_DN}"`) +
       (last != null ? cpRow('距高點', ((last / c.year.hi - 1) * 100).toFixed(2) + '%') + cpRow('距低點', '+' + ((last / c.year.lo - 1) * 100).toFixed(2) + '%') : '') + `</div>`;
   }
+  if (c.diag) html += `<div class="cp-small">K 線資料來源：${escapeHTML(c.diag)}</div>`;
   return html || '<div class="cp-note">暫無資料</div>';
 }
 
@@ -2520,13 +2577,56 @@ function panelTradesHTML(c) {
   return `<div class="cp-title">最近成交明細（最新 ${v.rows.length} 筆）</div><div class="cp-tr hd"><span>時間</span><span>成交價</span><span>單量</span><span></span></div>${body}` +
     `<div class="cp-small">外＝成交價在賣價以上（主動買），內＝成交價在買價以下（主動賣）。</div>`;
 }
+const isEtfSym = sym => /^00\d/.test(sym);
+async function loadDivTab(c) {
+  if (c.div) return;
+  c.div = { state: 'loading' }; renderChartPanel();
+  try {
+    const j = await workerGet(`/div?symbol=${encodeURIComponent(c.sym)}`);
+    c.div = Array.isArray(j.dividends) ? (j.dividends.length ? { state: 'ok', list: j.dividends } : { state: 'empty' }) : { state: 'noworker' };
+  } catch (e) { c.div = { state: e.message === 'http404' ? 'empty' : 'err' }; }
+  if (chartCur === c) renderChartPanel();
+}
+async function loadHoldTab(c) {
+  if (c.hold) return;
+  c.hold = { state: 'loading' }; renderChartPanel();
+  try {
+    const j = await workerGet(`/holdings?symbol=${encodeURIComponent(c.sym)}`);
+    c.hold = Array.isArray(j.holdings) && j.holdings.length ? { state: 'ok', date: j.date, src: j.source, list: j.holdings } : { state: Array.isArray(j.holdings) ? 'empty' : 'noworker' };
+  } catch (e) { c.hold = { state: e.message === 'http404' ? 'empty' : 'err' }; }
+  if (chartCur === c) renderChartPanel();
+}
+const workerNote = st => ({ noworker: '需要先更新 Cloudflare Worker 才能取得這項資料。', empty: '查無資料（可能尚未配息，或來源網站沒有這檔）。' }[st] || failNote(st));
+function panelDivHTML(c) {
+  const v = c.div; if (!v || v.state !== 'ok') return `<div class="cp-note">${workerNote(v ? v.state : 'loading')}</div>`;
+  const yearAgo = new Date(Date.now() + 8 * 3600e3 - 365 * 864e5).toISOString().slice(0, 10);
+  const yr = v.list.filter(x => x.date >= yearAgo), sum = yr.reduce((a, x) => a + x.amount, 0);
+  const price = c.quote && numOk(c.quote.lastPrice) ? c.quote.lastPrice : (c.stock && numOk(c.stock.price) ? c.stock.price : null);
+  const shares = c.stock ? calcStockInfo(c.stock).shares : 0;
+  let html = `<div class="cp-title">近一年配息</div><div class="cp-grid">` +
+    cpRow('合計', fmtP(sum) + ' 元') + cpRow('次數', yr.length + ' 次') +
+    cpRow('現價殖利率', price && sum ? (sum / price * 100).toFixed(2) + '%' : '—') + cpRow('最近一次', escapeHTML(v.list[0].date)) + `</div>`;
+  if (shares > 0 && sum > 0) html += `<div class="cp-small">以目前持有 ${shares.toLocaleString()} 股估算，近一年配息約 ${Math.round(shares * sum).toLocaleString()} 元（過去配息不代表未來）。</div>`;
+  html += `<div class="cp-title">歷史配息（每股，依除息日）</div><div class="cp-list">` +
+    v.list.slice(0, 16).map(x => `<div><span>${escapeHTML(x.date)}</span><b>${fmtP(x.amount)} 元</b></div>`).join('') + `</div>`;
+  return html;
+}
+function panelHoldHTML(c) {
+  const v = c.hold; if (!v || v.state !== 'ok') return `<div class="cp-note">${workerNote(v ? v.state : 'loading')}</div>`;
+  const top = v.list.slice(0, 10), max = Math.max(...top.map(x => Math.abs(x.weight))) || 1, sum = top.reduce((a, x) => a + x.weight, 0);
+  const rows = top.map((x, i) => `<div class="cp-hold"><span class="rk">${i + 1}</span><span class="nm">${escapeHTML(x.name || x.symbol)}${x.symbol ? `<small>${escapeHTML(x.symbol.replace(/\.(TW|TWO)$/i, ''))}</small>` : ''}</span>` +
+    `<span class="bar"><i style="width:${(Math.abs(x.weight) / max * 100).toFixed(0)}%"></i></span><b>${x.weight.toFixed(2)}%</b></div>`).join('');
+  return `<div class="cp-title">前十大持股${v.date ? `（資料日 ${escapeHTML(String(v.date))}）` : ''}</div>` +
+    `<div class="cp-grid" style="margin-bottom:6px">${cpRow('前十大合計', sum.toFixed(2) + '%')}${cpRow('揭露檔數', v.list.length + (v.list.length >= 30 ? '+' : '') + ' 檔')}</div>${rows}` +
+    `<div class="cp-small">資料來源：${escapeHTML(v.src || '')}，僅供參考；持股可能和最新揭露有時間差。</div>`;
+}
 function renderChartPanel() {
   const c = chartCur, el = $('chartPanel'), tabs = $('chartPtabs');
   if (!c || c.engine !== 'fugle') { el.innerHTML = ''; tabs.innerHTML = ''; return; }
-  tabs.innerHTML = [['quote', '行情'], ['vol', '分價量'], ['trades', '成交明細']]
+  tabs.innerHTML = [['quote', '行情'], ['vol', '分價量'], ['trades', '成交明細'], ['div', '配息'], ...(isEtfSym(c.sym) ? [['hold', '成分股']] : [])]
     .map(([k, n]) => `<button type="button" class="${k === c.ptab ? 'on' : ''}" data-ptab="${k}">${n}</button>`).join('');
   const top = el.scrollTop;
-  el.innerHTML = c.ptab === 'vol' ? panelVolHTML(c) : c.ptab === 'trades' ? panelTradesHTML(c) : panelQuoteHTML(c);
+  el.innerHTML = c.ptab === 'vol' ? panelVolHTML(c) : c.ptab === 'trades' ? panelTradesHTML(c) : c.ptab === 'div' ? panelDivHTML(c) : c.ptab === 'hold' ? panelHoldHTML(c) : panelQuoteHTML(c);
   el.scrollTop = top;
 }
 
@@ -2625,7 +2725,7 @@ function openChartModal(s) {
   $('chartTitle').innerHTML = `${escapeHTML(s.symbol)}${s.name ? `<small>${escapeHTML(s.name)}</small>` : ''}`;
   $('chartModalOverlay').classList.add('show');
   if (!(history.state && history.state.chart)) history.pushState({ chart: 1 }, '');
-  startChart({ sym: s.symbol, stock: s, engine: /^\d/.test(s.symbol) ? 'fugle' : 'tv', tf: chartTf, data: [], ma: [[], [], []], vis: 60, off: 0, sel: null, timer: 0, quote: null, year: null, ptab: 'quote', vol: null, trades: null, ind: null });
+  startChart({ sym: s.symbol, stock: s, engine: /^\d/.test(s.symbol) ? 'fugle' : 'tv', tf: chartTf, data: [], ma: [[], [], []], vis: 60, off: 0, sel: null, timer: 0, quote: null, year: null, ptab: 'quote', vol: null, trades: null, div: null, hold: null, ind: null });
 }
 function teardownChart() {
   chartOpenSeq++;
@@ -2646,7 +2746,7 @@ $('chartTfs').addEventListener('click', e => {
 $('chartPtabs').addEventListener('click', e => {
   const b = e.target.closest('button[data-ptab]'); if (!b || !chartCur || chartCur.engine !== 'fugle') return;
   const c = chartCur; c.ptab = b.dataset.ptab; renderChartPanel(); $('chartPanel').scrollTop = 0;
-  if (c.ptab === 'vol') loadVolTab(c); else if (c.ptab === 'trades') loadTradesTab(c);
+  if (c.ptab === 'vol') loadVolTab(c); else if (c.ptab === 'trades') loadTradesTab(c); else if (c.ptab === 'div') loadDivTab(c); else if (c.ptab === 'hold') loadHoldTab(c);
 });
 document.addEventListener('click', e => {
   const h = e.target.closest('.srow .sym-container');
