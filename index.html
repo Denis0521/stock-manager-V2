@@ -29,7 +29,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.87-newsFast'; 
+const APP_VER = 'V7.88-twiiChart'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -208,6 +208,9 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .idx-card-box.dragging { opacity: 0.4; transform: scale(0.95); }
 .idx-card-box.drag-over { border-left: 3px solid var(--accent); }
 .idx-card-box:last-child { border-right: none; }
+.idx-card-box.twii-card { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.idx-card-box.twii-card:active { opacity: 0.7; }
+.idx-marquee .idx-card-box.twii-card { cursor: pointer; }
 
 .idx-box-name { font-size: 17px; color: var(--t-muted); font-weight: 700; line-height: 1.2; margin-bottom: 2px; } 
 .idx-data-row { display: flex; align-items: baseline; justify-content: flex-end; gap: 8px; margin-top: 1px; }
@@ -777,7 +780,7 @@ body.row-sorting, body.row-sorting * { -webkit-user-select: none; user-select: n
 <div class="idx-scroll-container" id="idxScrollContainer">
   <div class="idx-track" id="idxTrack">
   <div class="idx-cards" id="idxCards">
-  <div class="idx-card-box">
+  <div class="idx-card-box twii-card" data-twii="1" role="button" tabindex="0" aria-label="開啟臺灣加權指數 K 線圖">
     <div class="idx-box-name" id="idxTitle">🇹🇼 臺灣加權指數</div>
     <div class="idx-data-row">
       <div class="idx-box-price-wrap"><span class="idx-box-price" id="idxPrice">—</span></div>
@@ -1189,7 +1192,7 @@ function applyIdxMarquee() {
 }
 function toggleIdxPause(e) {
   if (!idxMarquee) return;
-  if (e && e.target instanceof Element && e.target.closest('a,button,input')) return;
+  if (e && e.target instanceof Element && e.target.closest('a,button,input,[data-twii]')) return;
   $('idxScrollContainer').classList.toggle('idx-paused');
 }
 function dismissIdxNotice() {
@@ -2225,12 +2228,13 @@ function proxyJson(url) {
 }
 async function yahooHistRows(sym, tf) {
   const [range, itv] = tf === 'D' ? ['1y', '1d'] : tf === 'W' ? ['5y', '1wk'] : ['10y', '1mo'];
-  const order = suffixCache.get(sym) === '.TWO' ? ['.TWO', '.TW'] : ['.TW', '.TWO'];
+  const isIdx = sym === 'IX0001', ysym = isIdx ? '^TWII' : sym;
+  const order = isIdx ? [''] : suffixCache.get(sym) === '.TWO' ? ['.TWO', '.TW'] : ['.TW', '.TWO'];
   let log = '代理伺服器無回應';
   for (const sfx of order) {
     let j = null;
     for (const host of ['query1', 'query2']) {
-      j = await proxyJson(`https://${host}.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}${sfx}?interval=${itv}&range=${range}`);
+      j = await proxyJson(`https://${host}.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ysym)}${sfx}?interval=${itv}&range=${range}`);
       if (j) break;
     }
     if (!j) return { rows: null, log };
@@ -2238,7 +2242,7 @@ async function yahooHistRows(sym, tf) {
     if (!res || !res.timestamp) { log = '查無此代號資料'; continue; }
     const q = res.indicators.quote[0];
     const rows = res.timestamp.map((t, i) => ({ t: new Date(t * 1000 + 8 * 3600e3).toISOString().slice(0, 10), o: q.open[i], h: q.high[i], l: q.low[i], c: q.close[i], v: q.volume[i] || 0 })).filter(validBar);
-    if (rows.length) { suffixCache.set(sym, sfx); return { rows, log: '' }; }
+    if (rows.length) { if (!isIdx) suffixCache.set(sym, sfx); return { rows, log: '' }; }
   }
   return { rows: null, log };
 }
@@ -2293,12 +2297,13 @@ async function fugleIntradayRows(sym) {
     .filter(validBar).sort((a, b) => a.t < b.t ? -1 : 1);
 }
 const fugleQuote = sym => fugleGet(`intraday/quote/${encodeURIComponent(sym)}`).catch(() => null);
-function mergeLiveQuote(rows, q) {
+function mergeLiveQuote(rows, q, isIdx) {
   if (!q) return;
   const today = twToday(), last = q.lastPrice ?? q.closePrice;
   if (last == null || q.openPrice == null || (q.date && q.date !== today)) return;
   const bar = { t: today, o: q.openPrice, h: q.highPrice ?? last, l: q.lowPrice ?? last, c: last, v: (q.total && q.total.tradeVolume || 0) * 1000 };
   const prev = rows[rows.length - 1];
+  if (isIdx) bar.v = prev && prev.t === today ? prev.v : 0; // 指數沒有「張」，保留資料源原本的量
   if (prev && prev.t === today) Object.assign(prev, bar);
   else if (!prev || prev.t < today) rows.push(bar);
 }
@@ -2353,7 +2358,7 @@ async function loadFugleChart(c) {
     const rowsP = c.tf === '5' ? fugleIntradayRows(c.sym) : chartHistRows(c);
     const [rows, q] = await Promise.all([rowsP, fugleQuote(c.sym)]);
     if (q) c.quote = q;
-    if (c.tf === 'D') mergeLiveQuote(rows, c.quote);
+    if (c.tf === 'D') mergeLiveQuote(rows, c.quote, c.isIndex);
     if (seq !== chartOpenSeq || chartCur !== c) return;
     renderChartPanel();
     if (!rows.length) { chartMsg(c.tf === '5' ? '目前沒有當日分K資料（非交易時段或休市）' : '沒有取得K線資料'); return; }
@@ -2375,7 +2380,7 @@ function scheduleChartRefresh(c, seq) {
         const [q, rows] = await Promise.all([fugleQuote(c.sym), c.tf === '5' ? fugleIntradayRows(c.sym).catch(() => null) : null]);
         if (seq !== chartOpenSeq || chartCur !== c) return;
         if (q) c.quote = q;
-        if (rows && rows.length) c.data = rows; else if (c.tf === 'D') mergeLiveQuote(c.data, c.quote);
+        if (rows && rows.length) c.data = rows; else if (c.tf === 'D') mergeLiveQuote(c.data, c.quote, c.isIndex);
         chartRecalc(c);
         if (c.ptab === 'vol') loadVolTab(c, true); else if (c.ptab === 'trades') loadTradesTab(c, true);
         drawChart(); chartInfoUpdate(); renderChartPanel();
@@ -2387,7 +2392,7 @@ function scheduleChartRefresh(c, seq) {
 
 /* ---------- 繪圖 ---------- */
 const fmtP = v => (+Number(v).toFixed(2)).toString();
-const fmtV = (c, v) => c.tf === '5' ? Math.round(v).toLocaleString() + ' 張' : Math.round(v / 1000).toLocaleString() + ' 張';
+const fmtV = (c, v) => c.isIndex ? (v >= 1e8 ? (v / 1e8).toFixed(1) + ' 億' : Math.round(v).toLocaleString()) : c.tf === '5' ? Math.round(v).toLocaleString() + ' 張' : Math.round(v / 1000).toLocaleString() + ' 張';
 function drawChart() {
   const cv = $('chartCanvas'); if (!cv || !chartCur) return;
   const c = chartCur, W = cv.parentElement.clientWidth, H = cv.parentElement.clientHeight, dpr = window.devicePixelRatio || 1;
@@ -2513,12 +2518,12 @@ function panelQuoteHTML(c) {
       cpRow('開盤', numOk(q.openPrice) ? fmtP(q.openPrice) : '—', upDnStyle(q.openPrice, prev)) +
       cpRow('最高', numOk(q.highPrice) ? fmtP(q.highPrice) : '—', upDnStyle(q.highPrice, prev)) +
       cpRow('最低', numOk(q.lowPrice) ? fmtP(q.lowPrice) : '—', upDnStyle(q.lowPrice, prev)) +
-      cpRow('均價', numOk(q.avgPrice) ? fmtP(q.avgPrice) : '—', upDnStyle(q.avgPrice, prev)) +
+      (c.isIndex ? '' : cpRow('均價', numOk(q.avgPrice) ? fmtP(q.avgPrice) : '—', upDnStyle(q.avgPrice, prev))) +
       cpRow('振幅', numOk(q.amplitude) ? q.amplitude.toFixed(2) + '%' : '—') +
-      cpRow('成交量', numOk(t.tradeVolume) ? Math.round(t.tradeVolume).toLocaleString() + ' 張' : '—') +
+      (c.isIndex ? '' : cpRow('成交量', numOk(t.tradeVolume) ? Math.round(t.tradeVolume).toLocaleString() + ' 張' : '—')) +
       cpRow('成交金額', yi(t.tradeValue)) +
-      cpRow('成交筆數', numOk(t.transaction) ? t.transaction.toLocaleString() : '—') +
-      cpRow('內盤/外盤', numOk(bidV) && numOk(askV) && bidV + askV > 0 ? `${(bidV / (bidV + askV) * 100).toFixed(0)}% / ${(askV / (bidV + askV) * 100).toFixed(0)}%` : '—') + `</div>`;
+      (c.isIndex ? '' : cpRow('成交筆數', numOk(t.transaction) ? t.transaction.toLocaleString() : '—')) +
+      (c.isIndex ? '' : cpRow('內盤/外盤', numOk(bidV) && numOk(askV) && bidV + askV > 0 ? `${(bidV / (bidV + askV) * 100).toFixed(0)}% / ${(askV / (bidV + askV) * 100).toFixed(0)}%` : '—')) + `</div>`;
     const bids = (q.bids || []).slice(0, 5), asks = (q.asks || []).slice(0, 5);
     if (bids.length || asks.length) {
       let book = '';
@@ -2667,6 +2672,7 @@ function panelHoldHTML(c) {
 function renderChartPanel() {
   const c = chartCur, el = $('chartPanel'), tabs = $('chartPtabs');
   if (!c || c.engine !== 'fugle') { el.innerHTML = ''; tabs.innerHTML = ''; return; }
+  if (c.isIndex) { c.ptab = 'quote'; tabs.innerHTML = ''; el.innerHTML = panelQuoteHTML(c); return; }
   tabs.innerHTML = [['quote', '行情'], ['vol', '分價量'], ['trades', '成交明細'], ['div', '配息'], ...(isEtfSym(c.sym) ? [['hold', '成分股']] : [])]
     .map(([k, n]) => `<button type="button" class="${k === c.ptab ? 'on' : ''}" data-ptab="${k}">${n}</button>`).join('');
   const top = el.scrollTop;
@@ -2769,7 +2775,7 @@ function openChartModal(s) {
   $('chartTitle').innerHTML = `${escapeHTML(s.symbol)}${s.name ? `<small>${escapeHTML(s.name)}</small>` : ''}`;
   $('chartModalOverlay').classList.add('show');
   if (!(history.state && history.state.chart)) history.pushState({ chart: 1 }, '');
-  startChart({ sym: s.symbol, stock: s, engine: /^\d/.test(s.symbol) ? 'fugle' : 'tv', tf: chartTf, data: [], ma: [[], [], []], vis: 60, off: 0, sel: null, timer: 0, quote: null, year: null, ptab: 'quote', vol: null, trades: null, div: null, hold: null, ind: null });
+  startChart({ sym: s.symbol, stock: s, engine: (s.isIndex || /^\d/.test(s.symbol)) ? 'fugle' : 'tv', isIndex: !!s.isIndex, tf: chartTf, data: [], ma: [[], [], []], vis: 60, off: 0, sel: null, timer: 0, quote: null, year: null, ptab: 'quote', vol: null, trades: null, div: null, hold: null, ind: null });
 }
 function teardownChart() {
   chartOpenSeq++;
@@ -2783,6 +2789,7 @@ function closeChartModal() {
 }
 window.addEventListener('popstate', () => { if ($('chartModalOverlay').classList.contains('show')) teardownChart(); });
 $('chartModalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeChartModal(); });
+document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target instanceof Element && e.target.matches('[data-twii]')) { e.preventDefault(); openTwiiChart(); } });
 $('chartTfs').addEventListener('click', e => {
   const b = e.target.closest('button[data-tf]'); if (!b || !chartCur || chartCur.engine !== 'fugle') return;
   chartTf = chartCur.tf = b.dataset.tf; renderChartTools(); loadFugleChart(chartCur);
@@ -2792,7 +2799,9 @@ $('chartPtabs').addEventListener('click', e => {
   const c = chartCur; c.ptab = b.dataset.ptab; renderChartPanel(); $('chartPanel').scrollTop = 0;
   if (c.ptab === 'vol') loadVolTab(c); else if (c.ptab === 'trades') loadTradesTab(c); else if (c.ptab === 'div') loadDivTab(c); else if (c.ptab === 'hold') loadHoldTab(c);
 });
+function openTwiiChart() { openChartModal({ symbol: 'IX0001', name: '臺灣加權指數', isIndex: true }); }
 document.addEventListener('click', e => {
+  if (e.target instanceof Element && e.target.closest('[data-twii]')) { openTwiiChart(); return; }
   const h = e.target.closest('.srow .sym-container');
   if (!h) return;
   if (Date.now() - lastRowDragAt < 500) return; // 長按拖曳排序後放開，不要誤開圖表
