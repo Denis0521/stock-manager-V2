@@ -29,7 +29,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.92-idxChart'; 
+const APP_VER = 'V7.93-idxLive'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -1556,6 +1556,7 @@ async function refreshFut() {
     const d = await res.json();
     if (!d || !d.near || d.near.price == null) return;
     updateFutDOM(d); setIfChanged(LS.KEYS.CACHE_FUT, d);
+    futTickAdd(d.near.price, d.near.volume, d.session);
   } catch (e) {}
 }
 
@@ -2470,6 +2471,7 @@ function altApply(c, live) {
   if (c.src !== 'fut') c.quote = { date: d.t, previousClose: prev, openPrice: d.o, highPrice: d.h, lowPrice: d.l, lastPrice: d.c, amplitude: prev ? (d.h - d.l) / prev * 100 : null, total: {} };
 }
 async function loadAltChart(c) {
+  if (c.tf === 'T') return loadLiveChart(c);
   const seq = ++chartOpenSeq; clearTimeout(c.timer);
   c.data = []; c.sel = null; c.off = 0; drawChart(); chartInfoUpdate(); chartMsg('圖表載入中…');
   const [rows, live] = await Promise.all([altHistRows(c).catch(() => []), altLive(c).catch(() => null)]);
@@ -2485,6 +2487,136 @@ async function loadAltChart(c) {
   };
   c.timer = setTimeout(tick, 15000);
 }
+/* ---------- 即時走勢（分時線）：國外指數用 Yahoo 1 分鐘資料；台指期優先用 Worker /intraday，沒有就用 App 本機記錄 ---------- */
+const FUT_TICK_KEY = 'tw_fut_ticks_v1';
+const tickRow = (ts, p) => ({ ts, t: new Date((ts + 28800) * 1000).toISOString().slice(0, 16), o: p, h: p, l: p, c: p, v: 0 });
+function futTicksGet() {
+  try {
+    const cut = Date.now() / 1000 - 20 * 3600;
+    return JSON.parse(localStorage.getItem(FUT_TICK_KEY) || '[]').filter(x => x[0] > cut && numOk(x[1])).map(x => tickRow(x[0], x[1]));
+  } catch (e) { return []; }
+}
+function futTickAdd(price, vol, session) {
+  if (!numOk(price) || (session !== 'day' && session !== 'night')) return; // 非交易時段不記錄，避免畫出一條平線
+  try {
+    const now = Math.floor(Date.now() / 1000), min = Math.floor(now / 60) * 60, cut = now - 20 * 3600;
+    const a = JSON.parse(localStorage.getItem(FUT_TICK_KEY) || '[]').filter(x => x[0] > cut), last = a[a.length - 1];
+    if (last && last[0] === min) { last[1] = price; last[2] = vol; }
+    else if (!last || !numOk(vol) || last[2] !== vol) a.push([min, price, vol]); // 成交量沒變＝沒有新成交，不新增
+    localStorage.setItem(FUT_TICK_KEY, JSON.stringify(a.slice(-1300)));
+  } catch (e) {}
+}
+// 台指期交易時段框：日盤 08:45–13:45、夜盤 15:00–次日 05:00（台北時間）
+function futFrame(rows) {
+  if (!rows.length) return null;
+  const lastTs = rows[rows.length - 1].ts, tw = new Date((lastTs + 28800) * 1000), mins = tw.getUTCHours() * 60 + tw.getUTCMinutes();
+  const day0 = Date.UTC(tw.getUTCFullYear(), tw.getUTCMonth(), tw.getUTCDate()) / 1000 - 28800;
+  if (mins >= 525 && mins <= 830) return [day0 + 525 * 60, day0 + 825 * 60];
+  if (mins >= 900) return [day0 + 900 * 60, day0 + 86400 + 300 * 60];
+  if (mins < 300) return [day0 - 86400 + 900 * 60, day0 + 300 * 60];
+  return null;
+}
+async function yahooIntraday(sym) {
+  for (const host of ['query1', 'query2']) {
+    const j = await proxyJson(`https://${host}.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1m&range=1d`);
+    const res = j && j.chart && j.chart.result && j.chart.result[0];
+    if (!res || !res.timestamp) continue;
+    const q = res.indicators.quote[0], m = res.meta || {}, off = m.gmtoffset || 0, rows = [];
+    res.timestamp.forEach((ts, i) => { const p = q.close[i]; if (numOk(p)) rows.push({ ts, t: new Date((ts + off) * 1000).toISOString().slice(0, 16), o: p, h: p, l: p, c: p, v: 0 }); });
+    const rg = m.currentTradingPeriod && m.currentTradingPeriod.regular;
+    if (rows.length) return { rows, prev: m.chartPreviousClose ?? m.previousClose, off, frame: rg && rg.start && rg.end ? [rg.start, rg.end] : null };
+  }
+  return null;
+}
+async function altIntraday(c) {
+  if (c.src === 'fut') {
+    await altLive(c).catch(() => null); // 更新 c.futData
+    const d = c.futData, near = d && d.near;
+    if (near && near.price != null) futTickAdd(near.price, near.volume, d.session);
+    let rows = [], src = 'worker';
+    try {
+      const r = await fetch(FUT_WORKER_URL + 'intraday?_=' + Date.now(), { signal: AbortSignal.timeout(8000), cache: 'no-store' });
+      if (r.ok) { const j = await r.json(); rows = (Array.isArray(j.rows) ? j.rows : []).map(a => tickRow(a[0] > 1e12 ? Math.floor(a[0] / 1000) : a[0], a[1])).filter(x => numOk(x.c)); }
+    } catch (e) {}
+    const local = futTicksGet();
+    if (rows.length < 2 || rows.length < local.length) { rows = local; src = 'local'; }
+    const frame = futFrame(rows);
+    if (frame) rows = rows.filter(r => r.ts >= frame[0] - 60 && r.ts <= frame[1] + 60);
+    return { rows, live: { prev: near ? near.ref : null, off: 28800, frame, src } };
+  }
+  const y = await yahooIntraday(c.sym);
+  return y ? { rows: y.rows, live: { prev: y.prev, off: y.off, frame: y.frame, src: 'yahoo' } } : null;
+}
+async function loadLiveChart(c) {
+  const seq = ++chartOpenSeq; clearTimeout(c.timer);
+  c.data = []; c.sel = null; c.off = 0; c.live = null; drawChart(); chartInfoUpdate(); chartMsg('即時走勢載入中…');
+  const run = async () => {
+    const got = await altIntraday(c).catch(() => null);
+    if (seq !== chartOpenSeq || chartCur !== c || c.tf !== 'T') return;
+    if (got && got.rows.length) {
+      c.data = got.rows; c.live = got.live;
+      if (c.src !== 'fut') {
+        const cl = got.rows.map(r => r.c), pv = got.live.prev, hi = Math.max(...cl), lo = Math.min(...cl);
+        c.quote = { date: got.rows[got.rows.length - 1].t.slice(0, 10), previousClose: pv, openPrice: cl[0], highPrice: hi, lowPrice: lo, lastPrice: cl[cl.length - 1], amplitude: pv ? (hi - lo) / pv * 100 : null, total: {} };
+      }
+    }
+    renderChartPanel();
+    if (c.data.length < 2) { chartMsg(c.src === 'fut' ? '台指期即時走勢累積中：App 開著時每分鐘記錄一筆，稍後再看，或切到「日」看日 K' : '目前沒有即時走勢資料（休市，或代理伺服器沒有回應）'); return; }
+    chartMsg(''); drawChart(); chartInfoUpdate();
+  };
+  await run();
+  const gap = c.src === 'fut' ? 15000 : 30000;
+  const tick = async () => {
+    if (seq !== chartOpenSeq || chartCur !== c || c.tf !== 'T') return;
+    if (document.visibilityState === 'visible') await run();
+    if (seq === chartOpenSeq && chartCur === c && c.tf === 'T') c.timer = setTimeout(tick, gap);
+  };
+  c.timer = setTimeout(tick, gap);
+}
+function liveSelect(c, e, cv, toggle) {
+  const L = c.LT; if (!L || !c.data.length) return;
+  const r = cv.getBoundingClientRect(), ts = L.t0 + (e.clientX - r.left) / L.plotW * (L.t1 - L.t0);
+  let best = 0, bd = Infinity;
+  c.data.forEach((d, i) => { const dd = Math.abs(d.ts - ts); if (dd < bd) { bd = dd; best = i; } });
+  c.sel = toggle && c.sel === best ? null : best; drawChart(); chartInfoUpdate();
+}
+function drawLive(c, g, W, H) {
+  const data = c.data, lv = c.live || {}, cs = getComputedStyle(document.body);
+  const cMuted = cs.getPropertyValue('--t-muted').trim() || '#888', cGrid = cs.getPropertyValue('--border-light').trim() || '#ddd', cMain = cs.getPropertyValue('--t-main').trim() || '#222';
+  const padR = 58, padT = 10, padB = 20, plotW = W - padR, plotH = H - padT - padB;
+  const first = data[0], last = data[data.length - 1], prev = numOk(lv.prev) ? lv.prev : first.c;
+  let t0 = first.ts, t1 = last.ts;
+  if (lv.frame) { t0 = Math.min(lv.frame[0], t0); t1 = Math.max(lv.frame[1], t1); }
+  if (t1 - t0 < 1800) t1 = t0 + 1800;
+  let mx = 0; data.forEach(d => { mx = Math.max(mx, Math.abs(d.c - prev)); });
+  const span = (mx || prev * 0.002) * 1.15, hi = prev + span, lo = prev - span;
+  const xAt = ts => (ts - t0) / (t1 - t0) * plotW, yAt = v => padT + (hi - v) / (hi - lo) * plotH;
+  g.font = '11px sans-serif'; g.lineWidth = 1; g.textAlign = 'left';
+  for (let k = 0; k <= 4; k++) { // 水平線：中間那條是昨收；右側價格、左側漲跌幅
+    const v = hi - (hi - lo) * k / 4, y = Math.round(yAt(v)) + 0.5, pc = (v - prev) / prev * 100;
+    g.strokeStyle = cGrid; g.setLineDash(k === 2 ? [4, 3] : []); g.beginPath(); g.moveTo(0, y); g.lineTo(plotW, y); g.stroke(); g.setLineDash([]);
+    g.textBaseline = k === 0 ? 'top' : k === 4 ? 'bottom' : 'middle';
+    g.fillStyle = cMuted; g.fillText(fmtP(v), plotW + 4, y);
+    g.fillStyle = pc > 0.005 ? CHART_UP : pc < -0.005 ? CHART_DN : cMuted; g.fillText((pc > 0 ? '+' : '') + pc.toFixed(2) + '%', 4, y);
+  }
+  g.textBaseline = 'alphabetic'; g.fillStyle = cMuted;
+  for (let k = 0; k <= 4; k++) { g.textAlign = k === 0 ? 'left' : k === 4 ? 'right' : 'center'; g.fillText(new Date((t0 + (t1 - t0) * k / 4 + (lv.off || 0)) * 1000).toISOString().slice(11, 16), xAt(t0 + (t1 - t0) * k / 4), H - 5); }
+  const col = last.c > prev ? CHART_UP : last.c < prev ? CHART_DN : '#8A94A6';
+  const grad = g.createLinearGradient(0, padT, 0, padT + plotH); grad.addColorStop(0, col + '45'); grad.addColorStop(1, col + '00');
+  g.beginPath(); data.forEach((d, i) => { const x = xAt(d.ts), y = yAt(d.c); if (i) g.lineTo(x, y); else g.moveTo(x, y); });
+  g.strokeStyle = col; g.lineWidth = 1.6; g.lineJoin = 'round'; g.stroke();
+  g.lineTo(xAt(last.ts), padT + plotH); g.lineTo(xAt(first.ts), padT + plotH); g.closePath(); g.fillStyle = grad; g.fill(); g.lineWidth = 1;
+  const ly = yAt(last.c); // 最新價標籤
+  g.strokeStyle = col; g.setLineDash([3, 3]); g.beginPath(); g.moveTo(0, ly); g.lineTo(plotW, ly); g.stroke(); g.setLineDash([]);
+  g.fillStyle = col; g.fillRect(plotW, ly - 8, padR, 16); g.fillStyle = '#fff'; g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText(fmtP(last.c), plotW + 4, ly);
+  if (c.sel != null && data[c.sel]) {
+    const d = data[c.sel], x = xAt(d.ts), y = yAt(d.c);
+    g.strokeStyle = cMain; g.globalAlpha = 0.5; g.setLineDash([4, 3]); g.beginPath(); g.moveTo(Math.round(x) + 0.5, padT); g.lineTo(Math.round(x) + 0.5, padT + plotH); g.moveTo(0, Math.round(y) + 0.5); g.lineTo(plotW, Math.round(y) + 0.5); g.stroke(); g.setLineDash([]); g.globalAlpha = 1;
+    g.fillStyle = col; g.beginPath(); g.arc(x, y, 3.5, 0, Math.PI * 2); g.fill();
+  }
+  if (lv.src === 'local') { g.fillStyle = cMuted; g.textAlign = 'center'; g.textBaseline = 'top'; g.fillText('走勢由 App 開啟期間記錄', plotW / 2, padT + 2); }
+  c.LT = { t0, t1, plotW };
+}
 function panelFutHTML(c) {
   const d = c.futData, n = d && d.near; if (!n) return '';
   const x = d.next, f = v => numOk(v) ? fmtP(v) : '—', iv = v => numOk(v) ? Math.round(v).toLocaleString() : '—';
@@ -2497,7 +2629,7 @@ function openAltChart(s) {
   $('chartTitle').innerHTML = `${escapeHTML(s.symbol)}<small>${escapeHTML(s.name)}</small>`;
   $('chartModalOverlay').classList.add('show');
   if (!(history.state && history.state.chart)) history.pushState({ chart: 1 }, '');
-  startChart({ sym: s.symbol, stock: null, engine: 'fugle', src: s.src, isIndex: true, tf: s.src === 'fut' || chartTf === '5' ? 'D' : chartTf, data: [], ma: [[], [], []], vis: 60, off: 0, sel: null, timer: 0, quote: null, futData: null, year: null, ptab: 'quote', vol: null, trades: null, div: null, hold: null, ind: null });
+  startChart({ sym: s.symbol, stock: null, engine: 'fugle', src: s.src, isIndex: true, tf: 'T', data: [], ma: [[], [], []], vis: 60, live: null, off: 0, sel: null, timer: 0, quote: null, futData: null, year: null, ptab: 'quote', vol: null, trades: null, div: null, hold: null, ind: null });
 }
 function scheduleChartRefresh(c, seq) {
   clearTimeout(c.timer);
@@ -2528,6 +2660,7 @@ function drawChart() {
   if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
   const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
   const data = c.data; if (!data || !data.length) return;
+  if (c.tf === 'T') { drawLive(c, g, W, H); return; }
   const cs = getComputedStyle(document.body);
   const cMuted = cs.getPropertyValue('--t-muted').trim() || '#888', cGrid = cs.getPropertyValue('--border-light').trim() || '#ddd', cMain = cs.getPropertyValue('--t-main').trim() || '#222';
   const padR = 52, padT = 8, padB = 20, gap = 8;
@@ -2623,6 +2756,14 @@ function chartInfoUpdate() {
   const el = $('chartInfo'), c = chartCur;
   if (!c || !c.data || !c.data.length) { el.innerHTML = ''; return; }
   const i = c.sel != null && c.sel < c.data.length ? c.sel : c.data.length - 1;
+  if (c.tf === 'T') { // 即時走勢：顯示時間、價格、漲跌與當日高低
+    const lv = c.live || {}, p0 = lv.prev, pt = c.data[i], cl = c.data.map(r => r.c), dh = Math.max(...cl), dl = Math.min(...cl);
+    const ch = numOk(p0) ? pt.c - p0 : null, cc = ch > 0 ? CHART_UP : ch < 0 ? CHART_DN : 'inherit';
+    el.innerHTML = `${escapeHTML(pt.t.replace('T', ' ').slice(5, 16))}　價 <b style="color:${cc}">${fmtP(pt.c)}</b>` +
+      (ch != null ? ` <b style="color:${cc}">${ch > 0 ? '+' : ''}${fmtP(ch)} (${ch > 0 ? '+' : ''}${(ch / p0 * 100).toFixed(2)}%)</b>` : '') +
+      `<br>昨收 ${numOk(p0) ? fmtP(p0) : '—'}　高 <b style="color:${CHART_UP}">${fmtP(dh)}</b>　低 <b style="color:${CHART_DN}">${fmtP(dl)}</b>`;
+    return;
+  }
   const d = c.data[i], pc = i > 0 ? c.data[i - 1].c : null;
   const chg = pc != null ? d.c - pc : null, col = v => v > 0 ? CHART_UP : v < 0 ? CHART_DN : 'inherit';
   const chgTxt = chg != null ? ` <b style="color:${col(chg)}">${chg > 0 ? '+' : ''}${fmtP(chg)} (${chg > 0 ? '+' : ''}${(chg / pc * 100).toFixed(2)}%)</b>` : '';
@@ -2820,6 +2961,10 @@ function bindChartCanvas(cv) {
   cv.addEventListener('pointermove', e => {
     const c = chartCur; if (!c || !st || !ptrs.has(e.pointerId)) return;
     ptrs.set(e.pointerId, e.clientX);
+    if (c.tf === 'T') { // 即時走勢：按住拖曳＝十字游標，不縮放、不平移
+      if (!st.pinch) { if (Math.abs(e.clientX - st.x0) > 6) st.moved = true; if (st.moved) liveSelect(c, e, cv, false); }
+      return;
+    }
     if (st.pinch && ptrs.size === 2) {
       const [a, b] = [...ptrs.values()]; const d = Math.abs(a - b) || 1;
       c.vis = Math.max(15, Math.min(240, Math.round(st.vis0 * st.d0 / d))); c.sel = null;
@@ -2832,7 +2977,8 @@ function bindChartCanvas(cv) {
   const up = e => {
     const c = chartCur; const wasTap = st && !st.pinch && !st.moved && ptrs.size === 1;
     ptrs.delete(e.pointerId);
-    if (wasTap && c && c.L) {
+    if (wasTap && c && c.tf === 'T') liveSelect(c, e, cv, true);
+    else if (wasTap && c && c.L) {
       const r = cv.getBoundingClientRect(), L = c.L;
       let k = Math.round((e.clientX - r.left - (L.plotW - L.n * L.step)) / L.step - 0.5);
       k = Math.max(0, Math.min(L.n - 1, k)); const idx = L.start + k;
@@ -2886,8 +3032,9 @@ async function loadTvChart(c) {
 /* ---------- 彈窗控制 ---------- */
 function renderChartTools() {
   const c = chartCur;
+  $('chartIndBtn').style.display = c.tf === 'T' ? 'none' : ''; // 即時走勢沒有副圖
   $('chartTfs').innerHTML = c.engine === 'fugle'
-    ? CHART_TFS.filter(([k]) => !c.src || (k !== '5' && (c.src !== 'fut' || k === 'D'))).map(([k, n]) => `<button type="button" class="${k === c.tf ? 'on' : ''}" data-tf="${k}">${n}</button>`).join('') : '';
+    ? (c.src ? [['T', '即時']] : []).concat(CHART_TFS.filter(([k]) => !c.src || (k !== '5' && (c.src !== 'fut' || k === 'D')))).map(([k, n]) => `<button type="button" class="${k === c.tf ? 'on' : ''}" data-tf="${k}">${n}</button>`).join('') : '';
 }
 function startChart(c) {
   const body = $('chartBody'); clearTimeout(c.timer); chartCur = c; ++chartOpenSeq;
@@ -2921,7 +3068,8 @@ $('chartModalOverlay').addEventListener('click', e => { if (e.target === e.curre
 document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target instanceof Element && e.target.matches('[data-twii]')) { e.preventDefault(); openTwiiChart(); } });
 $('chartTfs').addEventListener('click', e => {
   const b = e.target.closest('button[data-tf]'); if (!b || !chartCur || chartCur.engine !== 'fugle') return;
-  chartTf = chartCur.tf = b.dataset.tf; renderChartTools(); loadFugleChart(chartCur);
+  chartCur.tf = b.dataset.tf; if (b.dataset.tf !== 'T') chartTf = b.dataset.tf; // 「即時」只屬於指數／期貨，不影響個股預設週期
+  renderChartTools(); loadFugleChart(chartCur);
 });
 $('chartPtabs').addEventListener('click', e => {
   const b = e.target.closest('button[data-ptab]'); if (!b || !chartCur || chartCur.engine !== 'fugle') return;
