@@ -29,7 +29,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.91-twiiFut'; 
+const APP_VER = 'V7.92-idxChart'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -210,6 +210,8 @@ button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):ac
 .idx-card-box:last-child { border-right: none; }
 .idx-card-box.twii-card { cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .idx-card-box.twii-card:active { opacity: 0.7; }
+.idx-card-box.fut-card { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.idx-card-box.fut-card:active { opacity: 0.7; }
 .idx-marquee .idx-card-box.twii-card { cursor: pointer; }
 
 .idx-box-name { font-size: 17px; color: var(--t-muted); font-weight: 700; line-height: 1.2; margin-bottom: 2px; } 
@@ -1206,7 +1208,7 @@ function applyIdxMarquee() {
 }
 function toggleIdxPause(e) {
   if (!idxMarquee) return;
-  if (e && e.target instanceof Element && e.target.closest('a,button,input,[data-twii]')) return;
+  if (e && e.target instanceof Element && e.target.closest('a,button,input,[data-twii],.fut-card,.draggable-card')) return;
   $('idxScrollContainer').classList.toggle('idx-paused');
 }
 function dismissIdxNotice() {
@@ -2265,9 +2267,9 @@ function proxyJson(url) {
   })());
   return Promise.any(tasks).catch(() => null);
 }
-async function yahooHistRows(sym, tf) {
+async function yahooHistRows(sym, tf, yOnly = false) {
   const [range, itv] = tf === 'D' ? ['1y', '1d'] : tf === 'W' ? ['5y', '1wk'] : ['10y', '1mo'];
-  const isIdx = sym === 'IX0001', ysym = isIdx ? '^TWII' : sym;
+  const isIdx = sym === 'IX0001' || yOnly, ysym = sym === 'IX0001' ? '^TWII' : sym;
   const order = isIdx ? [''] : suffixCache.get(sym) === '.TWO' ? ['.TWO', '.TW'] : ['.TW', '.TWO'];
   let log = '代理伺服器無回應';
   for (const sfx of order) {
@@ -2390,6 +2392,7 @@ function calcYear(c) {
 }
 
 async function loadFugleChart(c) {
+  if (c.src) return loadAltChart(c);
   const seq = ++chartOpenSeq; clearTimeout(c.timer);
   c.data = []; c.sel = null; c.off = 0; drawChart(); chartInfoUpdate();
   chartMsg('圖表載入中…');
@@ -2438,6 +2441,63 @@ async function extendIndexHistory(c, seq) {
   histCacheSet(c.sym, tf, c.data);
   c.diag = base + `；已補抓至 ${c.data.length} 根（最早 ${c.data[0].t}）`;
   chartRecalc(c); drawChart(); chartInfoUpdate(); renderChartPanel();
+}
+/* ---------- 自選國外指數／臺灣指數期貨 K 線（資料不走 Fugle） ---------- */
+const rowsOf = j => Array.isArray(j && j.rows) ? j.rows.map(a => ({ t: a[0], o: a[1], h: a[2], l: a[3], c: a[4], v: a[5] })).filter(validBar) : [];
+async function altHistRows(c) {
+  if (c.src === 'fut') {
+    const r = await fetch(FUT_WORKER_URL + 'hist?tf=D&_=' + Date.now(), { signal: AbortSignal.timeout(12000) });
+    return r.ok ? rowsOf(await r.json()) : [];
+  }
+  const fromWorker = async () => { const rows = rowsOf(await workerGet(`/hist?symbol=${encodeURIComponent(c.sym)}&tf=${c.tf}`)); if (rows.length) return rows; throw new Error('w'); };
+  const fromYahoo = async () => { const y = await yahooHistRows(c.sym, c.tf, true); if (y.rows && y.rows.length) return y.rows; throw new Error('y'); };
+  return Promise.any([fromWorker(), fromYahoo()]).catch(() => []);
+}
+async function altLive(c) {
+  if (c.src === 'fut') {
+    const r = await fetch(FUT_WORKER_URL + '?_=' + Date.now(), { signal: AbortSignal.timeout(API_TIMEOUT), cache: 'no-store' });
+    c.futData = r.ok ? await r.json() : c.futData;
+    const n = c.futData && c.futData.near;
+    return n && n.price != null ? { last: n.price, prev: n.ref } : null;
+  }
+  const it = cachedGlobalIndices.find(x => x.symbol === c.sym);
+  return it ? { last: it.price, prev: it.price - it.changeAmt } : null;
+}
+function altApply(c, live) {
+  const last = c.data[c.data.length - 1];
+  if (live && last) { last.c = live.last; last.h = Math.max(last.h, live.last); last.l = Math.min(last.l, live.last); }
+  const d = c.data[c.data.length - 1] || {}, prev = live && live.prev != null ? live.prev : (c.data.length > 1 ? c.data[c.data.length - 2].c : null);
+  if (c.src !== 'fut') c.quote = { date: d.t, previousClose: prev, openPrice: d.o, highPrice: d.h, lowPrice: d.l, lastPrice: d.c, amplitude: prev ? (d.h - d.l) / prev * 100 : null, total: {} };
+}
+async function loadAltChart(c) {
+  const seq = ++chartOpenSeq; clearTimeout(c.timer);
+  c.data = []; c.sel = null; c.off = 0; drawChart(); chartInfoUpdate(); chartMsg('圖表載入中…');
+  const [rows, live] = await Promise.all([altHistRows(c).catch(() => []), altLive(c).catch(() => null)]);
+  if (seq !== chartOpenSeq || chartCur !== c) return;
+  renderChartPanel();
+  if (!rows.length) { chartMsg(c.src === 'fut' ? '期貨 K 線資料累積中：Worker 需綁定 KV 並設定每分鐘排程，之後每個交易日會新增一根' : '沒有取得 K 線資料'); return; }
+  c.data = rows; c.vis = { D: 60, W: 52, M: 48 }[c.tf]; altApply(c, live); chartRecalc(c);
+  chartMsg(''); drawChart(); chartInfoUpdate(); renderChartPanel();
+  const tick = async () => {
+    if (seq !== chartOpenSeq || chartCur !== c) return;
+    if (document.visibilityState === 'visible') { try { altApply(c, await altLive(c)); chartRecalc(c); drawChart(); chartInfoUpdate(); renderChartPanel(); } catch (e) {} }
+    c.timer = setTimeout(tick, 15000);
+  };
+  c.timer = setTimeout(tick, 15000);
+}
+function panelFutHTML(c) {
+  const d = c.futData, n = d && d.near; if (!n) return '';
+  const x = d.next, f = v => numOk(v) ? fmtP(v) : '—', iv = v => numOk(v) ? Math.round(v).toLocaleString() : '—';
+  return `<div class="cp-title">近月行情${d.session === 'night' ? '（夜盤）' : d.session === 'day' ? '（日盤）' : ''}</div><div class="cp-grid">` +
+    cpRow('參考價', f(n.ref)) + cpRow('開盤', f(n.open), upDnStyle(n.open, n.ref)) + cpRow('最高', f(n.high), upDnStyle(n.high, n.ref)) + cpRow('最低', f(n.low), upDnStyle(n.low, n.ref)) +
+    cpRow('成交量', iv(n.volume) + ' 口') + cpRow('未平倉', iv(n.oi) + ' 口') + cpRow('買價', f(n.bid)) + cpRow('賣價', f(n.ask)) +
+    cpRow('近月減現貨', numOk(d.basis) ? (d.basis > 0 ? '+' : '') + fmtP(d.basis) : '—') + (x ? cpRow('近二', f(x.price) + (numOk(x.change) ? `（${x.change > 0 ? '+' : ''}${fmtP(x.change)}）` : '')) : '') + `</div>`;
+}
+function openAltChart(s) {
+  $('chartTitle').innerHTML = `${escapeHTML(s.symbol)}<small>${escapeHTML(s.name)}</small>`;
+  $('chartModalOverlay').classList.add('show');
+  if (!(history.state && history.state.chart)) history.pushState({ chart: 1 }, '');
+  startChart({ sym: s.symbol, stock: null, engine: 'fugle', src: s.src, isIndex: true, tf: s.src === 'fut' || chartTf === '5' ? 'D' : chartTf, data: [], ma: [[], [], []], vis: 60, off: 0, sel: null, timer: 0, quote: null, futData: null, year: null, ptab: 'quote', vol: null, trades: null, div: null, hold: null, ind: null });
 }
 function scheduleChartRefresh(c, seq) {
   clearTimeout(c.timer);
@@ -2740,6 +2800,7 @@ function panelHoldHTML(c) {
 function renderChartPanel() {
   const c = chartCur, el = $('chartPanel'), tabs = $('chartPtabs');
   if (!c || c.engine !== 'fugle') { el.innerHTML = ''; tabs.innerHTML = ''; return; }
+  if (c.src === 'fut') { tabs.innerHTML = ''; el.innerHTML = panelFutHTML(c); return; }
   if (c.isIndex) { c.ptab = 'quote'; tabs.innerHTML = ''; el.innerHTML = panelQuoteHTML(c); return; }
   tabs.innerHTML = [['quote', '行情'], ['vol', '分價量'], ['trades', '成交明細'], ['div', '配息'], ...(isEtfSym(c.sym) ? [['hold', '成分股']] : [])]
     .map(([k, n]) => `<button type="button" class="${k === c.ptab ? 'on' : ''}" data-ptab="${k}">${n}</button>`).join('');
@@ -2826,7 +2887,7 @@ async function loadTvChart(c) {
 function renderChartTools() {
   const c = chartCur;
   $('chartTfs').innerHTML = c.engine === 'fugle'
-    ? CHART_TFS.map(([k, n]) => `<button type="button" class="${k === c.tf ? 'on' : ''}" data-tf="${k}">${n}</button>`).join('') : '';
+    ? CHART_TFS.filter(([k]) => !c.src || (k !== '5' && (c.src !== 'fut' || k === 'D'))).map(([k, n]) => `<button type="button" class="${k === c.tf ? 'on' : ''}" data-tf="${k}">${n}</button>`).join('') : '';
 }
 function startChart(c) {
   const body = $('chartBody'); clearTimeout(c.timer); chartCur = c; ++chartOpenSeq;
@@ -2870,6 +2931,9 @@ $('chartPtabs').addEventListener('click', e => {
 function openTwiiChart() { openChartModal({ symbol: 'IX0001', name: '臺灣加權指數', isIndex: true }); }
 document.addEventListener('click', e => {
   if (e.target instanceof Element && e.target.closest('[data-twii]')) { openTwiiChart(); return; }
+  if (e.target instanceof Element && e.target.closest('.fut-card')) { openAltChart({ symbol: 'WTX&', name: '🇹🇼 臺灣指數期貨', src: 'fut' }); return; }
+  const ic = e.target instanceof Element && e.target.closest('.idx-card-box.draggable-card');
+  if (ic && ic.dataset.symbol && !draggedIdxSymbol) { const m = availableIndices.find(x => x.symbol === ic.dataset.symbol); openAltChart({ symbol: ic.dataset.symbol, name: m ? m.name : ic.dataset.symbol, src: 'yahoo' }); return; }
   const h = e.target.closest('.srow .sym-container');
   if (!h) return;
   if (Date.now() - lastRowDragAt < 500) return; // 長按拖曳排序後放開，不要誤開圖表
