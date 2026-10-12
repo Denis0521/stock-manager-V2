@@ -1556,7 +1556,7 @@ async function refreshFut() {
     const d = await res.json();
     if (!d || !d.near || d.near.price == null) return;
     updateFutDOM(d); setIfChanged(LS.KEYS.CACHE_FUT, d);
-    futTickAdd(d.near.price, d.near.volume, d.session);
+    futTickAdd(d.near.price, d.near.volume, d.session); futDailyUpdate(d);
   } catch (e) {}
 }
 
@@ -1594,7 +1594,6 @@ async function refreshGlobalIndices() {
       changeAmt: item.change ?? item.regularMarketChange ?? 0,
       pct: item.changePercent ?? item.regularMarketChangePercent ?? 0
     })).sort((a, b) => syms.indexOf(a.symbol) - syms.indexOf(b.symbol));
-    cachedGlobalIndices.forEach(it => idxTickAdd(it.symbol, it.price));
     setIfChanged(LS.KEYS.CACHE_IDX, cachedGlobalIndices); trackApiUsage('Yahoo');
     renderGlobalIndices(cachedGlobalIndices, false);
   } catch (e) {}
@@ -2446,10 +2445,32 @@ async function extendIndexHistory(c, seq) {
 }
 /* ---------- 自選國外指數／臺灣指數期貨 K 線（資料不走 Fugle） ---------- */
 const rowsOf = j => Array.isArray(j && j.rows) ? j.rows.map(a => ({ t: a[0], o: a[1], h: a[2], l: a[3], c: a[4], v: a[5] })).filter(validBar) : [];
+// 台指期日 K 本機累積：Worker 沒有歷史資料時，App 每次取得報價就更新當日這一根
+const FUT_DAILY_KEY = 'tw_fut_daily_v1';
+function futDailyGet() {
+  try { return JSON.parse(localStorage.getItem(FUT_DAILY_KEY) || '[]').map(a => ({ t: a[0], o: a[1], h: a[2], l: a[3], c: a[4], v: a[5] || 0 })).filter(validBar); } catch (e) { return []; }
+}
+function futDailyUpdate(d) {
+  const n = d && d.near; if (!n || !numOk(n.price)) return;
+  if (d.session !== 'day' && d.session !== 'night') return;
+  try {
+    const tw = new Date(Date.now() + 28800e3); // 台北時間
+    if (d.session === 'night' && tw.getUTCHours() >= 15) tw.setUTCDate(tw.getUTCDate() + 1); // 夜盤歸屬下一個交易日
+    while (tw.getUTCDay() === 0 || tw.getUTCDay() === 6) tw.setUTCDate(tw.getUTCDate() + 1);
+    const day = tw.toISOString().slice(0, 10), a = JSON.parse(localStorage.getItem(FUT_DAILY_KEY) || '[]'), i = a.findIndex(x => x[0] === day);
+    const p = n.price, o = numOk(n.open) ? n.open : p, h = Math.max(numOk(n.high) ? n.high : p, p), l = Math.min(numOk(n.low) ? n.low : p, p);
+    if (i < 0) a.push([day, o, h, l, p, n.volume || 0]);
+    else { const x = a[i]; x[2] = Math.max(x[2], h); x[3] = Math.min(x[3], l); x[4] = p; if (numOk(n.volume)) x[5] = n.volume; }
+    a.sort((x, y) => x[0] < y[0] ? -1 : 1);
+    localStorage.setItem(FUT_DAILY_KEY, JSON.stringify(a.slice(-500)));
+  } catch (e) {}
+}
 async function altHistRows(c) {
   if (c.src === 'fut') {
-    const r = await fetch(FUT_WORKER_URL + 'hist?tf=D&_=' + Date.now(), { signal: AbortSignal.timeout(12000) });
-    return r.ok ? rowsOf(await r.json()) : [];
+    let w = [];
+    try { const r = await fetch(FUT_WORKER_URL + 'hist?tf=D&_=' + Date.now(), { signal: AbortSignal.timeout(12000) }); if (r.ok) w = rowsOf(await r.json()); } catch (e) {}
+    const m = new Map(); futDailyGet().forEach(r => m.set(r.t, r)); w.forEach(r => m.set(r.t, r)); // Worker 資料優先，本機補足缺的日期
+    return [...m.values()].sort((a, b) => a.t < b.t ? -1 : 1);
   }
   const fromWorker = async () => { const rows = rowsOf(await workerGet(`/hist?symbol=${encodeURIComponent(c.sym)}&tf=${c.tf}`)); if (rows.length) return rows; throw new Error('w'); };
   const fromYahoo = async () => { const y = await yahooHistRows(c.sym, c.tf, true); if (y.rows && y.rows.length) return y.rows; throw new Error('y'); };
@@ -2459,6 +2480,7 @@ async function altLive(c) {
   if (c.src === 'fut') {
     const r = await fetch(FUT_WORKER_URL + '?_=' + Date.now(), { signal: AbortSignal.timeout(API_TIMEOUT), cache: 'no-store' });
     c.futData = r.ok ? await r.json() : c.futData;
+    futDailyUpdate(c.futData);
     const n = c.futData && c.futData.near;
     return n && n.price != null ? { last: n.price, prev: n.ref } : null;
   }
@@ -2478,7 +2500,7 @@ async function loadAltChart(c) {
   const [rows, live] = await Promise.all([altHistRows(c).catch(() => []), altLive(c).catch(() => null)]);
   if (seq !== chartOpenSeq || chartCur !== c) return;
   renderChartPanel();
-  if (!rows.length) { chartMsg(c.src === 'fut' ? '期貨 K 線資料累積中：Worker 需綁定 KV 並設定每分鐘排程，之後每個交易日會新增一根' : '沒有取得 K 線資料'); return; }
+  if (!rows.length) { chartMsg(c.src === 'fut' ? '期貨 K 線資料累積中：App 開著且在交易時段時會自動記錄日 K，之後每個交易日新增一根' : '沒有取得 K 線資料'); return; }
   c.data = rows; c.vis = { D: 60, W: 52, M: 48 }[c.tf]; altApply(c, live); chartRecalc(c);
   chartMsg(''); drawChart(); chartInfoUpdate(); renderChartPanel();
   const tick = async () => {
@@ -2671,7 +2693,7 @@ function openAltChart(s) {
   $('chartTitle').innerHTML = `${escapeHTML(s.symbol)}<small>${escapeHTML(s.name)}</small>`;
   $('chartModalOverlay').classList.add('show');
   if (!(history.state && history.state.chart)) history.pushState({ chart: 1 }, '');
-  startChart({ sym: s.symbol, stock: null, engine: 'fugle', src: s.src, isIndex: true, tf: 'T', data: [], ma: [[], [], []], vis: 60, live: null, off: 0, sel: null, timer: 0, quote: null, futData: null, year: null, ptab: 'quote', vol: null, trades: null, div: null, hold: null, ind: null });
+  startChart({ sym: s.symbol, stock: null, engine: 'fugle', src: s.src, isIndex: true, tf: 'D', data: [], ma: [[], [], []], vis: 60, live: null, off: 0, sel: null, timer: 0, quote: null, futData: null, year: null, ptab: 'quote', vol: null, trades: null, div: null, hold: null, ind: null });
 }
 function scheduleChartRefresh(c, seq) {
   clearTimeout(c.timer);
@@ -3076,7 +3098,7 @@ function renderChartTools() {
   const c = chartCur;
   $('chartIndBtn').style.display = c.tf === 'T' ? 'none' : ''; // 即時走勢沒有副圖
   $('chartTfs').innerHTML = c.engine === 'fugle'
-    ? (c.src ? [['T', '即時']] : []).concat(CHART_TFS.filter(([k]) => !c.src || (k !== '5' && (c.src !== 'fut' || k === 'D')))).map(([k, n]) => `<button type="button" class="${k === c.tf ? 'on' : ''}" data-tf="${k}">${n}</button>`).join('') : '';
+    ? [].concat(CHART_TFS.filter(([k]) => !c.src || (k !== '5' && (c.src !== 'fut' || k === 'D')))).map(([k, n]) => `<button type="button" class="${k === c.tf ? 'on' : ''}" data-tf="${k}">${n}</button>`).join('') : '';
 }
 function startChart(c) {
   const body = $('chartBody'); clearTimeout(c.timer); chartCur = c; ++chartOpenSeq;
