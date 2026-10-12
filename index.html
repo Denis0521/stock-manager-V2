@@ -29,7 +29,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.90-twiiFast'; 
+const APP_VER = 'V7.91-twiiFut'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -791,6 +791,17 @@ body.row-sorting, body.row-sorting * { -webkit-user-select: none; user-select: n
     </div>
     <div class="idx-box-src" id="idxSource">Loading...</div>
   </div>
+  <div class="idx-card-box fut-card" aria-label="臺灣指數期貨即時報價">
+    <div class="idx-box-name" id="futTitle">🇹🇼 臺灣指數期貨</div>
+    <div class="idx-data-row">
+      <div class="idx-box-price-wrap"><span class="idx-box-price" id="futPrice">—</span></div>
+      <div class="idx-box-vol" id="futVolume">(—)</div>
+    </div>
+    <div class="idx-data-row">
+      <div class="idx-box-change-row"><span id="futChange"></span><span id="futPct"></span></div>
+    </div>
+    <div class="idx-box-src" id="futSource">Loading...</div>
+  </div>
   </div>
   <div class="idx-cards idx-clone" id="idxClone" aria-hidden="true"></div>
   </div>
@@ -1048,6 +1059,7 @@ const DEFAULT_INDICES = [{symbol:'^DJI',name:'🇺🇸 道瓊工業指數'},{sym
 const PROXY_LIST = ['https://api.allorigins.win/raw?url=', 'https://corsproxy.io/?', 'https://api.codetabs.com/v1/proxy?quest=', 'https://thingproxy.freeboard.io/fetch/'];
 const API_TIMEOUT = 5000;
 const CF_WORKER_URL = 'https://yahoo-index-proxy.denis0521.workers.dev';
+const FUT_WORKER_URL = 'https://taifex-quote.denis0521.workers.dev/';
 const FUGLE_API = 'https://api.fugle.tw/marketdata/v1.0/stock/intraday/quote/';
 const TICKER_API = 'https://api.fugle.tw/marketdata/v1.0/stock/intraday/ticker/';
 
@@ -1057,7 +1069,7 @@ const LS = {
     FK: 'tw_fugle_key', SFK: 'tw_second_fugle_key', THEME: 'tw_theme',
     CUR_TAB: 'tw_current_tab', TAB_NAMES: 'tw_tab_names', TAB_COUNT: 'tw_tab_count',
     TICKER: 'tw_show_ticker', FLASH: 'tw_show_flash', IDX_MARQUEE: 'tw_idx_marquee', NOTICE_IDX: 'tw_notice_stock_features_v1', FOREIGN_IDX: 'tw_custom_foreign_indices',
-    CACHE_IDX: 'tw_cached_indices', CACHE_TWII: 'tw_cached_twii', HIST_CACHE: 'tw_hist_cache_v1',
+    CACHE_IDX: 'tw_cached_indices', CACHE_TWII: 'tw_cached_twii', CACHE_FUT: 'tw_cached_fut', HIST_CACHE: 'tw_hist_cache_v1',
     STOCK: i => `tw_stock_portfolio_tab_${i}`, RECORD: i => `tw_records_tab_${i}`
   },
   get: (k, def) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch(e){ return def; } },
@@ -1114,6 +1126,8 @@ function loadState(){
 
   const cachedTwii = LS.get(LS.KEYS.CACHE_TWII, null);
   if (cachedTwii) updateTwiiDOM(cachedTwii, true);
+  const cachedFut = LS.get(LS.KEYS.CACHE_FUT, null);
+  if (cachedFut) updateFutDOM(cachedFut, true);
 
   $('tickerContainer').style.display = showTicker ? 'flex' : 'none';
   applyIdxMarquee();
@@ -1518,6 +1532,31 @@ function updateTwiiDOM(res, isOffline = false) {
   if(els.s) els.s.textContent = `via ${res.source} ${isOffline ? '(快取)' : new Date().toLocaleTimeString('zh-TW',{hour12:false, hour:'2-digit',minute:'2-digit'})}`;
 }
 
+/* 臺灣指數期貨（近月）：資料來自自己的 Worker，含日盤與夜盤 */
+function updateFutDOM(d, isOffline = false) {
+  const f = d && d.near; if (!f || f.price == null) return;
+  const sess = d.session === 'night' ? '夜盤' : d.session === 'day' ? '日盤' : '';
+  const tag = isOffline ? '(離線)' : sess;
+  const titleBox = $('futTitle');
+  if (titleBox) titleBox.innerHTML = `🇹🇼 臺灣指數期貨${tag ? `<span style="color:var(--t-muted); font-size:12px; margin-left:6px; opacity:0.8;">${tag}</span>` : ''}`;
+  const els = { p: $('futPrice'), c: $('futChange'), pct: $('futPct'), v: $('futVolume'), s: $('futSource') };
+  if (els.p) els.p.textContent = f.price.toLocaleString('en-US', { maximumFractionDigits: 0 });
+  if (els.v) els.v.textContent = f.volume > 0 ? `(${f.volume.toLocaleString()} 口)` : '(—)';
+  if (els.c && f.change != null) { els.c.textContent = getSign(f.change) + f.change.toFixed(0); els.c.className = getColorCls(f.change); }
+  if (els.pct && f.pct != null) { els.pct.textContent = `(${getSign(f.pct)}${f.pct.toFixed(2)}%)`; els.pct.className = getColorCls(f.pct); }
+  if (els.s) els.s.textContent = isOffline ? 'via Yahoo (快取)' : `via Yahoo ${f.time ? f.time.slice(0, 5) : new Date().toLocaleTimeString('zh-TW', { hour12: false, hour: '2-digit', minute: '2-digit' })}`;
+}
+
+async function refreshFut() {
+  try {
+    const res = await fetch(FUT_WORKER_URL + '?_=' + Date.now(), { signal: AbortSignal.timeout(API_TIMEOUT), cache: 'no-store' });
+    if (!res.ok) return;
+    const d = await res.json();
+    if (!d || !d.near || d.near.price == null) return;
+    updateFutDOM(d); setIfChanged(LS.KEYS.CACHE_FUT, d);
+  } catch (e) {}
+}
+
 /* 內容沒變就不寫入 localStorage */
 const lsCache = new Map();
 const setIfChanged = (k, v) => { const str = JSON.stringify(v); if (lsCache.get(k) === str) return; lsCache.set(k, str); LS.set(k, str); };
@@ -1653,8 +1692,8 @@ async function refreshStocks() {
 
 async function refreshPrices(){
   if (!navigator.onLine) { showToast('處於離線狀態，顯示快取資料'); return; }
-  // 大盤、國外指數、個股彼此獨立，平行抓取
-  await Promise.allSettled([refreshTwii(), refreshGlobalIndices(), refreshStocks()]);
+  // 大盤、期貨、國外指數、個股彼此獨立，平行抓取
+  await Promise.allSettled([refreshTwii(), refreshFut(), refreshGlobalIndices(), refreshStocks()]);
   syncInterval();
   maybeRenderApiStats();
 }
