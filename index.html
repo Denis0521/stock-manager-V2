@@ -29,7 +29,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.93-idxLive'; 
+const APP_VER = 'V7.94-idxLive'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -2517,61 +2517,91 @@ function futFrame(rows) {
   return null;
 }
 async function yahooIntraday(sym) {
-  for (const host of ['query1', 'query2']) {
+  // query1 / query2 同時發出（每個又同時走多個代理），誰先回來用誰
+  const one = async host => {
     const j = await proxyJson(`https://${host}.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=1m&range=1d`);
     const res = j && j.chart && j.chart.result && j.chart.result[0];
-    if (!res || !res.timestamp) continue;
+    if (!res || !res.timestamp) throw new Error('empty');
     const q = res.indicators.quote[0], m = res.meta || {}, off = m.gmtoffset || 0, rows = [];
     res.timestamp.forEach((ts, i) => { const p = q.close[i]; if (numOk(p)) rows.push({ ts, t: new Date((ts + off) * 1000).toISOString().slice(0, 16), o: p, h: p, l: p, c: p, v: 0 }); });
+    if (!rows.length) throw new Error('empty');
     const rg = m.currentTradingPeriod && m.currentTradingPeriod.regular;
-    if (rows.length) return { rows, prev: m.chartPreviousClose ?? m.previousClose, off, frame: rg && rg.start && rg.end ? [rg.start, rg.end] : null };
-  }
-  return null;
+    return { rows, prev: m.chartPreviousClose ?? m.previousClose, off, frame: rg && rg.start && rg.end ? [rg.start, rg.end] : null };
+  };
+  return Promise.any([one('query1'), one('query2')]).catch(() => null);
+}
+async function workerIntradayRows() {
+  try {
+    const r = await fetch(FUT_WORKER_URL + 'intraday?_=' + Date.now(), { signal: AbortSignal.timeout(6000), cache: 'no-store' });
+    if (!r.ok) return [];
+    const j = await r.json();
+    return (Array.isArray(j.rows) ? j.rows : []).map(a => tickRow(a[0] > 1e12 ? Math.floor(a[0] / 1000) : a[0], a[1])).filter(x => numOk(x.c));
+  } catch (e) { return []; }
+}
+function futLiveBuild(wRows, near) {
+  let rows = wRows, src = 'worker';
+  const local = futTicksGet();
+  if (rows.length < 2 || rows.length < local.length) { rows = local; src = 'local'; }
+  const frame = futFrame(rows);
+  if (frame) rows = rows.filter(r => r.ts >= frame[0] - 60 && r.ts <= frame[1] + 60);
+  return { rows, live: { prev: near ? near.ref : null, off: 28800, frame, src } };
 }
 async function altIntraday(c) {
   if (c.src === 'fut') {
-    await altLive(c).catch(() => null); // 更新 c.futData
+    const [, wRows] = await Promise.all([altLive(c).catch(() => null), workerIntradayRows()]); // 兩個請求同時發出
     const d = c.futData, near = d && d.near;
     if (near && near.price != null) futTickAdd(near.price, near.volume, d.session);
-    let rows = [], src = 'worker';
-    try {
-      const r = await fetch(FUT_WORKER_URL + 'intraday?_=' + Date.now(), { signal: AbortSignal.timeout(8000), cache: 'no-store' });
-      if (r.ok) { const j = await r.json(); rows = (Array.isArray(j.rows) ? j.rows : []).map(a => tickRow(a[0] > 1e12 ? Math.floor(a[0] / 1000) : a[0], a[1])).filter(x => numOk(x.c)); }
-    } catch (e) {}
-    const local = futTicksGet();
-    if (rows.length < 2 || rows.length < local.length) { rows = local; src = 'local'; }
-    const frame = futFrame(rows);
-    if (frame) rows = rows.filter(r => r.ts >= frame[0] - 60 && r.ts <= frame[1] + 60);
-    return { rows, live: { prev: near ? near.ref : null, off: 28800, frame, src } };
+    return futLiveBuild(wRows, near);
   }
-  const y = await yahooIntraday(c.sym);
-  return y ? { rows: y.rows, live: { prev: y.prev, off: y.off, frame: y.frame, src: 'yahoo' } } : null;
+  return yahooIntraday(c.sym).then(y => y ? { rows: y.rows, live: { prev: y.prev, off: y.off, frame: y.frame, src: 'yahoo' } } : null);
+}
+// 走勢快取：下次開啟先用上次的資料秒開，背景再更新
+const liveCacheKey = c => 'tw_live_cache_v1_' + c.sym;
+function liveCacheSave(c, got) {
+  if (c.src === 'fut') return;
+  try { localStorage.setItem(liveCacheKey(c), JSON.stringify({ at: Date.now(), rows: got.rows.map(r => [r.ts, r.c]), prev: got.live.prev, off: got.live.off, frame: got.live.frame })); } catch (e) {}
+}
+function liveCacheLoad(c) {
+  try {
+    if (c.src === 'fut') {
+      const cf = LS.get(LS.KEYS.CACHE_FUT, null), got = futLiveBuild([], cf && cf.near);
+      return got.rows.length >= 2 ? got : null;
+    }
+    const j = JSON.parse(localStorage.getItem(liveCacheKey(c)) || 'null');
+    if (!j || !Array.isArray(j.rows) || Date.now() - j.at > 36 * 3600e3) return null;
+    const rows = j.rows.map(a => { const p = a[1]; return { ts: a[0], t: new Date((a[0] + (j.off || 0)) * 1000).toISOString().slice(0, 16), o: p, h: p, l: p, c: p, v: 0 }; });
+    return rows.length >= 2 ? { rows, live: { prev: j.prev, off: j.off, frame: j.frame, src: 'yahoo' } } : null;
+  } catch (e) { return null; }
+}
+function liveApply(c, got) {
+  c.data = got.rows; c.live = got.live;
+  if (c.src !== 'fut') {
+    const cl = got.rows.map(r => r.c), pv = got.live.prev, hi = Math.max(...cl), lo = Math.min(...cl);
+    c.quote = { date: got.rows[got.rows.length - 1].t.slice(0, 10), previousClose: pv, openPrice: cl[0], highPrice: hi, lowPrice: lo, lastPrice: cl[cl.length - 1], amplitude: pv ? (hi - lo) / pv * 100 : null, total: {} };
+  }
 }
 async function loadLiveChart(c) {
   const seq = ++chartOpenSeq; clearTimeout(c.timer);
-  c.data = []; c.sel = null; c.off = 0; c.live = null; drawChart(); chartInfoUpdate(); chartMsg('即時走勢載入中…');
+  c.data = []; c.sel = null; c.off = 0; c.live = null; drawChart(); chartInfoUpdate();
+  const cached = liveCacheLoad(c);
+  if (cached) { liveApply(c, cached); chartMsg(''); renderChartPanel(); drawChart(); chartInfoUpdate(); } // 先秒開舊資料
+  else chartMsg('即時走勢載入中…');
   const run = async () => {
     const got = await altIntraday(c).catch(() => null);
     if (seq !== chartOpenSeq || chartCur !== c || c.tf !== 'T') return;
-    if (got && got.rows.length) {
-      c.data = got.rows; c.live = got.live;
-      if (c.src !== 'fut') {
-        const cl = got.rows.map(r => r.c), pv = got.live.prev, hi = Math.max(...cl), lo = Math.min(...cl);
-        c.quote = { date: got.rows[got.rows.length - 1].t.slice(0, 10), previousClose: pv, openPrice: cl[0], highPrice: hi, lowPrice: lo, lastPrice: cl[cl.length - 1], amplitude: pv ? (hi - lo) / pv * 100 : null, total: {} };
-      }
-    }
+    if (got && got.rows.length) { liveApply(c, got); liveCacheSave(c, got); }
     renderChartPanel();
     if (c.data.length < 2) { chartMsg(c.src === 'fut' ? '台指期即時走勢累積中：App 開著時每分鐘記錄一筆，稍後再看，或切到「日」看日 K' : '目前沒有即時走勢資料（休市，或代理伺服器沒有回應）'); return; }
     chartMsg(''); drawChart(); chartInfoUpdate();
   };
-  await run();
   const gap = c.src === 'fut' ? 15000 : 30000;
   const tick = async () => {
     if (seq !== chartOpenSeq || chartCur !== c || c.tf !== 'T') return;
     if (document.visibilityState === 'visible') await run();
     if (seq === chartOpenSeq && chartCur === c && c.tf === 'T') c.timer = setTimeout(tick, gap);
   };
-  c.timer = setTimeout(tick, gap);
+  c.timer = setTimeout(tick, gap); // 先排定下一次，避免首次更新慢時整個停住
+  await run();
 }
 function liveSelect(c, e, cv, toggle) {
   const L = c.LT; if (!L || !c.data.length) return;
