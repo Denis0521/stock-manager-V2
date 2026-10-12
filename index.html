@@ -29,13 +29,14 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.87-holiday'; 
+const APP_VER = 'V7.87-newsFast'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
   setTimeout(() => location.reload(), 200);
 }
 </script>
+<link rel="preconnect" href="https://finance-news-api.denis0521.workers.dev" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&display=swap" media="print" onload="this.media='all'">
@@ -1419,12 +1420,6 @@ async function getTickerInfo(sym, currentPrice) {
   return null;
 }
 
-// 取得報價所屬的「交易日」(YYYY-MM-DD)：國定假日/颱風假時，API 回傳的仍是上一個交易日的資料
-function fugleTradeDate(q) {
-  if (q.date) return String(q.date).slice(0, 10);
-  if (q.lastUpdated) return new Date(q.lastUpdated / 1000 + 8 * 3600e3).toISOString().slice(0, 10); // 微秒 → 台灣日期
-  return null;
-}
 async function fetchFugle(sym){
   const kr = getKeyRotator(); if (kr.count === 0) return null;
   let quoteData = null;
@@ -1444,7 +1439,7 @@ async function fetchFugle(sym){
   return {
     price: p, change: quoteData.change ?? 0, changePercent: quoteData.changePercent ?? 0,
     volume: quoteData.total ? (quoteData.total.tradeValue || quoteData.total.tradeVolume || 0) : 0,
-    source: 'Fugle', tradeDate: fugleTradeDate(quoteData), name: quoteData.name || '', limitUp: tickerInfo?.limitUp ?? null, limitDown: tickerInfo?.limitDown ?? null
+    source: 'Fugle', name: quoteData.name || '', limitUp: tickerInfo?.limitUp ?? null, limitDown: tickerInfo?.limitDown ?? null
   };
 }
 
@@ -1476,7 +1471,7 @@ async function fetchYahooQuote(ySym) {
     }
     const base = prevClose ?? o, chg = +(p - base).toFixed(2);
     trackApiUsage('Yahoo');
-    return { price: p, change: chg, changePercent: +((chg / base) * 100).toFixed(2), volume: v, source: 'Yahoo', tradeDate: (cols[0] || '').trim() || null, name: '' };
+    return { price: p, change: chg, changePercent: +((chg / base) * 100).toFixed(2), volume: v, source: 'Yahoo', name: '' };
   } catch (e) { return null; }
 }
 
@@ -1590,7 +1585,6 @@ async function ensureHistory(syms) {
   dirty.forEach(i => LS.set(LS.KEYS.STOCK(i), tabStocks[i]));
 }
 
-const quoteDate = new Map(); // 代號 -> 最近一次報價所屬交易日
 const quoteOkAt = new Map(), quoteTryAt = new Map(); // 代號 -> 最近「成功」/「嘗試」取價的時間
 const QUOTE_FRESH_MS = 120000, QUOTE_RETRY_MS = 180000;
 const isQuoteFresh = sym => Date.now() - (quoteOkAt.get(sym) || 0) < QUOTE_FRESH_MS;
@@ -1612,7 +1606,6 @@ async function fetchAndApplyQuotes(syms, dirty, shouldAbort = () => false) {
       const lu = r.limitUp ?? null, ld = r.limitDown ?? null, h = histCache[sym]?.data;
       hasUpdates = true;
       quoteOkAt.set(sym, Date.now());
-      quoteDate.set(sym, r.tradeDate || null);
       for (let idx = 0; idx < 5; idx++) {
         for (const s of tabStocks[idx]) {
           if (s.symbol !== sym) continue;
@@ -1824,8 +1817,6 @@ async function checkAutoSave() {
       if (tabStocks[i].length === 0) continue;
       // 有報價的持股若仍是舊價格（取價失敗）：這次不記錄，等下一分鐘重試，避免寫入錯誤損益
       if (!tabStocks[i].every(s => s.price == null || isQuoteFresh(s.symbol))) continue;
-      // 國定假日/颱風假/休市：報價的交易日不是今天 → 今天沒開盤，不記錄（避免把前一交易日的損益記成今天）
-      if (!tabStocks[i].some(s => quoteDate.get(s.symbol) === todayStr)) continue;
 
       let pnl = 0, asset = 0;
       tabStocks[i].forEach(s => { const info = calcStockInfo(s); pnl += info.todayPnl; asset += info.mktValue; });
@@ -2043,17 +2034,30 @@ const handleTouchWakeup = () => { if(Date.now() - lastSuccessTime > 15000 && !is
 document.addEventListener('touchend', handleTouchWakeup, {passive: true});
 document.addEventListener('click', handleTouchWakeup, {passive: true});
 
+const NEWS_KEY = 'tw_news_cache';
+function renderNews(data) {
+  const c = $('js-ticker');
+  if (!Array.isArray(data) || !data.length) return false;
+  const html = data.map(i => `<a href="${/^https?:\/\//i.test(i.link) ? escapeHTML(i.link) : '#'}" target="_blank" rel="noopener noreferrer" class="ticker-item"><span class="ticker-source">${escapeHTML(i.source)}</span>${escapeHTML(i.title)}</a>`).join('');
+  c.innerHTML = html + html;
+  c.style.animationDuration = `${c.textContent.length * 0.18}s`;
+  return true;
+}
+/* 先用本機快取立刻開跑，再於背景更新；新聞 API 較慢時也不會空等 */
 async function loadFinanceNews() {
   const c = $('js-ticker');
+  let shown = false;
+  try { shown = renderNews(JSON.parse(localStorage.getItem(NEWS_KEY) || 'null')); } catch(e) {}
   try {
     const res = await fetch('https://finance-news-api.denis0521.workers.dev/');
-    if(!res.ok) throw new Error();
+    if (!res.ok) throw new Error();
     const data = await res.json();
-    if(!data.length) return c.innerHTML = '<span class="ticker-item">目前暫無新聞</span>';
-    const html = data.map(i => `<a href="${/^https?:\/\//i.test(i.link) ? escapeHTML(i.link) : '#'}" target="_blank" rel="noopener noreferrer" class="ticker-item"><span class="ticker-source">${escapeHTML(i.source)}</span>${escapeHTML(i.title)}</a>`).join('');
-    c.innerHTML = html + html;
-    c.style.animationDuration = `${c.textContent.length * 0.18}s`;
-  } catch(e) { c.innerHTML = '<span class="ticker-item" style="color:var(--t-muted);">無法載入即時新聞，請稍後再試</span>'; }
+    if (!data.length) { if (!shown) c.innerHTML = '<span class="ticker-item">目前暫無新聞</span>'; return; }
+    try { localStorage.setItem(NEWS_KEY, JSON.stringify(data)); } catch(e) {}
+    if (!shown) renderNews(data); // 已在播放舊新聞就不打斷，下次開啟自動使用新內容
+  } catch(e) {
+    if (!shown) c.innerHTML = '<span class="ticker-item" style="color:var(--t-muted);">無法載入即時新聞，請稍後再試</span>';
+  }
 }
 
 /* ========================================================= ↕ 長按代號拖曳排序 ========================================================= */
@@ -2798,6 +2802,7 @@ document.addEventListener('click', e => {
 });
 
 /* ========================================================= 🚀 啟動與休眠優化 ========================================================= */
+loadFinanceNews(); // 腳本位於頁面底部，DOM 已就緒，不必等 DOMContentLoaded
 loadState(); renderAll();
 setTimeout(wake, 500);
 setTimeout(cleanupOldKeys, 3000);
@@ -2811,7 +2816,6 @@ document.addEventListener('visibilitychange', () => {
   if (isVis) wake();
 });
 
-document.addEventListener('DOMContentLoaded', loadFinanceNews);
 
 const kd = (id, next, action) => { $(id).addEventListener('keydown', e => { if(e.key === 'Enter') { e.preventDefault(); if(next) $(next).focus(); else if(action) action(); } }); };
 kd('symInput', 'qtyInput'); kd('qtyInput', 'buyPriceInput'); kd('buyPriceInput', null, addStock);

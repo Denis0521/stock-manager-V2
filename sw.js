@@ -1,4 +1,4 @@
-/* Service Worker：網路優先（3 秒逾時退回快取）+ 離線退回 App Shell
+/* Service Worker：網路優先（一般 3 秒、頁面導覽 1.2 秒逾時退回快取）+ 離線退回 App Shell
    只攔截同來源 GET 請求：API 屬跨網域且為即時資料，直接放行可少一層開銷並避免污染快取
    版本號由 index.html 以 sw.js?v=版本 傳入，不需再手動同步兩處 */
 const VER = new URL(self.location.href).searchParams.get('v') || 'dev';
@@ -6,6 +6,7 @@ const CACHE_NAME = 'stock-app-' + VER;
 const APP_SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 const SAME_ORIGIN_PREFIX = self.location.origin + '/';
 const NETWORK_TIMEOUT = 3000;
+const NAV_TIMEOUT = 1200; // 開啟 App（頁面導覽）時縮短等待，網路慢就先用快取秒開，背景仍會更新快取
 
 let cachePromise = null;
 const getCache = () => cachePromise || (cachePromise = caches.open(CACHE_NAME)); // 同一個 DB 只開一次
@@ -42,7 +43,7 @@ async function networkFirst(req, event) {
     return res;
   });
   let timer;
-  const timeout = new Promise((_, reject) => { timer = setTimeout(reject, NETWORK_TIMEOUT, new Error('timeout')); });
+  const timeout = new Promise((_, reject) => { timer = setTimeout(reject, req.mode === 'navigate' ? NAV_TIMEOUT : NETWORK_TIMEOUT, new Error('timeout')); });
   try {
     return await Promise.race([network, timeout]);
   } catch (err) {
