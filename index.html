@@ -29,7 +29,7 @@
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
 <script>
-const APP_VER = 'V7.88-twiiChart'; 
+const APP_VER = 'V7.90-twiiFast'; 
 if(localStorage.getItem('tw_app_version') !== APP_VER) {
   localStorage.setItem('tw_app_version', APP_VER);
   if('caches' in window) { caches.keys().then(ks => ks.forEach(k => caches.delete(k))); }
@@ -2266,7 +2266,7 @@ async function chartHistRows(c) {
   catch (e) { err = e; if (e.message === 'nokey') throw e; diag.push('Fugle 取得失敗'); }
   const cRows = histCacheGet(sym, tf);
   let yRows = null;
-  if (fRows.length < need && cRows.length < need) {
+  if (!c.isIndex && fRows.length < need && cRows.length < need) {
     let wlog = '';
     try {
       const j = await workerGet(`/hist?symbol=${encodeURIComponent(sym)}&tf=${tf}`);
@@ -2365,11 +2365,40 @@ async function loadFugleChart(c) {
     c.data = rows; c.vis = { '5': 54, D: 60, W: 52, M: 48 }[c.tf];
     chartRecalc(c);
     chartMsg(''); drawChart(); chartInfoUpdate(); renderChartPanel(); scheduleChartRefresh(c, seq);
+    if (c.isIndex && c.tf !== '5') extendIndexHistory(c, seq);
   } catch (e) {
     if (seq !== chartOpenSeq || chartCur !== c) return;
     chartMsg(e.message === 'nokey' ? '尚未設定 Fugle Key，請到「進階」輸入 Key'
       : '無法取得 Fugle K線資料（可能是方案權限或流量限制）');
   }
+}
+/* 指數歷史補抓：Fugle 對 IX0001 只回傳近期資料，先畫圖，再於背景用 Worker／Yahoo 並行補抓更長的歷史 */
+async function extendIndexHistory(c, seq) {
+  const tf = c.tf, need = tf === 'D' ? 120 : tf === 'W' ? 60 : 36;
+  if (c.data.length >= need) return;
+  const base = c.diag || '';
+  const note = t => { if (seq === chartOpenSeq && chartCur === c && c.tf === tf) { c.diag = base + '；' + t; renderChartPanel(); } };
+  note('補抓更長歷史中…');
+  const fromWorker = async () => {
+    for (const s of ['%5ETWII', 'TWII']) {
+      try {
+        const j = await workerGet(`/hist?symbol=${s}&tf=${tf}`);
+        const rows = Array.isArray(j.rows) ? j.rows.map(a => ({ t: a[0], o: a[1], h: a[2], l: a[3], c: a[4], v: a[5] })).filter(validBar) : [];
+        if (rows.length) return rows;
+      } catch (e) {}
+    }
+    throw new Error('worker');
+  };
+  const fromYahoo = async () => { const y = await yahooHistRows('IX0001', tf); if (y.rows && y.rows.length) return y.rows; throw new Error('yahoo'); };
+  const rows = await Promise.any([fromWorker(), fromYahoo()]).catch(() => null);
+  if (seq !== chartOpenSeq || chartCur !== c || c.tf !== tf) return;
+  if (!rows || rows.length <= c.data.length) { note('無法補抓更長歷史（Worker 與 Yahoo 皆失敗），之後每次開啟會自動累積'); return; }
+  const m = new Map(); rows.forEach(r => m.set(r.t, r));
+  c.data.forEach(r => { const y = m.get(r.t); m.set(r.t, y && y.v > 0 ? { ...r, v: y.v } : r); }); // 重疊日期沿用補抓來源的量，避免兩個來源單位不同造成量柱落差
+  c.data = [...m.values()].sort((a, b) => a.t < b.t ? -1 : 1);
+  histCacheSet(c.sym, tf, c.data);
+  c.diag = base + `；已補抓至 ${c.data.length} 根（最早 ${c.data[0].t}）`;
+  chartRecalc(c); drawChart(); chartInfoUpdate(); renderChartPanel();
 }
 function scheduleChartRefresh(c, seq) {
   clearTimeout(c.timer);
