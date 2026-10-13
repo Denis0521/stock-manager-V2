@@ -2258,6 +2258,18 @@ async function fugleHistRows(sym, tf) {
   return (j.data || []).map(d => ({ t: d.date, o: d.open, h: d.high, l: d.low, c: d.close, v: d.volume || 0 })).filter(validBar);
 }
 // 同時向所有代理發出請求，最快成功的優先；全部失敗才算失敗
+// 一次同時發出：Yahoo 直連 ＋ (query1/query2 × 所有代理)，最快回應的優先，不再逐一重試
+function yahooChartRace(path) {
+  const ok = j => { if (!j || !j.chart) throw new Error('bad'); return j; };
+  const get = async (url, ms) => { const r = await fetch(url, { signal: AbortSignal.timeout(ms), cache: 'no-store' }); if (!r.ok) throw new Error('http' + r.status); return ok(await r.json()); };
+  const tasks = [];
+  for (const host of ['query1', 'query2']) {
+    const u = `https://${host}.finance.yahoo.com/${path}`;
+    tasks.push(get(u, 6000));
+    PROXY_LIST.forEach(px => tasks.push(get(px + encodeURIComponent(u), 8000)));
+  }
+  return Promise.any(tasks).catch(() => null);
+}
 function proxyJson(url) {
   const tasks = PROXY_LIST.map(px => (async () => {
     const res = await fetch(px + encodeURIComponent(url), { signal: AbortSignal.timeout(10000), cache: 'no-store' });
@@ -2274,11 +2286,7 @@ async function yahooHistRows(sym, tf, yOnly = false) {
   const order = isIdx ? [''] : suffixCache.get(sym) === '.TWO' ? ['.TWO', '.TW'] : ['.TW', '.TWO'];
   let log = '代理伺服器無回應';
   for (const sfx of order) {
-    let j = null;
-    for (const host of ['query1', 'query2']) {
-      j = await proxyJson(`https://${host}.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ysym)}${sfx}?interval=${itv}&range=${range}`);
-      if (j) break;
-    }
+    const j = await yahooChartRace(`v8/finance/chart/${encodeURIComponent(ysym)}${sfx}?interval=${itv}&range=${range}`);
     if (!j) return { rows: null, log };
     const res = j.chart.result && j.chart.result[0];
     if (!res || !res.timestamp) { log = '查無此代號資料'; continue; }
@@ -2472,9 +2480,13 @@ async function altHistRows(c) {
     const m = new Map(); futDailyGet().forEach(r => m.set(r.t, r)); w.forEach(r => m.set(r.t, r)); // Worker 資料優先，本機補足缺的日期
     return [...m.values()].sort((a, b) => a.t < b.t ? -1 : 1);
   }
-  const fromWorker = async () => { const rows = rowsOf(await workerGet(`/hist?symbol=${encodeURIComponent(c.sym)}&tf=${c.tf}`)); if (rows.length) return rows; throw new Error('w'); };
+  // 自家 Worker /hist 優先（有邊緣快取），Yahoo 競速為後備
+  const fromWorker = async path => { const rows = rowsOf(await workerGet(path)); if (rows.length) return rows; throw new Error('w'); };
   const fromYahoo = async () => { const y = await yahooHistRows(c.sym, c.tf, true); if (y.rows && y.rows.length) return y.rows; throw new Error('y'); };
-  return Promise.any([fromWorker(), fromYahoo()]).catch(() => []);
+  const q = `symbol=${encodeURIComponent(c.sym)}&tf=${c.tf}`;
+  const rows = await Promise.any([fromWorker('/hist?' + q), fromYahoo()]).catch(() => []);
+  if (rows.length) histCacheSet(c.sym, c.tf, rows);
+  return rows;
 }
 async function altLive(c) {
   if (c.src === 'fut') {
@@ -2497,9 +2509,19 @@ async function loadAltChart(c) {
   if (c.tf === 'T') return loadLiveChart(c);
   const seq = ++chartOpenSeq; clearTimeout(c.timer);
   c.data = []; c.sel = null; c.off = 0; drawChart(); chartInfoUpdate(); chartMsg('圖表載入中…');
+  // 先用本機快取立刻畫出（國外指數），再背景更新；不必等網路
+  if (c.src !== 'fut') {
+    const cached = histCacheGet(c.sym, c.tf);
+    if (cached.length) {
+      const l0 = await altLive(c).catch(() => null);
+      c.data = cached; c.vis = { D: 60, W: 52, M: 48 }[c.tf]; altApply(c, l0); chartRecalc(c);
+      chartMsg(''); drawChart(); chartInfoUpdate(); renderChartPanel();
+    }
+  }
   const [rows, live] = await Promise.all([altHistRows(c).catch(() => []), altLive(c).catch(() => null)]);
   if (seq !== chartOpenSeq || chartCur !== c) return;
   renderChartPanel();
+  if (!rows.length && c.data.length) { altApply(c, live); chartRecalc(c); drawChart(); chartInfoUpdate(); renderChartPanel(); return; }
   if (!rows.length) { chartMsg(c.src === 'fut' ? '期貨 K 線資料累積中：App 開著且在交易時段時會自動記錄日 K，之後每個交易日新增一根' : '沒有取得 K 線資料'); return; }
   c.data = rows; c.vis = { D: 60, W: 52, M: 48 }[c.tf]; altApply(c, live); chartRecalc(c);
   chartMsg(''); drawChart(); chartInfoUpdate(); renderChartPanel();
@@ -3098,7 +3120,7 @@ function renderChartTools() {
   const c = chartCur;
   $('chartIndBtn').style.display = c.tf === 'T' ? 'none' : ''; // 即時走勢沒有副圖
   $('chartTfs').innerHTML = c.engine === 'fugle'
-    ? [].concat(CHART_TFS.filter(([k]) => !c.src || (k !== '5' && (c.src !== 'fut' || k === 'D')))).map(([k, n]) => `<button type="button" class="${k === c.tf ? 'on' : ''}" data-tf="${k}">${n}</button>`).join('') : '';
+    ? (c.src && c.src !== 'fut' ? [['T', '即時']] : []).concat(CHART_TFS.filter(([k]) => !c.src || (k !== '5' && (c.src !== 'fut' || k === 'D')))).map(([k, n]) => `<button type="button" class="${k === c.tf ? 'on' : ''}" data-tf="${k}">${n}</button>`).join('') : '';
 }
 function startChart(c) {
   const body = $('chartBody'); clearTimeout(c.timer); chartCur = c; ++chartOpenSeq;
