@@ -2631,7 +2631,7 @@ async function altIntraday(c) {
   const it = cachedGlobalIndices.find(x => x.symbol === c.sym);
   if (it) idxTickAdd(c.sym, it.price);
   const local = idxTicksGet(c.sym);
-  return local.length ? { rows: local, live: { prev: it ? it.price - it.changeAmt : null, off: 28800, frame: null, src: 'local' } } : null;
+  return local.length >= 20 ? { rows: local, live: { prev: it ? it.price - it.changeAmt : null, off: 28800, frame: null, src: 'local' } } : null;
 }
 async function loadLiveChart(c) {
   const seq = ++chartOpenSeq; clearTimeout(c.timer);
@@ -2647,7 +2647,7 @@ async function loadLiveChart(c) {
       }
     }
     renderChartPanel();
-    if (c.data.length < 2) { chartMsg(c.src === 'fut' ? '台指期即時走勢累積中：雲端每 2 分鐘記錄一點（交易時段），稍後再看，或切到「日」看日 K' : '目前沒有即時走勢資料（休市，或所有資料來源都沒有回應；App 開著會自動累積本機走勢）'); return; }
+    if (c.data.length < 2) { chartMsg(c.src === 'fut' ? '台指期即時走勢累積中：雲端每 2 分鐘記錄一點（交易時段），稍後再看，或切到「日」看日 K' : '即時走勢載入失敗：所有資料來源都沒有回應，每 30 秒自動重試。可先切到「日」查看日 K'); return; }
     chartMsg(''); drawChart(); chartInfoUpdate();
   };
   await run();
