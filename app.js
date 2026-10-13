@@ -336,7 +336,8 @@ function renderAll(){
 function renderRow(s, oldPrice = null) {
   const el = document.querySelector(`.srow[data-id="${s.id}"]`);
   if(el) {
-    el.innerHTML = getStockHtmlInner(s);
+    const html = getStockHtmlInner(s);
+    if (el._h !== html) { el.innerHTML = html; el._h = html; } // 內容沒變就不動 DOM
     if (enableFlash && oldPrice != null && s.price != null && oldPrice !== s.price) {
       const priceEl = el.querySelector('.price');
       if (priceEl) {

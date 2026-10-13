@@ -56,7 +56,7 @@ input,select,button{font-family:inherit;font-size:inherit;outline:none;text-alig
 .header, .card, .idx-scroll-container, .table-scroll, .summary, .hist-item, .backup-box { 
   background: var(--bg-card); box-shadow: var(--shadow-soft); border-radius: 12px; transition: background-color 0.4s ease, box-shadow 0.4s ease; border: 1px solid var(--border-light);
 }
-.header { box-shadow: var(--shadow-strong); border-bottom: 2px solid var(--s-dark); border-radius: 0 0 16px 16px; padding: 12px 10px 4px 10px; display: flex; flex-direction: column; position: sticky; top: 0; z-index: 100; transition: all 0.4s ease; }
+.header { box-shadow: var(--shadow-strong); border-bottom: 2px solid var(--s-dark); border-radius: 0 0 16px 16px; padding: 12px 10px 4px 10px; display: flex; flex-direction: column; position: sticky; top: 0; z-index: 100; transition: transform 0.4s ease, filter 0.4s ease, box-shadow 0.4s ease, color 0.4s ease, background-color 0.4s ease, border-color 0.4s ease, opacity 0.4s ease; }
 .header-top { display: flex; align-items: center; justify-content: space-between; width: 100%; }
 .header h1 { font-size: 20px; font-weight: 700; color: var(--t-main); user-select: none; margin-left: 6px; display: flex; align-items: center; gap: 10px; }
 
@@ -105,22 +105,22 @@ body.tech .title-text {
   padding: 6px 16px; font-size: 16px !important; font-weight: 800; white-space: nowrap; border-radius: 30px; 
   background: linear-gradient(135deg, var(--s-light) 0%, transparent 100%); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px solid var(--border-light);
   box-shadow: inset 0 4px 6px var(--protrude-l), inset 0 -4px 6px var(--protrude-d), 3px 4px 8px var(--s-dark), -2px -2px 6px var(--s-light) !important;
-  color: var(--t-main); text-shadow: none !important; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: var(--t-main); text-shadow: none !important; transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), filter 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; display: flex; align-items: center; justify-content: center;
 }
 .header-top .btn-add-hdr { color: var(--up); }
 .header-top .btn-theme:hover, .header-top .btn-adv:hover, .header-top .btn-add-hdr:hover { transform: translateY(-2px); filter: brightness(1.08); box-shadow: inset 0 5px 8px var(--protrude-l), inset 0 -3px 5px var(--protrude-d), 5px 6px 12px var(--s-dark), -3px -3px 8px var(--s-light) !important; }
 .header-top .btn-theme:active, .header-top .btn-adv:active, .header-top .btn-add-hdr:active { transform: translateY(1px); filter: brightness(0.95); box-shadow: inset 0 3px 6px var(--protrude-d), inset 0 -2px 4px var(--protrude-l), 1px 2px 3px var(--s-dark) !important; }
 
-.btn-glass-circle { width: 28px !important; height: 28px !important; padding: 0 !important; border-radius: 50% !important; display: flex; align-items: center; justify-content: center; font-size: 14px !important; font-weight: 800; background: linear-gradient(135deg, var(--s-light) 0%, transparent 100%); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px solid var(--border-light) !important; box-shadow: inset 0 3px 5px var(--protrude-l), inset 0 -3px 5px var(--protrude-d), 2px 3px 5px var(--s-dark), -1px -1px 3px var(--s-light) !important; text-shadow: none !important; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; flex-shrink: 0; }
+.btn-glass-circle { width: 28px !important; height: 28px !important; padding: 0 !important; border-radius: 50% !important; display: flex; align-items: center; justify-content: center; font-size: 14px !important; font-weight: 800; background: linear-gradient(135deg, var(--s-light) 0%, transparent 100%); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); border: 1px solid var(--border-light) !important; box-shadow: inset 0 3px 5px var(--protrude-l), inset 0 -3px 5px var(--protrude-d), 2px 3px 5px var(--s-dark), -1px -1px 3px var(--s-light) !important; text-shadow: none !important; transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), filter 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; flex-shrink: 0; }
 .btn-glass-circle.del { color: var(--up) !important; }
 .btn-glass-circle.edit { color: var(--accent) !important; }
 .btn-glass-circle:hover { transform: translateY(-2px); filter: brightness(1.08); box-shadow: inset 0 4px 6px var(--protrude-l), inset 0 -2px 4px var(--protrude-d), 3px 4px 8px var(--s-dark), -2px -2px 6px var(--s-light) !important; }
 .btn-glass-circle:active { transform: translateY(1px); filter: brightness(0.95); box-shadow: inset 0 2px 4px var(--protrude-d), inset 0 -1px 2px var(--protrude-l), 1px 1px 2px var(--s-dark) !important; }
 
-.news-ticker-container { margin: 6px 0 0 0; width: 100%; box-sizing: border-box; background: transparent; border-radius: 6px; box-shadow: none; border: none; display: flex; align-items: center; height: 42px; overflow: hidden; transition: all 0.4s ease; }
+.news-ticker-container { margin: 6px 0 0 0; width: 100%; box-sizing: border-box; background: transparent; border-radius: 6px; box-shadow: none; border: none; display: flex; align-items: center; height: 42px; overflow: hidden; transition: transform 0.4s ease, filter 0.4s ease, box-shadow 0.4s ease, color 0.4s ease, background-color 0.4s ease, border-color 0.4s ease, opacity 0.4s ease; }
 .ticker-scroll-area { flex: 1; overflow: hidden; position: relative; }
 .ticker-wrap { display: inline-block; white-space: nowrap; padding-left: 100%; animation: ticker linear infinite; }
-.ticker-item { display: inline-block; padding: 0 20px; color: var(--accent); text-decoration: none; font-weight: 700; font-size: 17px; transition: all 0.3s ease; }
+.ticker-item { display: inline-block; padding: 0 20px; color: var(--accent); text-decoration: none; font-weight: 700; font-size: 17px; transition: transform 0.3s ease, filter 0.3s ease, box-shadow 0.3s ease, color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease; }
 .ticker-item:hover { text-decoration: underline; transform: translateY(-2px); }
 .ticker-source { color: var(--t-muted); font-size: 13px; margin-right: 6px; border: 1px solid var(--border-light); padding: 2px 4px; border-radius: 4px; text-shadow: none; }
 @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-100%, 0, 0); } }
@@ -135,7 +135,7 @@ input::placeholder { color: var(--t-muted); text-shadow: none; font-weight: norm
 .form-row select { flex: 0 0 68px; padding: 12px 4px; text-align: center; }
 .form-row .sym-inp { flex: 0 0 90px; }
 
-button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle) { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; padding: 10px 16px; box-shadow: var(--shadow-soft); color: var(--t-main); font-weight: 600; cursor: pointer; transition: all 0.25s ease; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); display: flex; align-items: center; justify-content: center; }
+button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle) { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; padding: 10px 16px; box-shadow: var(--shadow-soft); color: var(--t-main); font-weight: 600; cursor: pointer; transition: transform 0.25s ease, filter 0.25s ease, box-shadow 0.25s ease, color 0.25s ease, background-color 0.25s ease, border-color 0.25s ease, opacity 0.25s ease; text-shadow: 1px 1px 1px var(--engrave-l), -1px -1px 1px var(--engrave-d); display: flex; align-items: center; justify-content: center; }
 button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):hover { transform: translateY(-1px); box-shadow: var(--shadow-strong); }
 button:not(.btn-theme):not(.btn-adv):not(.btn-add-hdr):not(.btn-glass-circle):active { transform: translateY(0); box-shadow: var(--shadow-inset); color: var(--accent); border-color: var(--accent); }
 .form-row button { font-size: 16px; letter-spacing: 2px; padding-left: 18px; }
