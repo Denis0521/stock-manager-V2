@@ -2647,7 +2647,7 @@ async function loadLiveChart(c) {
       }
     }
     renderChartPanel();
-    if (c.data.length < 2) { chartMsg(c.src === 'fut' ? '台指期即時走勢累積中：App 開著時每分鐘記錄一筆，稍後再看，或切到「日」看日 K' : '目前沒有即時走勢資料（休市，或所有資料來源都沒有回應；App 開著會自動累積本機走勢）'); return; }
+    if (c.data.length < 2) { chartMsg(c.src === 'fut' ? '台指期即時走勢累積中：雲端每 2 分鐘記錄一點（交易時段），稍後再看，或切到「日」看日 K' : '目前沒有即時走勢資料（休市，或所有資料來源都沒有回應；App 開著會自動累積本機走勢）'); return; }
     chartMsg(''); drawChart(); chartInfoUpdate();
   };
   await run();
@@ -2715,7 +2715,7 @@ function openAltChart(s) {
   $('chartTitle').innerHTML = `${escapeHTML(s.symbol)}<small>${escapeHTML(s.name)}</small>`;
   $('chartModalOverlay').classList.add('show');
   if (!(history.state && history.state.chart)) history.pushState({ chart: 1 }, '');
-  startChart({ sym: s.symbol, stock: null, engine: 'fugle', src: s.src, isIndex: true, tf: 'D', data: [], ma: [[], [], []], vis: 60, live: null, off: 0, sel: null, timer: 0, quote: null, futData: null, year: null, ptab: 'quote', vol: null, trades: null, div: null, hold: null, ind: null });
+  startChart({ sym: s.symbol, stock: null, engine: 'fugle', src: s.src, isIndex: true, tf: 'T', data: [], ma: [[], [], []], vis: 60, live: null, off: 0, sel: null, timer: 0, quote: null, futData: null, year: null, ptab: 'quote', vol: null, trades: null, div: null, hold: null, ind: null });
 }
 function scheduleChartRefresh(c, seq) {
   clearTimeout(c.timer);
@@ -3120,7 +3120,7 @@ function renderChartTools() {
   const c = chartCur;
   $('chartIndBtn').style.display = c.tf === 'T' ? 'none' : ''; // 即時走勢沒有副圖
   $('chartTfs').innerHTML = c.engine === 'fugle'
-    ? (c.src && c.src !== 'fut' ? [['T', '即時']] : []).concat(CHART_TFS.filter(([k]) => !c.src || (k !== '5' && (c.src !== 'fut' || k === 'D')))).map(([k, n]) => `<button type="button" class="${k === c.tf ? 'on' : ''}" data-tf="${k}">${n}</button>`).join('') : '';
+    ? (c.src ? [['T', '即時']] : []).concat(CHART_TFS.filter(([k]) => !c.src || (k !== '5' && (c.src !== 'fut' || k === 'D')))).map(([k, n]) => `<button type="button" class="${k === c.tf ? 'on' : ''}" data-tf="${k}">${n}</button>`).join('') : '';
 }
 function startChart(c) {
   const body = $('chartBody'); clearTimeout(c.timer); chartCur = c; ++chartOpenSeq;
