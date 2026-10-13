@@ -3,7 +3,7 @@
    版本號由 index.html 以 sw.js?v=版本 傳入，不需再手動同步兩處 */
 const VER = new URL(self.location.href).searchParams.get('v') || 'dev';
 const CACHE_NAME = 'stock-app-' + VER;
-const APP_SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
+const APP_SHELL = ['./', './index.html', './style.css', './app.js', './manifest.json', './icon-192.png', './icon-512.png'];
 const SAME_ORIGIN_PREFIX = self.location.origin + '/';
 const NETWORK_TIMEOUT = 3000;
 const NAV_TIMEOUT = 1200; // 開啟 App（頁面導覽）時縮短等待，網路慢就先用快取秒開，背景仍會更新快取
@@ -39,7 +39,8 @@ self.addEventListener('fetch', event => {
 async function networkFirst(req, event) {
   const cache = await getCache();
   const network = fetch(req).then(res => {
-    if (res && res.ok && res.type === 'basic') cache.put(req, res.clone());
+    // 帶時間戳（_=）的即時請求不寫入快取，避免快取無限增長
+    if (res && res.ok && res.type === 'basic' && !new URL(req.url).searchParams.has('_')) cache.put(req, res.clone());
     return res;
   });
   let timer;
