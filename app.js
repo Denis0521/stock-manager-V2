@@ -1565,7 +1565,7 @@ function parseYahooIntraday(j) {
   const res = j && j.chart && j.chart.result && j.chart.result[0];
   if (!res || !res.timestamp || !res.indicators) return null;
   const q = res.indicators.quote[0], m = res.meta || {}, off = m.gmtoffset || 0, rows = [];
-  res.timestamp.forEach((ts, i) => { const p = q.close[i]; if (numOk(p)) rows.push({ ts, t: new Date((ts + off) * 1000).toISOString().slice(0, 16), o: p, h: p, l: p, c: p, v: 0 }); });
+  res.timestamp.forEach((ts, i) => { const p = q.close[i]; if (numOk(p)) rows.push({ ts, t: new Date((ts + 28800) * 1000).toISOString().slice(0, 16), o: p, h: p, l: p, c: p, v: 0 }); });
   const rg = m.currentTradingPeriod && m.currentTradingPeriod.regular;
   return rows.length ? { rows, prev: m.chartPreviousClose ?? m.previousClose, off, frame: rg && rg.start && rg.end ? [rg.start, rg.end] : null } : null;
 }
@@ -1718,7 +1718,7 @@ function drawLive(c, g, W, H) {
     g.fillStyle = pc > 0.005 ? CHART_UP : pc < -0.005 ? CHART_DN : cMuted; g.fillText((pc > 0 ? '+' : '') + pc.toFixed(2) + '%', 4, y);
   }
   g.textBaseline = 'alphabetic'; g.fillStyle = cMuted;
-  for (let k = 0; k <= 4; k++) { g.textAlign = k === 0 ? 'left' : k === 4 ? 'right' : 'center'; g.fillText(new Date((t0 + (t1 - t0) * k / 4 + (lv.off || 0)) * 1000).toISOString().slice(11, 16), xAt(t0 + (t1 - t0) * k / 4), H - 5); }
+  for (let k = 0; k <= 4; k++) { g.textAlign = k === 0 ? 'left' : k === 4 ? 'right' : 'center'; g.fillText(new Date((t0 + (t1 - t0) * k / 4 + 28800) * 1000).toISOString().slice(11, 16), xAt(t0 + (t1 - t0) * k / 4), H - 5); }
   const col = last.c > prev ? CHART_UP : last.c < prev ? CHART_DN : '#8A94A6';
   const grad = g.createLinearGradient(0, padT, 0, padT + plotH); grad.addColorStop(0, col + '45'); grad.addColorStop(1, col + '00');
   g.beginPath(); data.forEach((d, i) => { const x = xAt(d.ts), y = yAt(d.c); if (i) g.lineTo(x, y); else g.moveTo(x, y); });
