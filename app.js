@@ -1671,7 +1671,12 @@ function drawLive(c, g, W, H) {
   const padR = 58, padT = 10, padB = 20, plotW = W - padR, plotH = H - padT - padB;
   const first = data[0], last = data[data.length - 1], prev = numOk(lv.prev) ? lv.prev : first.c;
   let t0 = first.ts, t1 = last.ts;
-  if (lv.frame) { t0 = Math.min(lv.frame[0], t0); t1 = Math.max(lv.frame[1], t1); }
+  if (lv.frame) {
+    let [f0, f1] = lv.frame;
+    // Yahoo 收盤後會把「目前交易時段」跳到下一個交易日；若與資料不在同一天，整天平移回資料所在的那一天，避免軸線被拉成 30 小時
+    if (f0 > last.ts || f1 < first.ts) { const sh = Math.round((first.ts - f0) / 86400) * 86400; f0 += sh; f1 += sh; }
+    t0 = Math.min(f0, t0); t1 = Math.max(f1, t1);
+  }
   if (t1 - t0 < 1800) t1 = t0 + 1800;
   let mx = 0; data.forEach(d => { mx = Math.max(mx, Math.abs(d.c - prev)); });
   const span = (mx || prev * 0.002) * 1.15, hi = prev + span, lo = prev - span;
