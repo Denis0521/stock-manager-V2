@@ -1683,7 +1683,7 @@ async function loadLiveChart(c) {
     }
     renderChartPanel();
     if (c.data.length === 1 && c.src !== 'fut') { chartMsg('剛開盤，目前只有 1 筆即時資料，累積中（每 30 秒自動更新）。可先切到「日」查看日 K'); return; }
-    if (c.data.length < 2) { chartMsg(c.src === 'fut' ? '台指期即時走勢累積中：雲端每 2 分鐘記錄一點（交易時段），稍後再看，或切到「日」看日 K' : '即時走勢載入失敗：所有資料來源都沒有回應，每 30 秒自動重試。可先切到「日」查看日 K'); return; }
+    if (c.data.length < 2) { chartMsg(c.src === 'fut' ? '台指期即時走勢累積中：雲端每 2.5 分鐘記錄一點（交易時段），稍後再看，或切到「日」看日 K' : '即時走勢載入失敗：所有資料來源都沒有回應，每 30 秒自動重試。可先切到「日」查看日 K'); return; }
     chartMsg(''); drawChart(); chartInfoUpdate();
   };
   await run();
