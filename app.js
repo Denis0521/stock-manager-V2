@@ -1601,8 +1601,25 @@ const IDX_TICK_KEY = 'tw_idx_ticks_v1_';
 function idxTicksGet(sym) {
   try { const cut = Date.now() / 1000 - 26 * 3600; return tickStore.load(IDX_TICK_KEY + sym).filter(x => x[0] > cut && numOk(x[1])).map(x => tickRow(x[0], x[1])); } catch (e) { return []; }
 }
+// 國外指數交易時段（取自 Yahoo meta 的 regular 時段，依「日」平移到今天）；盤後不記錄、不輪詢
+const IDX_FRAME_KEY = 'tw_idx_frames_v1';
+function idxFrameSet(sym, frame, off) {
+  if (!frame || !(frame[1] > frame[0])) return;
+  try { const m = JSON.parse(localStorage.getItem(IDX_FRAME_KEY) || '{}'); m[sym] = { f: frame, off: off || 0 }; localStorage.setItem(IDX_FRAME_KEY, JSON.stringify(m)); } catch (e) {}
+}
+function idxInSession(sym) {
+  try {
+    const e = (JSON.parse(localStorage.getItem(IDX_FRAME_KEY) || '{}'))[sym];
+    if (!e) return true; // 還不知道交易時段：照舊（靠價格沒變就不新增擋掉平線）
+    const now = Date.now() / 1000, len = e.f[1] - e.f[0];
+    const wd = new Date((now + e.off) * 1000).getUTCDay();
+    if (wd === 0 || wd === 6) return false;
+    const s0 = e.f[0] + Math.floor((now - e.f[0]) / 86400) * 86400;
+    return now >= s0 - 60 && now <= s0 + len + 120; // 收盤後多留 2 分鐘抓最後幾筆
+  } catch (e) { return true; }
+}
 function idxTickAdd(sym, price) {
-  if (!numOk(price)) return;
+  if (!numOk(price) || !idxInSession(sym)) return;
   try {
     const now = Math.floor(Date.now() / 1000), min = Math.floor(now / 60) * 60, cut = now - 26 * 3600;
     const a = tickStore.load(IDX_TICK_KEY + sym).filter(x => x[0] > cut), last = a[a.length - 1];
@@ -1627,6 +1644,7 @@ async function altIntraday(c) {
     return { rows, live: { prev: near ? near.ref : null, off: 28800, frame, src } };
   }
   const y = await yahooIntraday(c.sym);
+  if (y) idxFrameSet(c.sym, y.frame, y.off);
   const it = cachedGlobalIndices.find(x => x.symbol === c.sym);
   if (it) idxTickAdd(c.sym, it.price);
   const local = idxTicksGet(c.sym);
@@ -1661,8 +1679,10 @@ async function loadLiveChart(c) {
   const gap = c.src === 'fut' ? 15000 : 30000;
   const tick = async () => {
     if (seq !== chartOpenSeq || chartCur !== c || c.tf !== 'T') return;
-    if (document.visibilityState === 'visible') await run();
-    if (seq === chartOpenSeq && chartCur === c && c.tf === 'T') c.timer = setTimeout(tick, gap);
+    let wait = gap;
+    if (c.src !== 'fut' && c.data.length > 1 && !idxInSession(c.sym)) wait = 60000; // 國外指數盤後：不再抓即時資料，只每分鐘檢查是否開盤
+    else if (document.visibilityState === 'visible') await run();
+    if (seq === chartOpenSeq && chartCur === c && c.tf === 'T') c.timer = setTimeout(tick, wait);
   };
   c.timer = setTimeout(tick, gap);
 }
