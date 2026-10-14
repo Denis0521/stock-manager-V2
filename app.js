@@ -1649,11 +1649,22 @@ async function altIntraday(c) {
   if (it) idxTickAdd(c.sym, it.price);
   const local = idxTicksGet(c.sym);
   if (y) {
+    // 收盤時間：優先用這次回傳的時段，沒有就用本機記下的時段；依資料所在的那一天平移
+    let fr = y.frame;
+    if (!fr) { try { const e = (JSON.parse(localStorage.getItem(IDX_FRAME_KEY) || '{}'))[c.sym]; if (e) fr = e.f; } catch (e) {} }
+    let [s0, s1] = fr || [0, 0], cut = Infinity;
+    if (fr) { const sh = Math.round((y.rows[0].ts - s0) / 86400) * 86400; s0 += sh; s1 += sh; cut = s1 + 120; }
+    let yr = y.rows.filter(r => r.ts <= cut); // 收盤後的資料一律丟掉，曲線停在收盤
+    if (!yr.length) yr = y.rows;
     // 開盤初期 Yahoo 常只回 1~2 個點（或比實際報價落後）：把本機記錄且比 Yahoo 最後一點新的報價接在後面
-    const lastTs = y.rows[y.rows.length - 1].ts;
-    const extra = local.filter(r => r.ts > lastTs + 30 && r.ts - lastTs < 8 * 3600);
-    const rows = extra.length ? y.rows.concat(extra) : y.rows;
-    return { rows, live: { prev: y.prev, off: y.off, frame: y.frame, src: 'yahoo' } };
+    const lastTs = yr[yr.length - 1].ts;
+    const extra = local.filter(r => r.ts > lastTs + 30 && r.ts - lastTs < 8 * 3600 && r.ts <= cut);
+    let rows = extra.length ? yr.concat(extra) : yr;
+    if (!fr) { // 查不到時段：尾端「價格都沒變」超過 5 分鐘的平線視為盤後，截掉
+      let k = rows.length - 1; while (k > 0 && rows[k - 1].c === rows[rows.length - 1].c) k--;
+      if (rows[rows.length - 1].ts - rows[k].ts > 300) rows = rows.slice(0, k + 1);
+    }
+    return { rows, live: { prev: y.prev, off: y.off, frame: fr ? [s0, s1] : null, src: 'yahoo' } };
   }
   return local.length >= 20 ? { rows: local, live: { prev: it ? it.price - it.changeAmt : null, off: 28800, frame: null, src: 'local' } } : null;
 }
