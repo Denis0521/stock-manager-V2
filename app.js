@@ -578,6 +578,7 @@ async function refreshGlobalIndices() {
       pct: item.changePercent ?? item.regularMarketChangePercent ?? 0
     })).sort((a, b) => syms.indexOf(a.symbol) - syms.indexOf(b.symbol));
     setIfChanged(LS.KEYS.CACHE_IDX, cachedGlobalIndices); trackApiUsage('Yahoo');
+    cachedGlobalIndices.forEach(it => idxTickAdd(it.symbol, it.price)); // 本機每分鐘記錄，Yahoo 即時資料點不足時用來補圖
     renderGlobalIndices(cachedGlobalIndices, false);
   } catch (e) {}
 }
@@ -1626,10 +1627,16 @@ async function altIntraday(c) {
     return { rows, live: { prev: near ? near.ref : null, off: 28800, frame, src } };
   }
   const y = await yahooIntraday(c.sym);
-  if (y) return { rows: y.rows, live: { prev: y.prev, off: y.off, frame: y.frame, src: 'yahoo' } };
   const it = cachedGlobalIndices.find(x => x.symbol === c.sym);
   if (it) idxTickAdd(c.sym, it.price);
   const local = idxTicksGet(c.sym);
+  if (y) {
+    // 開盤初期 Yahoo 常只回 1~2 個點（或比實際報價落後）：把本機記錄且比 Yahoo 最後一點新的報價接在後面
+    const lastTs = y.rows[y.rows.length - 1].ts;
+    const extra = local.filter(r => r.ts > lastTs + 30 && r.ts - lastTs < 8 * 3600);
+    const rows = extra.length ? y.rows.concat(extra) : y.rows;
+    return { rows, live: { prev: y.prev, off: y.off, frame: y.frame, src: 'yahoo' } };
+  }
   return local.length >= 20 ? { rows: local, live: { prev: it ? it.price - it.changeAmt : null, off: 28800, frame: null, src: 'local' } } : null;
 }
 async function loadLiveChart(c) {
@@ -1646,6 +1653,7 @@ async function loadLiveChart(c) {
       }
     }
     renderChartPanel();
+    if (c.data.length === 1 && c.src !== 'fut') { chartMsg('剛開盤，目前只有 1 筆即時資料，累積中（每 30 秒自動更新）。可先切到「日」查看日 K'); return; }
     if (c.data.length < 2) { chartMsg(c.src === 'fut' ? '台指期即時走勢累積中：雲端每 2 分鐘記錄一點（交易時段），稍後再看，或切到「日」看日 K' : '即時走勢載入失敗：所有資料來源都沒有回應，每 30 秒自動重試。可先切到「日」查看日 K'); return; }
     chartMsg(''); drawChart(); chartInfoUpdate();
   };
