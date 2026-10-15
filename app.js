@@ -825,7 +825,25 @@ function saveEditStock() {
 let autoSaveTimer = null;
 function triggerAutoSave() {
   clearTimeout(autoSaveTimer);
-  autoSaveTimer = setTimeout(checkAutoSave, 20000); // 喚醒後20秒更新
+  autoSaveTimer = setTimeout(checkAutoSave, 0); // 不再固定等 20 秒：由 checkAutoSave 自己確認「收盤後的最終報價」都取到才記錄
+}
+
+// 這檔報價是否為「13:35 之後才取得」的最終報價（收盤 13:30 的集合競價結果已定）。
+// 以時間點判斷而不是等固定秒數：開啟當下就抓、抓到就記，抓不到就不記並在下一分鐘重試。
+function isFinalQuote(sym) {
+  const t = getTWTime(), sinceMs = (((t.getHours() * 60 + t.getMinutes()) - 815) * 60 + t.getSeconds()) * 1000;
+  return Date.now() - (quoteOkAt.get(sym) || 0) <= Math.max(sinceMs, 0);
+}
+async function ensureFinalQuotes() {
+  if (!navigator.onLine) return;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const need = [...new Set(tabStocks.flat().map(s => s.symbol))].filter(sym => !isFinalQuote(sym));
+    if (!need.length) return;
+    const dirty = new Set();
+    if (await fetchAndApplyQuotes(need, dirty)) updateSummary();
+    persistTabs(dirty);
+    if (attempt < 2) await new Promise(r => setTimeout(r, 1500)); // 有失敗的稍等再補抓，最多 3 輪
+  }
 }
 
 let autoSaving = false;
@@ -835,7 +853,7 @@ async function checkAutoSave() {
   if (autoSaving || !inWindow(getTWTime())) return;
   autoSaving = true;
   try {
-    await ensureFreshQuotes(); // 先確保所有分頁都是最新報價
+    await ensureFinalQuotes(); // 先確保所有分頁的報價都是收盤後取得的最終價
 
     const twTime = getTWTime();
     const todayStr = twDateStr(twTime);
@@ -844,8 +862,8 @@ async function checkAutoSave() {
 
     for (let i = 0; i < 5; i++) {
       if (tabStocks[i].length === 0) continue;
-      // 有報價的持股若仍是舊價格（取價失敗）：這次不記錄，等下一分鐘重試，避免寫入錯誤損益
-      if (!tabStocks[i].every(s => s.price == null || isQuoteFresh(s.symbol))) continue;
+      // 有報價的持股若不是收盤後取得的價格（取價失敗）：這次不記錄，等下一分鐘重試，避免寫入錯誤損益
+      if (!tabStocks[i].every(s => s.price == null || isFinalQuote(s.symbol))) continue;
 
       let pnl = 0, asset = 0;
       tabStocks[i].forEach(s => { const info = calcStockInfo(s); pnl += info.todayPnl; asset += info.mktValue; });
