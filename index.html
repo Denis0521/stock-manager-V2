@@ -28,7 +28,7 @@
 <style>:root{--status-bg:#D3D9E0;}</style>
 <link rel="apple-touch-icon" href="icon-512.png">
 <link rel="icon" href="icon-512.png" type="image/png">
-<script>const APP_VER = 'V7.97-opt';</script>
+<script>const APP_VER = 'V7.99-today-sell';</script>
 <link rel="preconnect" href="https://finance-news-api.denis0521.workers.dev" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -185,6 +185,7 @@
     </div>
     <label>買入均價 (選填)</label>
     <input type="number" id="buyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="off" style="margin-bottom: 10px;">
+    <label style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:15px;"><input type="checkbox" id="boughtTodayInput" style="width:20px;height:20px;"> 今日買入（今日損益以買入均價計算）</label>
     <div style="display: flex; gap: 12px; margin-top: 20px;">
       <button type="button" class="modal-close" onclick="addStock()" style="flex:1; background:var(--accent); color:#fff; text-shadow:none; margin:0;">確認新增</button>
       <button type="button" class="modal-close" onclick="closeModalById('addModalOverlay')" style="flex:1; margin:0;">取消</button>
@@ -206,6 +207,12 @@
     <select id="editUnitSelect"><option value="張">張</option><option value="股">股</option></select>
     <label>買入均價 (留空不計算總損益)</label>
     <input type="number" id="editBuyPriceInput" placeholder="買入均價" step="0.01" min="0" inputmode="decimal" autocomplete="off" style="margin-bottom: 10px;">
+    <label style="display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:15px;"><input type="checkbox" id="editBoughtTodayInput" style="width:20px;height:20px;"> 今日買入（今日損益以買入均價計算）</label>
+    <div style="font-size:14px;margin:2px 0 6px;opacity:.8;">今日盤中賣出（數量填賣出的部分，上方持有數量填賣後剩餘）</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <input type="number" id="editSoldQtyInput" placeholder="今日賣出數量" step="1" min="0" inputmode="numeric" autocomplete="off" style="flex:1;min-width:0;">
+      <input type="number" id="editSoldPriceInput" placeholder="賣出均價" step="0.01" min="0" inputmode="decimal" autocomplete="off" style="flex:1;min-width:0;">
+    </div>
     <div style="display: flex; gap: 12px; margin-top: 20px;">
       <button type="button" class="modal-close" onclick="saveEditStock()" style="flex:1; background:var(--accent); color:#fff; text-shadow:none; margin:0;">💾 確認儲存</button>
       <button type="button" class="modal-close" onclick="closeModalById('editModalOverlay')" style="flex:1; margin:0;">取消</button>

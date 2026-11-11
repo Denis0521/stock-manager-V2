@@ -258,7 +258,16 @@ function calcStockInfo(s) {
   const shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
   const p = s.price, chg = s.change ?? 0;
   const mktValue = p != null ? Math.round(shares * p) : 0;
-  const todayPnl = (p != null || s.change != null) ? Math.round(shares * chg) : 0;
+  const boughtToday = s.boughtDate === twDateStr() && s.buyPrice > 0;
+  // 今日買入：今日損益 = (現價 − 買入均價) × 股數；否則沿用 漲跌 × 股數
+  let todayPnl = boughtToday ? (p != null ? Math.round(shares * (p - s.buyPrice)) : 0)
+    : ((p != null || s.change != null) ? Math.round(shares * chg) : 0);
+  // 今日盤中已賣出的部分：已實現損益 = 賣出股數 × (賣出價 − 基準價)；基準 = 今日買入則買入均價，否則昨收（現價 − 漲跌）
+  const soldToday = s.soldDate === twDateStr() && s.soldShares > 0 && s.soldPrice > 0;
+  if (soldToday) {
+    const base = boughtToday ? s.buyPrice : (p != null && s.change != null ? p - s.change : null);
+    if (base != null) todayPnl += Math.round(s.soldShares * (s.soldPrice - base));
+  }
   
   let cost = 0, unPnl = 0, roi = 0, hasCost = false;
   if (s.buyPrice > 0 && p != null) {
@@ -267,7 +276,7 @@ function calcStockInfo(s) {
     unPnl = Math.round(mktValue - cost);
     roi = ((mktValue - cost) / cost) * 100;
   }
-  return { shares, mktValue, todayPnl, cost, unPnl, roi, hasCost };
+  return { shares, mktValue, todayPnl, cost, unPnl, roi, hasCost, boughtToday, soldToday };
 }
 
 function getStockHtmlInner(s) {
@@ -304,7 +313,7 @@ function getStockHtmlInner(s) {
     </div>
     <div style="width:100%; display:flex; flex-direction:column; align-items:flex-end; justify-content:center;">${priceHtml}</div>
     <div style="width:100%; display:flex; flex-direction:column; align-items:flex-end; justify-content:center;">${changeHtml}</div>
-    <div class="today-pnl ${getColorCls(info.todayPnl)}">${s.change != null ? getSign(info.todayPnl) + info.todayPnl.toLocaleString() : '—'}</div>
+    <div class="today-pnl ${getColorCls(info.todayPnl)}">${(s.change != null || info.boughtToday) ? getSign(info.todayPnl) + info.todayPnl.toLocaleString() : '—'}${(info.boughtToday || info.soldToday) ? `<div class="qty-sub">${info.boughtToday ? '今買' : ''}${info.soldToday ? '今賣' : ''}</div>` : ''}</div>
     <div class="total ${getColorCls(totalValForClass)}">${totalHtml}</div>
     <div class="hist-col ${genPctCls(s.pct5)}" style="font-weight:800; font-size:16px;">${genPctStr(s.pct5)}</div>
     <div class="hist-col ${genPctCls(s.pct20)}" style="font-weight:800; font-size:16px;">${genPctStr(s.pct20)}</div>
@@ -786,10 +795,11 @@ function addStock(){
     id: 's_'+Date.now()+'_'+Math.random().toString(36).slice(2,6), symbol: sym, name: STOCK_DICT[sym] || '',
     displayQty: qty, displayUnit: unit, buyPrice: isNaN(bp) || bp <= 0 ? null : bp,
     shares: unit === '張' ? qty * 1000 : qty, price: null, change: null, changePercent: null,
-    limitUp: null, limitDown: null
+    limitUp: null, limitDown: null,
+    boughtDate: ($('boughtTodayInput').checked && bp > 0) ? twDateStr() : null
   });
   LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll();
-  ['symInput', 'qtyInput', 'buyPriceInput'].forEach(id => $(id).value = '');
+  ['symInput', 'qtyInput', 'buyPriceInput'].forEach(id => $(id).value = ''); $('boughtTodayInput').checked = false;
   showToast(`已新增 ${sym}`); closeModalById('addModalOverlay'); forceRefresh();
 }
 
@@ -804,6 +814,10 @@ function openEditModal(id) {
   $('editId').value = s.id; $('editSymInput').value = s.symbol;
   $('editNameInput').value = s.name || ''; $('editQtyInput').value = s.displayQty;
   $('editUnitSelect').value = s.displayUnit; $('editBuyPriceInput').value = s.buyPrice || '';
+  $('editBoughtTodayInput').checked = s.boughtDate === twDateStr();
+  const soldOn = s.soldDate === twDateStr() && s.soldShares > 0;
+  $('editSoldQtyInput').value = soldOn ? (s.displayUnit === '張' ? s.soldShares / 1000 : s.soldShares) : '';
+  $('editSoldPriceInput').value = soldOn ? s.soldPrice : '';
   $('editModalOverlay').classList.add('show');
 }
 
@@ -818,6 +832,10 @@ function saveEditStock() {
   s.shares = s.displayUnit === '張' ? s.displayQty * 1000 : s.displayQty;
   const bp = parseFloat($('editBuyPriceInput').value);
   s.buyPrice = isNaN(bp) || bp <= 0 ? null : bp;
+  s.boughtDate = ($('editBoughtTodayInput').checked && s.buyPrice) ? twDateStr() : null;
+  const sq = parseFloat($('editSoldQtyInput').value), sp = parseFloat($('editSoldPriceInput').value);
+  if (sq > 0 && sp > 0) { s.soldDate = twDateStr(); s.soldShares = s.displayUnit === '張' ? Math.round(sq * 1000) : sq; s.soldPrice = sp; }
+  else { s.soldDate = null; s.soldShares = null; s.soldPrice = null; }
   LS.set(LS.KEYS.STOCK(currentTab), tabStocks[currentTab]); renderAll(); closeModalById('editModalOverlay'); showToast('已修改'); forceRefresh();
 }
 
